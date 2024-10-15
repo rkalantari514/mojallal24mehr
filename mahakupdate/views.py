@@ -2,11 +2,11 @@ from functools import update_wrapper
 import pyodbc
 from django.shortcuts import render
 import os
-from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile
+from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount
 import sys
 sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
 import time
-
+from collections import Counter
 # Create your views here.
 def connect_to_mahak():
     sn = os.getenv('COMPUTERNAME')
@@ -281,3 +281,29 @@ def Update_from_mahak(request):
     print(f"شناسایی کالاها: {kala_time:.2f} ثانیه")
     print(f"فاکتورها {factor_time:.2f} ثانیه")
     print(f"جزئیات فاکتورها {factor_detail_time:.2f} ثانیه")
+
+
+
+
+
+def Kala_group(request):
+    # kalas = Kala.objects.all()
+    # all_words = []
+    # for kala in kalas:
+    #     words = kala.name.split()  # تقسیم نام به کلمات
+    #     all_words.extend(words)  # افزودن کلمات به لیست
+    # filtered_words = [word for word in all_words if len(word) > 3]
+    # # شمارش تکرار کلمات
+    # word_counts = Counter(filtered_words)
+    # # ذخیره کلمات و تعداد تکرار آنها در مدل WordCount
+    # for word, count in word_counts.items():
+    #     if count>4:
+    #         WordCount.objects.update_or_create(word=word, defaults={'count': count})
+
+    words=WordCount.objects.all()
+    context={
+        'title': 'گروه بندی کالاها',
+        'words': words,
+    }
+
+    return render(request, 'kala_group.html',context)

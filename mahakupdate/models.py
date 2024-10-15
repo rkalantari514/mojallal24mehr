@@ -64,3 +64,15 @@ class FactorDetaile(models.Model):
 
     def __str__(self):
         return str(self.code_factor)  # تصحیح به str
+
+
+class WordCount(models.Model):
+    word = models.CharField(max_length=100, unique=True, verbose_name='کلمه')  # کلید واژه
+    count = models.IntegerField( verbose_name='تعداد')  # تعداد تکرار
+
+    def __str__(self):
+        return f"{self.word}: {self.count}"
+
+    class Meta:
+        verbose_name = 'تکرار کلمه'
+        verbose_name_plural = 'کلمه'

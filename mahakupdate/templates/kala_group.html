@@ -1,0 +1,143 @@
+{% extends 'shared/_MainLayout.html' %}
+{% load humanize %}
+{% load static %}
+{% block content %}
+    <div class="content-wrapper">
+
+
+<div class="card-body col-md-5">
+        <div class="table-responsive mt-15 ">
+
+            <table
+                    id="table"
+                    class="table-striped"
+                    data-toggle="table"
+                    data-locale="fa-IR"
+                    data-search="true"
+                    data-show-columns="true"
+                    data-show-export="true"
+                    data-show-refresh="true"
+                    data-show-columns-toggle-all="true"
+                    data-show-pagination-switch="true"
+                    data-show-toggle="true"
+                    data-show-fullscreen="true"
+                    data-buttons="buttons"
+                    data-search-align="left"
+                    data-buttons-class="primary"
+                    data-pagination="true"
+                    data-show-columns-search="true"
+                    data-show-footer="true"
+                    data-page-size="50"
+                    data-remember-order="true"
+                    data-sortable="true"
+                    data-show-search-clear-button="true"
+                    data-sort-name="count"
+                    data-sort-order="desc"
+                    data-filter-control="true"
+                    data-show-print="true"
+                    data-export-data-type="all"
+                    data-export-types=['excel']
+            >
+                <thead>
+                <tr class="tr-class-1">
+{#                    <th data-field="name" data-valign="middle" class="card-text text-center"#}
+{#                        data-filter-control="input">طرف قرارداد#}
+{#                    </th>#}
+{#                    #}
+
+
+{#                    data-filter-control="select"#}
+
+                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
+                         data-field="pr">کلمه
+                    </th>
+                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly" data-field="count">تعداد
+                    </th>
+{#                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly">مانده بدهکار#}
+{#                    </th>#}
+{#                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"#}
+{#                        data-footer-formatter="priceFormatter">در حال ممیزی#}
+{#                    </th>#}
+{#                    <th class="card-text text-center" data-sortable="true" data-field="kambod" data-sorter="numericOnly"#}
+{#                        data-footer-formatter="priceFormatter"#}
+{#                    >کمبود اسناد#}
+                </tr>
+                </thead>
+                <tbody>
+                {% for word in words %}
+                    <tr>
+{#                        <td class="card-title text-center"><a href="/seller/{{ zone.zone_code }}/{{ t.seller_id }} "#}
+{#                                                              target="_blank">#}
+{#                            {{ t.seller }}</a></td>#}
+{#                        #}
+
+
+
+                        <td class="card-text text-center"><h6><a href="/project/{{ zone.zone_code }}/{{ t.product_id }}"
+                                                                 target="_blank">
+                            {{ word.word }}</a></h6></td>
+                        <td class="card-text text-center"><h6><a
+                                href="/{{ zone.zone_code }}/cash_flow/{{ t.product_id }}/{{ t.seller_id }}"
+                                target="_blank">
+                            {{ word.count }}</a></h6></td>
+
+{#                        <td class="card-text text-center"><h6>#}
+{#                        <a#}
+{#                                href="/selpro_detail/{{ zone.zone_code }}/{{ t.selp_id }}"#}
+{#                                target="_blank">#}
+{#                            {{ t.bedehkar|intcomma:False }}</a>#}
+{#                        </h6></td>#}
+{#                        <td class="card-text text-center"><h6> {{ t.inmo|intcomma:False }} </h6></td>#}
+{#                        <td class="card-text text-center"><h6> {{ t.kambod|intcomma:False }} </h6></td>#}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <button type="button" class="btn btn-dark" onclick="javascript:window.print();">
+        <span><i class="fa fa-print"></i> چاپ</span>
+    </button>
+    </div>
+{% endblock %}
+
+
+{% block date %}
+    <script src="{% static 'js/table1/tableExport.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-locale-all.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-export.min.js' %}"></script>
+    <script src="{% static 'js/table1/natural-sorting.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-filter-control.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-print.min.js' %}"></script>
+    <script src="{% static 'js/table1/jspdf.min.js' %}"></script>
+    <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
+    <script>
+        var $table = $('#table')
+
+        $(function () {
+            $table.bootstrapTable()
+        })
+
+        function idFormatter() {
+            return 'Total'
+        }
+
+        function nameFormatter(data) {
+            return data.length
+        }
+
+        function priceFormatter(data) {
+            var field = this.field
+            return data.map(function (row) {
+                return +row[field].substring(0)
+            }).reduce(function (sum, i) {
+                return sum + i
+            }, 0)
+        }
+
+        function formatMoney(number) {
+            return number.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
+        }
+    </script>
+{% endblock %}
