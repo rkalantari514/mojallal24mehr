@@ -34,7 +34,7 @@ def get_all_table_data(cursor):
             try:
                 cursor.execute(f"SELECT * FROM {table_name};")
                 # rows = cursor.fetchall()
-                rows = cursor.fetchmany(10)  # دریافت 1000 ردیف اول
+                rows = cursor.fetchmany(20)  # دریافت 1000 ردیف اول
 
                 columns = get_table_columns(cursor, table_name)  # دریافت نام ستون‌ها
                 table_data[table_name] = {'rows': rows, 'columns': columns}  # ذخیره نام ستون‌ها به همراه داده‌ها
@@ -46,12 +46,14 @@ def get_all_table_data(cursor):
 
 
 def MTables(request):
-    cursor = connect_to_mahak()
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
     table_data = get_all_table_data(cursor)
 
     context = {  
         'table_data': table_data,  
     }  
 
-    cursor.close()  
+    # conn.close()
+    cursor.close()
     return render(request, 'tables.html', context)
