@@ -1,0 +1,49 @@
+from django.contrib import admin
+
+from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile
+
+
+# Register your models here.
+
+
+class MtablesAdmin(admin.ModelAdmin):
+    list_display = ['__str__','name', 'description', 'in_use','none_use','row_count','cloumn_count']
+    # list_filter = ['description','name', 'in_use']
+    list_editable = ['description','name', 'in_use','none_use']
+    search_fields = ['name', 'description', 'in_use','none_use']
+
+    class Meta:
+        model = Mtables
+
+
+class KalaAdmin(admin.ModelAdmin):
+    list_display = ['__str__','name', 'code',]
+    # list_filter = ['name','code']
+    # list_editable = ['description', 'in_use']
+    search_fields = ['name', 'code']
+
+    class Meta:
+        model = Kala
+class FactorAdmin(admin.ModelAdmin):
+    list_display = ['pdate', 'code','create_time','mablagh_factor','takhfif','darsad_takhfif']
+    # list_filter = ['name','code']
+    # list_editable = ['description', 'in_use']
+    # search_fields = ['name', 'code']
+
+    class Meta:
+        model = Factor
+
+class FactorDetaileAdmin(admin.ModelAdmin):
+    list_display = ['code_factor', 'kala','count','mablagh_vahed','mablagh_nahaee']
+    # list_filter = ['name','code']
+    # list_editable = ['description', 'in_use']
+    # search_fields = ['name', 'code']
+
+    class Meta:
+        model = FactorDetaile
+
+
+admin.site.register(Mtables, MtablesAdmin)
+admin.site.register(Kala, KalaAdmin)
+admin.site.register(Factor, FactorAdmin)
+admin.site.register(FactorDetaile, FactorDetaileAdmin)

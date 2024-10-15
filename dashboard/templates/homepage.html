@@ -1,0 +1,969 @@
+{% extends 'shared/_MainLayout.html' %}
+{% load humanize %}
+{% load static %}
+{% block content %}
+    <div class="content-wrapper header-info">
+        <div class="page-title">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3 class="mb-15 text-white"> خوش آمدید، ! </h3>
+                    <span class="mb-10 mb-md-30 text-white d-block">خلاصه ای از حساب کاربری خود را به مهمترین فعالیت های حساب کاربری منتقل کنید.</span>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="btn-group info-drop header-info-button">
+                            <button type="button" class="dropdown-toggle-split  button" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false"> افزودن جدید <i class="ti-plus"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#"><i class="text-dark ti-layers-alt"></i>اضافه کردن
+                                    پروژه </a>
+                                <a class="dropdown-item" href="#"><i class="text-primary ti-files"></i>اضافه کردن کار
+                                </a>
+                                <a class="dropdown-item" href="#"><i class="text-warning ti-id-badge"></i>تیم را اضافه
+                                    کنید </a>
+                                <a class="dropdown-item" href="#"><i class="text-dark ti-pencil-alt"></i>ترک برنامه </a>
+                                <a class="dropdown-item" href="#"><i class="text-success ti-email"></i>پام جدید</a>
+                                <a class="dropdown-item" href="#"><i class="text-warning ti-user"></i>ویرایش مشخصات</a>
+                                <a class="dropdown-item" href="#"><i class="text-info ti-settings"></i>تنظیمات</a>
+                                <a class="dropdown-item" href="#"><i class="text-danger ti-unlock"></i>خروج</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- widgets -->
+        <div class="row account-overview mb-30">
+            <div class="col-12">
+                <div class="card card-statistics h-100">
+                    <div class="card-body bg-white">
+                        <h5 class="card-title">نمای کلی حساب</h5>
+                        <div class="row">
+                            <div class="col-xl-3 col-sm-6">
+                                <div class="row">
+                                    <div class="col-md-7 col-sm-7 col-7 align-self-center">
+                                        <span>مجموع مبلغ فاکتورها</span>
+                                        <h4 class="text-danger fw-6 mt-10">{{ mablagh_factor_total|intword }}</h4>
+                                    </div>
+                                    <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">
+                                        <span class="round-chart mb-0" data-percent="100" data-size="80" data-width="4"
+                                              data-color="#dc3545"> <span class="percent"
+                                                                          style="width: 80px; height: 80px; line-height: 80px;">100</span>
+{#                                            <canvas height="80" width="80"></canvas>#}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-sm-6">
+                                <div class="row">
+                                    <div class="col-md-7 col-sm-7 col-7 align-self-center">
+                                        <span>فروش یخچال</span>
+                                        <h4 class="text-success fw-6 mt-10">{{ mablagh_yakh|intword }}</h4>
+                                    </div>
+                                    <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">
+                                        <span class="round-chart mb-0" data-percent="{{ yakhdarsad }}" data-size="80" data-width="4"
+                                              data-color="#28a745"> <span class="percent"
+                                                                          style="width: 80px; height: 80px; line-height: 80px;">{{ yakhdarsad }}</span>
+{#                                            <canvas#}
+{#                                                height="80" width="80"></canvas>#}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-sm-6">
+                                <div class="row">
+                                    <div class="col-md-7 col-sm-7 col-7 align-self-center">
+                                        <span>فروش لباسشویی</span>
+                                        <h4 class="text-info fw-6 mt-10">{{ mablagh_leba|intword }}</h4>
+                                    </div>
+                                    <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">
+                                        <span class="round-chart mb-0" data-percent="{{ lebadarsad }}" data-size="80" data-width="4"
+                                              data-color="#17a2b8"> <span class="percent"
+                                                                          style="width: 80px; height: 80px; line-height: 80px;">{{ lebadarsad }}</span>
+{#                                            <canvas#}
+{#                                                height="80" width="80"></canvas>#}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-sm-6">
+                                <div class="row">
+                                    <div class="col-md-7 col-sm-7 col-7 align-self-center">
+                                        <span>فروش کولر</span>
+                                        <h4 class="text-warning fw-6 mt-10">{{ mablagh_col|intword }}</h4>
+                                    </div>
+                                    <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">
+                                        <span class="round-chart mb-0" data-percent="{{ coldarsad }}" data-size="80" data-width="4"
+                                              data-color="#ffc107"> <span class="percent"
+                                                                          style="width: 80px; height: 80px; line-height: 80px;">{{ coldarsad }}</span>
+{#                                            <canvas#}
+{#                                                height="80" width="80"></canvas>#}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xl-4 h-100">
+                <div class="card card-statistics mb-30">
+{#                    #نمودار CSS#}
+                    <div class="code-example">
+                        <style name="animations-example-11">
+                            #animations-example-4 {
+                                width: 100%;
+                                max-width: 300px;
+                                margin: 0 auto;
+                            }
+
+                            #animations-example-4 .column {
+                                --aspect-ratio: 4 / 3;
+                            }
+
+                            #animations-example-4 .column tbody td {
+                                transform-origin: bottom;
+                                animation: revealing-bars 10s linear infinite;
+                            }
+
+                            @keyframes revealing-bars {
+                                0% {
+                                    transform: scaleY(0);
+                                }
+                                30% {
+                                    transform: scaleY(1);
+                                }
+                            }
+                        </style>
+                        <div id="animations-example-4">
+                            <table class="charts-css column show-labels hide-data data-spacing-5 show-primary-axis">
+                                <caption> Animation Example #4</caption>
+                                <thead>
+                                <tr>
+                                    <th scope="col"> Year</th>
+                                    <th scope="col"> Progress</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <th scope="row"> یخچال</th>
+                                    <td style="--size: 0.52;"><span class="data"> {{ mablagh_yakh }} </span></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"> لباسشویی</th>
+                                    <td style="--size: 0.14;"><span class="data"> {{mablagh_leba  }} </span></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row"> کولر</th>
+                                    <td style="--size: 0.22;"><span class="data">{{ mablagh_col }}  </span></td>
+                                </tr>
+{#                                <tr>#}
+{#                                    <th scope="row"> 2019</th>#}
+{#                                    <td style="--size: 0.8;"><span class="data"> 80 </span></td>#}
+{#                                </tr>#}
+{#                                <tr>#}
+{#                                    <th scope="row"> 2020</th>#}
+{#                                    <td style="--size: 1.0;"><span class="data"> 100 </span></td>#}
+{#                                </tr>#}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {#                    <div class="card-body p-0">#}
+                    {#                        <div class="bg-danger">#}
+                    {#                            <div class="d-flex justify-content-between p-3">#}
+                    {#                                <div class="d-block">#}
+                    {#                                    <h5 class="text-white">بازار پایین </h5>#}
+                    {#                                </div>#}
+                    {#                                <div class="d-flex">#}
+                    {#                                    <i class="mr-10 text-white fa fa-arrow-down"> </i>#}
+                    {#                                    <h5 class="text-white"><b>466</b></h5>#}
+                    {#                                </div>#}
+                    {#                            </div>#}
+                    {#                            <div id="sparkline8-1" class="text-center">#}
+                    {#                                <canvas width="818" height="181"#}
+                    {#                                        style="display: inline-block; width: 818px; height: 181px; vertical-align: top;"></canvas>#}
+                    {#                            </div>#}
+                    {#                        </div>#}
+                    {#                    </div>#}
+                </div>
+                <div class="card card-statistics mb-30">
+                    <div id="effect-example-7">
+                        <table class="charts-css column hide-data">
+                            <caption> 3D Effect Example #7</caption>
+                            <thead>
+                            <tr>
+                                <th scope="col"> Year</th>
+                                <th scope="col"> Progress</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <th scope="row"> 2016</th>
+                                <td style="--size: 0.2;"><span class="data"> 20 </span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row"> 2017</th>
+                                <td style="--size: 0.4;"><span class="data"> 40 </span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row"> 2018</th>
+                                <td style="--size: 0.6;"><span class="data"> 60 </span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row"> 2019</th>
+                                <td style="--size: 0.8;"><span class="data"> 80 </span></td>
+                            </tr>
+                            <tr>
+                                <th scope="row"> 2020</th>
+                                <td style="--size: 1.0;"><span class="data"> 100 </span></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {#             <div class="card-body p-0">#}
+                    {#                <div class="bg-success">#}
+                    {#                <div class="d-flex justify-content-between p-3">#}
+                    {#                    <div class="d-block">#}
+                    {#                      <h5 class="text-white">بازار بالا</h5>#}
+                    {#                    </div>#}
+                    {#                    <div class="d-flex">#}
+                    {#                      <i class="mr-10 text-white fa fa-arrow-up"> </i>#}
+                    {#                       <h5 class="text-white"><b>463</b></h5>#}
+                    {#                    </div>#}
+                    {#                   </div>#}
+                    {#                  <div id="sparkline7-1" class="text-center"><canvas width="818" height="181" style="display: inline-block; width: 818px; height: 181px; vertical-align: top;"></canvas></div>#}
+                    {#               </div>#}
+                    {#               </div>#}
+                </div>
+
+            </div>
+            <div class="col-xl-4 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">بهترین آیتم های فروش</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-20">
+                                <div class="media">
+                                    <div class="position-relative">
+                                        <img class="img-fluid mr-15 avatar-small" src="images/item/01.png" alt="">
+                                    </div>
+                                    <div class="media-body">
+                                        <h6 class="mt-0 mb-0">فروشنده ماشین <span
+                                                class="float-right text-danger"> 8,561</span></h6>
+                                        <p>تم وردپرس خودرو </p>
+                                    </div>
+                                </div>
+                                <div class="divider dotted mt-20"></div>
+                            </li>
+                            <li class="mb-20">
+                                <div class="media">
+                                    <div class="position-relative clearfix">
+                                        <img class="img-fluid mr-15 avatar-small" src="images/item/02.png" alt="">
+                                    </div>
+                                    <div class="media-body">
+                                        <h6 class="mt-0 mb-0">وبستر <span class="float-right text-warning"> 6,213</span>
+                                        </h6>
+                                        <p>قالب چند منظوره HTML5 </p>
+                                    </div>
+                                </div>
+                                <div class="divider dotted mt-20"></div>
+                            </li>
+                            <li class="mb-20">
+                                <div class="media">
+                                    <div class="position-relative clearfix">
+                                        <img class="img-fluid mr-15 avatar-small" src="images/item/04.png" alt="">
+                                    </div>
+                                    <div class="media-body">
+                                        <h6 class="mt-0 mb-0">ارش خادملو <span
+                                                class="float-right text-warning"> 6,213</span></h6>
+                                        <p>قالب چند منظوره HTML5 </p>
+                                    </div>
+                                </div>
+                                <div class="divider dotted mt-20"></div>
+                            </li>
+                            <li>
+                                <div class="media">
+                                    <div class="position-relative">
+                                        <img class="img-fluid mr-15 avatar-small" src="images/item/03.png" alt="">
+                                    </div>
+                                    <div class="media-body">
+                                        <h6 class="mt-0 mb-0">ارش خادملو <span
+                                                class="float-right text-success"> 2,926</span></h6>
+                                        <p> قالب چند منظوره HTML5 </p>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">بازخورد مشتری</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="clearfix">
+                                    <p class="mb-10 float-left">مثبت</p>
+                                    <i class="mb-10 text-success float-right fa fa-arrow-up"> </i>
+                                </div>
+                                <div class="progress progress-small">
+                                    <div class="skill2-bar bg-success" role="progressbar" style="width: 70%"
+                                         aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <h5 class="mt-10 text-success">8501</h5>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="clearfix">
+                                    <p class="mb-10 float-left">منفی</p>
+                                    <i class="mb-10 text-danger float-right fa fa-arrow-down"> </i>
+                                </div>
+                                <div class="progress progress-small">
+                                    <div class="skill2-bar bg-danger" role="progressbar" style="width: 30%"
+                                         aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <h5 class="mt-10 text-danger">3251</h5>
+                            </div>
+                        </div>
+                        <div id="morris-area" class="hide-axis"
+                             style="height: 320px; position: relative; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);">
+                            <svg height="320" version="1.1" width="783" xmlns="http://www.w3.org/2000/svg"
+                                 style="overflow: hidden; position: relative; left: -0.53125px; top: -0.5px;">
+                                <desc style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">Created with Raphaël
+                                    2.1.2
+                                </desc>
+                                <defs style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></defs>
+                                <text x="12.5" y="295" text-anchor="end" font="10px &quot;yekan&quot;" stroke="none"
+                                      fill="#888888"
+                                      style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font: 12px yekan, Poppins, sans-serif;"
+                                      font-size="12px" font-family="yekan,Poppins, sans-serif" font-weight="normal">
+                                    <tspan dy="295" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">0</tspan>
+                                </text>
+                                <path fill="none" stroke="#efefef" d="M25,295.5H758" stroke-width="0.5"
+                                      style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                                <text x="12.5" y="227.5" text-anchor="end" font="10px &quot;yekan&quot;" stroke="none"
+                                      fill="#888888"
+                                      style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font: 12px yekan, Poppins, sans-serif;"
+                                      font-size="12px" font-family="yekan,Poppins, sans-serif" font-weight="normal">
+                                    <tspan dy="227.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">50</tspan>
+                                </text>
+                                <path fill="none" stroke="#efefef" d="M25,227.5H758" stroke-width="0.5"
+                                      style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                                <text x="12.5" y="160" text-anchor="end" font="10px &quot;yekan&quot;" stroke="none"
+                                      fill="#888888"
+                                      style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font: 12px yekan, Poppins, sans-serif;"
+                                      font-size="12px" font-family="yekan,Poppins, sans-serif" font-weight="normal">
+                                    <tspan dy="160" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">100</tspan>
+                                </text>
+                                <path fill="none" stroke="#efefef" d="M25,160.5H758" stroke-width="0.5"
+                                      style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                                <text x="12.5" y="92.5" text-anchor="end" font="10px &quot;yekan&quot;" stroke="none"
+                                      fill="#888888"
+                                      style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font: 12px yekan, Poppins, sans-serif;"
+                                      font-size="12px" font-family="yekan,Poppins, sans-serif" font-weight="normal">
+                                    <tspan dy="92.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">150</tspan>
+                                </text>
+                                <path fill="none" stroke="#efefef" d="M25,92.5H758" stroke-width="0.5"
+                                      style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                                <text x="12.5" y="25" text-anchor="end" font="10px &quot;yekan&quot;" stroke="none"
+                                      fill="#888888"
+                                      style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: end; font: 12px yekan, Poppins, sans-serif;"
+                                      font-size="12px" font-family="yekan,Poppins, sans-serif" font-weight="normal">
+                                    <tspan dy="25" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">200</tspan>
+                                </text>
+                                <path fill="none" stroke="#efefef" d="M25,25.5H758" stroke-width="0.5"
+                                      style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                                <text x="749.696433525593" y="307.5" text-anchor="middle" font="10px &quot;yekan&quot;"
+                                      stroke="none" fill="#888888"
+                                      style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); text-anchor: middle; font: 12px yekan, Poppins, sans-serif;"
+                                      font-size="12px" font-family="yekan,Poppins, sans-serif" font-weight="normal"
+                                      transform="matrix(1,0,0,1,0,0)">
+                                    <tspan dy="307.5" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);">2010
+                                    </tspan>
+                                </text>
+                                <path fill="#f9f9f9" stroke="none"
+                                      d="M25,146.5C206.7667563601152,139.75,570.3002690803456,116.1305081402143,752.0670254404608,119.5C752.3641612763655,119.5055081402143,752.9584329481748,161.68980848153214,753.2555687840795,160C753.551892773438,158.31480848153214,754.144540752155,107.6875,754.4408647415135,106C754.7371887308719,104.3125,755.3298367095889,149.875,755.6261606989474,146.5C755.9224846883059,143.125,756.5151326670228,75.62961696306428,756.8114566563813,79C757.108592492286,82.37961696306428,757.7028641640953,149.875,758,173.5L758,295L25,295Z"
+                                      fill-opacity="1"
+                                      style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></path>
+                                <path fill="none" stroke="#e6e6e6"
+                                      d="M25,146.5C206.7667563601152,139.75,570.3002690803456,116.1305081402143,752.0670254404608,119.5C752.3641612763655,119.5055081402143,752.9584329481748,161.68980848153214,753.2555687840795,160C753.551892773438,158.31480848153214,754.144540752155,107.6875,754.4408647415135,106C754.7371887308719,104.3125,755.3298367095889,149.875,755.6261606989474,146.5C755.9224846883059,143.125,756.5151326670228,75.62961696306428,756.8114566563813,79C757.108592492286,82.37961696306428,757.7028641640953,149.875,758,173.5"
+                                      stroke-width="0" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                                <circle cx="25" cy="146.5" r="0" fill="#e6e6e6" stroke="#ffffff" stroke-width="1"
+                                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                                <circle cx="752.0670254404608" cy="119.5" r="0" fill="#e6e6e6" stroke="#ffffff"
+                                        stroke-width="1"
+                                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                                <circle cx="753.2555687840795" cy="160" r="0" fill="#e6e6e6" stroke="#ffffff"
+                                        stroke-width="1"
+                                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                                <circle cx="754.4408647415135" cy="106" r="0" fill="#e6e6e6" stroke="#ffffff"
+                                        stroke-width="1"
+                                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                                <circle cx="755.6261606989474" cy="146.5" r="0" fill="#e6e6e6" stroke="#ffffff"
+                                        stroke-width="1"
+                                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                                <circle cx="756.8114566563813" cy="79" r="0" fill="#e6e6e6" stroke="#ffffff"
+                                        stroke-width="1"
+                                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                                <circle cx="758" cy="173.5" r="0" fill="#e6e6e6" stroke="#ffffff" stroke-width="1"
+                                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                                <path fill="#38b6ca" stroke="none"
+                                      d="M25,227.5C206.7667563601152,219.0625,570.3002690803456,190.38050814021432,752.0670254404608,193.75C752.3641612763655,193.75550814021432,752.9584329481748,239.31019151846786,753.2555687840795,241C753.551892773438,242.68519151846786,754.144540752155,210.625,754.4408647415135,207.25C754.7371887308719,203.875,755.3298367095889,215.6875,755.6261606989474,214C755.9224846883059,212.3125,756.5151326670228,190.37961696306428,756.8114566563813,193.75C757.108592492286,197.12961696306428,757.7028641640953,229.1875,758,241L758,295L25,295Z"
+                                      fill-opacity="1"
+                                      style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); fill-opacity: 1;"></path>
+                                <path fill="none" stroke="#17a2b8"
+                                      d="M25,227.5C206.7667563601152,219.0625,570.3002690803456,190.38050814021432,752.0670254404608,193.75C752.3641612763655,193.75550814021432,752.9584329481748,239.31019151846786,753.2555687840795,241C753.551892773438,242.68519151846786,754.144540752155,210.625,754.4408647415135,207.25C754.7371887308719,203.875,755.3298367095889,215.6875,755.6261606989474,214C755.9224846883059,212.3125,756.5151326670228,190.37961696306428,756.8114566563813,193.75C757.108592492286,197.12961696306428,757.7028641640953,229.1875,758,241"
+                                      stroke-width="0" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                                <circle cx="25" cy="227.5" r="0" fill="#17a2b8" stroke="#ffffff" stroke-width="1"
+                                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                                <circle cx="752.0670254404608" cy="193.75" r="0" fill="#17a2b8" stroke="#ffffff"
+                                        stroke-width="1"
+                                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                                <circle cx="753.2555687840795" cy="241" r="0" fill="#17a2b8" stroke="#ffffff"
+                                        stroke-width="1"
+                                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                                <circle cx="754.4408647415135" cy="207.25" r="0" fill="#17a2b8" stroke="#ffffff"
+                                        stroke-width="1"
+                                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                                <circle cx="755.6261606989474" cy="214" r="0" fill="#17a2b8" stroke="#ffffff"
+                                        stroke-width="1"
+                                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                                <circle cx="756.8114566563813" cy="193.75" r="0" fill="#17a2b8" stroke="#ffffff"
+                                        stroke-width="1"
+                                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                                <circle cx="758" cy="241" r="0" fill="#17a2b8" stroke="#ffffff" stroke-width="1"
+                                        style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
+                            </svg>
+                            <div class="morris-hover morris-default-style"
+                                 style="left: 331.594px; top: 105px; display: none;">
+                                <div class="morris-hover-row-label">2012</div>
+                                <div class="morris-hover-point" style="color: #689bc3">
+                                    سری A:
+                                    75
+                                </div>
+                                <div class="morris-hover-point" style="color: #a2b3bf">
+                                    سری B:
+                                    55
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xl-4 mb-30">
+                <div class="card data-usage h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">استفاده ماهانه</h5>
+                        <div class="row d-flex align-items-center">
+                            <div class="col-sm-6">
+                <span class="round-chart" data-percent="77" data-width="5" data-color="#84ba3f">
+                  <span class="percent" style="width: 160px; height: 160px; line-height: 160px;">77</span>
+{#                <canvas height="160" width="160"></canvas>#}
+                </span>
+                            </div>
+                            <div class="col-sm-6">
+                                <h2 class="theme-color font-weight-bold">70.45 GB</h2>
+                                <small>طرح فعلی</small>
+                                <h5 class="mt-2 text-dark">263 گیگابایت در هر ماه</h5></div>
+                        </div>
+                        <p><strong>نکته:</strong> شما می توانید طرح حق بیمه موجود خود را به یک برنامه با ویژگی های بیشتر
+                            یا دوره اشتراک بیشتر ارتقا دهید.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body text-left">
+                        <h5 class="card-title">فعالیت های کاربران</h5>
+                        <div class="row">
+                            <div class="col-6 col-sm-6 mb-30">
+                                <div class="counter">
+                                    <span class="timer text-success" data-to="4905" data-speed="10000">4905</span>
+                                    <label class="text-capitalize mt-0">ارسال جدید </label>
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-6 mb-30">
+                                <div class="counter">
+                                    <span class="timer text-info" data-to="6524" data-speed="10000">6524</span>
+                                    <label class="text-capitalize mt-0">مخاطبین جدید</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="row">
+                            <div class="col-6 col-sm-4 mt-30">
+                                <b>بازدید کنندگان روزانه</b>
+                                <p>465</p>
+                            </div>
+                            <div class="col-6 col-sm-4 mt-30">
+                                <b>فعال</b>
+                                <p>9524</p>
+                            </div>
+                            <div class="col-6 col-sm-4 mt-30">
+                                <b>غیر فعال</b>
+                                <p>1283</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="p-4 text-center bg" style="background: url(images/bg/01.jpg);">
+                        <h5 class="mb-60 text-white position-relative">ارش خادملو </h5>
+                        <div class="btn-group info-drop">
+                            <button type="button" class="dropdown-toggle-split text-white" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false"><i class="ti-more"></i></button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#"><i class="text-primary ti-files"></i> اضافه کردن
+                                    کار</a>
+                                <a class="dropdown-item" href="#"><i class="text-dark ti-pencil-alt"></i> ویرایش مشخصات</a>
+                                <a class="dropdown-item" href="#"><i class="text-success ti-user"></i> نمایش مشخصات</a>
+                                <a class="dropdown-item" href="#"><i class="text-secondary ti-info"></i> اطلاعات
+                                    تماس</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body text-center position-relative">
+                        <div class="avatar-top">
+                            <img class="img-fluid w-25 rounded-circle " src="images/team/13.jpg" alt="">
+                        </div>
+                        <div class="row">
+                            <div class="col-6 col-sm-4 mt-30">
+                                <b>فایل های ذخیره شده</b>
+                                <h4 class="text-success mt-10">1582</h4>
+                            </div>
+                            <div class="col-6 col-sm-4 mt-30">
+                                <b>حافظه استفاده شده </b>
+                                <h4 class="text-danger mt-10">58GB</h4>
+                            </div>
+                            <div class="col-12 col-sm-4 mt-30">
+                                <b>پول صرف شده</b>
+                                <h4 class="text-warning mt-10">352,6 تومان</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xl-8 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <h5 class="mb-15 pb-0 border-0 card-title">آخرین بیلینگز </h5>
+                        <!-- action group -->
+                        <div class="btn-group info-drop">
+                            <button type="button" class="dropdown-toggle-split text-muted" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false"><i class="ti-more"></i></button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#"><i class="text-success ti-files"></i> تایید شده</a>
+                                <a class="dropdown-item" href="#"><i class="text-warning ti-pencil-alt"></i> در
+                                    انتظار</a>
+                                <a class="dropdown-item" href="#"><i class="text-danger ti-user"></i> رد شد</a>
+                                <a class="dropdown-item" href="#"><i class="text-secondary ti-reload"></i> تازه کردن</a>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table center-aligned-table mb-10">
+                                <thead>
+                                <tr class="text-dark">
+                                    <th>شماره سفارش</th>
+                                    <th>نام محصول</th>
+                                    <th>خریداری شده در</th>
+                                    <th>وضعیت حمل و نقل</th>
+                                    <th>روش پرداخت</th>
+                                    <th>وضعیت پرداخت</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td><i class="fa fa-circle text-success"></i></td>
+                                    <td>آیفون 7</td>
+                                    <td>12 خرداد 1397</td>
+                                    <td>ارسال شده</td>
+                                    <td>کارت اعتباری</td>
+                                    <td><label class="badge badge-warning">در انتظار</label></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-circle text-info"></i></td>
+                                    <td>آیفون 7</td>
+                                    <td>12 خرداد 1397</td>
+                                    <td>ارسال شده</td>
+                                    <td>Internet banking</td>
+                                    <td><label class="badge badge-warning">در انتظار</label></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-circle text-warning"></i></td>
+                                    <td>آیفون 7</td>
+                                    <td>12 خرداد 1397</td>
+                                    <td>ارسال شده</td>
+                                    <td>کارت اعتباری</td>
+                                    <td><label class="badge badge-success">تایید شده</label></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-circle text-danger"></i></td>
+                                    <td>آیفون 7</td>
+                                    <td>12 خرداد 1397</td>
+                                    <td>ارسال شده</td>
+                                    <td>پرداخت در محل</td>
+                                    <td><label class="badge badge-danger">رد شد</label></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-circle text-dark"></i></td>
+                                    <td>آیفون 7</td>
+                                    <td>12 خرداد 1397</td>
+                                    <td>ارسال شده</td>
+                                    <td>کارت اعتباری</td>
+                                    <td><label class="badge badge-success">تایید شده</label></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-circle text-info"></i></td>
+                                    <td>آیفون 7</td>
+                                    <td>12 خرداد 1397</td>
+                                    <td>ارسال شده</td>
+                                    <td>کارت اعتباری</td>
+                                    <td><label class="badge badge-warning">در انتظار</label></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 mb-30">
+                <div class="card card-statistics h-100 admin-followers">
+                    <div class="card-body">
+                        <h5 class="card-title">دنبال کنندگان </h5>
+                        <div class="scrollbar max-h-350" tabindex="2"
+                             style="overflow-y: hidden; outline: none; touch-action: none;">
+                            <ul class="list-unstyled">
+                                <li class="mb-30">
+                                    <div class="media">
+                                        <div class="position-relative">
+                                            <img class="img-fluid mr-15 avatar-small" src="images/team/05.jpg" alt="">
+                                            <i class="avatar-online bg-success"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <div>
+                                                <a class="button button-border gray small border float-right" href="#">دنبال
+                                                    کردن</a>
+                                            </div>
+                                            <h6 class="mt-0 text-info">ارش خادملو </h6>
+                                            <p>@potenzauser</p>
+                                        </div>
+                                    </div>
+                                    <div class="divider mt-30"></div>
+                                </li>
+                                <li class="mb-30">
+                                    <div class="media">
+                                        <div class="position-relative clearfix">
+                                            <img class="img-fluid mr-15 avatar-small" src="images/team/02.jpg" alt="">
+                                            <i class="avatar-online bg-success"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <div>
+                                                <a class="button button-border gray small border float-right" href="#">دنبال
+                                                    کردن</a>
+                                            </div>
+                                            <h6 class="mt-0 text-warning">ارش خادملو </h6>
+                                            <p>@potenzauser</p>
+                                        </div>
+                                    </div>
+                                    <div class="divider mt-30"></div>
+                                </li>
+                                <li class="mb-30">
+                                    <div class="media">
+                                        <div class="position-relative">
+                                            <img class="img-fluid mr-15 avatar-small" src="images/team/03.jpg" alt="">
+                                            <i class="avatar-online bg-danger"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <div>
+                                                <a class="button gray small border float-right" href="#">دنبال <i
+                                                        class="fa fa-check"></i></a>
+                                            </div>
+                                            <h6 class="mt-0 text-danger">ارش خادملو</h6>
+                                            <p>@potenzauser</p>
+                                        </div>
+                                    </div>
+                                    <div class="divider mt-30"></div>
+                                </li>
+                                <li class="mb-30">
+                                    <div class="media">
+                                        <div class="position-relative">
+                                            <img class="img-fluid mr-15 avatar-small" src="images/team/04.jpg" alt="">
+                                            <i class="avatar-online bg-success"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <div>
+                                                <a class="button button-border gray small border float-right" href="#">دنبال
+                                                    کردن</a>
+                                            </div>
+                                            <h6 class="mt-0 text-info">ارش خادملو </h6>
+                                            <p>@potenzauser</p>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--=================================
+         wrapper -->
+
+        <!--=================================
+         footer -->
+
+        <footer class="bg-white p-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="text-center text-md-left">
+                        <p class="mb-0"> © کپی رایت <span id="copyright"> <script>document.getElementById('copyright').appendChild(document.createTextNode(new Date().getFullYear()))</script>2024</span>.
+                            <a href="#"> وب مین </a> همه حقوق محفوظ است.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <ul class="text-center text-md-right">
+                        <li class="list-inline-item"><a href="#">شرایط و ضوابط </a></li>
+                        <li class="list-inline-item"><a href="#">API استفاده از خط مشی </a></li>
+                        <li class="list-inline-item"><a href="#">حریم خصوصی </a></li>
+                    </ul>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+
+
+
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <div style="width: 50%;align: center">
+
+
+        <div class="code-example">
+            <style name="tooltips-example-1">
+                #tooltips-example-1 {
+                    width: 100%;
+                    max-width: 600px;
+                    margin: 0 auto;
+                }
+
+                #tooltips-example-1 .column {
+                    --color-1: #FEE101;
+                    --color-2: #D7D7D7;
+                    --color-3: #A77044;
+                }
+            </style>
+            <div id="tooltips-example-1">
+                <table class="charts-css column multiple show-heading show-labels show-primary-axis data-spacing-20
+show-data-on-hover ">
+                    <caption> Tooltips Example - 2016 Summer Olympics Medal Table</caption>
+                    <thead>
+                    <tr>
+                        <th scope="col"> Country</th>
+                        <th scope="col"> Gold</th>
+                        <th scope="col"> Silver</th>
+                        <th scope="col"> Bronze</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th scope="row"> USA</th>
+                        <td style="--size: calc( 46 / 50 );"><span class="data"> 46 <br> 🥇 </span> <span
+                                class="tooltip"> United States took <br> home 46 gold medals </span>
+                        </td>
+                        <td style="--size: calc( 37 / 50 );"><span class="data"> 37 <br> 🥈 </span> <span
+                                class="tooltip"> United States took <br> home 37 silver medals </span>
+                        </td>
+                        <td style="--size: calc( 38 / 50 );"><span class="data"> 38 <br> 🥉 </span> <span
+                                class="tooltip"> United States took <br> home 38 bronze medals </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"> GBR</th>
+                        <td style="--size: calc( 27 / 50 );"><span class="data"> 27 </span> <span class="tooltip"> Great Britain took <br> home 27 gold medals </span>
+                        </td>
+                        <td style="--size: calc( 23 / 50 );"><span class="data"> 23 </span> <span class="tooltip"> Great Britain took <br> home 23 silver medals </span>
+                        </td>
+                        <td style="--size: calc( 17 / 50 );"><span class="data"> 17 </span> <span class="tooltip"> Great Britain took <br> home 17 bronze medals </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"> CHN</th>
+                        <td style="--size: calc( 26 / 50 );"><span class="data"> 26 </span> <span class="tooltip"> China took home <br> 26 gold medals </span>
+                        </td>
+                        <td style="--size: calc( 18 / 50 );"><span class="data"> 18 </span> <span class="tooltip"> China took home <br> 18 silver medals </span>
+                        </td>
+                        <td style="--size: calc( 26 / 50 );"><span class="data"> 26 </span> <span class="tooltip"> China took home <br> 26 bronze medals </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+    </div>
+
+    <br>
+    <br>
+
+
+    <div style="width: 50%;align: center">
+
+        <div class="code-example">
+            <style name="animations-example-4">
+                #animations-example-4 {
+                    width: 100%;
+                    max-width: 300px;
+                    margin: 0 auto;
+                }
+
+                #animations-example-4 .column {
+                    --aspect-ratio: 4 / 3;
+                }
+
+                #animations-example-4 .column tbody td {
+                    transform-origin: bottom;
+                    animation: revealing-bars 10s linear infinite;
+                }
+
+                @keyframes revealing-bars {
+                    0% {
+                        transform: scaleY(0);
+                    }
+                    30% {
+                        transform: scaleY(1);
+                    }
+                }
+            </style>
+            <div id="animations-example-4">
+                <table class="charts-css column show-labels hide-data data-spacing-5 show-primary-axis">
+                    <caption> Animation Example #4</caption>
+                    <thead>
+                    <tr>
+                        <th scope="col"> Year</th>
+                        <th scope="col"> Progress</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th scope="row"> 2016</th>
+                        <td style="--size: 0.2;"><span class="data"> 20 </span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"> 2017</th>
+                        <td style="--size: 0.4;"><span class="data"> 40 </span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"> 2018</th>
+                        <td style="--size: 0.6;"><span class="data"> 60 </span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"> 2019</th>
+                        <td style="--size: 0.8;"><span class="data"> 80 </span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row"> 2020</th>
+                        <td style="--size: 1.0;"><span class="data"> 100 </span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+    </div>
+
+
+    <br>
+    <br>
+    <style name="effect-example-7">
+        #effect-example-7 {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        #effect-example-7 .column {
+            --aspect-ratio: 4 / 3;
+        }
+
+        #effect-example-7 .column tbody {
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: inset -5px -5px 10px rgba(0, 0, 0, 0.5),
+            5px 5px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        #effect-example-7 .column tbody td {
+            margin-inline: 10px;
+            border-radius: 10px;
+            box-shadow: inset -5px -5px 10px rgba(0, 0, 0, 0.5),
+            5px 5px 5px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+    <div style="width: 50%;align: center">
+
+        <div id="effect-example-7">
+            <table class="charts-css column hide-data">
+                <caption> 3D Effect Example #7</caption>
+                <thead>
+                <tr>
+                    <th scope="col"> Year</th>
+                    <th scope="col"> Progress</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th scope="row"> 2016</th>
+                    <td style="--size: 0.2;"><span class="data"> 20 </span></td>
+                </tr>
+                <tr>
+                    <th scope="row"> 2017</th>
+                    <td style="--size: 0.4;"><span class="data"> 40 </span></td>
+                </tr>
+                <tr>
+                    <th scope="row"> 2018</th>
+                    <td style="--size: 0.6;"><span class="data"> 60 </span></td>
+                </tr>
+                <tr>
+                    <th scope="row"> 2019</th>
+                    <td style="--size: 0.8;"><span class="data"> 80 </span></td>
+                </tr>
+                <tr>
+                    <th scope="row"> 2020</th>
+                    <td style="--size: 1.0;"><span class="data"> 100 </span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+
+    <br>
+    <br>
+    <br>
+
+
+
+{% endblock %}
+
+

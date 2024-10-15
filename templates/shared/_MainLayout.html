@@ -1,0 +1,40 @@
+{% load static %}
+{% load render_partial %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="keywords" content="HTML5 Template"/>
+    <meta name="description" content="Webmin - Bootstrap 4 & Angular 5 Admin Dashboard Template"/>
+    <meta name="author" content="potenzaglobalsolutions.com"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>{{ title }}</title>
+    {% include 'shared/_HeaderReferences.html' %}
+</head>
+<body>
+<div class="wrapper">
+    <!--=================================
+     preloader -->
+    <div id="pre-loader">
+        <img src="{% static 'images/pre-loader/loader-01.svg' %}" alt="">
+    </div>
+    <!--=================================
+     header start-->
+    {% render_partial 'header' %}
+    <div class="container-fluid">
+        <div class="row">
+            {% render_partial 'sidebar' %}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    <!--=================================
+     footer -->
+    {% block mapbox %}{% endblock %}
+    {% include 'shared/_FooterReferences.html' %}
+    {% block date %}{% endblock %}
+    {% block chart %}{% endblock %}
+    {% block myjs %}{% endblock %}
+</div>
+</body>
+</html>
