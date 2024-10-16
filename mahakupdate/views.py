@@ -101,26 +101,26 @@ def Update_from_mahak(request):
     t2 = time.time()
 
     #  ================================================== پر کردن جدول کالا ============
-    # cursor.execute("SELECT * FROM GoodInf")
-    # mahakt_data = cursor.fetchall()
-    # existing_in_mahak = {row[1] for row in mahakt_data}
-    # print('existing_in_mahak')
-    # print(existing_in_mahak)
-    # for row in mahakt_data:
-    #     Kala.objects.update_or_create(
-    #         code=row[1],
-    #         defaults={
-    #             'name': row[2],
-    #         }
-    #     )
-    # print('update finish')
-    # model_to_delete = Kala.objects.exclude(code__in=existing_in_mahak)
-    # print('model_to_delete')
-    # print(model_to_delete)
-    # model_to_delete.delete()
-    # print('delete finish')
-
-    # Factor.objects.all().delete()
+    cursor.execute("SELECT * FROM GoodInf")
+    mahakt_data = cursor.fetchall()
+    existing_in_mahak = {row[1] for row in mahakt_data}
+    print('existing_in_mahak')
+    print(existing_in_mahak)
+    for row in mahakt_data:
+        Kala.objects.update_or_create(
+            code=row[1],
+            defaults={
+                'name': row[2],
+            }
+        )
+    print('update finish')
+    model_to_delete = Kala.objects.exclude(code__in=existing_in_mahak)
+    print('model_to_delete')
+    print(model_to_delete)
+    model_to_delete.delete()
+    print('delete finish')
+    #
+    Factor.objects.all().delete()
     t3 = time.time()
     # ==============================================================# پر کردن جدول فاکتور
     # cursor.execute("SELECT * FROM Fact_Fo")  # یا نام همه ستون‌ها را به جا column4, column7, column11 وارد کنید
