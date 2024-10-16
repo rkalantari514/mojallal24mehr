@@ -17,9 +17,31 @@ class Mtables(models.Model):
     def __str__(self):
         return self.name
 
+
+class Category(models.Model):
+    LEVEL_CHOICES = (
+        (1, 'سطح 1'),
+        (2, 'سطح 2'),
+        (3, 'سطح 3'),
+    )
+    name = models.CharField(max_length=150, verbose_name='نام دسته‌بندی')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, related_name='children', null=True, blank=True, verbose_name='دسته‌بندی والد')
+    level = models.PositiveSmallIntegerField(choices=LEVEL_CHOICES, verbose_name='سطح')
+
+    class Meta:
+        verbose_name = 'دسته‌بندی'
+        verbose_name_plural = 'دسته‌بندی‌ها'
+
+    def __str__(self):
+        return self.name
+
+
+
 class Kala(models.Model):
     code= models.IntegerField(default=0, verbose_name='کد کالا')
     name = models.CharField(max_length=150, verbose_name='نام کالا')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='kalas', verbose_name='دسته‌بندی',blank = True,null = True)
+
 
     class Meta:
         verbose_name = 'کالا'
@@ -76,3 +98,5 @@ class WordCount(models.Model):
     class Meta:
         verbose_name = 'تکرار کلمه'
         verbose_name_plural = 'کلمه'
+
+

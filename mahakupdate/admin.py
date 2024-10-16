@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount
+from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category
 
 
 # Register your models here.
@@ -17,9 +17,9 @@ class MtablesAdmin(admin.ModelAdmin):
 
 
 class KalaAdmin(admin.ModelAdmin):
-    list_display = ['__str__','name', 'code',]
-    # list_filter = ['name','code']
-    # list_editable = ['description', 'in_use']
+    list_display = ['__str__','name', 'code','category']
+    list_filter = ['category']
+    list_editable = ['category']
     search_fields = ['name', 'code']
 
     class Meta:
@@ -51,6 +51,15 @@ class WordCountAdmin(admin.ModelAdmin):
     class Meta:
         model = WordCount
 
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ['__str__','name','parent','level']
+    list_filter = ['level','parent',]
+    list_editable = ['name','parent','level']
+    search_fields = ['name','parent','level']
+
+    class Meta:
+        model = Category
+
 
 
 admin.site.register(Mtables, MtablesAdmin)
@@ -58,3 +67,4 @@ admin.site.register(Kala, KalaAdmin)
 admin.site.register(Factor, FactorAdmin)
 admin.site.register(FactorDetaile, FactorDetaileAdmin)
 admin.site.register(WordCount, WordCountAdmin)
+admin.site.register(Category, CategoryAdmin)

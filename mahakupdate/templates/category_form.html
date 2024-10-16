@@ -1,0 +1,6 @@
+<!-- category_form.html -->
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">ذخیره</button>
+</form>
