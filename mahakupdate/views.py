@@ -102,73 +102,73 @@ def Update_from_mahak(request):
     t2 = time.time()
 
     #  ================================================== پر کردن جدول کالا ============
-    cursor.execute("SELECT * FROM GoodInf")
-    mahakt_data = cursor.fetchall()
-    existing_in_mahak = {row[1] for row in mahakt_data}
-    print('existing_in_mahak')
-    print(existing_in_mahak)
-    for row in mahakt_data:
-        Kala.objects.update_or_create(
-            code=row[1],
-            defaults={
-                'name': row[2],
-            }
-        )
-    print('update finish')
-    model_to_delete = Kala.objects.exclude(code__in=existing_in_mahak)
-    print('model_to_delete')
-    print(model_to_delete)
-    model_to_delete.delete()
-    print('delete finish')
+    # cursor.execute("SELECT * FROM GoodInf")
+    # mahakt_data = cursor.fetchall()
+    # existing_in_mahak = {row[1] for row in mahakt_data}
+    # print('existing_in_mahak')
+    # print(existing_in_mahak)
+    # for row in mahakt_data:
+    #     Kala.objects.update_or_create(
+    #         code=row[1],
+    #         defaults={
+    #             'name': row[2],
+    #         }
+    #     )
+    # print('update finish')
+    # model_to_delete = Kala.objects.exclude(code__in=existing_in_mahak)
+    # print('model_to_delete')
+    # print(model_to_delete)
+    # model_to_delete.delete()
+    # print('delete finish')
 
     t3 = time.time()
     # ==============================================================# پر کردن جدول فاکتور
-    cursor.execute("SELECT * FROM Fact_Fo")  # یا نام همه ستون‌ها را به جا column4, column7, column11 وارد کنید
-    mahakt_data = cursor.fetchall()
-    existing_in_mahak = {row[0] for row in mahakt_data}  # مجموعه‌ای از کدهای موجود در Fact_Fo
-    print('existing_in_mahak')
-    print(existing_in_mahak)
-    for row in mahakt_data:
-        Factor.objects.update_or_create(
-            code=row[0],
-            defaults={
-                'pdate': row[4],
-                'mablagh_factor': row[5],
-                'takhfif': row[6],
-                'create_time': row[38],
-                'darsad_takhfif': row[44],
-            }
-        )
-    print('update finish')
-    model_to_delete = Factor.objects.exclude(code__in=existing_in_mahak)
-    print('model_to_delete')
-    print(model_to_delete)
-    model_to_delete.delete()
-    print('delete finish')
+    # cursor.execute("SELECT * FROM Fact_Fo")  # یا نام همه ستون‌ها را به جا column4, column7, column11 وارد کنید
+    # mahakt_data = cursor.fetchall()
+    # existing_in_mahak = {row[0] for row in mahakt_data}  # مجموعه‌ای از کدهای موجود در Fact_Fo
+    # print('existing_in_mahak')
+    # print(existing_in_mahak)
+    # for row in mahakt_data:
+    #     Factor.objects.update_or_create(
+    #         code=row[0],
+    #         defaults={
+    #             'pdate': row[4],
+    #             'mablagh_factor': row[5],
+    #             'takhfif': row[6],
+    #             'create_time': row[38],
+    #             'darsad_takhfif': row[44],
+    #         }
+    #     )
+    # print('update finish')
+    # model_to_delete = Factor.objects.exclude(code__in=existing_in_mahak)
+    # print('model_to_delete')
+    # print(model_to_delete)
+    # model_to_delete.delete()
+    # print('delete finish')
 
     t4 = time.time()
     # ==================================================================پر کردن جدول جزئیات فاکتور
-    cursor.execute("SELECT * FROM Fact_Fo_Detail")
-    mahakt_data = cursor.fetchall()
-    existing_in_mahak = set((row[0], row[1]) for row in mahakt_data)
-    for row in mahakt_data:
-        print(row)
-        # با استفاده از ترکیب چند فیلد
-        FactorDetaile.objects.update_or_create(
-            code_factor=row[0],  # فیلد اول برای شناسایی
-            radif=row[1],  # فیلد دوم برای شناسایی
-            defaults={
-                'code_kala': row[3],
-                'count': row[5],
-                'mablagh_vahed': row[6],
-                'mablagh_nahaee': row[29],
-            }
-        )
-
-    existing_keys = set((detail.code_factor, detail.radif) for detail in FactorDetaile.objects.all())
-    model_to_delete = existing_keys - existing_in_mahak
-    for key in model_to_delete:
-        FactorDetaile.objects.filter(code_factor=key[0], radif=key[1]).delete()
+    # cursor.execute("SELECT * FROM Fact_Fo_Detail")
+    # mahakt_data = cursor.fetchall()
+    # existing_in_mahak = set((row[0], row[1]) for row in mahakt_data)
+    # for row in mahakt_data:
+    #     print(row)
+    #     # با استفاده از ترکیب چند فیلد
+    #     FactorDetaile.objects.update_or_create(
+    #         code_factor=row[0],  # فیلد اول برای شناسایی
+    #         radif=row[1],  # فیلد دوم برای شناسایی
+    #         defaults={
+    #             'code_kala': row[3],
+    #             'count': row[5],
+    #             'mablagh_vahed': row[6],
+    #             'mablagh_nahaee': row[29],
+    #         }
+    #     )
+    #
+    # existing_keys = set((detail.code_factor, detail.radif) for detail in FactorDetaile.objects.all())
+    # model_to_delete = existing_keys - existing_in_mahak
+    # for key in model_to_delete:
+    #     FactorDetaile.objects.filter(code_factor=key[0], radif=key[1]).delete()
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # جدول کاردکس

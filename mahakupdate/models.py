@@ -1,5 +1,7 @@
 from django.db import models
-
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+import jdatetime
 # Create your models here.
 
 
@@ -25,7 +27,7 @@ class Category(models.Model):
         (3, 'سطح 3'),
     )
     name = models.CharField(max_length=150, verbose_name='نام دسته‌بندی')
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, related_name='children', null=True, blank=True, verbose_name='دسته‌بندی والد')
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, related_name='children', null=True, blank=True, verbose_name='دسته‌بندی والد')
     level = models.PositiveSmallIntegerField(choices=LEVEL_CHOICES, verbose_name='سطح')
 
     class Meta:
@@ -40,7 +42,7 @@ class Category(models.Model):
 class Kala(models.Model):
     code= models.IntegerField(default=0, verbose_name='کد کالا')
     name = models.CharField(max_length=150, verbose_name='نام کالا')
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='kalas', verbose_name='دسته‌بندی',blank = True,null = True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name='kalas', verbose_name='دسته‌بندی',blank = True,null = True)
 
 
     class Meta:
@@ -58,9 +60,7 @@ class Factor(models.Model):
     takhfif= models.FloatField(blank = True,null = True,default=0, verbose_name='تخفیف')
     create_time=models.CharField(blank = True,null = True,max_length=150,verbose_name='ساعت ایجاد')
     darsad_takhfif= models.FloatField(blank = True,null = True,default=0, verbose_name='درصد تخفیف')
-
-
-
+    date = models.DateField(blank=True, null=True, verbose_name='تاریخ میلادی')
 
     class Meta:
         verbose_name = 'فاکتور'
@@ -69,13 +69,25 @@ class Factor(models.Model):
     def __str__(self):
         return self.pdate
 
+@receiver(pre_save, sender=Factor)
+def convert_pdate_to_date(sender, instance, **kwargs):
+    if instance.pdate:
+        # تبدیل تاریخ شمسی به میلادی
+        jalali_date = jdatetime.date(*map(int, instance.pdate.split('/')))
+        gregorian_date = jalali_date.togregorian()
+        instance.date = gregorian_date
+
+
+
+
+
 
 class FactorDetaile(models.Model):
     code_factor = models.IntegerField(blank=True, null=True, default=0, verbose_name='شماره فاکتور')
     radif= models.IntegerField(blank = True,null = True,default=0, verbose_name='ردیف')
-    factor = models.ForeignKey(Factor, on_delete=models.CASCADE, related_name='details', null=True, blank = True)
+    factor = models.ForeignKey(Factor, on_delete=models.SET_NULL, related_name='details', null=True, blank = True)
     code_kala = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد کالا')
-    kala = models.ForeignKey(Kala, on_delete=models.CASCADE, null=True)
+    kala = models.ForeignKey(Kala, on_delete=models.SET_NULL, null=True)
     count = models.FloatField(blank=True, null=True, default=0, verbose_name='تعداد')
     mablagh_vahed = models.FloatField(blank=True, null=True, default=0, verbose_name='مبلغ واحد')
     mablagh_nahaee = models.FloatField(blank=True, null=True, default=0, verbose_name='مبلغ نهایی')

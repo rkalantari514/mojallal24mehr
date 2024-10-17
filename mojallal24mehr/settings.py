@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'django_render_partial',
+    'django_jalali',
 
     'mahaktables',
     'mahakupdate',

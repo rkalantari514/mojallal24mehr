@@ -1,0 +1,11 @@
+ pip install jdatetime
+
+
+pip install django-jalali      باید به ستینگ اضافه شود
+
+
+INSTALLED_APPS = [
+    ...
+    'django_jalali',
+    ...
+
