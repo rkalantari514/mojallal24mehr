@@ -46,7 +46,11 @@ def connect_to_mahak():
             else:
                 raise EnvironmentError("The computer name does not match.")
 
-
+def Updatedb(request):
+    context={
+        'title':'صفحه آپدیت جدواول'
+    }
+    return render(request, 'updatepage.html',context)
 def Update_from_mahak(request):
     t0 = time.time()
     print('شروع آپدیت')
@@ -223,21 +227,21 @@ def Update_from_mahak(request):
 
 def Kala_group(request):
     # دریافت کالاهای موجود در جزئیات فاکتور
-    WordCount.objects.all().delete()
-    factors = FactorDetaile.objects.values('kala').distinct()
-    kalas = Kala.objects.filter(id__in=[item['kala'] for item in factors])
-    kalas=Kala.objects.all()
-    all_words = []
-    for kala in kalas:
-        words = kala.name.split()  # تقسیم نام به کلمات
-        all_words.extend(words)  # افزودن کلمات به لیست
-    filtered_words = [word for word in all_words if len(word) > 3]
-    # شمارش تکرار کلمات
-    word_counts = Counter(filtered_words)
-    # ذخیره کلمات و تعداد تکرار آنها در مدل WordCount
-    for word, count in word_counts.items():
-        if count>4:
-            WordCount.objects.update_or_create(word=word, defaults={'count': count})
+    # WordCount.objects.all().delete()
+    # factors = FactorDetaile.objects.values('kala').distinct()
+    # kalas = Kala.objects.filter(id__in=[item['kala'] for item in factors])
+    # kalas=Kala.objects.all()
+    # all_words = []
+    # for kala in kalas:
+    #     words = kala.name.split()  # تقسیم نام به کلمات
+    #     all_words.extend(words)  # افزودن کلمات به لیست
+    # filtered_words = [word for word in all_words if len(word) > 3]
+    # # شمارش تکرار کلمات
+    # word_counts = Counter(filtered_words)
+    # # ذخیره کلمات و تعداد تکرار آنها در مدل WordCount
+    # for word, count in word_counts.items():
+    #     if count>4:
+    #         WordCount.objects.update_or_create(word=word, defaults={'count': count})
 
     words = WordCount.objects.all()
     context = {
