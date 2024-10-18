@@ -6,7 +6,7 @@ from django.http import HttpResponse
 
 from django.utils.timesince import timesince
 
-from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Kardex
+from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Kardex, Person
 import sys
 from django.utils import timezone
 
@@ -55,8 +55,11 @@ def connect_to_mahak():
 
 # صفحه عملیات آپدیت
 def Updatedb(request):
+    ff = Kardex.objects.filter(code_kala=58692)
+    print(ff)
+    for f in ff:
+        print(f.pdate, f.stock, f.radif)
     tables = Mtables.objects.filter(in_use=True)
-
     for t in tables:
         tsinse = (timezone.now() - t.last_update_time).total_seconds() / 60
         if tsinse / t.update_period >= 1:
@@ -84,6 +87,9 @@ def Updatedb(request):
         if t.name == 'Kardex':
             t.url1 = 'update/kardex'
 
+        if t.name == 'PerInf':
+            t.url1 = 'update/person'
+
     context = {
         'title': 'صفحه آپدیت جداول',
         'tables': tables
@@ -101,11 +107,12 @@ def Updateall(request):
         'GoodInf': UpdateKala,
         'Fact_Fo_Detail': UpdateFactorDetail,
         'Kardex': UpdateKardex,
+        'PerInf': UpdatePerson,
     }
 
     for t in tables:
         tsinse = (timezone.now() - t.last_update_time).total_seconds() / 60
-        if tsinse / t.update_period > 0.7:
+        if tsinse / t.update_period > 0.0007:
             view_func = view_map.get(t.name)
             if view_func:
                 response = view_func(request)
@@ -211,6 +218,7 @@ def UpdateKardex(request):
                 'mablaghsanad': row[3],
                 'count': row[7],
                 'averageprice': row[11],
+                'radif': row[14],
             }
         )
     print('update finish')
@@ -593,3 +601,68 @@ def kala_create_view(request):
     else:
         form = KalaForm()
     return render(request, 'kala_form.html', {'form': form})
+
+
+# آپدیت گروه
+
+# آپدیت افراد
+def UpdatePerson(request):
+    t0 = time.time()
+    print('شروع آپدیت')
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    print('cursor')
+    print(cursor)
+    t1 = time.time()
+    # ==============================================================# پر کردن جدول افراد
+    cursor.execute("SELECT * FROM PerInf")  # یا نام همه ستون‌ها را به جا column4, column7, column11 وارد کنید
+    mahakt_data = cursor.fetchall()
+    existing_in_mahak = {row[0] for row in mahakt_data}  # مجموعه‌ای از کدهای موجود در Fact_Fo
+    print('existing_in_mahak')
+    print(existing_in_mahak)
+
+    for row in mahakt_data:
+        Person.objects.update_or_create(
+            code=row[0],
+            defaults={
+                'grpcode': row[3],
+                'name': row[1],
+                'lname': row[2],
+                'tel1': row[6],
+                'tel2': row[7],
+                'fax': row[8],
+                'mobile': row[9],
+                'address': row[10],
+                'comment': row[12],
+            }
+        )
+    print('update finish')
+    model_to_delete = Person.objects.exclude(code__in=existing_in_mahak)
+    print('model_to_delete')
+    print(model_to_delete)
+    model_to_delete.delete()
+    print('delete finish')
+    tend = time.time()
+    total_time = tend - t0
+    db_time = t1 - t0
+    update_time = tend - t1
+
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    print(f" اتصال به دیتا بیس:{db_time:.2f} ثانیه")
+    print(f" زمان آپدیت جدول:{update_time:.2f} ثانیه")
+
+    # شمارش تعداد سطرها
+    cursor.execute(f"SELECT COUNT(*) FROM PerInf")
+    row_count = cursor.fetchone()[0]
+    ## شمارش تعداد ستون‌ها
+    cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'PerInf'")
+    column_count = cursor.fetchone()[0]
+
+    table = Mtables.objects.filter(name='PerInf').last()
+    table.last_update_time = timezone.now()
+    table.update_duration = update_time
+    table.row_count = row_count
+    table.cloumn_count = column_count
+    table.save()
+
+    return redirect('/updatedb')

@@ -106,6 +106,7 @@ class Kardex(models.Model):
     warehousecode=models.IntegerField(blank = True,null = True,default=0, verbose_name='کد انبار')
     mablaghsanad=models.FloatField(blank=True, null=True, default=0, verbose_name='مبلغ سند')
     code_kala = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد کالا')
+    radif = models.IntegerField(blank=True, null=True, default=0, verbose_name='ردیف در فاکتور')  #برای سورت کردن لازم است
     kala = models.ForeignKey(Kala, on_delete=models.SET_NULL,blank=True, null=True)
     code_factor=models.IntegerField(blank=True, null=True, default=0, verbose_name='کد فاکتور')
     factor = models.ForeignKey(Factor, on_delete=models.SET_NULL,blank=True, null=True)
@@ -116,9 +117,12 @@ class Kardex(models.Model):
     class Meta:
         verbose_name = 'کاردکس انبار'
         verbose_name_plural = 'کاردکس های انبار'
+        ordering = ['pdate', 'radif']
 
     def __str__(self):
         return str(self.pdate)  # تصحیح به str
+
+
 
 
 
@@ -133,12 +137,36 @@ def convert_pdate_to_date(sender, instance, **kwargs):
 
 
 
+class PersonGroup(models.Model):
+    code= models.IntegerField(default=0, verbose_name='کد گروه')
+    name = models.CharField(max_length=150, verbose_name='نام گروه')
+
+    class Meta:
+        verbose_name = 'گروه'
+        verbose_name_plural = 'گروه ها'
+    def __str__(self):
+        return self.name
 
 
+class Person(models.Model):
+    code= models.IntegerField(default=0, verbose_name='کد فرد')
+    grpcode=models.IntegerField(default=0, verbose_name='کد گروه')
+    group=models.ForeignKey(PersonGroup, on_delete=models.SET_NULL,blank=True, null=True)
+    name = models.CharField(max_length=150, verbose_name='نام')
+    lname = models.CharField(max_length=150, verbose_name='نام خانوادگی')
+    tel1 = models.CharField(max_length=150, verbose_name='تلفن1')
+    tel2 = models.CharField(max_length=150, verbose_name='تلفن2')
+    fax = models.CharField(max_length=150, verbose_name='فکس')
+    mobile = models.CharField(max_length=150, verbose_name='موبایل')
+    address=models.CharField(max_length=550, verbose_name='آدرس')
+    comment=models.CharField(max_length=550, verbose_name='توضیحات')
+    # reminbg
 
-
-
-
+    class Meta:
+        verbose_name = 'فرد'
+        verbose_name_plural = 'افراد'
+    def __str__(self):
+        return f'{self.name}  {self.lname}'
 
 class WordCount(models.Model):
     word = models.CharField(max_length=100, unique=True, verbose_name='کلمه')  # کلید واژه
