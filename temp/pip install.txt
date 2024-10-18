@@ -1,7 +1,14 @@
- pip install jdatetime
-
-
+pip install django
+pip install pyodbc
+pip install django-render-partial
+pip install
+pip install jdatetime
 pip install django-jalali      باید به ستینگ اضافه شود
+pip install
+
+
+
+
 
 
 INSTALLED_APPS = [

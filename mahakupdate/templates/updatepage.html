@@ -4,7 +4,70 @@
 {% block content %}
     <div class="content-wrapper">
 
+<div class="col-xl-12 mb-30">
+           <div class="card card-statistics h-100">
+           <div class="card-body">
+             <h5 class="card-title pb-0 border-0">به روز رسانی جداول از محک </h5>
+             <!-- action group -->
+              <div class="btn-group info-drop">
+                <button type="button" class="dropdown-toggle-split text-muted" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="ti-more"></i></button>
+                <div class="dropdown-menu">
+{#                  <a class="dropdown-item" href="#"><i class="text-success ti-files"></i> Approved</a>#}
+{#                  <a class="dropdown-item" href="#"><i class="text-warning ti-pencil-alt"></i> Pending</a>#}
+{#                  <a class="dropdown-item" href="#"><i class="text-danger ti-user"></i> Rejected</a>#}
+                  <a class="dropdown-item" href="/updateall"><i class="text-secondary ti-reload"></i> آپدیت جداول ضروری</a>
+                </div>
+              </div>
+              <div class="table-responsive">
+              <table class="table center-aligned-table mb-0 text-center">
+                <thead>
+                  <tr class="text-dark">
+                    <th>ردیف</th>
+                      <th>نام جدول</th>
+                      <th>table</th>
+                    <th>تعداد ستون</th>
+                    <th>تعداد سطر</th>
+                    <th>دوره آپدیت</th>
+                    <th>آخرین آپدیت</th>
+                      <th>مدت آخرین آپدیت</th>
+                      <th>وضعیت آپدیت</th>
+                    <th>آپدیت</th>
+                    <th></th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for t in tables %}
+                      <tr>
+                      <td>{{ forloop.counter }}</td>
+                          <td>{{ t.description }}</td>
+                          <td>{{ t.name }}</td>
+                      <td>{{ t.cloumn_count }}</td>
+                      <td>{{ t.row_count }}</td>
+                      <td>{{ t.update_period }} دقیقه </td>
+                      <td>{{ t.last_update_time|timesince }} پیش </td>
+                      <td>{{ t.update_duration|floatformat:1 }} ثانیه </td>
+                          <td>
+                      <div class="progress progress-small mt-2">
+                            <div class="skill2-bar {{ t.progress_class }}"
+                                 role="progressbar"
+                                 style="width: {{ t.progress_bar_width }}%"
+                                 aria-valuenow="{{ t.progress_bar_width }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"></div>
+                        </div>
+                    </td>
+                      <td><a href="{{ t.url1 }}"><button type="button" class="btn btn-primary">بروز رسانی</button></a></td>
+                      </tr>
 
+        {% endfor %}
+
+                </tbody>
+              </table>
+            </div>
+            </div>
+          </div>
+        </div>
 
     </div>
 {% endblock %}

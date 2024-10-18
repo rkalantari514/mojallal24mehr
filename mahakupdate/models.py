@@ -2,6 +2,9 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 import jdatetime
+from django.utils import timezone
+
+
 # Create your models here.
 
 
@@ -12,6 +15,9 @@ class Mtables(models.Model):
     description = models.CharField(blank = True,null = True,max_length=150, verbose_name='توضیح')
     row_count = models.IntegerField(blank = True,null = True,default=0, verbose_name='تعداد ردیف ها')
     cloumn_count = models.IntegerField(blank = True,null = True,default=0, verbose_name='تعداد ستون ها')
+    last_update_time = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='آخرین آپدیت')
+    update_period = models.IntegerField(default=60, blank=True, null=True, verbose_name='بازه به‌روزرسانی (دقیقه)')
+    update_duration = models.FloatField(blank=True, null=True, verbose_name='مدت زمان به‌روزرسانی (ثانیه)')
 
     class Meta:
         verbose_name = 'جدول محک'
