@@ -75,13 +75,7 @@ class Factor(models.Model):
     def __str__(self):
         return self.pdate
 
-@receiver(pre_save, sender=Factor)
-def convert_pdate_to_date(sender, instance, **kwargs):
-    if instance.pdate:
-        # تبدیل تاریخ شمسی به میلادی
-        jalali_date = jdatetime.date(*map(int, instance.pdate.split('/')))
-        gregorian_date = jalali_date.togregorian()
-        instance.date = gregorian_date
+
 
 
 
@@ -104,6 +98,46 @@ class FactorDetaile(models.Model):
 
     def __str__(self):
         return str(self.code_factor)  # تصحیح به str
+
+class Kardex(models.Model):
+    pdate=models.CharField(blank = True,null = True,max_length=150, verbose_name='تاریخ شمسی')
+    date = models.DateField(blank=True, null=True, verbose_name='تاریخ میلادی')
+    percode=models.IntegerField(blank = True,null = True,default=0, verbose_name='کد شخص')
+    warehousecode=models.IntegerField(blank = True,null = True,default=0, verbose_name='کد انبار')
+    mablaghsanad=models.FloatField(blank=True, null=True, default=0, verbose_name='مبلغ سند')
+    code_kala = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد کالا')
+    kala = models.ForeignKey(Kala, on_delete=models.SET_NULL,blank=True, null=True)
+    code_factor=models.IntegerField(blank=True, null=True, default=0, verbose_name='کد فاکتور')
+    factor = models.ForeignKey(Factor, on_delete=models.SET_NULL,blank=True, null=True)
+    count=models.FloatField(blank=True, null=True, default=0, verbose_name='تعداد')
+    averageprice=models.FloatField(blank=True, null=True, default=0, verbose_name='قیمت میانگین')
+    stock=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی')
+
+    class Meta:
+        verbose_name = 'کاردکس انبار'
+        verbose_name_plural = 'کاردکس های انبار'
+
+    def __str__(self):
+        return str(self.pdate)  # تصحیح به str
+
+
+
+@receiver(pre_save, sender=Factor)
+@receiver(pre_save, sender=Kardex)
+def convert_pdate_to_date(sender, instance, **kwargs):
+    if instance.pdate:
+        # تبدیل تاریخ شمسی به میلادی
+        jalali_date = jdatetime.date(*map(int, instance.pdate.split('/')))
+        gregorian_date = jalali_date.togregorian()
+        instance.date = gregorian_date
+
+
+
+
+
+
+
+
 
 
 class WordCount(models.Model):

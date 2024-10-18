@@ -6,7 +6,7 @@ from django.http import HttpResponse
 
 from django.utils.timesince import timesince
 
-from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount
+from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Kardex
 import sys
 from django.utils import timezone
 
@@ -16,6 +16,7 @@ from collections import Counter
 from django.shortcuts import render, get_object_or_404
 from .forms import CategoryForm, KalaForm
 from .models import Kala
+
 
 # Create your views here.
 def connect_to_mahak():
@@ -51,45 +52,44 @@ def connect_to_mahak():
             else:
                 raise EnvironmentError("The computer name does not match.")
 
+
 # صفحه عملیات آپدیت
 def Updatedb(request):
-    tables=Mtables.objects.filter(in_use=True)
+    tables = Mtables.objects.filter(in_use=True)
 
     for t in tables:
-        tsinse=(timezone.now()-t.last_update_time).total_seconds()/60
-        if tsinse/t.update_period >= 1:
+        tsinse = (timezone.now() - t.last_update_time).total_seconds() / 60
+        if tsinse / t.update_period >= 1:
             t.progress_bar_width = 100
             t.progress_class = 'skill2-bar bg-danger'
-        elif tsinse/t.update_period < 0.4:
+        elif tsinse / t.update_period < 0.4:
             t.progress_class = 'skill2-bar bg-success'
-            t.progress_bar_width = tsinse/t.update_period *100
-        elif tsinse/t.update_period < 0.9:
-            t.progress_bar_width = tsinse/t.update_period *100
+            t.progress_bar_width = tsinse / t.update_period * 100
+        elif tsinse / t.update_period < 0.9:
+            t.progress_bar_width = tsinse / t.update_period * 100
             t.progress_class = 'skill2-bar bg-warning'
-        elif tsinse/t.update_period < 1:
-            t.progress_bar_width = tsinse/t.update_period *100
+        elif tsinse / t.update_period < 1:
+            t.progress_bar_width = tsinse / t.update_period * 100
             t.progress_class = 'skill2-bar bg-danger'
 
-        if t.name=='Fact_Fo':
-            t.url1='update/factor'
+        if t.name == 'Fact_Fo':
+            t.url1 = 'update/factor'
 
-        if t.name=='GoodInf':
-            t.url1='update/kala'
+        if t.name == 'GoodInf':
+            t.url1 = 'update/kala'
 
-        if t.name=='Fact_Fo_Detail':
-            t.url1='update/factor-detail'
+        if t.name == 'Fact_Fo_Detail':
+            t.url1 = 'update/factor-detail'
 
-        if t.name=='Kardex':
-                    t.url1='update/kardex'
+        if t.name == 'Kardex':
+            t.url1 = 'update/kardex'
 
-
-
-
-    context={
-        'title':'صفحه آپدیت جداول',
-        'tables':tables
+    context = {
+        'title': 'صفحه آپدیت جداول',
+        'tables': tables
     }
-    return render(request, 'updatepage.html',context)
+    return render(request, 'updatepage.html', context)
+
 
 # آپدیت همه جدوال که موقع آن است
 def Updateall(request):
@@ -100,7 +100,7 @@ def Updateall(request):
         'Fact_Fo': UpdateFactor,
         'GoodInf': UpdateKala,
         'Fact_Fo_Detail': UpdateFactorDetail,
-        'Kardex':UpdateKardex,
+        'Kardex': UpdateKardex,
     }
 
     for t in tables:
@@ -150,7 +150,7 @@ def UpdateFactor(request):
     tend = time.time()
     total_time = tend - t0
     db_time = t1 - t0
-    update_time=tend-t1
+    update_time = tend - t1
 
     print(f"زمان کل: {total_time:.2f} ثانیه")
     print(f" اتصال به دیتا بیس:{db_time:.2f} ثانیه")
@@ -163,17 +163,15 @@ def UpdateFactor(request):
     cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Fact_Fo'")
     column_count = cursor.fetchone()[0]
 
-    table=Mtables.objects.filter(name='Fact_Fo').last()
-    table.last_update_time= timezone.now()
-    table.update_duration=update_time
-    table.row_count=row_count
-    table.cloumn_count=column_count
+    table = Mtables.objects.filter(name='Fact_Fo').last()
+    table.last_update_time = timezone.now()
+    table.update_duration = update_time
+    table.row_count = row_count
+    table.cloumn_count = column_count
     table.save()
 
-
-
-
     return redirect('/updatedb')
+
 
 # آپدیت کاردکس
 def UpdateKardex(request):
@@ -184,34 +182,55 @@ def UpdateKardex(request):
     print('cursor')
     print(cursor)
     t1 = time.time()
-    # ==============================================================# پر کردن جدول فاکتور
-    cursor.execute("SELECT * FROM Kardex")  # یا نام همه ستون‌ها را به جا column4, column7, column11 وارد کنید
+
+    # پر کردن جدول فاکتور
+    cursor.execute("SELECT * FROM Kardex")
     mahakt_data = cursor.fetchall()
-    existing_in_mahak = {row[0] for row in mahakt_data}  # مجموعه‌ای از کدهای موجود در Fact_Fo
+    existing_in_mahak = set((row[0], row[4], row[12]) for row in mahakt_data)
     print('existing_in_mahak')
     print(existing_in_mahak)
     for row in mahakt_data:
-        print(row)
-        # Factor.objects.update_or_create(
-        #     code=row[0],
-        #     defaults={
-        #         'pdate': row[4],
-        #         'mablagh_factor': row[5],
-        #         'takhfif': row[6],
-        #         'create_time': row[38],
-        #         'darsad_takhfif': row[44],
-        #     }
-        # )
+        print('pdate', row[0])
+        print('percode', row[1])
+        print('warehousecode', row[2])
+        print('mablaghsanad', row[3])
+        print('codekala', row[4])
+        print('codefactor', row[6])
+        print('count', row[7])
+        print('averageprice', row[11])
+        print('stock ', row[12])
+        print('-------------------------------')
+        Kardex.objects.update_or_create(
+            pdate=row[0],
+            code_kala=row[4],
+            stock=row[12],
+            defaults={
+                'code_factor': row[6],
+                'percode': row[1],
+                'warehousecode': row[2],
+                'mablaghsanad': row[3],
+                'count': row[7],
+                'averageprice': row[11],
+            }
+        )
     print('update finish')
-    model_to_delete = Factor.objects.exclude(code__in=existing_in_mahak)
-    print('model_to_delete')
-    print(model_to_delete)
-    model_to_delete.delete()
+
+    existing_keys = set((detail.pdate, detail.code_kala, detail.stock) for detail in Kardex.objects.all())
+    model_to_delete = existing_keys - existing_in_mahak
+    for key in model_to_delete:
+        if len(key) == 3:
+            Kardex.objects.filter(pdate=key[0], code_kala=key[1], stock=key[2]).delete()
+
+    print('delete finish')
+    tend = time.time()
+    total_time = tend - t0
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+
     print('delete finish')
     tend = time.time()
     total_time = tend - t0
     db_time = t1 - t0
-    update_time=tend-t1
+    update_time = tend - t1
 
     print(f"زمان کل: {total_time:.2f} ثانیه")
     print(f" اتصال به دیتا بیس:{db_time:.2f} ثانیه")
@@ -224,15 +243,12 @@ def UpdateKardex(request):
     cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Kardex'")
     column_count = cursor.fetchone()[0]
 
-    table=Mtables.objects.filter(name='Kardex').last()
-    table.last_update_time= timezone.now()
-    table.update_duration=update_time
-    table.row_count=row_count
-    table.cloumn_count=column_count
+    table = Mtables.objects.filter(name='Kardex').last()
+    table.last_update_time = timezone.now()
+    table.update_duration = update_time
+    table.row_count = row_count
+    table.cloumn_count = column_count
     table.save()
-
-
-
 
     return redirect('/updatedb')
 
@@ -279,11 +295,10 @@ def UpdateFactorDetail(request):
         FactorDetaile.objects.filter(code_factor=key[0], radif=key[1]).delete()
     print('delete finish')
 
-
     tend = time.time()
     total_time = tend - t0
     db_time = t1 - t0
-    update_time=tend-t1
+    update_time = tend - t1
 
     print(f"زمان کل: {total_time:.2f} ثانیه")
     print(f" اتصال به دیتا بیس:{db_time:.2f} ثانیه")
@@ -296,17 +311,15 @@ def UpdateFactorDetail(request):
     cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Fact_Fo_Detail'")
     column_count = cursor.fetchone()[0]
 
-    table=Mtables.objects.filter(name='Fact_Fo_Detail').last()
-    table.last_update_time= timezone.now()
-    table.update_duration=update_time
-    table.row_count=row_count
-    table.cloumn_count=column_count
+    table = Mtables.objects.filter(name='Fact_Fo_Detail').last()
+    table.last_update_time = timezone.now()
+    table.update_duration = update_time
+    table.row_count = row_count
+    table.cloumn_count = column_count
     table.save()
 
-
-
-
     return redirect('/updatedb')
+
 
 def UpdateKala(request):
     t0 = time.time()
@@ -322,10 +335,10 @@ def UpdateKala(request):
     existing_in_mahak = {row[1] for row in mahakt_data}
     print('existing_in_mahak')
     print(existing_in_mahak)
-    ii=1
+    ii = 1
     for row in mahakt_data:
-        print(ii,'-->',row[1])
-        ii+= 1
+        print(ii, '-->', row[1])
+        ii += 1
         Kala.objects.update_or_create(
             code=row[1],
             defaults={
@@ -341,7 +354,7 @@ def UpdateKala(request):
     tend = time.time()
     total_time = tend - t0
     db_time = t1 - t0
-    update_time=tend-t1
+    update_time = tend - t1
 
     print(f"زمان کل: {total_time:.2f} ثانیه")
     print(f" اتصال به دیتا بیس:{db_time:.2f} ثانیه")
@@ -354,17 +367,15 @@ def UpdateKala(request):
     cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'GoodInf'")
     column_count = cursor.fetchone()[0]
 
-    table=Mtables.objects.filter(name='GoodInf').last()
-    table.last_update_time= timezone.now()
-    table.update_duration=update_time
-    table.row_count=row_count
-    table.cloumn_count=column_count
+    table = Mtables.objects.filter(name='GoodInf').last()
+    table.last_update_time = timezone.now()
+    table.update_duration = update_time
+    table.row_count = row_count
+    table.cloumn_count = column_count
     table.save()
 
-
-
-
     return redirect('/updatedb')
+
 
 def Update_from_mahak(request):
     t0 = time.time()
@@ -414,9 +425,6 @@ def Update_from_mahak(request):
     #             print('column_count', column_count)
     #         except:
     #             print('nononononoonon')
-
-
-
 
     t2 = time.time()
 
@@ -517,8 +525,6 @@ def Update_from_mahak(request):
     # model_to_delete.delete()
     # print('delete finish')
 
-
-
     t6 = time.time()
 
     tend = time.time()
@@ -576,6 +582,7 @@ def category_create_view(request):
     else:
         form = CategoryForm()
     return render(request, 'category_form.html', {'form': form})
+
 
 def kala_create_view(request):
     if request.method == "POST":
