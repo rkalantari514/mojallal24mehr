@@ -5,6 +5,7 @@ pip install
 pip install jdatetime
 pip install django-jalali      باید به ستینگ اضافه شود
 pip install
+pip install persianutils
 
 
 
