@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'mahaktables',
     'mahakupdate',
     'dashboard',
+    'dashkala',
 
 ]
 
