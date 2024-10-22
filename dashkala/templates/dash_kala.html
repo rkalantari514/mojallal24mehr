@@ -5,123 +5,125 @@
     <div class="content-wrapper">
 
 
-    <div class="row">
+        <div class="row">
             <div class="col-xl-8 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body">
-                        <h5 class="mb-15 pb-0 border-0 card-title">موجودی کالها  </h5>
+                        <h5 class="mb-15 pb-0 border-0 card-title">موجودی کالاها</h5>
+                        <h7 class="mb-15 pb-0 border-0 card-title"> آخرین آپدیت: {{ table.last_update_time|timesince }}
+                            پیش
+                        </h7>
+                        <div class="progress progress-small mt-2">
+                            <div class="skill2-bar {{ table.progress_class }}"
+                                 role="progressbar"
+                                 style="width: {{ table.progress_bar_width }}%"
+                                 aria-valuenow="{{ table.progress_bar_width }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"></div>
+                        </div>
+
+
                         <!-- action group -->
                         <div class="btn-group info-drop">
-                            <button type="button" class="dropdown-toggle-split text-muted" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="ti-more"></i></button>
-{#                            <div class="dropdown-menu">#}
-{#                                <a class="dropdown-item" href="#"><i class="text-success ti-files"></i> تایید شده</a>#}
-{#                                <a class="dropdown-item" href="#"><i class="text-warning ti-pencil-alt"></i> در#}
-{#                                    انتظار</a>#}
-{#                                <a class="dropdown-item" href="#"><i class="text-danger ti-user"></i> رد شد</a>#}
-{#                                <a class="dropdown-item" href="#"><i class="text-secondary ti-reload"></i> تازه کردن</a>#}
-{#                            </div>#}
+                            <button type="button" class="dropdown-toggle-split text-muted" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false"><i class="ti-more"></i></button>
+                            {#                            <div class="dropdown-menu">#}
+                            {#                                <a class="dropdown-item" href="#"><i class="text-success ti-files"></i> تایید شده</a>#}
+                            {#                                <a class="dropdown-item" href="#"><i class="text-warning ti-pencil-alt"></i> در#}
+                            {#                                    انتظار</a>#}
+                            {#                                <a class="dropdown-item" href="#"><i class="text-danger ti-user"></i> رد شد</a>#}
+                            {#                                <a class="dropdown-item" href="#"><i class="text-secondary ti-reload"></i> تازه کردن</a>#}
+                            {#                            </div>#}
                         </div>
                         <div class="table-responsive">
-            <table
-                    id="table"
-                    class="table-striped"
-                    data-toggle="table"
-                    data-locale="fa-IR"
-                    data-search="true"
-                    data-show-columns="true"
-                    data-show-export="true"
-                    data-show-refresh="true"
-                    data-show-columns-toggle-all="true"
-                    data-show-pagination-switch="true"
-                    data-show-toggle="true"
-                    data-show-fullscreen="true"
-                    data-buttons="buttons"
-                    data-search-align="left"
-                    data-buttons-class="primary"
-                    data-pagination="true"
-                    data-show-columns-search="true"
-                    data-show-footer="true"
-                    data-page-size="5"
-                    data-remember-order="true"
-                    data-sortable="true"
-                    data-show-search-clear-button="true"
-                    data-sort-name="count"
-                    data-sort-order="desc"
-                    data-filter-control="true"
-                    data-show-print="true"
-                    data-export-data-type="all"
-                    data-export-types=['excel']
-            >
-                <thead>
-                <tr class="tr-class-1">
-{#                    <th data-field="name" data-valign="middle" class="card-text text-center"#}
-{#                        data-filter-control="input">طرف قرارداد#}
-{#                    </th>#}
-{#                    #}
+                            <table
+                                    id="table"
+                                    class="table-striped"
+                                    data-toggle="table"
+                                    data-locale="fa-IR"
+                                    data-search="true"
+                                    data-show-columns="true"
+                                    data-show-export="true"
+                                    data-show-refresh="true"
+                                    data-show-columns-toggle-all="true"
+                                    data-show-pagination-switch="true"
+                                    data-show-toggle="true"
+                                    data-show-fullscreen="true"
+                                    data-buttons="buttons"
+                                    data-search-align="left"
+                                    data-buttons-class="primary"
+                                    data-pagination="true"
+                                    data-show-columns-search="true"
+                                    data-show-footer="true"
+                                    data-page-size="5"
+                                    data-remember-order="true"
+                                    data-sortable="true"
+                                    data-show-search-clear-button="true"
+                                    data-sort-name="count"
+                                    data-sort-order="desc"
+                                    data-filter-control="true"
+                                    data-show-print="true"
+                                    data-export-data-type="all"
+                                    data-export-types=['excel']
+                            >
+                                <thead>
+                                <tr class="tr-class-1">
+                                    {#                    <th data-field="name" data-valign="middle" class="card-text text-center"#}
+                                    {#                        data-filter-control="input">طرف قرارداد#}
+                                    {#                    </th>#}
+                                    {#                    #}
 
 
-{#                    data-filter-control="select"#}
+                                    {#                    data-filter-control="select"#}
 
-                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
-                         data-field="cde_kala">کد کالا
-                    </th>
-                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly" data-field="name">نام کالا
-                    </th>
-                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly" data-field="warehousecode">شماره انبار
-                    </th>
-                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly" data-field="count">موجودی
-                    </th>
-{#                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly">مانده بدهکار#}
-{#                    </th>#}
-{#                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"#}
-{#                        data-footer-formatter="priceFormatter">در حال ممیزی#}
-{#                    </th>#}
-{#                    <th class="card-text text-center" data-sortable="true" data-field="kambod" data-sorter="numericOnly"#}
-{#                        data-footer-formatter="priceFormatter"#}
-{#                    >کمبود اسناد#}
-                </tr>
-                </thead>
-                <tbody>
-                {% for kala in mojodi %}
-                    <tr>
-{#                        <td class="card-title text-center"><a href="/seller/{{ zone.zone_code }}/{{ t.seller_id }} "#}
-{#                                                              target="_blank">#}
-{#                            {{ t.seller }}</a></td>#}
-{#                        #}
+                                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
+                                        data-field="cde_kala">کد کالا
+                                    </th>
+                                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
+                                        data-field="name">نام کالا
+                                    </th>
+                                    <th class="card-text text-center " data-filter-control="select" data-sortable="true"
+                                        data-sorter="numericOnly" data-field="warehousecode">شماره انبار
+                                    </th>
+                                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
+                                        data-field="count">موجودی
+                                    </th>
+                                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
+                                        data-field="arzesh">ارزش موجودی
+                                    </th>
 
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for kala in mojodi %}
+                                    <tr>
 
+                                        <td class="card-text text-center"><h6><a href="#"
+                                                                                 target="_blank">
+                                            {{ kala.code_kala }}</a></h6></td>
 
-                        <td class="card-text text-center"><h6><a href="#"
-                                                                 target="_blank">
-                            {{ kala.code_kala }}</a></h6></td>
+                                        <td class="card-text text-center"><h6><a
+                                                href="#"
+                                                target="_blank">
+                                            {{ kala.kala.name }}</a></h6></td>
 
-                        <td class="card-text text-center"><h6><a
-                                href="#"
-                                target="_blank">
-                            {{ kala.kala.name }}</a></h6></td>
+                                        <td class="card-text text-center"><h6><a
+                                                href="#"
+                                                target="_blank">
+                                            {{ kala.warehousecode }}</a></h6></td>
 
-                        <td class="card-text text-center"><h6><a
-                                href="#"
-                                target="_blank">
-                            {{ kala.warehousecode }}</a></h6></td>
-
-                        <td class="card-text text-center"><h6><a
-                                href="#"
-                                target="_blank">
-                            {{ kala.stock }}</a></h6></td>
-
-{#                        <td class="card-text text-center"><h6>#}
-{#                        <a#}
-{#                                href="/selpro_detail/{{ zone.zone_code }}/{{ t.selp_id }}"#}
-{#                                target="_blank">#}
-{#                            {{ t.bedehkar|intcomma:False }}</a>#}
-{#                        </h6></td>#}
-{#                        <td class="card-text text-center"><h6> {{ t.inmo|intcomma:False }} </h6></td>#}
-{#                        <td class="card-text text-center"><h6> {{ t.kambod|intcomma:False }} </h6></td>#}
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                                        <td class="card-text text-center"><h6><a
+                                                href="#"
+                                                target="_blank">
+                                            {{ kala.stock|floatformat:0 }}</a></h6></td>
+                                        <td class="card-text text-center"><h6><a
+                                                href="#"
+                                                target="_blank">
+                                            {{ kala.arzesh|floatformat:0 | intcomma:False }}</a></h6></td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
 
                         </div>
                     </div>
@@ -130,21 +132,32 @@
             <div class="col-xl-4 mb-30">
                 <div class="card card-statistics h-100 admin-followers">
                     <div class="card-body">
-                        <h5 class="card-title">------ </h5>
+                        <h5 class="card-title">5 کالای با ارزش موجود </h5>
+                        <div id="my-chart">
+
+                            <table class="charts-css pie show-data-on-hover">
+                                {% for t in top_5_arzesh %}
+                                    <tr>
+                                        <td style="--start: {{ t.start }}; --end: {{ t.end }};"><span
+                                                class="data"> {{ t.arzesh }} </span></td>
+                                    </tr>
+                                {% endfor %}
+
+                            </table>
+                            <ul class="charts-css legend legend-square">
+                                {% for t in top_5_arzesh %}
+                                    <li>
+                                        {{ t.kala.name }} | {{ t.arzesh|intword }} ريال
+                                    </li>
+                                {% endfor %}
+                            </ul>
+
+
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
-
-
-
-
-
-
-
-
-
 
 
     </div>
@@ -187,4 +200,5 @@
             return number.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
         }
     </script>
+
 {% endblock %}
