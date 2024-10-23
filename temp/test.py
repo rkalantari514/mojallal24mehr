@@ -20,7 +20,6 @@ import time
 from django.http import HttpResponse
 from django.views import View
 
-
 class CombinedView(View):
     def get(self, request, *args, **kwargs):
         response_one = ViewOne.as_view()(request, *args, **kwargs)
@@ -114,6 +113,7 @@ class ="fht-cell" > < div class ="no-filter-control" > < / div > < / div > < / t
 class ="fht-cell" > < div class ="no-filter-control" > < / div > < / div > < / th > < th class ="card-text text-center" style="" data-field="6" > < div class ="th-inner sortable both" >
 
 
+
 تامین
 اعتبار
 شده
@@ -127,6 +127,7 @@ class ="fht-cell" > < div class ="no-filter-control" > < / div > < / div > < / t
 صادر
 شده
 < / div > < div
+
 
 
 class ="fht-cell" > < div class ="no-filter-control" > < / div > < / div > < / th > < th class ="card-text text-center" style="" data-field="8" > < div class ="th-inner sortable both" >
@@ -189,3 +190,4 @@ style = "margin-right: 0px;" > < tr > < th
 
 
 class ="card-text text-center" style="vertical-align: middle; " > < div class ="th-inner" > < / div > < div class ="fht-cell" style="width: 65.7656px;" > < / div > < / th > < th class ="card-text text-center" style="vertical-align: middle; " > < div class ="th-inner" > < / div > < div class ="fht-cell" style="width: 74.5938px;" > < / div > < / th > < th class ="card-text text-center" style="vertical-align: middle; " > < div class ="th-inner" > < / div > < div class ="fht-cell" style="width: 95.2344px;" > < / div > < / th > < th class ="card-text text-center" style="vertical-align: middle; " > < div class ="th-inner" > < / div > < div class ="fht-cell" style="width: 25.6406px;" > < / div > < / th > < th class ="card-text text-center" style="" > < div class ="th-inner" > $NaN < / div > < div class ="fht-cell" style="width: 121.703px;" > < / div > < / th > < th class ="card-text text-center" style="" > < div class ="th-inner" > < / div > < div class ="fht-cell" style="width: 114.578px;" > < / div > < / th > < th class ="card-text text-center" style="" > < div class ="th-inner" > < / div > < div class ="fht-cell" style="width: 119.438px;" > < / div > < / th > < th class ="card-text text-center" style="" > < div class ="th-inner" > < / div > < div class ="fht-cell" style="width: 122.25px;" > < / div > < / th > < th class ="card-text text-center" style="" > < div class ="th-inner" > < / div > < div class ="fht-cell" style="width: 129.469px;" > < / div > < / th > < th class ="card-text text-center" style="" > < div class ="th-inner" > < / div > < div class ="fht-cell" style="width: 133.766px;" > < / div > < / th > < th class ="card-text text-center" style="" > < div class ="th-inner" > < / div > < div class ="fht-cell" style="width: 106.438px;" > < / div > < / th > < th class ="card-text text-center" style="" > < div class ="th-inner" > < / div > < div class ="fht-cell" style="width: 152.922px;" > < / div > < / th > < th class ="card-text text-center" style="" > < div class ="th-inner" > < / div > < div class ="fht-cell" style="width: 101.594px;" > < / div > < / th > < / tr > < / tfoot > < / table > < / div >
+
