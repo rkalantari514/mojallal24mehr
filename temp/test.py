@@ -20,7 +20,6 @@ import time
 from django.http import HttpResponse
 from django.views import View
 
-
 class CombinedView(View):
     def get(self, request, *args, **kwargs):
         response_one = ViewOne.as_view()(request, *args, **kwargs)
@@ -114,6 +113,7 @@ class ="fht-cell" > < div class ="no-filter-control" > < / div > < / div > < / t
 class ="fht-cell" > < div class ="no-filter-control" > < / div > < / div > < / th > < th class ="card-text text-center" style="" data-field="6" > < div class ="th-inner sortable both" >
 
 
+
 تامین
 اعتبار
 شده
@@ -121,12 +121,11 @@ class ="fht-cell" > < div class ="no-filter-control" > < / div > < / div > < / t
 
 
 class ="fht-cell" > < div class ="no-filter-control" > < / div > < / div > < / th > < th class ="card-text text-center" style="" data-field="7" > < div class ="th-inner sortable both" >
-
-
 تخصیص
 صادر
 شده
 < / div > < div
+
 
 
 class ="fht-cell" > < div class ="no-filter-control" > < / div > < / div > < / th > < th class ="card-text text-center" style="" data-field="8" > < div class ="th-inner sortable both" >
