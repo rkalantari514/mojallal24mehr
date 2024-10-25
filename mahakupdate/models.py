@@ -113,6 +113,8 @@ class Kardex(models.Model):
     count=models.FloatField(blank=True, null=True, default=0, verbose_name='تعداد')
     averageprice=models.FloatField(blank=True, null=True, default=0, verbose_name='قیمت میانگین')
     stock=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی')
+    is_prioritized = models.BooleanField(default=False)
+
 
     class Meta:
         verbose_name = 'کاردکس انبار'
@@ -123,19 +125,23 @@ class Kardex(models.Model):
         return str(self.pdate)  # تصحیح به str
 
 
-
+# @receiver(pre_save, sender=Kardex)
+# def convert_pdate_to_date(sender, instance, **kwargs):
+#     if not instance.is_prioritized:
+#         return  # از اینجا خارج می‌شود و دیگر کد اجرا نمی‌شود
+#
+#     if instance.pdate:
+#         # تبدیل تاریخ شمسی به میلادی
+#         jalali_date = jdatetime.date(*map(int, instance.pdate.split('/')))
+#         instance.date = jalali_date.togregorian()
 
 
 @receiver(pre_save, sender=Factor)
-@receiver(pre_save, sender=Kardex)
 def convert_pdate_to_date(sender, instance, **kwargs):
     if instance.pdate:
         # تبدیل تاریخ شمسی به میلادی
         jalali_date = jdatetime.date(*map(int, instance.pdate.split('/')))
-        gregorian_date = jalali_date.togregorian()
-        instance.date = gregorian_date
-
-
+        instance.date = jalali_date.togregorian()
 
 class PersonGroup(models.Model):
     code= models.IntegerField(default=0, verbose_name='کد گروه')
