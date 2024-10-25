@@ -313,10 +313,12 @@ def UpdateKardex(request):
         # Bulk create new kardex records
         if kardex_to_create:
             Kardex.objects.bulk_create(kardex_to_create)
+            transaction.commit()
 
         # Bulk update existing kardex records
         if kardex_to_update:
             Kardex.objects.bulk_update(kardex_to_update, ['code_factor', 'percode', 'warehousecode', 'mablaghsanad', 'count', 'averageprice', 'radif'])
+            transaction.commit()
 
         # Delete obsolete kardex records
         obsolete_kardex = Kardex.objects.exclude(
@@ -326,7 +328,8 @@ def UpdateKardex(request):
         )
         if obsolete_kardex.exists():
             obsolete_kardex.delete()
-    print('پایان بالک و شروع بررسی به جای سیگنال')
+            transaction.commit()
+
     # اجرای حلقه جایگزین سیگنال‌ها
     for kardex in Kardex.objects.all():
         # اعمال همان تغییراتی که سیگنال‌ها انجام می‌دادند
