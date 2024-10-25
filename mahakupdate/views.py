@@ -309,18 +309,18 @@ def UpdateKardex(request):
         else:
             kardex_to_create.append(Kardex(pdate=pdate, code_kala=code_kala, stock=stock, **defaults))
 
-    with transaction.atomic():
-        # Bulk create new kardex records
-        if kardex_to_create:
+    # Bulk create new kardex records
+    if kardex_to_create:
+        with transaction.atomic():
             Kardex.objects.bulk_create(kardex_to_create)
-            transaction.commit()
 
-        # Bulk update existing kardex records
-        if kardex_to_update:
+    # Bulk update existing kardex records
+    if kardex_to_update:
+        with transaction.atomic():
             Kardex.objects.bulk_update(kardex_to_update, ['code_factor', 'percode', 'warehousecode', 'mablaghsanad', 'count', 'averageprice', 'radif'])
-            transaction.commit()
 
-        # Delete obsolete kardex records
+    # Delete obsolete kardex records
+    with transaction.atomic():
         obsolete_kardex = Kardex.objects.exclude(
             pdate__in=[k[0] for k in existing_in_mahak],
             code_kala__in=[k[1] for k in existing_in_mahak],
@@ -328,7 +328,6 @@ def UpdateKardex(request):
         )
         if obsolete_kardex.exists():
             obsolete_kardex.delete()
-            transaction.commit()
 
     # اجرای حلقه جایگزین سیگنال‌ها
     for kardex in Kardex.objects.all():
