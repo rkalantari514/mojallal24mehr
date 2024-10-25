@@ -1,9 +1,12 @@
 from functools import update_wrapper
+
+import jdatetime
 import pyodbc
 from django.shortcuts import render, redirect
 import os
 from django.http import HttpResponse
-
+import time
+from django.db import transaction
 from django.utils.timesince import timesince
 
 from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Kardex, Person
@@ -28,7 +31,7 @@ def connect_to_mahak():
     if sn == 'DESKTOP-ITU3EHV':
         conn = pyodbc.connect('Driver={SQL Server};'
                               'Server=DESKTOP-ITU3EHV\\MAHAK14;'
-                              'Database=mahak2;'
+                              'Database=mahak;'
                               'Trusted_Connection=yes;')
         return conn  # برگرداندن conn در اینجا
     else:
@@ -261,6 +264,8 @@ def UpdateFactor2(request):
 
 # آپدیت کاردکس
 
+
+
 def UpdateKardex(request):
     import time
     from django.db import transaction
@@ -294,18 +299,15 @@ def UpdateKardex(request):
             'averageprice': row[11],
             'radif': row[14]
         }
+
         if (pdate, code_kala, stock) in current_kardex:
             kardex = current_kardex[(pdate, code_kala, stock)]
             if any(getattr(kardex, attr) != value for attr, value in defaults.items()):
                 for attr, value in defaults.items():
                     setattr(kardex, attr, value)
-                kardex.is_prioritized = True  # فعال کردن پرچم برای آپدیت
                 kardex_to_update.append(kardex)
         else:
-            new_kardex = Kardex(pdate=pdate, code_kala=code_kala, stock=stock, **defaults)
-            new_kardex.is_prioritized = True  # فعال کردن پرچم برای ایجاد
-            kardex_to_create.append(new_kardex)
-
+            kardex_to_create.append(Kardex(pdate=pdate, code_kala=code_kala, stock=stock, **defaults))
 
     with transaction.atomic():
         # Bulk create new kardex records
@@ -314,8 +316,7 @@ def UpdateKardex(request):
 
         # Bulk update existing kardex records
         if kardex_to_update:
-            for kardex in kardex_to_update:
-                kardex.save()
+            Kardex.objects.bulk_update(kardex_to_update, ['code_factor', 'percode', 'warehousecode', 'mablaghsanad', 'count', 'averageprice', 'radif'])
 
         # Delete obsolete kardex records
         obsolete_kardex = Kardex.objects.exclude(
@@ -325,6 +326,99 @@ def UpdateKardex(request):
         )
         if obsolete_kardex.exists():
             obsolete_kardex.delete()
+    print('پایان بالک و شروع بررسی به جای سیگنال')
+    # اجرای حلقه جایگزین سیگنال‌ها
+    for kardex in Kardex.objects.all():
+        # اعمال همان تغییراتی که سیگنال‌ها انجام می‌دادند
+        try:
+            kardex.factor = Factor.objects.get(code=kardex.code_factor)
+        except Factor.DoesNotExist:
+            kardex.factor = None
+
+        try:
+            kardex.kala = Kala.objects.get(code=kardex.code_kala)
+        except Kala.DoesNotExist:
+            kardex.kala = None
+
+        if kardex.kala:
+            kardex.code_kala = kardex.kala.code
+
+        if kardex.factor:
+            kardex.code_factor = kardex.factor.code
+
+        if kardex.pdate:
+            jalali_date = jdatetime.date(*map(int, kardex.pdate.split('/')))
+            kardex.date = jalali_date.togregorian()
+
+        kardex.save()
+
+    tend = time.time()
+    total_time = tend - t0
+    db_time = t1 - t0
+    update_time = tend - t1
+
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    print(f" اتصال به دیتابیس:{db_time:.2f} ثانیه")
+    print(f" زمان آپدیت جدول:{update_time:.2f} ثانیه")
+
+    cursor.execute(f"SELECT COUNT(*) FROM Kardex")
+    row_count = cursor.fetchone()[0]
+
+    cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Kardex'")
+    column_count = cursor.fetchone()[0]
+
+    table = Mtables.objects.filter(name='Kardex').last()
+    table.last_update_time = timezone.now()
+    table.update_duration = update_time
+    table.row_count = row_count
+    table.cloumn_count = column_count
+    table.save()
+
+    return redirect('/updatedb')
+
+
+def UpdateKardex1(request):
+    import time
+    from django.db import transaction
+
+    t0 = time.time()
+    print('شروع آپدیت')
+
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    t1 = time.time()
+
+    cursor.execute("SELECT * FROM Kardex")
+    mahakt_data = cursor.fetchall()
+    existing_in_mahak = set((row[0], row[4], row[12]) for row in mahakt_data)
+
+    for row in mahakt_data:
+        pdate = row[0]
+        code_kala = row[4]
+        stock = row[12]
+        defaults = {
+            'code_factor': row[6],
+            'percode': row[1],
+            'warehousecode': row[2],
+            'mablaghsanad': row[3],
+            'count': row[7],
+            'averageprice': row[11],
+            'radif': row[14]
+        }
+
+        Kardex.objects.update_or_create(
+            pdate=pdate,
+            code_kala=code_kala,
+            stock=stock,
+            defaults=defaults
+        )
+
+    # Delete obsolete kardex records
+    Kardex.objects.exclude(
+        pdate__in=[k[0] for k in existing_in_mahak],
+        code_kala__in=[k[1] for k in existing_in_mahak],
+        stock__in=[k[2] for k in existing_in_mahak]
+    ).delete()
 
     tend = time.time()
     total_time = tend - t0
@@ -433,7 +527,6 @@ def UpdateKardex2(request):
 
     return redirect('/updatedb')
 
-
 def UpdateFactorDetail(request):
     import time
     from django.db import transaction
@@ -449,11 +542,6 @@ def UpdateFactorDetail(request):
     mahakt_data = cursor.fetchall()
     existing_in_mahak = set((row[0], row[1]) for row in mahakt_data)
 
-    details_to_create = []
-    details_to_update = []
-
-    current_details = {(detail.code_factor, detail.radif): detail for detail in FactorDetaile.objects.all()}
-
     for row in mahakt_data:
         code_factor = row[0]
         radif = row[1]
@@ -464,24 +552,17 @@ def UpdateFactorDetail(request):
             'mablagh_nahaee': row[29],
         }
 
-        if (code_factor, radif) in current_details:
-            detail = current_details[(code_factor, radif)]
-            for attr, value in defaults.items():
-                setattr(detail, attr, value)
-            details_to_update.append(detail)
-        else:
-            details_to_create.append(FactorDetaile(code_factor=code_factor, radif=radif, **defaults))
+        FactorDetaile.objects.update_or_create(
+            code_factor=code_factor,
+            radif=radif,
+            defaults=defaults
+        )
 
-    with transaction.atomic():
-        # Bulk create new details
-        FactorDetaile.objects.bulk_create(details_to_create)
-
-        # Bulk update existing details
-        FactorDetaile.objects.bulk_update(details_to_update, ['code_kala', 'count', 'mablagh_vahed', 'mablagh_nahaee'])
-
-        # Delete obsolete details
-        FactorDetaile.objects.exclude(code_factor__in=[k[0] for k in existing_in_mahak],
-                                      radif__in=[k[1] for k in existing_in_mahak]).delete()
+    # حذف رکوردهای غیرضروری
+    FactorDetaile.objects.exclude(
+        code_factor__in=[k[0] for k in existing_in_mahak],
+        radif__in=[k[1] for k in existing_in_mahak]
+    ).delete()
 
     tend = time.time()
     total_time = tend - t0
@@ -489,7 +570,7 @@ def UpdateFactorDetail(request):
     update_time = tend - t1
 
     print(f"زمان کل: {total_time:.2f} ثانیه")
-    print(f" اتصال به دیتا بیس:{db_time:.2f} ثانیه")
+    print(f" اتصال به دیتابیس:{db_time:.2f} ثانیه")
     print(f" زمان آپدیت جدول:{update_time:.2f} ثانیه")
 
     cursor.execute(f"SELECT COUNT(*) FROM Fact_Fo_Detail")

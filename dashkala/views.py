@@ -10,7 +10,6 @@ def fix_persian_characters(value):
 
 # Create your views here.
 def DsshKala (request):
-
     # زیر پرس‌وجو برای دریافت آخرین ردیف از هر `code_kala`
     subquery = Kardex.objects.filter(
         code_kala=OuterRef('code_kala'),warehousecode=OuterRef('warehousecode')

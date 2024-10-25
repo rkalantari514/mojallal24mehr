@@ -125,23 +125,29 @@ class Kardex(models.Model):
         return str(self.pdate)  # تصحیح به str
 
 
-# @receiver(pre_save, sender=Kardex)
-# def convert_pdate_to_date(sender, instance, **kwargs):
-#     if not instance.is_prioritized:
-#         return  # از اینجا خارج می‌شود و دیگر کد اجرا نمی‌شود
-#
-#     if instance.pdate:
-#         # تبدیل تاریخ شمسی به میلادی
-#         jalali_date = jdatetime.date(*map(int, instance.pdate.split('/')))
-#         instance.date = jalali_date.togregorian()
 
-
+@receiver(pre_save, sender=Kardex)
 @receiver(pre_save, sender=Factor)
 def convert_pdate_to_date(sender, instance, **kwargs):
-    if instance.pdate:
-        # تبدیل تاریخ شمسی به میلادی
-        jalali_date = jdatetime.date(*map(int, instance.pdate.split('/')))
-        instance.date = jalali_date.togregorian()
+    print("Signal convert_pdate_to_date triggered")  # برای دیباگینگ
+
+    if not instance.pk:
+        # رکورد جدید است، تبدیل تاریخ
+        if instance.pdate:
+            jalali_date = jdatetime.date(*map(int, instance.pdate.split('/')))
+            instance.date = jalali_date.togregorian()
+    else:
+        try:
+            old_instance = sender.objects.get(pk=instance.pk)
+        except sender.DoesNotExist:
+            old_instance = None
+
+        if old_instance and instance.pdate != old_instance.pdate:
+            # تاریخ تغییر کرده، تبدیل تاریخ
+            if instance.pdate:
+                jalali_date = jdatetime.date(*map(int, instance.pdate.split('/')))
+                instance.date = jalali_date.togregorian()
+
 
 class PersonGroup(models.Model):
     code= models.IntegerField(default=0, verbose_name='کد گروه')
