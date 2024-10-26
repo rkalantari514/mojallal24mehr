@@ -18,10 +18,13 @@ class Mtables(models.Model):
     last_update_time = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='آخرین آپدیت')
     update_period = models.IntegerField(default=60, blank=True, null=True, verbose_name='بازه به‌روزرسانی (دقیقه)')
     update_duration = models.FloatField(blank=True, null=True, verbose_name='مدت زمان به‌روزرسانی (ثانیه)')
+    update_priority = models.IntegerField(default=0, blank=True, null=True, verbose_name='اولویت آپدیت')
+
 
     class Meta:
         verbose_name = 'جدول محک'
         verbose_name_plural = 'جداول محک'
+        ordering = ['update_priority']
     def __str__(self):
         return self.name
 
@@ -126,7 +129,7 @@ class Kardex(models.Model):
 
 
 
-@receiver(pre_save, sender=Kardex)
+# @receiver(pre_save, sender=Kardex)
 @receiver(pre_save, sender=Factor)
 def convert_pdate_to_date(sender, instance, **kwargs):
     print("Signal convert_pdate_to_date triggered")  # برای دیباگینگ

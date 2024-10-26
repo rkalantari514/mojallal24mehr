@@ -30,6 +30,7 @@
                     <th>دوره آپدیت</th>
                     <th>آخرین آپدیت</th>
                       <th>مدت آخرین آپدیت</th>
+                      <th>ترتیب آپدیت</th>
                       <th>وضعیت آپدیت</th>
                     <th>آپدیت</th>
                     <th></th>
@@ -47,6 +48,7 @@
                       <td>{{ t.update_period }} دقیقه </td>
                       <td>{{ t.last_update_time|timesince }} پیش </td>
                       <td>{{ t.update_duration|floatformat:1 }} ثانیه </td>
+                      <td>{{ t.update_priority }} </td>
                           <td>
                       <div class="progress progress-small mt-2">
                             <div class="skill2-bar {{ t.progress_class }}"

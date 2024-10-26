@@ -2,7 +2,7 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from .models import FactorDetaile, Factor, Kala, Kardex  # اطمینان حاصل کنید که مدل‌ها را وارد کرده‌اید
 
-@receiver(pre_save, sender=FactorDetaile)
+# @receiver(pre_save, sender=FactorDetaile)
 def set_factor_and_kala(sender, instance, **kwargs):
     print("Signal set_factor_and_kala triggered")  # برای دیباگینگ
 
@@ -31,7 +31,7 @@ def set_factor_and_kala(sender, instance, **kwargs):
         instance.kala = kala
 
 
-@receiver(pre_save, sender=Kardex)
+# @receiver(pre_save, sender=Kardex)
 def update_kardex_codes(sender, instance, **kwargs):
     print("Signal update_kardex_codes triggered")  # برای دیباگینگ
 

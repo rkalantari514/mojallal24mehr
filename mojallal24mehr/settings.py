@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'mahakupdate',
     'dashboard',
     'dashkala',
+    'django_apscheduler',
 
 ]
 
@@ -143,3 +144,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "static_cdn", "media_root")
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Format for displaying run time timestamps in the Django admin site.
+APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds to wait for an explicitly requested job to complete.

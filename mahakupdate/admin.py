@@ -7,10 +7,10 @@ from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, 
 
 
 class MtablesAdmin(admin.ModelAdmin):
-    list_display = ['__str__','name', 'description', 'in_use','none_use','last_update_time','row_count','cloumn_count']
+    list_display = ['__str__','name', 'description', 'in_use','update_priority','last_update_time','row_count','cloumn_count']
     # list_filter = ['description','name', 'in_use']
-    list_editable = ['description', 'in_use','none_use']
-    search_fields = ['name', 'description', 'in_use','none_use']
+    list_editable = ['description', 'in_use','update_priority']
+    search_fields = ['name', 'description', 'in_use','update_priority']
 
     class Meta:
         model = Mtables

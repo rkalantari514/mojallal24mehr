@@ -1,4 +1,5 @@
 from django.urls import path
+from . import views, jobs
 
 from mahakupdate.views import Update_from_mahak, Kala_group, category_create_view, kala_create_view, Updatedb, \
     UpdateFactor, UpdateKala, UpdateFactorDetail, Updateall, UpdateKardex, UpdatePerson
