@@ -1,3 +1,5 @@
+from collections import Counter
+
 import jdatetime
 import pyodbc
 import os
@@ -100,7 +102,7 @@ def UpdateFactor(request):
     from django.db import transaction
 
     t0 = time.time()
-    print('شروع آپدیت فاکتور')
+    print('شروع آپدیت فاکتور--------------------------------------')
 
     conn = connect_to_mahak()
     cursor = conn.cursor()
@@ -177,7 +179,7 @@ def UpdateKardex(request):
     from django.db.models import Q
 
     t0 = time.time()
-    print('شروع آپدیت کاردکس')
+    print('شروع آپدیت کاردکس----------------------------------------')
 
     conn = connect_to_mahak()
     cursor = conn.cursor()
@@ -309,7 +311,7 @@ def UpdateKardex(request):
 
 def UpdateFactorDetail(request):
     t0 = time.time()
-    print('شروع آپدیت جزئیات فاکتور')
+    print('شروع آپدیت جزئیات فاکتور-------------------------------------------------')
 
     conn = connect_to_mahak()
     cursor = conn.cursor()
@@ -400,7 +402,7 @@ def UpdateFactorDetail(request):
     return redirect('/updatedb')
 def UpdateKala(request):
     t0 = time.time()
-    print('شروع آپدیت کالا')
+    print('شروع آپدیت کالا---------------------------------------------------')
 
     conn = connect_to_mahak()
     cursor = conn.cursor()
@@ -466,7 +468,7 @@ def UpdatePerson(request):
     from django.db import transaction
 
     t0 = time.time()
-    print('شروع آپدیت افراد')
+    print('شروع آپدیت افراد--------------------------------------------')
 
     conn = connect_to_mahak()
     cursor = conn.cursor()
@@ -546,7 +548,7 @@ def UpdatePerson(request):
 
 def Update_from_mahak(request):
     t0 = time.time()
-    print('شروع آپدیت')
+    print('شروع آپدیت---------------------------------------')
     conn = connect_to_mahak()
     cursor = conn.cursor()
     print('cursor')
@@ -726,7 +728,7 @@ def Kala_group(request):
     # word_counts = Counter(filtered_words)
     # # ذخیره کلمات و تعداد تکرار آنها در مدل WordCount
     # for word, count in word_counts.items():
-    #     if count>4:
+    #     if count>2:
     #         WordCount.objects.update_or_create(word=word, defaults={'count': count})
 
     words = WordCount.objects.all()
@@ -736,6 +738,9 @@ def Kala_group(request):
     }
 
     return render(request, 'kala_group.html', context)
+
+
+
 def category_create_view(request):
     if request.method == "POST":
         form = CategoryForm(request.POST)
@@ -755,3 +760,5 @@ def kala_create_view(request):
         form = KalaForm()
     return render(request, 'kala_form.html', {'form': form})
 # آپدیت افراد
+
+
