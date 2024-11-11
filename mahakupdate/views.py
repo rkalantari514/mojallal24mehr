@@ -1,9 +1,9 @@
 from collections import Counter
-
+from django.conf import settings
 import jdatetime
 import pyodbc
 import os
-from mahakupdate.models import WordCount, Kardex, Person
+from mahakupdate.models import WordCount, Kardex, Person, KalaGroupinfo
 import sys
 from django.shortcuts import render, redirect
 from .forms import CategoryForm, KalaForm
@@ -11,6 +11,10 @@ from django.utils import timezone
 from django.db import transaction
 import time
 from .models import FactorDetaile, Factor, Kala, Mtables
+import os
+import pandas as pd
+from django.shortcuts import redirect
+
 
 sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
 
@@ -760,5 +764,35 @@ def kala_create_view(request):
         form = KalaForm()
     return render(request, 'kala_form.html', {'form': form})
 # آپدیت افراد
+
+
+
+def UpdateKalaGroupinfo(request):
+    # مسیر فایل اکسل
+    file_path = os.path.join(settings.BASE_DIR, 'temp', 'kala_group.xlsx')    # خواندن فایل اکسل با Pandas
+    df = pd.read_excel(file_path)
+
+    # پردازش داده‌ها و به‌روزرسانی مدل
+    for index, row in df.iterrows():
+        code = row['code']
+        cat1 = row['cat1']
+        cat2 = row['cat2']
+        cat3 = row['cat3']
+        contain = row['contain']
+        not_contain = row['not_contain']
+
+        # به‌روزرسانی یا ایجاد رکورد جدید
+        KalaGroupinfo.objects.update_or_create(
+            code=code,
+            defaults={
+                'cat1': cat1,
+                'cat2': cat2,
+                'cat3': cat3,
+                'contain': contain,
+                'not_contain': not_contain
+            }
+        )
+
+    return redirect('/updatedb')
 
 

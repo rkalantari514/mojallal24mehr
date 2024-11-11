@@ -7,6 +7,7 @@ pip install django-jalali      باید به ستینگ اضافه شود
 pip install
 pip install persianutils
 pip install django-apscheduler
+pip install pandas openpyxl
 
 
 

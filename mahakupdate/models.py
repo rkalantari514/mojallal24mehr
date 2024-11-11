@@ -28,6 +28,21 @@ class Mtables(models.Model):
     def __str__(self):
         return self.name
 
+class KalaGroupinfo(models.Model):
+    code= models.IntegerField(default=0, verbose_name='کد اطلاعات گروه بندی')
+    cat1=models.CharField(max_length=150,blank=True, null=True, default="", verbose_name='دسته بندی 1')
+    cat2=models.CharField(max_length=150,blank=True, null=True, default="", verbose_name='دسته بندی 2')
+    cat3=models.CharField(max_length=150,blank=True, null=True, default="", verbose_name='دسته بندی 3')
+    contain=models.CharField(max_length=300,blank=True, verbose_name='شامل باشد')
+    not_contain=models.CharField(max_length=300,blank=True,  verbose_name='شامل نباشد')
+
+    class Meta:
+        verbose_name = 'شرط گروه بندی کالا'
+        verbose_name_plural = 'شروط گروه بندی کالا'
+
+    def __str__(self):
+        return self.contain
+
 
 class Category(models.Model):
     LEVEL_CHOICES = (
