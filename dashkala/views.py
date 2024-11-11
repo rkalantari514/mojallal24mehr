@@ -10,7 +10,7 @@ def fix_persian_characters(value):
 
 def DsshKala(request):
     start_time = time.time()  # زمان شروع تابع
-    print("شروع تابع DsshKala")
+    # print("شروع تابع DsshKala")
 
     # گرفتن آخرین آیدی برای هر `code_kala` و `warehousecode`
     latest_mojodi_start_time = time.time()
