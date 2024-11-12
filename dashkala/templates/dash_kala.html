@@ -27,13 +27,6 @@
                         <div class="btn-group info-drop">
                             <button type="button" class="dropdown-toggle-split text-muted" data-toggle="dropdown"
                                     aria-haspopup="true" aria-expanded="false"><i class="ti-more"></i></button>
-                            {#                            <div class="dropdown-menu">#}
-                            {#                                <a class="dropdown-item" href="#"><i class="text-success ti-files"></i> تایید شده</a>#}
-                            {#                                <a class="dropdown-item" href="#"><i class="text-warning ti-pencil-alt"></i> در#}
-                            {#                                    انتظار</a>#}
-                            {#                                <a class="dropdown-item" href="#"><i class="text-danger ti-user"></i> رد شد</a>#}
-                            {#                                <a class="dropdown-item" href="#"><i class="text-secondary ti-reload"></i> تازه کردن</a>#}
-                            {#                            </div>#}
                         </div>
                         <div class="table-responsive">
                             <table
@@ -68,22 +61,17 @@
                             >
                                 <thead>
                                 <tr class="tr-class-1">
-                                    {#                    <th data-field="name" data-valign="middle" class="card-text text-center"#}
-                                    {#                        data-filter-control="input">طرف قرارداد#}
-                                    {#                    </th>#}
-                                    {#                    #}
-
-
-                                    {#                    data-filter-control="select"#}
-
+                                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
+                                        data-field="cat_kala" data-filter-control="select">دسته بندی
+                                    </th>
                                     <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
                                         data-field="cde_kala">کد کالا
                                     </th>
                                     <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
                                         data-field="name">نام کالا
                                     </th>
-                                    <th class="card-text text-center " data-filter-control="select" data-sortable="true"
-                                        data-sorter="numericOnly" data-field="warehousecode">شماره انبار
+                                    <th class="card-text text-center" data-filter-control="select" data-sortable="true"
+                                        data-type="number" data-field="warehousecode"> نام انبار
                                     </th>
                                     <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
                                         data-field="count">موجودی
@@ -100,6 +88,9 @@
 
                                         <td class="card-text text-center"><h6><a href="#"
                                                                                  target="_blank">
+                                            {{ kala.kala.category.name }}</a></h6></td>
+                                        <td class="card-text text-center"><h6><a href="#"
+                                                                                 target="_blank">
                                             {{ kala.code_kala }}</a></h6></td>
 
                                         <td class="card-text text-center"><h6><a
@@ -110,7 +101,7 @@
                                         <td class="card-text text-center"><h6><a
                                                 href="#"
                                                 target="_blank">
-                                            {{ kala.warehousecode }}</a></h6></td>
+                                            {{ kala.storage.name }}</a></h6></td>
 
                                         <td class="card-text text-center"><h6><a
                                                 href="#"
@@ -172,6 +163,7 @@
     <script src="{% static 'js/table1/bootstrap-table-print.min.js' %}"></script>
     <script src="{% static 'js/table1/jspdf.min.js' %}"></script>
     <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
+
     <script>
         var $table = $('#table')
 

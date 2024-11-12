@@ -3,7 +3,7 @@ from django.conf import settings
 import jdatetime
 import pyodbc
 import os
-from mahakupdate.models import WordCount, Kardex, Person, KalaGroupinfo
+from mahakupdate.models import WordCount, Kardex, Person, KalaGroupinfo, Category, Storagek
 import sys
 from django.shortcuts import render, redirect
 from .forms import CategoryForm, KalaForm
@@ -58,6 +58,8 @@ def Updatedb(request):
         'Fact_Fo_Detail': 'update/factor-detail',
         'Kardex': 'update/kardex',
         'PerInf': 'update/person',
+        'Stores': 'update/storage',
+
     }
 
     for t in tables:
@@ -88,6 +90,7 @@ def Updateall(request):
         'Fact_Fo_Detail': UpdateFactorDetail,
         'Kardex': UpdateKardex,
         'PerInf': UpdatePerson,
+        'Stores': UpdateStorage,
     }
 
     responses = [
@@ -246,16 +249,18 @@ def UpdateKardex(request):
 
     # اجرای حلقه جایگزین سیگنال‌ها در بخش‌های کوچک‌تر
     # اجرای حلقه جایگزین سیگنال‌ها
-    kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala').all())
+    kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala','storage').all())
     batch_size = 1000
     updates = []
     factors = {factor.code: factor for factor in
                Factor.objects.filter(code__in=[k.code_factor for k in kardex_instances])}
     kalas = {kala.code: kala for kala in Kala.objects.filter(code__in=[k.code_kala for k in kardex_instances])}
+    storages = {storage.code: storage for storage in Storagek.objects.filter(code__in=[k.warehousecode for k in kardex_instances])}
 
     for kardex in kardex_instances:
         factor = factors.get(kardex.code_factor)
         kala = kalas.get(kardex.code_kala)
+        storage= storages.get(kardex.warehousecode)
 
         # بررسی تغییرات قبل از به‌روزرسانی
         updated = False
@@ -266,7 +271,9 @@ def UpdateKardex(request):
         if kardex.kala != kala:
             kardex.kala = kala
             updated = True
-
+        if kardex.storage != storage:
+            kardex.storage = storage
+            updated = True
             # بررسی تغییر تاریخ
         if kardex.pdate:
             jalali_date = jdatetime.date(*map(int, kardex.pdate.split('/')))
@@ -281,7 +288,7 @@ def UpdateKardex(request):
             # ذخیره‌سازی دسته‌ای
     if updates:
         with transaction.atomic():
-            Kardex.objects.bulk_update(updates, ['factor', 'kala', 'code_kala', 'code_factor', 'date'])
+            Kardex.objects.bulk_update(updates, ['factor', 'kala','storage', 'warehousecode','code_kala', 'code_factor', 'date'])
 
 
     t3 = time.time()
@@ -547,6 +554,66 @@ def UpdatePerson(request):
     return redirect('/updatedb')
 
 
+def UpdateStorage(request):
+    t0 = time.time()
+    print('شروع آپدیت کالا---------------------------------------------------')
+
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    t1 = time.time()
+
+    cursor.execute("SELECT code, name FROM Stores")
+    mahakt_data = cursor.fetchall()
+    existing_in_mahak = {row[0] for row in mahakt_data}
+
+    storage_to_create = []
+    storage_to_update = []
+
+    current_storage = {storg.code: storg for storg in Storagek.objects.all()}
+
+    for row in mahakt_data:
+        code = row[0]
+        name = row[1]
+
+        if code in current_storage:
+            if current_storage[code].name != name:
+                current_storage[code].name = name
+                storage_to_update.append(current_storage[code])
+        else:
+            storage_to_create.append(Storagek(code=code, name=name))
+
+    # Bulk create new kalas
+    Storagek.objects.bulk_create(storage_to_create)
+
+    # Bulk update existing kalas
+    Storagek.objects.bulk_update(storage_to_update, ['name'])
+
+    # Delete obsolete kalas
+    Storagek.objects.exclude(code__in=existing_in_mahak).delete()
+
+    tend = time.time()
+    total_time = tend - t0
+    db_time = t1 - t0
+    update_time = tend - t1
+
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    print(f" اتصال به دیتا بیس:{db_time:.2f} ثانیه")
+    print(f" زمان آپدیت جدول:{update_time:.2f} ثانیه")
+
+    cursor.execute(f"SELECT COUNT(*) FROM Stores")
+    row_count = cursor.fetchone()[0]
+
+    cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Stores'")
+    column_count = cursor.fetchone()[0]
+
+    table = Mtables.objects.filter(name='Stores').last()
+    table.last_update_time = timezone.now()
+    table.update_duration = update_time
+    table.row_count = row_count
+    table.cloumn_count = column_count
+    table.save()
+
+    return redirect('/updatedb')
 
 
 
@@ -793,6 +860,68 @@ def UpdateKalaGroupinfo(request):
             }
         )
 
+    return redirect('/updatedb')
+
+
+def update_categories_from_kala_groupinfo():
+    # استخراج دسته‌بندی‌های یکتا از ستون‌های cat1, cat2, cat3
+    kala_groups = KalaGroupinfo.objects.all()
+    categories = []
+
+    for group in kala_groups:
+        if group.cat1:
+            categories.append((group.cat1, 1, None))  # سطح 1، والد ندارد
+        if group.cat2:
+            categories.append((group.cat2, 2, group.cat1))  # سطح 2، والد cat1
+        if group.cat3:
+            categories.append((group.cat3, 3, group.cat2))  # سطح 3، والد cat2
+
+    # حذف دسته‌بندی‌های تکراری
+    unique_categories = list(dict.fromkeys(categories))
+
+    # ایجاد یا به‌روزرسانی رکوردهای مدل Category
+    with transaction.atomic():
+        for name, level, parent_name in unique_categories:
+            parent = None
+            if parent_name:
+                parent = Category.objects.filter(name=parent_name).first()
+
+            Category.objects.update_or_create(
+                name=name,
+                defaults={'level': level, 'parent': parent}
+            )
+
+def CreateKalaGroup(request):
+    update_categories_from_kala_groupinfo()
+    return redirect('/updatedb')
+
+
+
+def update_kala_categories():
+    # گرفتن تمامی کالاها
+    kalas = Kala.objects.all()
+    updates = []
+
+    # پیمایش کالاها و تعیین دسته‌بندی مناسب برای هر کالا
+    for kala in kalas:
+        group_infos = KalaGroupinfo.objects.all()
+        for group in group_infos:
+            if (group.contain in kala.name) and (group.not_contain not in kala.name):
+                # پیدا کردن دسته‌بندی سطح 3
+                category = Category.objects.filter(name=group.cat3, level=3).first()
+                if category:
+                    # تنظیم دسته‌بندی کالا
+                    kala.category = category
+                    updates.append(kala)
+                break
+
+    # به‌روزرسانی تمامی کالاها به صورت گروهی
+    if updates:
+        with transaction.atomic():
+            Kala.objects.bulk_update(updates, ['category'])
+
+def UpdateKalaGroup(request):
+    update_kala_categories()
     return redirect('/updatedb')
 
 

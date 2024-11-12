@@ -94,12 +94,6 @@ class Factor(models.Model):
         return self.pdate
 
 
-
-
-
-
-
-
 class FactorDetaile(models.Model):
     code_factor = models.IntegerField(blank=True, null=True, default=0, verbose_name='شماره فاکتور')
     radif= models.IntegerField(blank = True,null = True,default=0, verbose_name='ردیف')
@@ -117,11 +111,26 @@ class FactorDetaile(models.Model):
     def __str__(self):
         return str(self.code_factor)  # تصحیح به str
 
+class Storagek(models.Model):
+    code=models.IntegerField(blank = True,null = True,default=0, verbose_name='کد انبار')
+    name = models.CharField(max_length=150,blank = True,null = True,default="-", verbose_name='نام انبار')
+
+    class Meta:
+        verbose_name = 'انبار'
+        verbose_name_plural = 'انبار ها'
+
+    def __str__(self):
+        return self.name
+
+
+
+
 class Kardex(models.Model):
     pdate=models.CharField(blank = True,null = True,max_length=150, verbose_name='تاریخ شمسی')
     date = models.DateField(blank=True, null=True, verbose_name='تاریخ میلادی')
     percode=models.IntegerField(blank = True,null = True,default=0, verbose_name='کد شخص')
     warehousecode=models.IntegerField(blank = True,null = True,default=0, verbose_name='کد انبار')
+    storage = models.ForeignKey(Storagek, on_delete=models.SET_NULL,blank=True, null=True)
     mablaghsanad=models.FloatField(blank=True, null=True, default=0, verbose_name='مبلغ سند')
     code_kala = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد کالا')
     radif = models.IntegerField(blank=True, null=True, default=0, verbose_name='ردیف در فاکتور')  #برای سورت کردن لازم است

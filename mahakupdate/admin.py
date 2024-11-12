@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo
+from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo, \
+    Storagek
 
 
 # Register your models here.
@@ -61,7 +62,7 @@ class CategoryAdmin(admin.ModelAdmin):
         model = Category
 
 class KardexAdmin(admin.ModelAdmin):
-    list_display = ['__str__','stock','code_kala','kala','count','stock','warehousecode','averageprice']
+    list_display = ['__str__','stock','code_kala','kala','count','storage','warehousecode','averageprice']
     list_filter = ['warehousecode']
     # list_editable = ['name','parent','level']
     search_fields = ['pdate','count','code_kala','stock']
@@ -89,6 +90,15 @@ class KalaGroupinfoAdmin(admin.ModelAdmin):
     class Meta:
         model = KalaGroupinfo
 
+class StoragekAdmin(admin.ModelAdmin):
+    list_display = ['__str__','code']
+    # list_filter = ['level','parent',]
+    # list_editable = ['name','parent','level']
+    # search_fields = ['name','lname','group']
+
+    class Meta:
+        model = Storagek
+
 admin.site.register(Mtables, MtablesAdmin)
 admin.site.register(Kala, KalaAdmin)
 admin.site.register(Factor, FactorAdmin)
@@ -98,3 +108,4 @@ admin.site.register(Category, CategoryAdmin)
 admin.site.register(Kardex, KardexAdmin)
 admin.site.register(Person, PersonAdmin)
 admin.site.register(KalaGroupinfo, KalaGroupinfoAdmin)
+admin.site.register(Storagek, StoragekAdmin)
