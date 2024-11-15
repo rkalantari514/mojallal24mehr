@@ -16,7 +16,7 @@ import pandas as pd
 from django.shortcuts import redirect
 
 
-sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
+# sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
 
 
 # Create your views here.
