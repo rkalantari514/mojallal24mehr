@@ -29,14 +29,14 @@ def connect_to_mahak():
         'DESKTOP-ITU3EHV': ('DESKTOP-ITU3EHV\\MAHAK14', 'mahak'),
         'TECH_MANAGER': ('TECH_MANAGER\\RKALANTARI', 'mahak'),
         'DESKTOP-1ERPR1M': ('DESKTOP-1ERPR1M\\MAHAK', 'mahak'),
-        'sadegh': ('SADEGH\\INSTANCE', 'mahak')
+        'RP-MAHAK': ('Ac\\MAHAK', 'mahak')
     }
 
     if sn in connections:
         server, database = connections[sn]
-        if sn == 'sadegh':
+        if sn == 'RP-MAHAK':
             conn = pyodbc.connect(
-                f'Driver={{SQL Server}};Server={server};Database={database};UID=ali;PWD=123456;Integrated Security=False;'
+                f'Driver={{SQL Server}};Server={server};Database={database};UID=sa;PWD=6070582;Integrated Security=False;'
                 # f'Driver={{SQL Server}};Server={server};Database={database};UID=ali;PWD=123456;Trusted_Connection=no;'
 
             )

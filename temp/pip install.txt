@@ -13,7 +13,6 @@ pip install pandas openpyxl
 
 
 
-
 INSTALLED_APPS = [
     ...
     'django_jalali',
@@ -21,3 +20,15 @@ INSTALLED_APPS = [
     ...
 
 ]
+
+
+
+Connection-specific DNS Suffix  . :
+   Link-local IPv6 Address . . . . . : fe80::a74c:1c58:e552:2b06%8
+   IPv4 Address. . . . . . . . . . . : 172.16.1.14
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : fe80::1%8
+                                       fe80::928d:78ff:fe6d:7fa0%8
+                                       172.16.1.1
+
+
