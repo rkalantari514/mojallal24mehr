@@ -1,34 +1,17 @@
 {% extends 'shared/_MainLayout.html' %}
 {% load static %}
 {% block content %}
-    <div class="page-title">
-        <div class="row">
-            <div class="col-sm-6">
-                <h4 class="mb-0"> خطا </h4>
-            </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right ">
-                    <li class="breadcrumb-item"><a href="#" class="default-color">خانه</a></li>
-                    <li class="breadcrumb-item active"> خطای دسترسی</li>
-                </ol>
-            </div>
+    
+<div class="card card-statistics mb-30"> 
+        <div class="card-body position-relative">
+          <div class="error">
+           <h1>404</h1>
+           <h2>ارور</h2>
         </div>
+      </div>  
+     <img class="img-fluid error-image" src="{% static 'images/error.png' %}" alt="">
     </div>
-    <!-- main body -->
-    <div class="row">
-        <div class="col-xl-12">
-            <div class="card card-statistics mb-30">
-                <div class="card-body position-relative">
-                    <div class="error">
-                        <h1>خطا</h1>
-                        <h2>دسترسی به این صفحه وجود ندارد</h2>
-                    </div>
-                </div>
-                <img class="img-fluid error-image" src="{% static 'images/error.png' %}" alt="">
-            </div>
-        </div>
-    </div>
-
+    
 {% endblock %}
 
 

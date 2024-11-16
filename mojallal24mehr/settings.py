@@ -35,6 +35,7 @@ if sn in ('DESKTOP-ITU3EHV','TECH_MANAGER','DESKTOP-1ERPR1M'):
 else:
     print('DEBUG=False')
 
+# DEBUG = False
 
 
 ALLOWED_HOSTS = ['localhost','172.16.1.14','rp-mahak.ymv.ir']
