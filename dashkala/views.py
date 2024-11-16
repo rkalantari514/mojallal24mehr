@@ -2,15 +2,65 @@ from django.shortcuts import render
 from mahakupdate.models import Kardex, Mtables
 from persianutils import standardize
 from django.utils import timezone
-from django.db.models import OuterRef, Subquery, Max
+from django.shortcuts import render
+from django.db.models import Max, Subquery
+from .forms import FilterForm
 import time
+
 
 def fix_persian_characters(value):
     return standardize(value)
 
 
-
 def DsshKala(request):
+    start_time = time.time()  # زمان شروع تابع
+    default_storage_id = 3  # می‌توانید این مقدار را به ۳ تنظیم کنید یا از دیتابیس بگیرید
+    # پردازش فرم فیلتر
+    form = FilterForm(request.GET or None ,initial={
+                                              'storage': 7,
+
+                                          })
+    filters = {}
+
+    if form.is_valid():
+        if form.cleaned_data['kala']:
+            filters['kala'] = form.cleaned_data['kala']
+        if form.cleaned_data['storage']:
+            filters['storage'] = form.cleaned_data['storage']
+        if form.cleaned_data['category']:
+            filters['kala__category'] = form.cleaned_data['category']  # فرض بر این است که Kala به Category مرتبط است
+
+    # گرفتن آخرین آیدی برای هر `code_kala` و `warehousecode`
+    latest_mojodi = Kardex.objects.values('code_kala', 'warehousecode').annotate(
+        latest_id=Max('id')
+    ).values('latest_id')  # فقط آخرین ID را برگردانید
+
+    # استفاده از Subquery برای دریافت رکوردهای مربوط به آخرین موجودی و حذف موجودی‌های صفر
+    mojodi = Kardex.objects.filter(
+        id__in=Subquery(latest_mojodi),
+        stock__gt=0  # حذف موجودی‌های صفر
+    ).filter(**filters).select_related('kala')  # بارگذاری اطلاعات مرتبط با kala
+
+    # پردازش موجودی‌ها و محاسبه ارزش
+    for entry in mojodi:
+        if entry.kala is not None:
+            entry.kala.name = fix_persian_characters(entry.kala.name)
+            entry.arzesh = entry.stock * entry.averageprice
+
+    context = {
+        'mojodi': mojodi,
+        'form': form,
+    }
+
+    # تغییر بررسی درخواست AJAX
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'partials/mojodi_list.html', context)
+
+    return render(request, 'totalkala.html', context)
+
+
+
+def DsshKala2(request):
     start_time = time.time()  # زمان شروع تابع
 
     # گرفتن آخرین آیدی برای هر `code_kala` و `warehousecode`

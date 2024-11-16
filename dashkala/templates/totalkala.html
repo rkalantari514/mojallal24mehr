@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>فیلتر موجودی</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>فیلتر موجودی</h1>
+
+    <form id="filter-form">
+        {{ form.as_p }}
+        <button type="submit">اعمال فیلتر</button>
+    </form>
+
+    <div id="mojodi-list">
+        {% include 'partials/mojodi_list.html' %}
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#filter-form').on('submit', function(event) {
+                event.preventDefault(); // جلوگیری از ارسال فرم به صورت عادی
+                $.ajax({
+                    url: '{% url "dssh_kala" %}',  // نام URL باید با نام URL شما مطابقت داشته باشد
+                    data: $(this).serialize(),
+                    success: function(data) {
+                        $('#mojodi-list').html(data); // به‌روزرسانی محتوای موجودی
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
