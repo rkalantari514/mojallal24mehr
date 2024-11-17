@@ -898,6 +898,9 @@ def CreateKalaGroup(request):
 
 
 def update_kala_categories():
+    # گرفتن دسته‌بندی پیش‌فرض "تعیین نشده ۳"
+    default_category = Category.objects.filter(name='تعیین نشده 3', level=3).first()
+
     # گرفتن تمامی کالاها
     kalas = Kala.objects.all()
     updates = []
@@ -905,6 +908,8 @@ def update_kala_categories():
     # پیمایش کالاها و تعیین دسته‌بندی مناسب برای هر کالا
     for kala in kalas:
         group_infos = KalaGroupinfo.objects.all()
+        category_found = False  # متغیری برای پیگیری پیدا شدن دسته‌بندی
+
         for group in group_infos:
             if (group.contain in kala.name) and (group.not_contain not in kala.name):
                 # پیدا کردن دسته‌بندی سطح 3
@@ -913,7 +918,13 @@ def update_kala_categories():
                     # تنظیم دسته‌بندی کالا
                     kala.category = category
                     updates.append(kala)
+                    category_found = True
                 break
+
+        # اگر دسته‌بندی مناسب پیدا نشد، استفاده از دسته‌بندی پیش‌فرض
+        if not category_found:
+            kala.category = default_category
+            updates.append(kala)
 
     # به‌روزرسانی تمامی کالاها به صورت گروهی
     if updates:
