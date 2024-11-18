@@ -940,36 +940,48 @@ def UpdateKalaGroup(request):
 
 
 
+
+
+
+
+from django.db import transaction
+from django.db.models import Max, Subquery
+
 def UpdateMojodi(request):
     # دریافت آخرین موجودی‌ها بر اساس کالا و انبار
     latest_mojodi = Kardex.objects.values('code_kala', 'warehousecode').annotate(
         latest_id=Max('id')
-    ).values('latest_id')  # فقط آخرین ID را برگردانید
+    ).values_list('latest_id', flat=True)
 
     # دریافت رکوردهای مربوط به آخرین موجودی و حذف موجودی‌های صفر
     kardex_records = Kardex.objects.filter(
-        id__in=Subquery(latest_mojodi),
-        stock__gt=0  # حذف موجودی‌های صفر
+        id__in=latest_mojodi,
+        stock__gt=0
     ).select_related('kala')
 
-    # لیستی برای نگه‌داری از موجودی‌های جدید
-    new_mojodi_records = []
+    # لیستی برای شناسه‌های موجودی به‌روزرسانی شده
+    updated_mojodi_ids = []
 
-    for record in kardex_records:
-        new_mojodi_records.append(Mojodi(
-            pdate=record.pdate,
-            date=record.date,
-            warehousecode=record.warehousecode,
-            storage=record.storage,
-            code_kala=record.code_kala,
-            kala=record.kala,
-            averageprice=record.averageprice,
-            stock=record.stock,
-            arzesh=record.stock * record.averageprice  # محاسبه ارزش
-        ))
+    # با استفاده از transaction برای بهینه‌سازی و جلوگیری از مشکلات همزمانی
+    with transaction.atomic():
+        for record in kardex_records:
+            # به‌روزرسانی یا ایجاد رکورد جدید و افزودن شناسه رکورد به لیست
+            mojodi, created = Mojodi.objects.update_or_create(
+                code_kala=record.code_kala,
+                warehousecode=record.warehousecode,
+                defaults={
+                    'pdate': record.pdate,
+                    'date': record.date,
+                    'storage': record.storage,
+                    'kala': record.kala,
+                    'averageprice': record.averageprice,
+                    'stock': record.stock,
+                    'arzesh': record.stock * record.averageprice
+                }
+            )
+            updated_mojodi_ids.append(mojodi.id)
 
-    # پاک‌سازی موجودی‌های قدیمی و افزودن موجودی‌های جدید
-    Mojodi.objects.all().delete()
-    Mojodi.objects.bulk_create(new_mojodi_records)
+        # حذف رکوردهای اضافی که در لیست به‌روزرسانی نیستند
+        Mojodi.objects.exclude(id__in=updated_mojodi_ids).delete()
 
     return redirect('/updatedb')
