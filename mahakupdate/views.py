@@ -3,7 +3,7 @@ from django.conf import settings
 import jdatetime
 import pyodbc
 import os
-from mahakupdate.models import WordCount, Kardex, Person, KalaGroupinfo, Category, Storagek
+from mahakupdate.models import WordCount, Kardex, Person, KalaGroupinfo, Category, Storagek, Mojodi
 import sys
 from django.shortcuts import render, redirect
 from .forms import CategoryForm, KalaForm
@@ -14,7 +14,7 @@ from .models import FactorDetaile, Factor, Kala, Mtables
 import os
 import pandas as pd
 from django.shortcuts import redirect
-
+from django.db.models import Max, Subquery
 
 # sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
 
@@ -936,3 +936,40 @@ def UpdateKalaGroup(request):
     return redirect('/updatedb')
 
 
+
+
+
+
+def UpdateMojodi(request):
+    # دریافت آخرین موجودی‌ها بر اساس کالا و انبار
+    latest_mojodi = Kardex.objects.values('code_kala', 'warehousecode').annotate(
+        latest_id=Max('id')
+    ).values('latest_id')  # فقط آخرین ID را برگردانید
+
+    # دریافت رکوردهای مربوط به آخرین موجودی و حذف موجودی‌های صفر
+    kardex_records = Kardex.objects.filter(
+        id__in=Subquery(latest_mojodi),
+        stock__gt=0  # حذف موجودی‌های صفر
+    ).select_related('kala')
+
+    # لیستی برای نگه‌داری از موجودی‌های جدید
+    new_mojodi_records = []
+
+    for record in kardex_records:
+        new_mojodi_records.append(Mojodi(
+            pdate=record.pdate,
+            date=record.date,
+            warehousecode=record.warehousecode,
+            storage=record.storage,
+            code_kala=record.code_kala,
+            kala=record.kala,
+            averageprice=record.averageprice,
+            stock=record.stock,
+            arzesh=record.stock * record.averageprice  # محاسبه ارزش
+        ))
+
+    # پاک‌سازی موجودی‌های قدیمی و افزودن موجودی‌های جدید
+    Mojodi.objects.all().delete()
+    Mojodi.objects.bulk_create(new_mojodi_records)
+
+    return redirect('/updatedb')

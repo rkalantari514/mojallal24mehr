@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo, \
-    Storagek
+    Storagek, Mojodi
 
 
 # Register your models here.
@@ -69,6 +69,14 @@ class KardexAdmin(admin.ModelAdmin):
 
     class Meta:
         model = Kardex
+class MojodiAdmin(admin.ModelAdmin):
+    list_display = ['__str__','stock','code_kala','kala','storage','warehousecode','averageprice','arzesh']
+    list_filter = ['warehousecode']
+    # list_editable = ['name','parent','level']
+    search_fields = ['pdate','count','code_kala','stock']
+
+    class Meta:
+        model = Mojodi
 
 
 class PersonAdmin(admin.ModelAdmin):
@@ -106,6 +114,7 @@ admin.site.register(FactorDetaile, FactorDetaileAdmin)
 admin.site.register(WordCount, WordCountAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Kardex, KardexAdmin)
+admin.site.register(Mojodi, MojodiAdmin)
 admin.site.register(Person, PersonAdmin)
 admin.site.register(KalaGroupinfo, KalaGroupinfoAdmin)
 admin.site.register(Storagek, StoragekAdmin)

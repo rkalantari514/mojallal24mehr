@@ -151,6 +151,22 @@ class Kardex(models.Model):
     def __str__(self):
         return str(self.pdate)  # تصحیح به str
 
+class Mojodi(models.Model):
+    pdate=models.CharField(blank = True,null = True,max_length=150, verbose_name='تاریخ شمسی')
+    date = models.DateField(blank=True, null=True, verbose_name='تاریخ میلادی')
+    warehousecode=models.IntegerField(blank = True,null = True,default=0, verbose_name='کد انبار')
+    storage = models.ForeignKey(Storagek, on_delete=models.SET_NULL,blank=True, null=True)
+    code_kala = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد کالا')
+    kala = models.ForeignKey(Kala, on_delete=models.SET_NULL,blank=True, null=True)
+    averageprice=models.FloatField(blank=True, null=True, default=0, verbose_name='قیمت میانگین')
+    stock=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی')
+    arzesh = models.FloatField(blank=True, null=True, default=0, verbose_name='ارزش')
+    class Meta:
+        verbose_name = 'موجودی کالا'
+        verbose_name_plural = 'موجودی کالاها'
+
+    def __str__(self):
+        return self.kala.name
 
 
 # @receiver(pre_save, sender=Kardex)
