@@ -3,56 +3,56 @@
 {% load static %}
 {% block content %}
     <div class="content-wrapper">
-        <div class="col-md-8 mb-30">
-            <div class="card card-statistics mb-30">
-                <div class="card-body">
-                    <h5 class="card-title">انتخاب</h5>
-    <form method="get" action="{% url 'filter_kardex' %}" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="form-row">
-            <div class="col">
-                {{ kala_select_form.storage.label }}
-                {{ kala_select_form.storage }}
-                {% for error in kala_select_form.storage.errors %}
-                    <div class="text-danger"><p>{{ error }}</p></div>
-                {% endfor %}
-            </div>
+    <div class="col-md-8 mb-30">
+        <div class="card card-statistics mb-30">
+            <div class="card-body">
+                <h5 class="card-title">انتخاب</h5>
+                <form method="post" action="#" enctype="multipart/form-data" id="kalaForm"
+                      data-categories-level2-url="{% url 'ajax_load_categories_level2' %}"
+                      data-categories-level3-url="{% url 'ajax_load_categories_level3' %}">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="col">
+                            {{ kala_select_form.storage.label }}
+                            {{ kala_select_form.storage }}
+                            {% for error in kala_select_form.storage.errors %}
+                                <div class="text-danger"><p>{{ error }}</p></div>
+                            {% endfor %}
+                        </div>
+                        <div class="col">
+                            {{ kala_select_form.category1.label }}
+                            {{ kala_select_form.category1 }}
+                            {% for error in kala_select_form.category1.errors %}
+                                <div class="text-danger"><p>{{ error }}</p></div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-row">
+                        <div class="col">
+                            {{ kala_select_form.category2.label }}
+                            {{ kala_select_form.category2 }}
+                            {% for error in kala_select_form.category2.errors %}
+                                <div class="text-danger"><p>{{ error }}</p></div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-row">
+                        <div class="col">
+                            {{ kala_select_form.category3.label }}
+                            {{ kala_select_form.category3 }}
+                            {% for error in kala_select_form.category3.errors %}
+                                <div class="text-danger"><p>{{ error }}</p></div>
+                            {% endfor %}
+                        </div>
+                    </div>
 
-            <div class="col">
-                {{ kala_select_form.category1.label }}
-                {{ kala_select_form.category1 }}
-                {% for error in kala_select_form.category1.errors %}
-                    <div class="text-danger"><p>{{ error }}</p></div>
-                {% endfor %}
-            </div>
-        </div>
-        <br>
-        <div class="form-row">
-            <div class="col">
-                {{ kala_select_form.category2.label }}
-                {{ kala_select_form.category2 }}
-                {% for error in kala_select_form.category2.errors %}
-                    <div class="text-danger"><p>{{ error }}</p></div>
-                {% endfor %}
-            </div>
-        </div>
-        <br>
-        <div class="form-row">
-            <div class="col">
-                {{ kala_select_form.category3.label }}
-                {{ kala_select_form.category3 }}
-                {% for error in kala_select_form.category3.errors %}
-                    <div class="text-danger"><p>{{ error }}</p></div>
-                {% endfor %}
-            </div>
-        </div>
+                    <button type="submit" class="btn btn-primary">اعمال فیلتر</button>
+                </form>
 
-        <button type="submit" class="btn btn-primary">اعمال فیلتر</button>
-    </form>
-                </div>
             </div>
         </div>
-
 
         <div class="row">
             <div class="col-xl-8 mb-30">
@@ -175,89 +175,74 @@
 
     </div>
 {% endblock %}
-{% block date %}
-    <script src="{% static 'js/table1/tableExport.min.js' %}"></script>
-    <script src="{% static 'js/table1/bootstrap-table.min.js' %}"></script>
-    <script src="{% static 'js/table1/bootstrap-table-locale-all.min.js' %}"></script>
-    <script src="{% static 'js/table1/bootstrap-table-export.min.js' %}"></script>
-    <script src="{% static 'js/table1/natural-sorting.js' %}"></script>
-    <script src="{% static 'js/table1/bootstrap-table-filter-control.min.js' %}"></script>
-    <script src="{% static 'js/table1/bootstrap-table-print.min.js' %}"></script>
-    <script src="{% static 'js/table1/jspdf.min.js' %}"></script>
-    <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
+
+
+
+
+
+
+{% block myjs %}
+
 
     <script>
-        var $table = $('#table')
+        $(document).ready(function () {
+            // وقتی category1 تغییر می‌کند، گزینه‌های category2 را بارگذاری کن
+            $("#id_category1").change(function () {
+                const url = $("#kalaForm").attr("data-categories-level2-url");
+                const category1Id = $(this).val();
 
-        $(function () {
-            $table.bootstrapTable()
-        })
+                if (category1Id) {
+                    $.ajax({
+                        url: url,
+                        data: {
+                            'category1_id': category1Id
+                        },
+                        success: function (data) {
+                            // اینجا گزینه "همه" را به dropdown سطح ۲ اضافه می‌کنیم
+                            $("#id_category2").html('<option value="0">همه</option>' + data);
+                            $("#id_category3").html('<option value="0">همه</option>'); // ریست کردن سطح ۳
+                            $('#id_category2').selectpicker('refresh');  // برای بروزرسانی انتخاب کننده
+                            $('#id_category3').selectpicker('refresh');  // برای بروزرسانی انتخاب کننده
+                        }
+                    });
+                } else {
+                    $("#id_category2").html('<option value="0">همه</option>').selectpicker('refresh');
+                    $("#id_category3").html('<option value="0">همه</option>').selectpicker('refresh');
+                }
+            });
 
-        function idFormatter() {
-            return 'Total'
-        }
+            // وقتی category2 تغییر می‌کند، گزینه‌های category3 را بارگذاری کن
+            $("#id_category2").change(function () {
+                const url = $("#kalaForm").attr("data-categories-level3-url");
+                const category2Id = $(this).val();
 
-        function nameFormatter(data) {
-            return data.length
-        }
-
-        function priceFormatter(data) {
-            var field = this.field
-            return data.map(function (row) {
-                return +row[field].substring(0)
-            }).reduce(function (sum, i) {
-                return sum + i
-            }, 0)
-        }
-
-        function formatMoney(number) {
-            return number.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
-        }
+                if (category2Id) {
+                    $.ajax({
+                        url: url,
+                        data: {
+                            'category2_id': category2Id
+                        },
+                        success: function (data) {
+                            // اینجا گزینه "همه" را به dropdown سطح ۳ اضافه می‌کنیم
+                            $("#id_category3").html('<option value="0">همه</option>' + data);
+                            $('#id_category3').selectpicker('refresh');  // برای بروزرسانی انتخاب کننده
+                        }
+                    });
+                } else {
+                    $("#id_category3").html('<option value="0">همه</option>').selectpicker('refresh');
+                }
+            });
+        });
+    </script>
+    <script>
+        $('.selectpicker').selectpicker({
+            noneSelectedText: 'همه'
+        });
     </script>
 
-<script>
-    var $table = $('#table')
-
-    $(function () {
-        $table.bootstrapTable()
-    })
-
-    // تابع برای فرمت کردن مقادیر پولی
-    function formatMoney(number) {
-        return number.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        const category1Select = document.getElementById("id_category1");
-        const category2Select = document.getElementById("id_category2");
-        const category3Select = document.getElementById("id_category3");
-
-        category1Select.addEventListener("change", function() {
-            fetchCategories(this.value, 2, category2Select);
-            category2Select.innerHTML = '<option value="">هیچکدام</option>'; // Reset level 2
-            category3Select.innerHTML = '<option value="">هیچکدام</option>'; // Reset level 3
-        });
-
-        category2Select.addEventListener("change", function() {
-            fetchCategories(this.value, 3, category3Select);
-        });
-
-        function fetchCategories(parentId, level, targetSelect) {
-            console.log("Fetching categories for parentId:", parentId, "and level:", level);
-            fetch(`/load_categories/?parent_id=${parentId}&level=${level}`)
-                .then(response => response.json())
-                .then(data => {
-                    let options = '<option value="0">همه</option>';
-                    data.forEach(category => {
-                        options += `<option value="${category.id}">${category.name}</option>`;
-                    });
-                    options += '<option value="">هیچکدام</option>';
-                    targetSelect.innerHTML = options;
-                })
-                .catch(error => console.error('Error:', error));
-        }
-    });
-</script>
 
 
 {% endblock %}
+
+
+

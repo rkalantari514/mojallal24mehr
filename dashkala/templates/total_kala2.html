@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نمایش کالا</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/css/bootstrap-select.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>نمایش کالا</h1>
+
+        <form method="post" action="#" enctype="multipart/form-data" id="yadForm"
+              data-categories-level2-url="{% url 'ajax_load_categories_level2' %}"
+              data-categories-level3-url="{% url 'ajax_load_categories_level3' %}">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="col">
+                    {{ kala_select_form.storage.label }}
+                    {{ kala_select_form.storage }}
+                    {% for error in kala_select_form.storage.errors %}
+                        <div class="text-danger"><p>{{ error }}</p></div>
+                    {% endfor %}
+                </div>
+                <div class="col">
+                    {{ kala_select_form.category1.label }}
+                    {{ kala_select_form.category1 }}
+                    {% for error in kala_select_form.category1.errors %}
+                        <div class="text-danger"><p>{{ error }}</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+            <br>
+            <div class="form-row">
+                <div class="col">
+                    {{ kala_select_form.category2.label }}
+                    {{ kala_select_form.category2 }}
+                    {% for error in kala_select_form.category2.errors %}
+                        <div class="text-danger"><p>{{ error }}</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+            <br>
+            <div class="form-row">
+                <div class="col">
+                    {{ kala_select_form.category3.label }}
+                    {{ kala_select_form.category3 }}
+                    {% for error in kala_select_form.category3.errors %}
+                        <div class="text-danger"><p>{{ error }}</p></div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">اعمال فیلتر</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"></script>
+
+    <script>
+$(document).ready(function() {
+    // وقتی category1 تغییر می‌کند، گزینه‌های category2 را بارگذاری کن
+    $("#id_category1").change(function () {
+        const url = $("#yadForm").attr("data-categories-level2-url");
+        const category1Id = $(this).val();
+
+        if (category1Id) {
+            $.ajax({
+                url: url,
+                data: {
+                    'category1_id': category1Id
+                },
+                success: function (data) {
+                    // اینجا گزینه "همه" را به dropdown سطح ۲ اضافه می‌کنیم
+                    $("#id_category2").html('<option value="0">همه</option>' + data);
+                    $("#id_category3").html('<option value="0">همه</option>'); // ریست کردن سطح ۳
+                    $('#id_category2').selectpicker('refresh');  // برای بروزرسانی انتخاب کننده
+                    $('#id_category3').selectpicker('refresh');  // برای بروزرسانی انتخاب کننده
+                }
+            });
+        } else {
+            $("#id_category2").html('<option value="0">همه</option>').selectpicker('refresh');
+            $("#id_category3").html('<option value="0">همه</option>').selectpicker('refresh');
+        }
+    });
+
+    // وقتی category2 تغییر می‌کند، گزینه‌های category3 را بارگذاری کن
+    $("#id_category2").change(function () {
+        const url = $("#yadForm").attr("data-categories-level3-url");
+        const category2Id = $(this).val();
+
+        if (category2Id) {
+            $.ajax({
+                url: url,
+                data: {
+                    'category2_id': category2Id
+                },
+                success: function (data) {
+                    // اینجا گزینه "همه" را به dropdown سطح ۳ اضافه می‌کنیم
+                    $("#id_category3").html('<option value="0">همه</option>' + data);
+                    $('#id_category3').selectpicker('refresh');  // برای بروزرسانی انتخاب کننده
+                }
+            });
+        } else {
+            $("#id_category3").html('<option value="0">همه</option>').selectpicker('refresh');
+        }
+    });
+});
+            </script>
+</body>
+</html>
