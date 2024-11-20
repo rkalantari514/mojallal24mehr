@@ -1,11 +1,14 @@
 from django.shortcuts import render
-from mahakupdate.models import Kardex, Mtables, Category, Mojodi
+from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek
 from persianutils import standardize
 from django.utils import timezone
 from django.shortcuts import render
 from django.db.models import Max, Subquery
 from .forms import FilterForm, KalaSelectForm
 import time
+from django.shortcuts import render, redirect
+from django.db.models import Sum, Count, F, FloatField, Q
+from django.db.models.functions import Coalesce
 from django.http import JsonResponse
 
 
@@ -119,9 +122,6 @@ def DsshKala2(request):
     return response
 
 
-
-
-
 # AJAX برای بارگذاری دسته‌بندی سطح 2
 def load_categories_level2(request):
     category1_id = request.GET.get('category1_id')
@@ -134,6 +134,7 @@ def load_categories_level2(request):
     else:
         categories = Category.objects.none()
     return render(request, 'partials/category_dropdown_list_options.html', {'categories': categories})
+
 
 # AJAX برای بارگذاری دسته‌بندی سطح 3
 def load_categories_level3(request):
@@ -149,13 +150,47 @@ def load_categories_level3(request):
     return render(request, 'partials/category_dropdown_list_options.html', {'categories': categories})
 
 
-
-
-def TotalKala(request):
+def TotalKala(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
-    mojodi = Mojodi.objects.all().order_by('-id')[:1000]
+    st = kwargs['st']
+    cat1 = kwargs['cat1']
+    cat2 = kwargs['cat2']
+    cat3 = kwargs['cat3']
+    # جستجو در مدل‌ها
+    formst = Storagek.objects.filter(id=int(st)).last() if st != 'all' else None
+    formcat1 = Category.objects.filter(id=int(cat1)).last() if cat1 != 'all' else None
+    formcat2 = Category.objects.filter(id=int(cat2)).last() if cat2 != 'all' else None
+    formcat3 = Category.objects.filter(id=int(cat3)).last() if cat3 != 'all' else None
+    kala_select_form = KalaSelectForm(request.POST or None, initial={
+        'storage': formst,
+        'category1': formcat1,
+        'category2': formcat2,
+        'category3': formcat3,
+    })
 
-    kala_select_form = KalaSelectForm(request.POST or None)
+    # واکنش به ارسال فرم
+    def get_cleaned_data_or_default(form, field_name, default='all'):
+        field_value = form.cleaned_data.get(field_name)
+        return field_value.id if field_value else default
+
+    if kala_select_form.is_valid():
+        storage = get_cleaned_data_or_default(kala_select_form, 'storage')
+        category1 = get_cleaned_data_or_default(kala_select_form, 'category1')
+        category2 = get_cleaned_data_or_default(kala_select_form, 'category2')
+        category3 = get_cleaned_data_or_default(kala_select_form, 'category3')
+        # ساخت آدرس جدید با پارامترهای فیلتر شده
+        return redirect(f'/dash/kala/total/{storage}/{category1}/{category2}/{category3}/')
+
+    mojodi = Mojodi.objects.all()  # شروع با تمام رکوردها
+    # فیلتر بر اساس انتخاب
+    if formst and st != 'all':
+        mojodi = mojodi.filter(storage__id=st)
+    if formcat1 and cat1 != 'all':
+        mojodi = mojodi.filter(kala__category__parent__parent__id=cat1)
+    if formcat2 and cat2 != 'all':
+        mojodi = mojodi.filter(kala__category__parent__id=cat2)
+    if formcat3 and cat3 != 'all':
+        mojodi = mojodi.filter(kala__category__id=cat3)
 
     table = Mtables.objects.filter(name='Kardex').last()
     tsinse = (timezone.now() - table.last_update_time).total_seconds() / 60
@@ -173,21 +208,39 @@ def TotalKala(request):
         table.progress_bar_width = tsinse / table.update_period * 100
         table.progress_class = 'skill2-bar bg-danger'
 
-    context = {
-        'title': 'داشبورد کالاها',
-        'mojodi': mojodi,
-        'kala_select_form': kala_select_form,
-        'table': table,
+    summary = {
+        'storage': Storagek.objects.filter(id=int(st)).last().name if st != 'all' else 'همه انبار ها',
+        'cat1': Category.objects.filter(id=int(cat1)).last().name if cat1 != 'all' else 'همه',
+        'cat2': Category.objects.filter(id=int(cat2)).last().name if cat2 != 'all' else '',
+        'cat3': Category.objects.filter(id=int(cat3)).last().name if cat3 != 'all' else '',
+        'tedad': mojodi.values('kala').distinct().count(),
+        'total_item_count' : mojodi.aggregate(total_stock=Coalesce(Sum(F('stock'), output_field=FloatField()), 0.0))['total_stock'],
+        'total_value' : mojodi.aggregate(total_arzesh=Coalesce(Sum(F('arzesh'), output_field=FloatField()), 0.0))['total_arzesh'],
+        'weighted_average_value' : mojodi.aggregate(weighted_avg_value=Coalesce(Sum(F('stock') * F('averageprice'), output_field=FloatField()) /Coalesce(Sum(F('stock'), output_field=FloatField()), 1.0), 0.0))['weighted_avg_value'],
+
+
     }
 
-    response = render(request, 'total_kala.html', context)  # نام قالب خود را به‌روز کنید
+    # محاسبه زمان و دیگر اطلاعات
+    context = {
+        'title': 'موجودی کالاها',
+        'mojodi': mojodi,  # جدول برای نمایش
+        'kala_select_form': kala_select_form,  # فرم فیلترها
+        'table': table,
+        'summary': summary,
+
+    }
+
+
+
+
+
+
+
+
+
 
     total_time = time.time() - start_time
-    print(f"زمان کل تابع DsshKala: {total_time:.2f} ثانیه")
+    print(f"زمان کل تابع TotalKala: {total_time:.2f} ثانیه")
 
-    return response
-
-
-
-
-
+    return render(request, 'total_kala.html', context)
