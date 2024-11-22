@@ -8,7 +8,7 @@ pip install
 pip install persianutils
 pip install django-apscheduler
 pip install pandas openpyxl
-
+pip install psycopg2
 
 
 

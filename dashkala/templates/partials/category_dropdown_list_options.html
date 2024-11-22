@@ -1,0 +1,5 @@
+{% for category in categories %}
+    <option value="{{ category.id }}">{{ category.name }}</option>
+{% empty %}
+    <option value="0">هیچ دسته‌بندی‌ای وجود ندارد</option>
+{% endfor %}

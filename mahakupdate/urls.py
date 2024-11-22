@@ -6,7 +6,7 @@ from mahakupdate.views import Update_from_mahak, Kala_group, category_create_vie
 
 urlpatterns = [
     path('1', Update_from_mahak, name="update"),
-    path('', Updatedb, name="updatedb"),
+    # path('', Updatedb, name="updatedb"),
     path('updatedb', Updatedb, name="updatedb"),
     path('updateall', Updateall, name="updateall"),
     path('update/factor', UpdateFactor, name="updatefactor"),
