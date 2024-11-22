@@ -51,6 +51,12 @@ def connect_to_mahak():
 
 # صفحه عملیات آپدیت
 def Updatedb(request):
+    
+
+    
+    
+    
+    
     tables = Mtables.objects.filter(in_use=True)
     url_mapping = {
         'Fact_Fo': 'update/factor',
@@ -624,47 +630,49 @@ def Update_from_mahak(request):
     cursor = conn.cursor()
     print('cursor')
     print(cursor)
+    Mtables.objects.create(name='test',row_count = 12,cloumn_count=10)
 
     t1 = time.time()
 
     # # شناسایی کل جاول موجود
-    # cursor.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'")
-    # tables = cursor.fetchall()
-    # # خواندن نام جداول
-    # for table in tables:
-    #     try:
-    #         table_name = table[0]
-    #
-    #         # شمارش تعداد سطرها
-    #         cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
-    #         row_count = cursor.fetchone()[0]
-    #
-    #         # شمارش تعداد ستون‌ها
-    #         cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table_name}'")
-    #         column_count = cursor.fetchone()[0]
-    #
-    #         Mtables.objects.update_or_create(
-    #             name=table_name,
-    #             defaults={
-    #                 'row_count': row_count,
-    #                 'cloumn_count': column_count
-    #             }
-    #         )
-    #         print('ok ok ok ok ok ok ok ok table_name',table_name)
-    #
-    #     except:
-    #         print('error',table_name)
-    #         try:
-    #             cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
-    #             print('m1')
-    #             cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
-    #             row_count = cursor.fetchone()[0]
-    #             print('row_count', row_count)
-    #             cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table_name}'")
-    #             column_count = cursor.fetchone()[0]
-    #             print('column_count', column_count)
-    #         except:
-    #             print('nononononoonon')
+    cursor.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'")
+    tables = cursor.fetchall()
+    # خواندن نام جداول
+    for table in tables:
+        try:
+            table_name = table[0]
+
+            # شمارش تعداد سطرها
+            cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+            row_count = cursor.fetchone()[0]
+
+            # شمارش تعداد ستون‌ها
+            cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table_name}'")
+            column_count = cursor.fetchone()[0]
+            print("تا اینجا میام")
+
+            Mtables.objects.update_or_create(
+                name=table_name,
+                defaults={
+                    'row_count': row_count,
+                    'cloumn_count': column_count
+                }
+            )
+            print('ok ok ok ok ok ok ok ok table_name',table_name)
+
+        except:
+            print('error',table_name)
+            try:
+                cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+                print('m1')
+                cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+                row_count = cursor.fetchone()[0]
+                print('row_count', row_count)
+                cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table_name}'")
+                column_count = cursor.fetchone()[0]
+                print('column_count', column_count)
+            except:
+                print('nononononoonon')
 
     t2 = time.time()
 
