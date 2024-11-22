@@ -1,16 +1,12 @@
-from django.shortcuts import render
 from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek
 from persianutils import standardize
-from django.utils import timezone
-from django.shortcuts import render
 from django.db.models import Max, Subquery
 from .forms import FilterForm, KalaSelectForm
 import time
 from django.shortcuts import render, redirect
-from django.db.models import Sum, Count, F, FloatField, Q
+from django.db.models import Sum, F, FloatField
 from django.db.models.functions import Coalesce
-from django.http import JsonResponse
-
+from django.utils import timezone
 
 def fix_persian_characters(value):
     return standardize(value)
@@ -150,23 +146,36 @@ def load_categories_level3(request):
     return render(request, 'partials/category_dropdown_list_options.html', {'categories': categories})
 
 
+
+
+
 def TotalKala(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
     st = kwargs['st']
     cat1 = kwargs['cat1']
     cat2 = kwargs['cat2']
     cat3 = kwargs['cat3']
+    tt = kwargs['total']
+
+    detailaddress=f'/dash/kala/total/{st}/{cat1}/{cat2}/{cat3}/detile'
+
+    total=False if tt== 'total' else True
+
+
     # جستجو در مدل‌ها
     formst = Storagek.objects.filter(id=int(st)).last() if st != 'all' else None
     formcat1 = Category.objects.filter(id=int(cat1)).last() if cat1 != 'all' else None
     formcat2 = Category.objects.filter(id=int(cat2)).last() if cat2 != 'all' else None
     formcat3 = Category.objects.filter(id=int(cat3)).last() if cat3 != 'all' else None
-    kala_select_form = KalaSelectForm(request.POST or None, initial={
-        'storage': formst,
-        'category1': formcat1,
-        'category2': formcat2,
-        'category3': formcat3,
-    })
+
+    kala_select_form = KalaSelectForm(request.POST or None,
+                                      # initial={
+                                      #     'storage': formst,
+                                      #     'category1': formcat1,
+                                      #     'category2': formcat2,
+                                      #     'category3': formcat3,
+                                      # }
+                                      )
 
     # واکنش به ارسال فرم
     def get_cleaned_data_or_default(form, field_name, default='all'):
@@ -179,9 +188,10 @@ def TotalKala(request, *args, **kwargs):
         category2 = get_cleaned_data_or_default(kala_select_form, 'category2')
         category3 = get_cleaned_data_or_default(kala_select_form, 'category3')
         # ساخت آدرس جدید با پارامترهای فیلتر شده
-        return redirect(f'/dash/kala/total/{storage}/{category1}/{category2}/{category3}/')
+        return redirect(f'/dash/kala/total/{storage}/{category1}/{category2}/{category3}/total')
 
     mojodi = Mojodi.objects.all()  # شروع با تمام رکوردها
+
     # فیلتر بر اساس انتخاب
     if formst and st != 'all':
         mojodi = mojodi.filter(storage__id=st)
@@ -208,18 +218,68 @@ def TotalKala(request, *args, **kwargs):
         table.progress_bar_width = tsinse / table.update_period * 100
         table.progress_class = 'skill2-bar bg-danger'
 
+    # ساخت خلاصه کلی
     summary = {
         'storage': Storagek.objects.filter(id=int(st)).last().name if st != 'all' else 'همه انبار ها',
         'cat1': Category.objects.filter(id=int(cat1)).last().name if cat1 != 'all' else 'همه',
         'cat2': Category.objects.filter(id=int(cat2)).last().name if cat2 != 'all' else '',
         'cat3': Category.objects.filter(id=int(cat3)).last().name if cat3 != 'all' else '',
         'tedad': mojodi.values('kala').distinct().count(),
-        'total_item_count' : mojodi.aggregate(total_stock=Coalesce(Sum(F('stock'), output_field=FloatField()), 0.0))['total_stock'],
-        'total_value' : mojodi.aggregate(total_arzesh=Coalesce(Sum(F('arzesh'), output_field=FloatField()), 0.0))['total_arzesh'],
-        'weighted_average_value' : mojodi.aggregate(weighted_avg_value=Coalesce(Sum(F('stock') * F('averageprice'), output_field=FloatField()) /Coalesce(Sum(F('stock'), output_field=FloatField()), 1.0), 0.0))['weighted_avg_value'],
-
-
+        'total_item_count': mojodi.aggregate(total_stock=Coalesce(Sum(F('stock'), output_field=FloatField()), 0.0))[
+            'total_stock'],
+        'total_value': mojodi.aggregate(total_arzesh=Coalesce(Sum(F('arzesh'), output_field=FloatField()), 0.0))[
+            'total_arzesh'],
+        'weighted_average_value': mojodi.aggregate(weighted_avg_value=Coalesce(
+            Sum(F('stock') * F('averageprice'), output_field=FloatField()) / Coalesce(
+                Sum(F('stock'), output_field=FloatField()), 1.0), 0.0))['weighted_avg_value'],
     }
+
+    # ساخت خلاصه برای هر انبار در صورت انتخاب 'all'
+    all_storage_summaries = []
+    if st == 'all':
+        storages = Storagek.objects.all()
+    else:
+        storages = Storagek.objects.filter(id=st)
+
+    for storage in storages:
+        storage_mojodi = mojodi.filter(storage=storage)
+        storage_summary = {
+            'storage': storage.name,
+            'tedad': storage_mojodi.values('kala').distinct().count(),
+            'total_item_count':
+                storage_mojodi.aggregate(total_stock=Coalesce(Sum(F('stock'), output_field=FloatField()), 0.0))[
+                    'total_stock'],
+            'total_value':
+                storage_mojodi.aggregate(total_arzesh=Coalesce(Sum(F('arzesh'), output_field=FloatField()), 0.0))[
+                    'total_arzesh'],
+            'weighted_average_value': storage_mojodi.aggregate(weighted_avg_value=Coalesce(
+                Sum(F('stock') * F('averageprice'), output_field=FloatField()) / Coalesce(
+                    Sum(F('stock'), output_field=FloatField()), 1.0), 0.0))['weighted_avg_value'],
+        }
+        if storage_mojodi.values('kala').distinct().count()>0:
+            all_storage_summaries.append(storage_summary)
+
+    # ساخت خلاصه برای هر دسته‌بندی سطح ۳
+    all_category_summaries = []
+    categories = Category.objects.filter(level=3)
+
+    for category in categories:
+        category_mojodi = mojodi.filter(kala__category=category)
+        category_summary = {
+            'category': category.name,
+            'tedad': category_mojodi.values('kala').distinct().count(),
+            'total_item_count':
+                category_mojodi.aggregate(total_stock=Coalesce(Sum(F('stock'), output_field=FloatField()), 0.0))[
+                    'total_stock'],
+            'total_value':
+                category_mojodi.aggregate(total_arzesh=Coalesce(Sum(F('arzesh'), output_field=FloatField()), 0.0))[
+                    'total_arzesh'],
+            'weighted_average_value': category_mojodi.aggregate(weighted_avg_value=Coalesce(
+                Sum(F('stock') * F('averageprice'), output_field=FloatField()) / Coalesce(
+                    Sum(F('stock'), output_field=FloatField()), 1.0), 0.0))['weighted_avg_value'],
+        }
+        if category_mojodi.values('kala').distinct().count() >0:
+            all_category_summaries.append(category_summary)
 
     # محاسبه زمان و دیگر اطلاعات
     context = {
@@ -228,17 +288,11 @@ def TotalKala(request, *args, **kwargs):
         'kala_select_form': kala_select_form,  # فرم فیلترها
         'table': table,
         'summary': summary,
-
+        'all_storage_summaries': all_storage_summaries,  # خلاصه برای هر انبار در صورت انتخاب 'all'
+        'all_category_summaries': all_category_summaries,  # خلاصه برای هر دسته‌بندی سطح ۳
+        'total':total,
+        'detailaddress':detailaddress,
     }
-
-
-
-
-
-
-
-
-
 
     total_time = time.time() - start_time
     print(f"زمان کل تابع TotalKala: {total_time:.2f} ثانیه")

@@ -5,8 +5,8 @@ from django.shortcuts import redirect
 urlpatterns = [
     path('dash/kala', DsshKala, name='dssh_kala'),
 
-    path('', lambda request: redirect('/dash/kala/total/12/all/all/all/', permanent=True)),
-    path('dash/kala/total/<st>/<cat1>/<cat2>/<cat3>/', TotalKala, name='total_kala'),
+    path('', lambda request: redirect('/dash/kala/total/13/all/all/all/total', permanent=True)),
+    path('dash/kala/total/<st>/<cat1>/<cat2>/<cat3>/<total>', TotalKala, name='total_kala'),
 
     # Ajax
     path('ajax/load-categories-level2/', load_categories_level2, name='ajax_load_categories_level2'),  # AJAX برای سطح 2
