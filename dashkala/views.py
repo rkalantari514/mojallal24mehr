@@ -157,7 +157,10 @@ def TotalKala(request, *args, **kwargs):
     cat3 = kwargs['cat3']
     tt = kwargs['total']
 
-    detailaddress=f'/dash/kala/total/{st}/{cat1}/{cat2}/{cat3}/detile'
+    print(st,cat1,cat2,cat3)
+
+
+    detailaddress=f'/dash/kala/total/{st}/{cat1}/{cat2}/{cat3}/detaile'
 
     total=False if tt== 'total' else True
 
@@ -183,6 +186,7 @@ def TotalKala(request, *args, **kwargs):
         return field_value.id if field_value else default
 
     if kala_select_form.is_valid():
+        print("فرم شروع شد")
         storage = get_cleaned_data_or_default(kala_select_form, 'storage')
         category1 = get_cleaned_data_or_default(kala_select_form, 'category1')
         category2 = get_cleaned_data_or_default(kala_select_form, 'category2')
@@ -260,7 +264,50 @@ def TotalKala(request, *args, **kwargs):
             all_storage_summaries.append(storage_summary)
 
     # ساخت خلاصه برای هر دسته‌بندی سطح ۳
-    all_category_summaries = []
+    all_category_summaries_1 = []
+    categories = Category.objects.filter(level=1)
+
+    for category in categories:
+        category_mojodi = mojodi.filter(kala__category__parent__parent=category)
+        category_summary = {
+            'category': category.name,
+            'tedad': category_mojodi.values('kala').distinct().count(),
+            'total_item_count':
+                category_mojodi.aggregate(total_stock=Coalesce(Sum(F('stock'), output_field=FloatField()), 0.0))[
+                    'total_stock'],
+            'total_value':
+                category_mojodi.aggregate(total_arzesh=Coalesce(Sum(F('arzesh'), output_field=FloatField()), 0.0))[
+                    'total_arzesh'],
+            'weighted_average_value': category_mojodi.aggregate(weighted_avg_value=Coalesce(
+                Sum(F('stock') * F('averageprice'), output_field=FloatField()) / Coalesce(
+                    Sum(F('stock'), output_field=FloatField()), 1.0), 0.0))['weighted_avg_value'],
+        }
+        if category_mojodi.values('kala').distinct().count() >0:
+            all_category_summaries_1.append(category_summary)
+
+    all_category_summaries_2 = []
+    categories = Category.objects.filter(level=2)
+
+    for category in categories:
+        category_mojodi = mojodi.filter(kala__category__parent=category)
+        category_summary = {
+            'category': category.name,
+            'tedad': category_mojodi.values('kala').distinct().count(),
+            'total_item_count':
+                category_mojodi.aggregate(total_stock=Coalesce(Sum(F('stock'), output_field=FloatField()), 0.0))[
+                    'total_stock'],
+            'total_value':
+                category_mojodi.aggregate(total_arzesh=Coalesce(Sum(F('arzesh'), output_field=FloatField()), 0.0))[
+                    'total_arzesh'],
+            'weighted_average_value': category_mojodi.aggregate(weighted_avg_value=Coalesce(
+                Sum(F('stock') * F('averageprice'), output_field=FloatField()) / Coalesce(
+                    Sum(F('stock'), output_field=FloatField()), 1.0), 0.0))['weighted_avg_value'],
+        }
+        if category_mojodi.values('kala').distinct().count() > 0:
+            all_category_summaries_2.append(category_summary)
+
+
+    all_category_summaries_3 = []
     categories = Category.objects.filter(level=3)
 
     for category in categories:
@@ -279,9 +326,11 @@ def TotalKala(request, *args, **kwargs):
                     Sum(F('stock'), output_field=FloatField()), 1.0), 0.0))['weighted_avg_value'],
         }
         if category_mojodi.values('kala').distinct().count() >0:
-            all_category_summaries.append(category_summary)
+            all_category_summaries_3.append(category_summary)
 
-    # محاسبه زمان و دیگر اطلاعات
+
+
+
     context = {
         'title': 'موجودی کالاها',
         'mojodi': mojodi,  # جدول برای نمایش
@@ -289,7 +338,9 @@ def TotalKala(request, *args, **kwargs):
         'table': table,
         'summary': summary,
         'all_storage_summaries': all_storage_summaries,  # خلاصه برای هر انبار در صورت انتخاب 'all'
-        'all_category_summaries': all_category_summaries,  # خلاصه برای هر دسته‌بندی سطح ۳
+        'all_category_summaries_1': all_category_summaries_1,  # خلاصه برای هر دسته‌بندی سطح 1
+        'all_category_summaries_2': all_category_summaries_2,  # خلاصه برای هر دسته‌بندی سطح 2
+        'all_category_summaries_3': all_category_summaries_3,  # خلاصه برای هر دسته‌بندی سطح ۳
         'total':total,
         'detailaddress':detailaddress,
     }

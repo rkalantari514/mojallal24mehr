@@ -3,281 +3,330 @@
 {% load static %}
 {% block content %}
     <div class="content-wrapper">
-        <div class="col-md-8 mb-30">
-            {#        فرم#}
-            <div class="card card-statistics mb-30">
-                <div class="card-body">
-                    <h5 class="card-title">انتخاب</h5>
-                    <form method="post" action="#" enctype="multipart/form-data" id="kalaForm"
-                          data-categories-level2-url="{% url 'ajax_load_categories_level2' %}"
-                          data-categories-level3-url="{% url 'ajax_load_categories_level3' %}">
-                        {% csrf_token %}
-                        <div class="form-row">
-                            <div class="col">
-                                {{ kala_select_form.storage.label }}
-                                {{ kala_select_form.storage }}
-                                {% for error in kala_select_form.storage.errors %}
-                                    <div class="text-danger"><p>{{ error }}</p></div>
-                                {% endfor %}
-                            </div>
-                            <div class="col">
-                                {{ kala_select_form.category1.label }}
-                                {{ kala_select_form.category1 }}
-                                {% for error in kala_select_form.category1.errors %}
-                                    <div class="text-danger"><p>{{ error }}</p></div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <br>
-                        <div class="form-row">
-                            <div class="col"></div>
-                            <div class="col">
-                                {{ kala_select_form.category2.label }}
-                                {{ kala_select_form.category2 }}
-                                {% for error in kala_select_form.category2.errors %}
-                                    <div class="text-danger"><p>{{ error }}</p></div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <br>
-                        <div class="form-row">
-                            <div class="col"></div>
-                            <div class="col">
-                                {{ kala_select_form.category3.label }}
-                                {{ kala_select_form.category3 }}
-                                {% for error in kala_select_form.category3.errors %}
-                                    <div class="text-danger"><p>{{ error }}</p></div>
-                                {% endfor %}
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">اعمال فیلتر</button>
-                    </form>
-
-                </div>
-            </div>
-            {#        خلاصه#}
-            <div class="col-xl-12 mb-30">
-                <div class="card card-statistics h-100">
-                    <div class="card-body">
-                        <div class="d-block d-md-flex justify-content-between">
-                            <div class="d-block">
-                                <h5 class="card-title pb-0 border-0 ">     خلاصه موجودی    <a href='{{ detailaddress }}'><button type="button" class="btn btn-success">مشاهده جزئیات</button></a>  </h5>
-                                <h6 class="card-title pb-0 border-0">{{ summary.storage }}</h6>
-                                <h6 class="card-title pb-0 border-0">دسته بندی: {{ summary.cat1 }} -{{ summary.cat2 }}
-                                    -{{ summary.cat3 }}</h6>
-                            </div>
-
-                        </div>
-                        <div class="table-responsive mt-15 ">
-                            <table class="table center-aligned-table mb-0">
-                                <thead>
-                                <tr class="text-dark">
-                                    <th>شرح</th>
-                                    <th>مقدار</th>
-                                    <th>واحد</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr class="text-dark">
-                                    <td>تعداد عنوان کالا</td>
-                                    <td><h5>{{ summary.tedad }}</h5></td>
-                                    <td>عدد</td>
-
-                                </tr>
-                                <tr class="text-dark">
-                                    <td>تعداد کل موجودی</td>
-                                    <td><h5>{{ summary.total_item_count }}</h5></td>
-                                    <td>عدد</td>
-
-                                </tr>
-                                <tr class="text-dark">
-                                    <td>میانگین وزنی ارزش</td>
-                                    <td><h5>{{ summary.weighted_average_value|floatformat:0|intcomma:False }}</h5></td>
-                                    <td>ريال</td>
-
-                                </tr>
-                                <tr class="text-dark">
-                                    <td>ارزش کل</td>
-                                    <td><h5>{{ summary.total_value|intword }}</h5></td>
-                                    <td>ریال</td>
-
-                                </tr>
-                                </tbody>
-                            </table>
-                            <br>
-                            <br>
-                            <h5 class="card-title pb-0 border-0 ">به تفکیک انبار</h5>
-                            <br>
-                            <table class="table center-aligned-table mb-0 align-content-center">
-                                <tr class="text-dark">
-                                    <th>انبار</th>
-                                    <th>تعداد عنوان‌های یکتا</th>
-                                    <th>تعداد کل کالاها</th>
-                                    <th>ارزش کل کالاها</th>
-                                    <th>میانگین وزنی ارزش</th>
-                                </tr> {% for storage_summary in all_storage_summaries %}
-                                <tr class="text-dark">
-                                    <td>{{ storage_summary.storage }}</td>
-                                    <td>{{ storage_summary.tedad|floatformat:0|intcomma:False }}</td>
-                                    <td>{{ storage_summary.total_item_count|floatformat:0|intcomma:False }}</td>
-                                    <td>{{ storage_summary.total_value|intword }}</td>
-                                    <td>{{ storage_summary.weighted_average_value|floatformat:0|intcomma:False }}</td>
-                                </tr>
+    <div class="col-md-8 mb-30">
+        {#        فرم#}
+        <div class="card card-statistics mb-30">
+            <div class="card-body">
+                <h5 class="card-title">انتخاب</h5>
+                <form method="post" action="#" enctype="multipart/form-data" id="kalaForm"
+                      data-categories-level2-url="{% url 'ajax_load_categories_level2' %}"
+                      data-categories-level3-url="{% url 'ajax_load_categories_level3' %}">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <div class="col">
+                            {{ kala_select_form.storage.label }}
+                            {{ kala_select_form.storage }}
+                            {% for error in kala_select_form.storage.errors %}
+                                <div class="text-danger"><p>{{ error }}</p></div>
                             {% endfor %}
-                            </table>
-
-                            <br>
-                            <h5 class="card-title pb-0 border-0 ">به تفکیک دسته بندی</h5>
-                            <tr class="text-dark">
-                                {% if all_category_summaries %}
-                                    <table class="table center-aligned-table mb-0 align-content-center">
-                                        <tr class="text-dark">
-                                            <th>دسته‌بندی</th>
-                                            <th>تعداد عنوان‌های یکتا</th>
-                                            <th>تعداد کل کالاها</th>
-                                            <th>ارزش کل کالاها</th>
-                                            <th>میانگین وزنی ارزش</th>
-                                        </tr> {% for category_summary in all_category_summaries %}
-                                        <tr class="text-dark">
-                                            <td>{{ category_summary.category }}</td>
-                                            <td>{{ category_summary.tedad|floatformat:0|intcomma:False }}</td>
-                                            <td>{{ category_summary.total_item_count|floatformat:0|intcomma:False }}</td>
-                                            <td>{{ category_summary.total_value|intword }}</td>
-                                            <td>{{ category_summary.weighted_average_value|floatformat:0|intcomma:False }}</td>
-                                        </tr> {% endfor %} </table> {% endif %}
-
-
                         </div>
+                        <div class="col">
+                            {{ kala_select_form.category1.label }}
+                            {{ kala_select_form.category1 }}
+                            {% for error in kala_select_form.category1.errors %}
+                                <div class="text-danger"><p>{{ error }}</p></div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-row">
+                        <div class="col"></div>
+                        <div class="col">
+                            {{ kala_select_form.category2.label }}
+                            {{ kala_select_form.category2 }}
+                            {% for error in kala_select_form.category2.errors %}
+                                <div class="text-danger"><p>{{ error }}</p></div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <br>
+                    <div class="form-row">
+                        <div class="col"></div>
+                        <div class="col">
+                            {{ kala_select_form.category3.label }}
+                            {{ kala_select_form.category3 }}
+                            {% for error in kala_select_form.category3.errors %}
+                                <div class="text-danger"><p>{{ error }}</p></div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">اعمال فیلتر</button>
+                </form>
+
+            </div>
+        </div>
+        {#        خلاصه#}
+        <div class="col-xl-12 mb-30">
+            <div class="card card-statistics h-100">
+                <div class="card-body">
+                    <div class="d-block d-md-flex justify-content-between">
+                        <div class="d-block">
+                            <h5 class="card-title pb-0 border-0 "> خلاصه موجودی <a href='{{ detailaddress }}'>
+                                <button type="button" class="btn btn-success">مشاهده جزئیات</button>
+                            </a></h5>
+                            <h6 class="card-title pb-0 border-0">{{ summary.storage }}</h6>
+                            <h6 class="card-title pb-0 border-0">دسته بندی: {{ summary.cat1 }} -{{ summary.cat2 }}
+                                -{{ summary.cat3 }}</h6>
+                        </div>
+
+                    </div>
+                    <div class="table-responsive mt-15 ">
+                        <table class="table center-aligned-table mb-0">
+                            <thead>
+                            <tr class="text-dark">
+                                <th>شرح</th>
+                                <th>مقدار</th>
+                                <th>واحد</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr class="text-dark">
+                                <td>تعداد عنوان کالا</td>
+                                <td><h5>{{ summary.tedad }}</h5></td>
+                                <td>عدد</td>
+
+                            </tr>
+                            <tr class="text-dark">
+                                <td>تعداد کل موجودی</td>
+                                <td><h5>{{ summary.total_item_count }}</h5></td>
+                                <td>عدد</td>
+
+                            </tr>
+                            <tr class="text-dark">
+                                <td>میانگین وزنی ارزش</td>
+                                <td><h5>{{ summary.weighted_average_value|floatformat:0|intcomma:False }}</h5></td>
+                                <td>ريال</td>
+
+                            </tr>
+                            <tr class="text-dark">
+                                <td>ارزش کل</td>
+                                <td><h5>{{ summary.total_value|intword }}</h5></td>
+                                <td>ریال</td>
+
+                            </tr>
+                            </tbody>
+                        </table>
+                        <br>
+                        <br>
+                        <h5 class="card-title pb-0 border-0 ">به تفکیک انبار</h5>
+                        <br>
+                        <table class="table center-aligned-table mb-0 align-content-center">
+                            <tr class="text-dark">
+                                <th>انبار</th>
+                                <th>تعداد عنوان‌های یکتا</th>
+                                <th>تعداد کل کالاها</th>
+                                <th>ارزش کل کالاها</th>
+                                <th>میانگین وزنی ارزش</th>
+                            </tr> {% for storage_summary in all_storage_summaries %}
+                            <tr class="text-dark">
+                                <td>{{ storage_summary.storage }}</td>
+                                <td>{{ storage_summary.tedad|floatformat:0|intcomma:False }}</td>
+                                <td>{{ storage_summary.total_item_count|floatformat:0|intcomma:False }}</td>
+                                <td>{{ storage_summary.total_value|intword }}</td>
+                                <td>{{ storage_summary.weighted_average_value|floatformat:0|intcomma:False }}</td>
+                            </tr>
+                        {% endfor %}
+                        </table>
+
+                        <br>
+                        <h5 class="card-title pb-0 border-0 "> به تفکیک دسته بندی سطح 1</h5>
+                            {% if all_category_summaries_1 %}
+                                <table class="table center-aligned-table mb-0 align-content-center">
+                                    <tr class="text-dark">
+                                        <th>دسته‌بندی</th>
+                                        <th>تعداد عنوان‌های یکتا</th>
+                                        <th>تعداد کل کالاها</th>
+                                        <th>ارزش کل کالاها</th>
+                                        <th>میانگین وزنی ارزش</th>
+                                    </tr> {% for category_summary in all_category_summaries_1 %}
+                                    <tr class="text-dark">
+                                        <td>{{ category_summary.category }}</td>
+                                        <td>{{ category_summary.tedad|floatformat:0|intcomma:False }}</td>
+                                        <td>{{ category_summary.total_item_count|floatformat:0|intcomma:False }}</td>
+                                        <td>{{ category_summary.total_value|intword }}</td>
+                                        <td>{{ category_summary.weighted_average_value|floatformat:0|intcomma:False }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </table>
+                            {% endif %}
+
+                    <br>
+                        <h5 class="card-title pb-0 border-0 "> به تفکیک دسته بندی سطح 2</h5>
+                            {% if all_category_summaries_2 %}
+                                <table class="table center-aligned-table mb-0 align-content-center">
+                                    <tr class="text-dark">
+                                        <th>دسته‌بندی</th>
+                                        <th>تعداد عنوان‌های یکتا</th>
+                                        <th>تعداد کل کالاها</th>
+                                        <th>ارزش کل کالاها</th>
+                                        <th>میانگین وزنی ارزش</th>
+                                    </tr> {% for category_summary in all_category_summaries_2 %}
+                                    <tr class="text-dark">
+                                        <td>{{ category_summary.category }}</td>
+                                        <td>{{ category_summary.tedad|floatformat:0|intcomma:False }}</td>
+                                        <td>{{ category_summary.total_item_count|floatformat:0|intcomma:False }}</td>
+                                        <td>{{ category_summary.total_value|intword }}</td>
+                                        <td>{{ category_summary.weighted_average_value|floatformat:0|intcomma:False }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </table>
+                            {% endif %}
+
+
+                    <br>
+                        <h5 class="card-title pb-0 border-0 "> به تفکیک دسته بندی سطح 3</h5>
+                            {% if all_category_summaries_3 %}
+                                <table class="table center-aligned-table mb-0 align-content-center">
+                                    <tr class="text-dark">
+                                        <th>دسته‌بندی</th>
+                                        <th>تعداد عنوان‌های یکتا</th>
+                                        <th>تعداد کل کالاها</th>
+                                        <th>ارزش کل کالاها</th>
+                                        <th>میانگین وزنی ارزش</th>
+                                    </tr> {% for category_summary in all_category_summaries_3 %}
+                                    <tr class="text-dark">
+                                        <td>{{ category_summary.category }}</td>
+                                        <td>{{ category_summary.tedad|floatformat:0|intcomma:False }}</td>
+                                        <td>{{ category_summary.total_item_count|floatformat:0|intcomma:False }}</td>
+                                        <td>{{ category_summary.total_value|intword }}</td>
+                                        <td>{{ category_summary.weighted_average_value|floatformat:0|intcomma:False }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </table>
+                            {% endif %}
+
+
                     </div>
                 </div>
             </div>
-
-
-            {#    جدول#}
-        {% if total %}
-                        <div class="row">
-                            <div class="col-xl-12 mb-30">
-                                <div class="card card-statistics h-100">
-                                    <div class="card-body">
-                                        <h5 class="mb-15 pb-0 border-0 card-title">موجودی کالاها</h5>
-                                        <h7 class="mb-15 pb-0 border-0 card-title"> آخرین
-                                            آپدیت: {{ table.last_update_time|timesince }}
-                                            پیش
-                                        </h7>
-                                        <div class="progress progress-small mt-2 col-xl-4">
-                                            <div class="skill2-bar {{ table.progress_class }}"
-                                                 role="progressbar"
-                                                 style="width: {{ table.progress_bar_width }}%"
-                                                 aria-valuenow="{{ table.progress_bar_width }}"
-                                                 aria-valuemin="0"
-                                                 aria-valuemax="100"></div>
-                                        </div>
-
-
-                                        <!-- action group -->
-                                        <div class="btn-group info-drop">
-                                            <button type="button" class="dropdown-toggle-split text-muted" data-toggle="dropdown"
-                                                    aria-haspopup="true" aria-expanded="false"><i class="ti-more"></i></button>
-                                        </div>
-                                        <div class="table-responsive">
-                                            <table
-                                                    id="table"
-                                                    class="table-striped"
-                                                    data-toggle="table"
-                                                    data-locale="fa-IR"
-                                                    data-search="true"
-                                                    data-show-columns="true"
-                                                    data-show-export="true"
-                                                    data-show-refresh="true"
-                                                    data-show-columns-toggle-all="true"
-                                                    data-show-pagination-switch="true"
-                                                    data-show-toggle="true"
-                                                    data-show-fullscreen="true"
-                                                    data-buttons="buttons"
-                                                    data-search-align="left"
-                                                    data-buttons-class="primary"
-                                                    data-pagination="true"
-                                                    data-show-columns-search="true"
-                                                    data-show-footer="true"
-                                                    data-page-size="100"
-                                                    data-remember-order="true"
-                                                    data-sortable="true"
-                                                    data-show-search-clear-button="true"
-                                                    data-sort-name="count"
-                                                    data-sort-order="desc"
-                                                    data-filter-control="true"
-                                                    data-show-print="true"
-                                                    data-export-data-type="all"
-                                                    data-export-types=['excel']
-                                            >
-                                                <thead>
-                                                <tr class="tr-class-1">
-                                                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
-                                                        data-field="cat_kala" data-filter-control="select">دسته بندی
-                                                    </th>
-                                                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
-                                                        data-field="cde_kala">کد کالا
-                                                    </th>
-                                                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
-                                                        data-field="name">نام کالا
-                                                    </th>
-                                                    <th class="card-text text-center" data-filter-control="select"
-                                                        data-sortable="true"
-                                                        data-type="number" data-field="warehousecode"> نام انبار
-                                                    </th>
-                                                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
-                                                        data-field="count">موجودی
-                                                    </th>
-                                                    <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
-                                                        data-field="arzesh">ارزش موجودی
-                                                    </th>
-
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                {% for kala in mojodi %}
-                                                    <tr>
-
-                                                        <td class="card-text text-center"><h6><a href="#"
-                                                                                                 target="_blank">
-                                                            {{ kala.kala.category.name }}</a></h6></td>
-                                                        <td class="card-text text-center"><h6><a href="#"
-                                                                                                 target="_blank">
-                                                            {{ kala.code_kala }}</a></h6></td>
-
-                                                        <td class="card-text text-center"><h6><a
-                                                                href="#"
-                                                                target="_blank">
-                                                            {{ kala.kala.name }}</a></h6></td>
-
-                                                        <td class="card-text text-center"><h6><a
-                                                                href="#"
-                                                                target="_blank">
-                                                            {{ kala.storage.name }}</a></h6></td>
-
-                                                        <td class="card-text text-center"><h6><a
-                                                                href="#"
-                                                                target="_blank">
-                                                            {{ kala.stock|floatformat:0 }}</a></h6></td>
-                                                        <td class="card-text text-center"><h6><a
-                                                                href="#"
-                                                                target="_blank">
-                                                            {{ kala.arzesh|floatformat:0 | intcomma:False }}</a></h6></td>
-                                                    </tr>
-                                                {% endfor %}
-                                                </tbody>
-                                            </table>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-            <div class="col-xl-4 mb-30">
-                        </div>
-
-
         </div>
+
+
+        {#    جدول#}
+        {% if total %}
+            <div class="row">
+                <div class="col-xl-12 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <h5 class="mb-15 pb-0 border-0 card-title">موجودی کالاها</h5>
+                            <h7 class="mb-15 pb-0 border-0 card-title"> آخرین
+                                آپدیت: {{ table.last_update_time|timesince }}
+                                پیش
+                            </h7>
+                            <div class="progress progress-small mt-2 col-xl-4">
+                                <div class="skill2-bar {{ table.progress_class }}"
+                                     role="progressbar"
+                                     style="width: {{ table.progress_bar_width }}%"
+                                     aria-valuenow="{{ table.progress_bar_width }}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100"></div>
+                            </div>
+
+
+                            <!-- action group -->
+                            <div class="btn-group info-drop">
+                                <button type="button" class="dropdown-toggle-split text-muted" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false"><i class="ti-more"></i></button>
+                            </div>
+                            <div class="table-responsive">
+                                <table
+                                        id="table"
+                                        class="table-striped"
+                                        data-toggle="table"
+                                        data-locale="fa-IR"
+                                        data-search="true"
+                                        data-show-columns="true"
+                                        data-show-export="true"
+                                        data-show-refresh="true"
+                                        data-show-columns-toggle-all="true"
+                                        data-show-pagination-switch="true"
+                                        data-show-toggle="true"
+                                        data-show-fullscreen="true"
+                                        data-buttons="buttons"
+                                        data-search-align="left"
+                                        data-buttons-class="primary"
+                                        data-pagination="true"
+                                        data-show-columns-search="true"
+                                        data-show-footer="true"
+                                        data-page-size="100"
+                                        data-remember-order="true"
+                                        data-sortable="true"
+                                        data-show-search-clear-button="true"
+                                        data-sort-name="count"
+                                        data-sort-order="desc"
+                                        data-filter-control="true"
+                                        data-show-print="true"
+                                        data-export-data-type="all"
+                                        data-export-types=['excel']
+                                >
+                                    <thead>
+                                    <tr class="tr-class-1">
+                                        <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
+                                            data-field="cat_kala" data-filter-control="select">دسته بندی
+                                        </th>
+                                        <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
+                                            data-field="cde_kala">کد کالا
+                                        </th>
+                                        <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
+                                            data-field="name">نام کالا
+                                        </th>
+                                        <th class="card-text text-center" data-filter-control="select"
+                                            data-sortable="true"
+                                            data-type="number" data-field="warehousecode"> نام انبار
+                                        </th>
+                                        <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
+                                            data-field="count">موجودی
+                                        </th>
+                                        <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
+                                            data-field="arzesh">ارزش موجودی
+                                        </th>
+
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for kala in mojodi %}
+                                        <tr>
+
+                                            <td class="card-text text-center"><h6><a href="#"
+                                                                                     target="_blank">
+                                                {{ kala.kala.category.name }}</a></h6></td>
+                                            <td class="card-text text-center"><h6><a href="#"
+                                                                                     target="_blank">
+                                                {{ kala.code_kala }}</a></h6></td>
+
+                                            <td class="card-text text-center"><h6><a
+                                                    href="#"
+                                                    target="_blank">
+                                                {{ kala.kala.name }}</a></h6></td>
+
+                                            <td class="card-text text-center"><h6><a
+                                                    href="#"
+                                                    target="_blank">
+                                                {{ kala.storage.name }}</a></h6></td>
+
+                                            <td class="card-text text-center"><h6><a
+                                                    href="#"
+                                                    target="_blank">
+                                                {{ kala.stock|floatformat:0 }}</a></h6></td>
+                                            <td class="card-text text-center"><h6><a
+                                                    href="#"
+                                                    target="_blank">
+                                                {{ kala.arzesh|floatformat:0 | intcomma:False }}</a></h6></td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 mb-30">
+                </div>
+
+
+            </div>
         {% endif %}
     </div>
 {% endblock %}
@@ -305,8 +354,8 @@
                         },
                         success: function (data) {
                             // اینجا گزینه "همه" را به dropdown سطح ۲ اضافه می‌کنیم
-                            $("#id_category2").html('<option value="0">همه</option>' + data);
-                            $("#id_category3").html('<option value="0">همه</option>'); // ریست کردن سطح ۳
+                            {#$("#id_category2").html('<option value="0">همه</option>' + data);#}
+                            {#$("#id_category3").html('<option value="0">همه</option>'); // ریست کردن سطح ۳#}
                             $('#id_category2').selectpicker('refresh');  // برای بروزرسانی انتخاب کننده
                             $('#id_category3').selectpicker('refresh');  // برای بروزرسانی انتخاب کننده
                         }
@@ -330,7 +379,7 @@
                         },
                         success: function (data) {
                             // اینجا گزینه "همه" را به dropdown سطح ۳ اضافه می‌کنیم
-                            $("#id_category3").html('<option value="0">همه</option>' + data);
+                            {#$("#id_category3").html('<option value="0">همه</option>' + data);#}
                             $('#id_category3').selectpicker('refresh');  // برای بروزرسانی انتخاب کننده
                         }
                     });
