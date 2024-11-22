@@ -104,6 +104,8 @@ DATABASES = {
     }
 }
 
+
+# صرف نظر شد
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
