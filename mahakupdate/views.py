@@ -256,48 +256,48 @@ def UpdateKardex(request):
 
     # اجرای حلقه جایگزین سیگنال‌ها در بخش‌های کوچک‌تر
     # اجرای حلقه جایگزین سیگنال‌ها
-    kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala','storage').all())
-    batch_size = 1000
-    updates = []
-    factors = {factor.code: factor for factor in
-               Factor.objects.filter(code__in=[k.code_factor for k in kardex_instances])}
-    kalas = {kala.code: kala for kala in Kala.objects.filter(code__in=[k.code_kala for k in kardex_instances])}
-    storages = {storage.code: storage for storage in Storagek.objects.filter(code__in=[k.warehousecode for k in kardex_instances])}
-
-    for kardex in kardex_instances:
-        factor = factors.get(kardex.code_factor)
-        kala = kalas.get(kardex.code_kala)
-        storage= storages.get(kardex.warehousecode)
-
-        # بررسی تغییرات قبل از به‌روزرسانی
-        updated = False
-        if kardex.factor != factor:
-            kardex.factor = factor
-            updated = True
-
-        if kardex.kala != kala:
-            kardex.kala = kala
-            updated = True
-        if kardex.storage != storage:
-            kardex.storage = storage
-            updated = True
-            # بررسی تغییر تاریخ
-        if kardex.pdate:
-            jalali_date = jdatetime.date(*map(int, kardex.pdate.split('/')))
-            new_date = jalali_date.togregorian()
-            if kardex.date != new_date:
-                kardex.date = new_date
-                updated = True
-
-        if updated:
-            updates.append(kardex)
-
-            # ذخیره‌سازی دسته‌ای
-    if updates:
-        with transaction.atomic():
-            Kardex.objects.bulk_update(updates, ['factor', 'kala','storage', 'warehousecode','code_kala', 'code_factor', 'date'])
-
-
+    # kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala','storage').all())
+    # batch_size = 1000
+    # updates = []
+    # factors = {factor.code: factor for factor in
+    #            Factor.objects.filter(code__in=[k.code_factor for k in kardex_instances])}
+    # kalas = {kala.code: kala for kala in Kala.objects.filter(code__in=[k.code_kala for k in kardex_instances])}
+    # storages = {storage.code: storage for storage in Storagek.objects.filter(code__in=[k.warehousecode for k in kardex_instances])}
+    #
+    # for kardex in kardex_instances:
+    #     factor = factors.get(kardex.code_factor)
+    #     kala = kalas.get(kardex.code_kala)
+    #     storage= storages.get(kardex.warehousecode)
+    #
+    #     # بررسی تغییرات قبل از به‌روزرسانی
+    #     updated = False
+    #     if kardex.factor != factor:
+    #         kardex.factor = factor
+    #         updated = True
+    #
+    #     if kardex.kala != kala:
+    #         kardex.kala = kala
+    #         updated = True
+    #     if kardex.storage != storage:
+    #         kardex.storage = storage
+    #         updated = True
+    #         # بررسی تغییر تاریخ
+    #     if kardex.pdate:
+    #         jalali_date = jdatetime.date(*map(int, kardex.pdate.split('/')))
+    #         new_date = jalali_date.togregorian()
+    #         if kardex.date != new_date:
+    #             kardex.date = new_date
+    #             updated = True
+    #
+    #     if updated:
+    #         updates.append(kardex)
+    #
+    #         # ذخیره‌سازی دسته‌ای
+    # if updates:
+    #     with transaction.atomic():
+    #         Kardex.objects.bulk_update(updates, ['factor', 'kala','storage', 'warehousecode','code_kala', 'code_factor', 'date'])
+    #
+    #
     t3 = time.time()
     print('جایگزین سیگنال انجام شد')
 
@@ -959,16 +959,84 @@ def UpdateKalaGroup(request):
 
 
 
-from django.db.models import Q, Max
+
 
 from django.db.models import Max, Q
 
+from django.shortcuts import redirect
 from django.db import transaction
-from django.db.models import Max, Q
-from .models import Kardex, Mojodi  # فرض می‌کنیم اینجا مدل‌های لازم را وارد کرده‌اید
+from .models import Mojodi, Kardex
 
+from django.shortcuts import redirect
+from django.db import transaction
+from .models import Mojodi, Kardex
+
+
+from django.shortcuts import redirect
+from django.db import transaction
+from .models import Mojodi, Kardex
 
 def UpdateMojodi(request):
+    # ابتدا تمام رکوردهای کاردکس را بر اساس تاریخ مرتب می‌کنیم
+    Mojodi.objects.all().delete()
+    kardex_entries = Kardex.objects.all().order_by('date', 'radif')
+
+    # دیکشنری برای ذخیره موجودی کالاها بر اساس انبار و کد کالا
+    generated_mojodi = {}
+
+    with transaction.atomic():
+        for entry in kardex_entries:
+            key = (entry.warehousecode, entry.code_kala)
+
+            # اگر کلید (انبار و کد کالا) جدید است، آن را ایجاد می‌کنیم
+            if key not in generated_mojodi:
+                generated_mojodi[key] = {
+                    'pdate': entry.pdate,
+                    'date': entry.date,  # جدیدترین تاریخ از کاردکس
+                    'warehousecode': entry.warehousecode,
+                    'storage': entry.storage,
+                    'code_kala': entry.code_kala,
+                    'averageprice': entry.averageprice,
+                    'stock': 0,
+                    'arzesh': 0,
+                    'kala': entry.kala,
+                }
+            else:
+                # در صورتی که تاریخ جدیدتر از مقدار موجود باشد، آن را به‌روزرسانی کنید
+                if entry.date > generated_mojodi[key]['date']:
+                    generated_mojodi[key]['date'] = entry.date
+                    generated_mojodi[key]['pdate'] = entry.pdate  # برای آخرین تاریخ
+                    generated_mojodi[key]['averageprice'] = entry.averageprice
+
+            # افزایش مقدار موجودی
+            generated_mojodi[key]['stock'] += entry.count
+            generated_mojodi[key]['arzesh'] = generated_mojodi[key]['stock'] * generated_mojodi[key]['averageprice']
+
+        # حذف رکوردهای تکراری در مدل Mojodi
+        for key in generated_mojodi.keys():
+            warehouse_code, code_kala = key
+            Mojodi.objects.filter(warehousecode=warehouse_code, code_kala=code_kala).exclude(pk__in=Mojodi.objects.filter(warehousecode=warehouse_code, code_kala=code_kala).values('pk')[:1]).delete()
+
+        # حالا دیکشنری را در مدل موجودی پر می‌کنیم
+        for key, value in generated_mojodi.items():
+            Mojodi.objects.update_or_create(
+                warehousecode=value['warehousecode'],
+                code_kala=value['code_kala'],
+                defaults={
+                    'pdate': value['pdate'],
+                    'date': value['date'],
+                    'storage': value['storage'],
+                    'averageprice': value['averageprice'],
+                    'stock': value['stock'],
+                    'arzesh': value['arzesh'],
+                    'kala': value['kala'],
+                }
+            )
+
+    return redirect('/updatedb')
+
+
+def UpdateMojodi1(request):
     # دریافت آخرین رکوردها بر مبنای ترکیب کالا و انبار
     latest_mojodi = (
         Kardex.objects

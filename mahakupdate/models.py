@@ -157,7 +157,7 @@ class Mojodi(models.Model):
     warehousecode=models.IntegerField(blank = True,null = True,default=0, verbose_name='کد انبار')
     storage = models.ForeignKey(Storagek, on_delete=models.SET_NULL,blank=True, null=True)
     code_kala = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد کالا')
-    kala = models.ForeignKey(Kala, on_delete=models.SET_NULL,blank=True, null=True)
+    kala = models.ForeignKey(Kala, on_delete=models.SET_NULL, null=True, blank=True)
     averageprice=models.FloatField(blank=True, null=True, default=0, verbose_name='قیمت میانگین')
     stock=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی')
     arzesh = models.FloatField(blank=True, null=True, default=0, verbose_name='ارزش')
@@ -166,10 +166,10 @@ class Mojodi(models.Model):
         verbose_name_plural = 'موجودی کالاها'
 
     def __str__(self):
-        return self.kala.name
+        return self.kala.name if self.kala else "کالا نامشخص"
 
 
-# @receiver(pre_save, sender=Kardex)
+        # @receiver(pre_save, sender=Kardex)
 @receiver(pre_save, sender=Factor)
 def convert_pdate_to_date(sender, instance, **kwargs):
     print("Signal convert_pdate_to_date triggered")  # برای دیباگینگ
