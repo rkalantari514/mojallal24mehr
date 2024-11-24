@@ -52,12 +52,12 @@ def connect_to_mahak():
 
 # صفحه عملیات آپدیت
 def Updatedb(request):
-    
 
-    
-    
-    
-    
+
+
+
+
+
     tables = Mtables.objects.filter(in_use=True)
     url_mapping = {
         'Fact_Fo': 'update/factor',
@@ -203,7 +203,7 @@ def UpdateKardex(request):
     mahakt_data = cursor.fetchall()
     print('خواندن از دیتابیس انجام شد')
 
-    existing_in_mahak = {(row[0], row[4], row[12]) for row in mahakt_data}
+    existing_in_mahak = {(row[0], row[4], row[12] ,row[14]) for row in mahakt_data}
 
     kardex_to_create = []
     kardex_to_update = []
@@ -214,6 +214,7 @@ def UpdateKardex(request):
         pdate = row[0]
         code_kala = row[4]
         stock = row[12]
+        radif= row[14]
         defaults = {
             'code_factor': row[6],
             'percode': row[1],
@@ -221,7 +222,7 @@ def UpdateKardex(request):
             'mablaghsanad': row[3],
             'count': row[7],
             'averageprice': row[11],
-            'radif': row[14]
+
         }
 
         if (pdate, code_kala, stock) in current_kardex:
@@ -256,48 +257,48 @@ def UpdateKardex(request):
 
     # اجرای حلقه جایگزین سیگنال‌ها در بخش‌های کوچک‌تر
     # اجرای حلقه جایگزین سیگنال‌ها
-    # kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala','storage').all())
-    # batch_size = 1000
-    # updates = []
-    # factors = {factor.code: factor for factor in
-    #            Factor.objects.filter(code__in=[k.code_factor for k in kardex_instances])}
-    # kalas = {kala.code: kala for kala in Kala.objects.filter(code__in=[k.code_kala for k in kardex_instances])}
-    # storages = {storage.code: storage for storage in Storagek.objects.filter(code__in=[k.warehousecode for k in kardex_instances])}
-    #
-    # for kardex in kardex_instances:
-    #     factor = factors.get(kardex.code_factor)
-    #     kala = kalas.get(kardex.code_kala)
-    #     storage= storages.get(kardex.warehousecode)
-    #
-    #     # بررسی تغییرات قبل از به‌روزرسانی
-    #     updated = False
-    #     if kardex.factor != factor:
-    #         kardex.factor = factor
-    #         updated = True
-    #
-    #     if kardex.kala != kala:
-    #         kardex.kala = kala
-    #         updated = True
-    #     if kardex.storage != storage:
-    #         kardex.storage = storage
-    #         updated = True
-    #         # بررسی تغییر تاریخ
-    #     if kardex.pdate:
-    #         jalali_date = jdatetime.date(*map(int, kardex.pdate.split('/')))
-    #         new_date = jalali_date.togregorian()
-    #         if kardex.date != new_date:
-    #             kardex.date = new_date
-    #             updated = True
-    #
-    #     if updated:
-    #         updates.append(kardex)
-    #
-    #         # ذخیره‌سازی دسته‌ای
-    # if updates:
-    #     with transaction.atomic():
-    #         Kardex.objects.bulk_update(updates, ['factor', 'kala','storage', 'warehousecode','code_kala', 'code_factor', 'date'])
-    #
-    #
+    kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala','storage').all())
+    batch_size = 1000
+    updates = []
+    factors = {factor.code: factor for factor in
+               Factor.objects.filter(code__in=[k.code_factor for k in kardex_instances])}
+    kalas = {kala.code: kala for kala in Kala.objects.filter(code__in=[k.code_kala for k in kardex_instances])}
+    storages = {storage.code: storage for storage in Storagek.objects.filter(code__in=[k.warehousecode for k in kardex_instances])}
+
+    for kardex in kardex_instances:
+        factor = factors.get(kardex.code_factor)
+        kala = kalas.get(kardex.code_kala)
+        storage= storages.get(kardex.warehousecode)
+
+        # بررسی تغییرات قبل از به‌روزرسانی
+        updated = False
+        if kardex.factor != factor:
+            kardex.factor = factor
+            updated = True
+
+        if kardex.kala != kala:
+            kardex.kala = kala
+            updated = True
+        if kardex.storage != storage:
+            kardex.storage = storage
+            updated = True
+            # بررسی تغییر تاریخ
+        if kardex.pdate:
+            jalali_date = jdatetime.date(*map(int, kardex.pdate.split('/')))
+            new_date = jalali_date.togregorian()
+            if kardex.date != new_date:
+                kardex.date = new_date
+                updated = True
+
+        if updated:
+            updates.append(kardex)
+
+            # ذخیره‌سازی دسته‌ای
+    if updates:
+        with transaction.atomic():
+            Kardex.objects.bulk_update(updates, ['factor', 'kala','storage', 'warehousecode','code_kala', 'code_factor', 'date'])
+
+
     t3 = time.time()
     print('جایگزین سیگنال انجام شد')
 
@@ -978,7 +979,7 @@ from .models import Mojodi, Kardex
 
 def UpdateMojodi(request):
     # ابتدا تمام رکوردهای کاردکس را بر اساس تاریخ مرتب می‌کنیم
-    Mojodi.objects.all().delete()
+    # Mojodi.objects.all().delete()
     kardex_entries = Kardex.objects.all().order_by('date', 'radif')
 
     # دیکشنری برای ذخیره موجودی کالاها بر اساس انبار و کد کالا
