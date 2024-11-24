@@ -15,6 +15,7 @@ import os
 import pandas as pd
 from django.shortcuts import redirect
 from django.db.models import Max, Subquery
+from django.db.models import Max, F
 
 # sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
 
@@ -952,17 +953,77 @@ def UpdateKalaGroup(request):
 
 
 
+
+
+
+
+
+
+from django.db.models import Q, Max
+
+from django.db.models import Max, Q
+
 from django.db import transaction
-from django.db.models import Max, Subquery
+from django.db.models import Max, Q
+from .models import Kardex, Mojodi  # فرض می‌کنیم اینجا مدل‌های لازم را وارد کرده‌اید
+
 
 def UpdateMojodi(request):
+    # دریافت آخرین رکوردها بر مبنای ترکیب کالا و انبار
+    latest_mojodi = (
+        Kardex.objects
+        .values('code_kala', 'warehousecode')
+        .annotate(latest_date=Max('date'), highest_radif=Max('radif'))
+    )
+
+    # لیستی برای ذخیره رکوردهایی که باید به روزرسانی شوند
+    updated_mojodis = []
+
+    # ایجاد کوئری برای هر کالا و انبار به طور مستقل
+    for record in latest_mojodi:
+        kardex_records = Kardex.objects.filter(
+            code_kala=record['code_kala'],
+            warehousecode=record['warehousecode'],
+            date=record['latest_date'],
+            radif=record['highest_radif'],
+            stock__gt=0  # فقط مواردی که موجودی بیشتر از صفر دارند
+        ).select_related('kala')  # برای افزایش سرعت با پیش‌بارگذاری 'kala'
+
+        for record in kardex_records:
+            updated_mojodis.append(
+                Mojodi(
+                    code_kala=record.code_kala,
+                    warehousecode=record.warehousecode,
+                    pdate=record.pdate,
+                    date=record.date,
+                    storage=record.storage,
+                    kala=record.kala,
+                    averageprice=record.averageprice,
+                    stock=record.stock,
+                    arzesh=record.stock * record.averageprice
+                )
+            )
+
+    with transaction.atomic():
+        # استفاده از bulk_create برای افزودن رکوردها به پایگاه داده
+        Mojodi.objects.bulk_create(updated_mojodis)
+
+        # حذف رکوردهای غیرضروری
+        updated_mojodi_ids = [mojodi.id for mojodi in updated_mojodis]
+        Mojodi.objects.exclude(id__in=updated_mojodi_ids).delete()
+
+    return redirect('/updatedb')
+
+
+
+def UpdateMojodi2(request):
     # دریافت آخرین موجودی‌ها بر اساس کالا و انبار
     latest_mojodi = Kardex.objects.values('code_kala', 'warehousecode').annotate(
         latest_id=Max('id')
     ).values_list('latest_id', flat=True)
 
     # دریافت رکوردهای مربوط به آخرین موجودی و حذف موجودی‌های صفر
-    kardex_records = Kardex.objects.filter(
+    kardex_records = Kardex.objects.order_by('-date','radif').filter(
         id__in=latest_mojodi,
         stock__gt=0
     ).select_related('kala')

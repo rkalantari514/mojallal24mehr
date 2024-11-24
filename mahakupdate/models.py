@@ -146,7 +146,7 @@ class Kardex(models.Model):
     class Meta:
         verbose_name = 'کاردکس انبار'
         verbose_name_plural = 'کاردکس های انبار'
-        ordering = ['-pdate', '-radif']
+        ordering = ['-date', '-radif']
 
     def __str__(self):
         return str(self.pdate)  # تصحیح به str
