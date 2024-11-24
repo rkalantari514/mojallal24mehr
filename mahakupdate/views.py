@@ -208,7 +208,7 @@ def UpdateKardex(request):
     kardex_to_create = []
     kardex_to_update = []
 
-    current_kardex = {(kardex.pdate, kardex.code_kala, kardex.stock): kardex for kardex in Kardex.objects.all()}
+    current_kardex = {(kardex.pdate, kardex.code_kala, kardex.stock, kardex.radif): kardex for kardex in Kardex.objects.all()}
 
     for row in mahakt_data:
         pdate = row[0]
@@ -225,14 +225,14 @@ def UpdateKardex(request):
 
         }
 
-        if (pdate, code_kala, stock) in current_kardex:
-            kardex = current_kardex[(pdate, code_kala, stock)]
+        if (pdate, code_kala, stock,radif) in current_kardex:
+            kardex = current_kardex[(pdate, code_kala, stock,radif)]
             if any(getattr(kardex, attr) != value for attr, value in defaults.items()):
                 for attr, value in defaults.items():
                     setattr(kardex, attr, value)
                 kardex_to_update.append(kardex)
         else:
-            kardex_to_create.append(Kardex(pdate=pdate, code_kala=code_kala, stock=stock, **defaults))
+            kardex_to_create.append(Kardex(pdate=pdate, code_kala=code_kala, stock=stock,radif=radif, **defaults))
 
     # Bulk create new kardex records
     if kardex_to_create:
@@ -248,7 +248,9 @@ def UpdateKardex(request):
     with transaction.atomic():
         obsolete_kardex = Kardex.objects.exclude(Q(pdate__in=[k[0] for k in existing_in_mahak]) &
                                                 Q(code_kala__in=[k[1] for k in existing_in_mahak]) &
-                                                Q(stock__in=[k[2] for k in existing_in_mahak]))
+                                                Q(stock__in=[k[2] for k in existing_in_mahak])&
+                                                Q(radif__in=[k[3] for k in existing_in_mahak])
+                                                 )
         if obsolete_kardex.exists():
             obsolete_kardex.delete()
 
