@@ -191,11 +191,13 @@ def UpdateKardex(request):
     import time
     from django.db import transaction
     from django.db.models import Q
+    from .models import Kardex, Factor, Kala, Storagek, Mtables
+    from django.utils import timezone
 
     t0 = time.time()
     print('شروع آپدیت کاردکس----------------------------------------')
 
-    conn = connect_to_mahak()
+    conn = connect_to_mahak()  # فرض بر این است که این تابع اتصال به دیتابیس را برقرار می‌کند
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -203,7 +205,7 @@ def UpdateKardex(request):
     mahakt_data = cursor.fetchall()
     print('خواندن از دیتابیس انجام شد')
 
-    existing_in_mahak = {(row[0], row[4], row[12] ,row[14]) for row in mahakt_data}
+    existing_in_mahak = {(row[0], row[4], row[12], row[14]) for row in mahakt_data}
 
     kardex_to_create = []
     kardex_to_update = []
@@ -214,7 +216,7 @@ def UpdateKardex(request):
         pdate = row[0]
         code_kala = row[4]
         stock = row[12]
-        radif= row[14]
+        radif = row[14]
         defaults = {
             'code_factor': row[6],
             'percode': row[1],
@@ -222,17 +224,16 @@ def UpdateKardex(request):
             'mablaghsanad': row[3],
             'count': row[7],
             'averageprice': row[11],
-
         }
 
-        if (pdate, code_kala, stock,radif) in current_kardex:
-            kardex = current_kardex[(pdate, code_kala, stock,radif)]
+        if (pdate, code_kala, stock, radif) in current_kardex:
+            kardex = current_kardex[(pdate, code_kala, stock, radif)]
             if any(getattr(kardex, attr) != value for attr, value in defaults.items()):
                 for attr, value in defaults.items():
                     setattr(kardex, attr, value)
                 kardex_to_update.append(kardex)
         else:
-            kardex_to_create.append(Kardex(pdate=pdate, code_kala=code_kala, stock=stock,radif=radif, **defaults))
+            kardex_to_create.append(Kardex(pdate=pdate, code_kala=code_kala, stock=stock, radif=radif, **defaults))
 
     # Bulk create new kardex records
     if kardex_to_create:
@@ -246,31 +247,35 @@ def UpdateKardex(request):
 
     # Delete obsolete kardex records
     with transaction.atomic():
-        obsolete_kardex = Kardex.objects.exclude(Q(pdate__in=[k[0] for k in existing_in_mahak]) &
-                                                Q(code_kala__in=[k[1] for k in existing_in_mahak]) &
-                                                Q(stock__in=[k[2] for k in existing_in_mahak])&
-                                                Q(radif__in=[k[3] for k in existing_in_mahak])
-                                                 )
-        if obsolete_kardex.exists():
-            obsolete_kardex.delete()
+        batch_size = 500  # اندازه دسته برای حذف رکوردها
+        existing_keys = list(existing_in_mahak)
+
+        for i in range(0, len(existing_keys), batch_size):
+            batch = existing_keys[i:i + batch_size]
+            obsolete_kardex = Kardex.objects.exclude(
+                Q(pdate__in=[k[0] for k in batch]) &
+                Q(code_kala__in=[k[1] for k in batch]) &
+                Q(stock__in=[k[2] for k in batch]) &
+                Q(radif__in=[k[3] for k in batch])
+            )
+            if obsolete_kardex.exists():
+                obsolete_kardex.delete()
 
     t2 = time.time()
     print('آپدیت انجام شد')
 
     # اجرای حلقه جایگزین سیگنال‌ها در بخش‌های کوچک‌تر
-    # اجرای حلقه جایگزین سیگنال‌ها
-    kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala','storage').all())
+    kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala', 'storage').all())
     batch_size = 1000
     updates = []
-    factors = {factor.code: factor for factor in
-               Factor.objects.filter(code__in=[k.code_factor for k in kardex_instances])}
+    factors = {factor.code: factor for factor in Factor.objects.filter(code__in=[k.code_factor for k in kardex_instances])}
     kalas = {kala.code: kala for kala in Kala.objects.filter(code__in=[k.code_kala for k in kardex_instances])}
     storages = {storage.code: storage for storage in Storagek.objects.filter(code__in=[k.warehousecode for k in kardex_instances])}
 
     for kardex in kardex_instances:
         factor = factors.get(kardex.code_factor)
         kala = kalas.get(kardex.code_kala)
-        storage= storages.get(kardex.warehousecode)
+        storage = storages.get(kardex.warehousecode)
 
         # بررسی تغییرات قبل از به‌روزرسانی
         updated = False
@@ -284,7 +289,8 @@ def UpdateKardex(request):
         if kardex.storage != storage:
             kardex.storage = storage
             updated = True
-            # بررسی تغییر تاریخ
+
+        # بررسی تغییر تاریخ
         if kardex.pdate:
             jalali_date = jdatetime.date(*map(int, kardex.pdate.split('/')))
             new_date = jalali_date.togregorian()
@@ -295,11 +301,10 @@ def UpdateKardex(request):
         if updated:
             updates.append(kardex)
 
-            # ذخیره‌سازی دسته‌ای
+    # ذخیره‌سازی دسته‌ای
     if updates:
         with transaction.atomic():
-            Kardex.objects.bulk_update(updates, ['factor', 'kala','storage', 'warehousecode','code_kala', 'code_factor', 'date'])
-
+            Kardex.objects.bulk_update(updates, ['factor', 'kala', 'storage', 'warehousecode', 'code_kala', 'code_factor', 'date'])
 
     t3 = time.time()
     print('جایگزین سیگنال انجام شد')
@@ -311,9 +316,9 @@ def UpdateKardex(request):
     sig_time = t3 - t2
 
     print(f"زمان کل: {total_time:.2f} ثانیه")
-    print(f" اتصال به دیتابیس:{db_time:.2f} ثانیه")
-    print(f" عملیات اصلی آپدیت:{up_time:.2f} ثانیه")
-    print(f" جایگزین سیگنال:{sig_time:.2f} ثانیه")
+    print(f"اتصال به دیتابیس: {db_time:.2f} ثانیه")
+    print(f"عملیات اصلی آپدیت: {up_time:.2f} ثانیه")
+    print(f"جایگزین سیگنال: {sig_time:.2f} ثانیه")
 
     cursor.execute(f"SELECT COUNT(*) FROM Kardex")
     row_count = cursor.fetchone()[0]
