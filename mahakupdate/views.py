@@ -1251,18 +1251,25 @@ from django.shortcuts import redirect
 from collections import defaultdict
 
 
+from collections import defaultdict
+from django.db import transaction
+from django.shortcuts import redirect
+from django.db.models import Q
+
 def UpdateMojodi(request):
-    # مرحله اول: بارگذاری داده ها از مدل Kardex
-    kardex_entries = Kardex.objects.all()
+    # بارگذاری داده‌ها از مدل Kardex
+    kardex_entries = Kardex.objects.all().select_related('storage', 'kala')
 
     # دیکشنری برای جمع‌آوری اطلاعات
     mojodi_data = defaultdict(lambda: {
         'stock': 0,
         'averageprice': 0,
         'latest_date': None,
+        'storage': None,
+        'kala': None,
     })
 
-    # مرحله دوم: تجزیه و تحلیل داده ها
+    # تجزیه و تحلیل داده‌ها
     for entry in kardex_entries:
         key = (entry.code_kala, entry.warehousecode)
 
@@ -1273,8 +1280,10 @@ def UpdateMojodi(request):
         if mojodi_data[key]['latest_date'] is None or entry.date > mojodi_data[key]['latest_date']:
             mojodi_data[key]['averageprice'] = entry.averageprice
             mojodi_data[key]['latest_date'] = entry.date
+            mojodi_data[key]['storage'] = entry.storage  # ذخیره‌سازی اطلاعات
+            mojodi_data[key]['kala'] = entry.kala  # ذخیره‌سازی اطلاعات
 
-            # مرحله سوم: ایجاد یا به‌روزرسانی رکوردهای موجودی
+    # ایجاد یا به‌روزرسانی رکوردهای موجودی
     mojodi_instances = []
     for (code_kala, warehousecode), data in mojodi_data.items():
         arzesh = data['stock'] * data['averageprice'] if data['averageprice'] else 0
@@ -1283,8 +1292,8 @@ def UpdateMojodi(request):
             code_kala=code_kala,
             warehousecode=warehousecode,
             defaults={
-                'storage': kardex_entries.filter(code_kala=code_kala, warehousecode=warehousecode).first().storage,
-                'kala': kardex_entries.filter(code_kala=code_kala, warehousecode=warehousecode).first().kala,
+                'storage': data['storage'],
+                'kala': data['kala'],
                 'stock': data['stock'],
                 'averageprice': data['averageprice'],
                 'arzesh': arzesh,
@@ -1292,18 +1301,17 @@ def UpdateMojodi(request):
         )
         mojodi_instances.append(mojodi_instance)
 
-        # مرحله چهارم: حذف رکوردهای اضافی در Mojodi
-    existing_mojodi_codes = {(m.code_kala, m.warehousecode) for m in Mojodi.objects.all()}
+    # حذف رکوردهای اضافی در Mojodi
     current_mojodi_codes = set(mojodi_data.keys())
+    mojodi_to_delete = Mojodi.objects.exclude(
+        Q(code_kala__in=[code_kala for code_kala, _ in current_mojodi_codes]) &
+        Q(warehousecode__in=[warehousecode for _, warehousecode in current_mojodi_codes])
+    )
 
-    # حذف رکوردهایی که در kardex وجود ندارند
-    for mojodi in Mojodi.objects.filter(~Q(pk__in=[m.pk for m in mojodi_instances])):
-        if (mojodi.code_kala, mojodi.warehousecode) not in current_mojodi_codes:
-            mojodi.delete()
+    mojodi_to_delete.delete()  # حذف رکوردها به صورت دسته‌ای
 
-            # در نهایت، ریدایرکت به صفحه مورد نظر
+    # ریدایرکت به صفحه مورد نظر
     return redirect('/updatedb')
-
 
 def UpdateMojodi0(request):
     # ابتدا تمام رکوردهای کاردکس را بر اساس تاریخ مرتب می‌کنیم
