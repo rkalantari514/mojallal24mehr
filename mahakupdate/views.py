@@ -1,21 +1,23 @@
-from collections import Counter
 from django.conf import settings
-import jdatetime
 import pyodbc
-import os
-from mahakupdate.models import WordCount, Kardex, Person, KalaGroupinfo, Category, Storagek, Mojodi
-import sys
-from django.shortcuts import render, redirect
+from mahakupdate.models import WordCount, Kardex, Person, KalaGroupinfo, Category
+from django.shortcuts import render
 from .forms import CategoryForm, KalaForm
-from django.utils import timezone
-from django.db import transaction
-import time
-from .models import FactorDetaile, Factor, Kala, Mtables
+from .models import FactorDetaile
 import os
 import pandas as pd
+import time
+from django.db import transaction
+import time
+from .models import Kardex, Factor, Kala, Storagek, Mtables
+from django.utils import timezone
+import jdatetime  # فرض بر این است که برای تبدیل تاریخ هجری شمسی به میلادی استفاده می‌شود
+import time
+from django.db.models import Max, Q
 from django.shortcuts import redirect
-from django.db.models import Max, Subquery
-from django.db.models import Max, F
+from django.db import transaction
+from .models import Mojodi, Kardex
+
 
 # sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
 
@@ -52,12 +54,6 @@ def connect_to_mahak():
 
 # صفحه عملیات آپدیت
 def Updatedb(request):
-
-
-
-
-
-
     tables = Mtables.objects.filter(in_use=True)
     url_mapping = {
         'Fact_Fo': 'update/factor',
@@ -112,9 +108,6 @@ def Updateall(request):
 
 # آپدیت فاکتور
 def UpdateFactor(request):
-    import time
-    from django.db import transaction
-
     t0 = time.time()
     print('شروع آپدیت فاکتور--------------------------------------')
 
@@ -157,7 +150,8 @@ def UpdateFactor(request):
 
         # Bulk update existing factors
         if factors_to_update:
-            Factor.objects.bulk_update(factors_to_update, ['pdate', 'mablagh_factor', 'takhfif', 'create_time', 'darsad_takhfif'])
+            Factor.objects.bulk_update(factors_to_update,
+                                       ['pdate', 'mablagh_factor', 'takhfif', 'create_time', 'darsad_takhfif'])
 
         # Delete obsolete factors
         Factor.objects.exclude(code__in=existing_in_mahak).delete()
@@ -186,18 +180,140 @@ def UpdateFactor(request):
 
     return redirect('/updatedb')
 
-# آپدیت کاردکس
-def UpdateKardex(request):
-    import time
-    from django.db import transaction
-    from django.db.models import Q
-    from .models import Kardex, Factor, Kala, Storagek, Mtables
-    from django.utils import timezone
 
+# آپدیت کاردکس
+
+from django.shortcuts import redirect
+from django.db import transaction
+from django.utils import timezone
+import time
+import jdatetime
+from .models import Kardex, Mtables, Factor, Kala, Storagek
+
+
+def UpdateKardex(request):
     t0 = time.time()
     print('شروع آپدیت کاردکس----------------------------------------')
 
-    conn = connect_to_mahak()  # فرض بر این است که این تابع اتصال به دیتابیس را برقرار می‌کند
+    conn = connect_to_mahak()  # فرض بر این است که این تابع اتصال به دیتابیس را برقرار می‌کند.
+    cursor = conn.cursor()
+    t1 = time.time()
+
+    # خواندن داده‌ها از جدول Kardex
+    cursor.execute("SELECT * FROM Kardex")
+    mahakt_data = cursor.fetchall()
+
+    # مرحله به‌روزرسانی یا ایجاد رکوردها
+    updates = []
+    for row in mahakt_data:
+        pdate = row[0]
+        code_kala = row[4]
+        stock = row[12]
+        radif = row[14]
+        defaults = {
+            'code_factor': row[6],
+            'percode': row[1],
+            'warehousecode': row[2],
+            'mablaghsanad': row[3],
+            'count': row[7],
+            'averageprice': row[11],
+        }
+
+        # به‌روزرسانی یا ایجاد رکورد در مدل Kardex
+        kardex_instance, created = Kardex.objects.update_or_create(
+            pdate=pdate,
+            code_kala=code_kala,
+            stock=stock,
+            radif=radif,
+            defaults=defaults
+        )
+
+    t2 = time.time()
+    print('آپدیت انجام شد')
+
+    # اجرای حلقه جایگزین سیگنال‌ها
+    kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala', 'storage').all())
+    updates = []
+    factors = {factor.code: factor for factor in
+               Factor.objects.filter(code__in=[k.code_factor for k in kardex_instances])}
+    kalas = {kala.code: kala for kala in Kala.objects.filter(code__in=[k.code_kala for k in kardex_instances])}
+    storages = {storage.code: storage for storage in
+                Storagek.objects.filter(code__in=[k.warehousecode for k in kardex_instances])}
+
+    for kardex in kardex_instances:
+        factor = factors.get(kardex.code_factor)
+        kala = kalas.get(kardex.code_kala)
+        storage = storages.get(kardex.warehousecode)
+
+        # بررسی تغییرات قبل از به‌روزرسانی
+        updated = False
+        if kardex.factor != factor:
+            kardex.factor = factor
+            updated = True
+
+        if kardex.kala != kala:
+            kardex.kala = kala
+            updated = True
+
+        if kardex.storage != storage:
+            kardex.storage = storage
+            updated = True
+
+        # بررسی تغییر تاریخ
+        if kardex.pdate:
+            jalali_date = jdatetime.date(*map(int, kardex.pdate.split('/')))
+            new_date = jalali_date.togregorian()
+            if kardex.date != new_date:
+                kardex.date = new_date
+                updated = True
+
+        if updated:
+            updates.append(kardex)
+
+    # ذخیره‌سازی دسته‌ای
+    if updates:
+        with transaction.atomic():
+            Kardex.objects.bulk_update(updates,
+                                       ['factor', 'kala', 'storage', 'warehousecode', 'code_kala', 'code_factor',
+                                        'date'])
+            print(f"{len(updates)} رکورد به‌روز رسانی سیگنال‌ها انجام شد.")
+
+    t3 = time.time()
+    print('جایگزین سیگنال انجام شد')
+
+    # ثبت زمان‌ها و اطلاعات آخرین بروزرسانی در مدل Mtables
+    tend = time.time()
+    total_time = tend - t0
+    db_time = t1 - t0
+    up_time = t2 - t1
+    sig_time = t3 - t2
+
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    print(f"اتصال به دیتابیس: {db_time:.2f} ثانیه")
+    print(f"عملیات اصلی آپدیت: {up_time:.2f} ثانیه")
+    print(f"جایگزین سیگنال: {sig_time:.2f} ثانیه")
+
+    cursor.execute("SELECT COUNT(*) FROM Kardex")
+    row_count = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Kardex'")
+    column_count = cursor.fetchone()[0]
+
+    table = Mtables.objects.filter(name='Kardex').last()
+    table.last_update_time = timezone.now()
+    table.update_duration = total_time
+    table.row_count = row_count
+    table.column_count = column_count
+    table.save()
+
+    return redirect('/updatedb')
+
+
+def UpdateKardex2(request):
+    t0 = time.time()
+    print('شروع آپدیت کاردکس----------------------------------------')
+
+    conn = connect_to_mahak()  # فرض بر این است که این تابع اتصال به دیتابیس را برقرار می‌کند.
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -210,7 +326,8 @@ def UpdateKardex(request):
     kardex_to_create = []
     kardex_to_update = []
 
-    current_kardex = {(kardex.pdate, kardex.code_kala, kardex.stock, kardex.radif): kardex for kardex in Kardex.objects.all()}
+    current_kardex = {(kardex.pdate, kardex.code_kala, kardex.stock, kardex.radif): kardex for kardex in
+                      Kardex.objects.all()}
 
     for row in mahakt_data:
         pdate = row[0]
@@ -235,23 +352,26 @@ def UpdateKardex(request):
         else:
             kardex_to_create.append(Kardex(pdate=pdate, code_kala=code_kala, stock=stock, radif=radif, **defaults))
 
-    # Bulk create new kardex records
+    # Bulk Create New Kardex Records
     if kardex_to_create:
         with transaction.atomic():
             Kardex.objects.bulk_create(kardex_to_create)
+            print(f"{len(kardex_to_create)} رکورد جدید اضافه شد.")
 
-    # Bulk update existing kardex records
+    # Bulk Update Existing Kardex Records
     if kardex_to_update:
         with transaction.atomic():
-            Kardex.objects.bulk_update(kardex_to_update, ['code_factor', 'percode', 'warehousecode', 'mablaghsanad', 'count', 'averageprice', 'radif'])
+            Kardex.objects.bulk_update(kardex_to_update,
+                                       ['code_factor', 'percode', 'warehousecode', 'mablaghsanad', 'count',
+                                        'averageprice'])
+            print(f"{len(kardex_to_update)} رکورد به‌روزرسانی شد.")
 
-    # Delete obsolete kardex records
+    # Delete Obsolete Kardex Records
     with transaction.atomic():
-        batch_size = 500  # اندازه دسته برای حذف رکوردها
         existing_keys = list(existing_in_mahak)
 
-        for i in range(0, len(existing_keys), batch_size):
-            batch = existing_keys[i:i + batch_size]
+        for i in range(0, len(existing_keys), 500):  # حذف رکوردها در دسته‌های 500 تایی
+            batch = existing_keys[i:i + 500]
             obsolete_kardex = Kardex.objects.exclude(
                 Q(pdate__in=[k[0] for k in batch]) &
                 Q(code_kala__in=[k[1] for k in batch]) &
@@ -260,17 +380,19 @@ def UpdateKardex(request):
             )
             if obsolete_kardex.exists():
                 obsolete_kardex.delete()
+                print(f"{obsolete_kardex.count()} رکورد قدیمی حذف شد.")
 
     t2 = time.time()
     print('آپدیت انجام شد')
 
-    # اجرای حلقه جایگزین سیگنال‌ها در بخش‌های کوچک‌تر
+    # اجرای حلقه جایگزین سیگنال‌ها
     kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala', 'storage').all())
-    batch_size = 1000
     updates = []
-    factors = {factor.code: factor for factor in Factor.objects.filter(code__in=[k.code_factor for k in kardex_instances])}
+    factors = {factor.code: factor for factor in
+               Factor.objects.filter(code__in=[k.code_factor for k in kardex_instances])}
     kalas = {kala.code: kala for kala in Kala.objects.filter(code__in=[k.code_kala for k in kardex_instances])}
-    storages = {storage.code: storage for storage in Storagek.objects.filter(code__in=[k.warehousecode for k in kardex_instances])}
+    storages = {storage.code: storage for storage in
+                Storagek.objects.filter(code__in=[k.warehousecode for k in kardex_instances])}
 
     for kardex in kardex_instances:
         factor = factors.get(kardex.code_factor)
@@ -286,6 +408,7 @@ def UpdateKardex(request):
         if kardex.kala != kala:
             kardex.kala = kala
             updated = True
+
         if kardex.storage != storage:
             kardex.storage = storage
             updated = True
@@ -304,11 +427,15 @@ def UpdateKardex(request):
     # ذخیره‌سازی دسته‌ای
     if updates:
         with transaction.atomic():
-            Kardex.objects.bulk_update(updates, ['factor', 'kala', 'storage', 'warehousecode', 'code_kala', 'code_factor', 'date'])
+            Kardex.objects.bulk_update(updates,
+                                       ['factor', 'kala', 'storage', 'warehousecode', 'code_kala', 'code_factor',
+                                        'date'])
+            print(f"{len(updates)} رکورد به‌روز رسانی سیگنال‌ها انجام شد.")
 
     t3 = time.time()
     print('جایگزین سیگنال انجام شد')
 
+    # ثبت زمان‌ها و اطلاعات آخرین بروزرسانی در مدل Mtables
     tend = time.time()
     total_time = tend - t0
     db_time = t1 - t0
@@ -334,6 +461,7 @@ def UpdateKardex(request):
     table.save()
 
     return redirect('/updatedb')
+
 
 def UpdateFactorDetail(request):
     t0 = time.time()
@@ -400,8 +528,6 @@ def UpdateFactorDetail(request):
     t2 = time.time()
     print('آپدیت انجام شد', t2 - t1)
 
-
-
     tend = time.time()
 
     total_time = tend - t0
@@ -426,6 +552,8 @@ def UpdateFactorDetail(request):
     table.save()
 
     return redirect('/updatedb')
+
+
 def UpdateKala(request):
     t0 = time.time()
     print('شروع آپدیت کالا---------------------------------------------------')
@@ -488,11 +616,7 @@ def UpdateKala(request):
     return redirect('/updatedb')
 
 
-
 def UpdatePerson(request):
-    import time
-    from django.db import transaction
-
     t0 = time.time()
     print('شروع آپدیت افراد--------------------------------------------')
 
@@ -539,7 +663,9 @@ def UpdatePerson(request):
 
         # Bulk update existing persons
         if persons_to_update:
-            Person.objects.bulk_update(persons_to_update, ['grpcode', 'name', 'lname', 'tel1', 'tel2', 'fax', 'mobile', 'address', 'comment'])
+            Person.objects.bulk_update(persons_to_update,
+                                       ['grpcode', 'name', 'lname', 'tel1', 'tel2', 'fax', 'mobile', 'address',
+                                        'comment'])
 
         # Delete obsolete persons
         Person.objects.exclude(code__in=existing_in_mahak).delete()
@@ -631,7 +757,6 @@ def UpdateStorage(request):
     return redirect('/updatedb')
 
 
-
 def Update_from_mahak(request):
     t0 = time.time()
     print('شروع آپدیت---------------------------------------')
@@ -639,7 +764,7 @@ def Update_from_mahak(request):
     cursor = conn.cursor()
     print('cursor')
     print(cursor)
-    Mtables.objects.create(name='test',row_count = 12,cloumn_count=10)
+    Mtables.objects.create(name='test', row_count=12, cloumn_count=10)
 
     t1 = time.time()
 
@@ -667,10 +792,10 @@ def Update_from_mahak(request):
                     'cloumn_count': column_count
                 }
             )
-            print('ok ok ok ok ok ok ok ok table_name',table_name)
+            print('ok ok ok ok ok ok ok ok table_name', table_name)
 
         except:
-            print('error',table_name)
+            print('error', table_name)
             try:
                 cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
                 print('m1')
@@ -801,6 +926,8 @@ def Update_from_mahak(request):
     print(f"فاکتورها {factor_time:.2f} ثانیه")
     print(f"جزئیات فاکتورها {factor_detail_time:.2f} ثانیه")
     print(f"جزئیات  {kardex_time:.2f} ثانیه")
+
+
 def Kala_group(request):
     # دریافت کالاهای موجود در جزئیات فاکتور
     # WordCount.objects.all().delete()
@@ -828,7 +955,6 @@ def Kala_group(request):
     return render(request, 'kala_group.html', context)
 
 
-
 def category_create_view(request):
     if request.method == "POST":
         form = CategoryForm(request.POST)
@@ -838,6 +964,8 @@ def category_create_view(request):
     else:
         form = CategoryForm()
     return render(request, 'category_form.html', {'form': form})
+
+
 def kala_create_view(request):
     if request.method == "POST":
         form = KalaForm(request.POST)
@@ -847,13 +975,14 @@ def kala_create_view(request):
     else:
         form = KalaForm()
     return render(request, 'kala_form.html', {'form': form})
-# آپدیت افراد
 
+
+# آپدیت افراد
 
 
 def UpdateKalaGroupinfo(request):
     # مسیر فایل اکسل
-    file_path = os.path.join(settings.BASE_DIR, 'temp', 'kala_group.xlsx')    # خواندن فایل اکسل با Pandas
+    file_path = os.path.join(settings.BASE_DIR, 'temp', 'kala_group.xlsx')  # خواندن فایل اکسل با Pandas
     df = pd.read_excel(file_path)
 
     # پردازش داده‌ها و به‌روزرسانی مدل
@@ -908,10 +1037,10 @@ def update_categories_from_kala_groupinfo():
                 defaults={'level': level, 'parent': parent}
             )
 
+
 def CreateKalaGroup(request):
     update_categories_from_kala_groupinfo()
     return redirect('/updatedb')
-
 
 
 def update_kala_categories():
@@ -948,41 +1077,11 @@ def update_kala_categories():
         with transaction.atomic():
             Kala.objects.bulk_update(updates, ['category'])
 
+
 def UpdateKalaGroup(request):
     update_kala_categories()
     return redirect('/updatedb')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-from django.db.models import Max, Q
-
-from django.shortcuts import redirect
-from django.db import transaction
-from .models import Mojodi, Kardex
-
-from django.shortcuts import redirect
-from django.db import transaction
-from .models import Mojodi, Kardex
-
-
-from django.shortcuts import redirect
-from django.db import transaction
-from .models import Mojodi, Kardex
 
 def UpdateMojodi(request):
     # ابتدا تمام رکوردهای کاردکس را بر اساس تاریخ مرتب می‌کنیم
@@ -1023,7 +1122,9 @@ def UpdateMojodi(request):
         # حذف رکوردهای تکراری در مدل Mojodi
         for key in generated_mojodi.keys():
             warehouse_code, code_kala = key
-            Mojodi.objects.filter(warehousecode=warehouse_code, code_kala=code_kala).exclude(pk__in=Mojodi.objects.filter(warehousecode=warehouse_code, code_kala=code_kala).values('pk')[:1]).delete()
+            Mojodi.objects.filter(warehousecode=warehouse_code, code_kala=code_kala).exclude(
+                pk__in=Mojodi.objects.filter(warehousecode=warehouse_code, code_kala=code_kala).values('pk')[
+                       :1]).delete()
 
         # حالا دیکشنری را در مدل موجودی پر می‌کنیم
         for key, value in generated_mojodi.items():
@@ -1091,7 +1192,6 @@ def UpdateMojodi1(request):
     return redirect('/updatedb')
 
 
-
 def UpdateMojodi2(request):
     # دریافت آخرین موجودی‌ها بر اساس کالا و انبار
     latest_mojodi = Kardex.objects.values('code_kala', 'warehousecode').annotate(
@@ -1099,7 +1199,7 @@ def UpdateMojodi2(request):
     ).values_list('latest_id', flat=True)
 
     # دریافت رکوردهای مربوط به آخرین موجودی و حذف موجودی‌های صفر
-    kardex_records = Kardex.objects.order_by('-date','radif').filter(
+    kardex_records = Kardex.objects.order_by('-date', 'radif').filter(
         id__in=latest_mojodi,
         stock__gt=0
     ).select_related('kala')
