@@ -183,6 +183,10 @@ def UpdateFactor(request):
 
 # آپدیت کاردکس
 
+from django.db import transaction
+from django.shortcuts import redirect
+import time
+
 def UpdateKardex(request):
     t0 = time.time()
     print('شروع آپدیت کاردکس----------------------------------------')
@@ -205,6 +209,9 @@ def UpdateKardex(request):
         for k in Kardex.objects.all()
     }
 
+    # مجموعه‌ای برای کلیدهای رکوردهای جدید
+    new_keys = set()
+
     for row in mahakt_data:
         pdate = row[0]
         code_kala = row[4]
@@ -219,8 +226,10 @@ def UpdateKardex(request):
             'averageprice': row[11],
         }
 
-        # بررسی اینکه آیا رکورد موجود است یا خیر
+        # ایجاد کلید برای رکورد جدید
         key = (pdate, code_kala, stock, radif)
+        new_keys.add(key)
+
         if key in existing_kardex:
             kardex_instance = existing_kardex[key]
             # به‌روزرسانی رکورد موجود
@@ -237,7 +246,7 @@ def UpdateKardex(request):
                 **defaults
             ))
 
-            # ذخیره‌سازی دسته‌ای
+    # ذخیره‌سازی دسته‌ای
     if updates or new_records:
         with transaction.atomic():
             Kardex.objects.bulk_update(updates, ['code_factor', 'percode', 'warehousecode', 'mablaghsanad', 'count',
@@ -247,6 +256,20 @@ def UpdateKardex(request):
 
     t2 = time.time()
     print('آپدیت انجام شد')
+
+    # حذف رکوردهای اضافی
+    existing_keys = set(existing_kardex.keys())
+    keys_to_delete = existing_keys - new_keys
+
+    if keys_to_delete:
+        Kardex.objects.filter(
+            pdate__in=[key[0] for key in keys_to_delete],
+            code_kala__in=[key[1] for key in keys_to_delete],
+            stock__in=[key[2] for key in keys_to_delete],
+            radif__in=[key[3] for key in keys_to_delete]
+        ).delete()
+        print(f"{len(keys_to_delete)} رکورد اضافی حذف شد.")
+
 
     # اجرای حلقه جایگزین سیگنال‌ها
     kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala', 'storage').all())
@@ -1223,7 +1246,66 @@ def UpdateKalaGroup(request):
     return redirect('/updatedb')
 
 
+from django.db import transaction
+from django.shortcuts import redirect
+from collections import defaultdict
+
+
 def UpdateMojodi(request):
+    # مرحله اول: بارگذاری داده ها از مدل Kardex
+    kardex_entries = Kardex.objects.all()
+
+    # دیکشنری برای جمع‌آوری اطلاعات
+    mojodi_data = defaultdict(lambda: {
+        'stock': 0,
+        'averageprice': 0,
+        'latest_date': None,
+    })
+
+    # مرحله دوم: تجزیه و تحلیل داده ها
+    for entry in kardex_entries:
+        key = (entry.code_kala, entry.warehousecode)
+
+        # جمع‌آوری موجودی (`stock`)
+        mojodi_data[key]['stock'] += entry.count
+
+        # بروزرسانی میانگین قیمت و تاریخ آخرین رکورد
+        if mojodi_data[key]['latest_date'] is None or entry.date > mojodi_data[key]['latest_date']:
+            mojodi_data[key]['averageprice'] = entry.averageprice
+            mojodi_data[key]['latest_date'] = entry.date
+
+            # مرحله سوم: ایجاد یا به‌روزرسانی رکوردهای موجودی
+    mojodi_instances = []
+    for (code_kala, warehousecode), data in mojodi_data.items():
+        arzesh = data['stock'] * data['averageprice'] if data['averageprice'] else 0
+
+        mojodi_instance, created = Mojodi.objects.update_or_create(
+            code_kala=code_kala,
+            warehousecode=warehousecode,
+            defaults={
+                'storage': kardex_entries.filter(code_kala=code_kala, warehousecode=warehousecode).first().storage,
+                'kala': kardex_entries.filter(code_kala=code_kala, warehousecode=warehousecode).first().kala,
+                'stock': data['stock'],
+                'averageprice': data['averageprice'],
+                'arzesh': arzesh,
+            }
+        )
+        mojodi_instances.append(mojodi_instance)
+
+        # مرحله چهارم: حذف رکوردهای اضافی در Mojodi
+    existing_mojodi_codes = {(m.code_kala, m.warehousecode) for m in Mojodi.objects.all()}
+    current_mojodi_codes = set(mojodi_data.keys())
+
+    # حذف رکوردهایی که در kardex وجود ندارند
+    for mojodi in Mojodi.objects.filter(~Q(pk__in=[m.pk for m in mojodi_instances])):
+        if (mojodi.code_kala, mojodi.warehousecode) not in current_mojodi_codes:
+            mojodi.delete()
+
+            # در نهایت، ریدایرکت به صفحه مورد نظر
+    return redirect('/updatedb')
+
+
+def UpdateMojodi0(request):
     # ابتدا تمام رکوردهای کاردکس را بر اساس تاریخ مرتب می‌کنیم
     # Mojodi.objects.all().delete()
     kardex_entries = Kardex.objects.all().order_by('date', 'radif')
