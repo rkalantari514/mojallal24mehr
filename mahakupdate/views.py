@@ -183,15 +183,155 @@ def UpdateFactor(request):
 
 # آپدیت کاردکس
 
-from django.shortcuts import redirect
-from django.db import transaction
-from django.utils import timezone
-import time
-import jdatetime
-from .models import Kardex, Mtables, Factor, Kala, Storagek
-
-
 def UpdateKardex(request):
+    t0 = time.time()
+    print('شروع آپدیت کاردکس----------------------------------------')
+
+    conn = connect_to_mahak()  # فرض بر این است که این تابع اتصال به دیتابیس را برقرار می‌کند.
+    cursor = conn.cursor()
+    t1 = time.time()
+
+    # خواندن داده‌ها از جدول Kardex
+    cursor.execute("SELECT * FROM Kardex")
+    mahakt_data = cursor.fetchall()
+
+    # مرحله به‌روزرسانی یا ایجاد رکوردها
+    updates = []
+    new_records = []
+
+    # بارگذاری رکوردهای موجود در دیتابیس به یک دیکشنری
+    existing_kardex = {
+        (k.pdate, k.code_kala, k.stock, k.radif): k
+        for k in Kardex.objects.all()
+    }
+
+    for row in mahakt_data:
+        pdate = row[0]
+        code_kala = row[4]
+        stock = row[12]
+        radif = row[14]
+        defaults = {
+            'code_factor': row[6],
+            'percode': row[1],
+            'warehousecode': row[2],
+            'mablaghsanad': row[3],
+            'count': row[7],
+            'averageprice': row[11],
+        }
+
+        # بررسی اینکه آیا رکورد موجود است یا خیر
+        key = (pdate, code_kala, stock, radif)
+        if key in existing_kardex:
+            kardex_instance = existing_kardex[key]
+            # به‌روزرسانی رکورد موجود
+            for field, value in defaults.items():
+                setattr(kardex_instance, field, value)
+            updates.append(kardex_instance)
+        else:
+            # ایجاد رکورد جدید
+            new_records.append(Kardex(
+                pdate=pdate,
+                code_kala=code_kala,
+                stock=stock,
+                radif=radif,
+                **defaults
+            ))
+
+            # ذخیره‌سازی دسته‌ای
+    if updates or new_records:
+        with transaction.atomic():
+            Kardex.objects.bulk_update(updates, ['code_factor', 'percode', 'warehousecode', 'mablaghsanad', 'count',
+                                                 'averageprice'])
+            Kardex.objects.bulk_create(new_records)
+            print(f"{len(updates) + len(new_records)} رکورد به‌روز رسانی یا ایجاد شد.")
+
+    t2 = time.time()
+    print('آپدیت انجام شد')
+
+    # اجرای حلقه جایگزین سیگنال‌ها
+    kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala', 'storage').all())
+    updates = []
+    factors = {factor.code: factor for factor in
+               Factor.objects.filter(code__in=[k.code_factor for k in kardex_instances])}
+    kalas = {kala.code: kala for kala in Kala.objects.filter(code__in=[k.code_kala for k in kardex_instances])}
+    storages = {storage.code: storage for storage in
+                Storagek.objects.filter(code__in=[k.warehousecode for k in kardex_instances])}
+
+    for kardex in kardex_instances:
+        factor = factors.get(kardex.code_factor)
+        kala = kalas.get(kardex.code_kala)
+        storage = storages.get(kardex.warehousecode)
+
+        # بررسی تغییرات قبل از به‌روزرسانی
+        updated = False
+        if kardex.factor != factor:
+            kardex.factor = factor
+            updated = True
+
+        if kardex.kala != kala:
+            kardex.kala = kala
+            updated = True
+
+        if kardex.storage != storage:
+            kardex.storage = storage
+            updated = True
+
+        # بررسی تغییر تاریخ
+        if kardex.pdate:
+            jalali_date = jdatetime.date(*map(int, kardex.pdate.split('/')))
+            new_date = jalali_date.togregorian()
+            if kardex.date != new_date:
+                kardex.date = new_date
+                updated = True
+
+        if updated:
+            updates.append(kardex)
+
+    # ذخیره‌سازی دسته‌ای
+    if updates:
+        with transaction.atomic():
+            Kardex.objects.bulk_update(updates,
+                                       ['factor', 'kala', 'storage', 'warehousecode', 'code_kala', 'code_factor',
+                                        'date'])
+            print(f"{len(updates)} رکورد به‌روز رسانی سیگنال‌ها انجام شد.")
+
+    t3 = time.time()
+    print('جایگزین سیگنال انجام شد')
+
+    # ثبت زمان‌ها و اطلاعات آخرین بروزرسانی در مدل Mtables
+    tend = time.time()
+    total_time = tend - t0
+    db_time = t1 - t0
+    up_time = t2 - t1
+    sig_time = t3 - t2
+
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    print(f"اتصال به دیتابیس: {db_time:.2f} ثانیه")
+    print(f"عملیات اصلی آپدیت: {up_time:.2f} ثانیه")
+    print(f"جایگزین سیگنال: {sig_time:.2f} ثانیه")
+
+    cursor.execute("SELECT COUNT(*) FROM Kardex")
+    row_count = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Kardex'")
+    column_count = cursor.fetchone()[0]
+
+    table = Mtables.objects.filter(name='Kardex').last()
+    table.last_update_time = timezone.now()
+    table.update_duration = total_time
+    table.row_count = row_count
+    table.column_count = column_count
+    table.save()
+
+    return redirect('/updatedb')
+
+
+
+
+
+
+
+def UpdateKardex1(request):
     t0 = time.time()
     print('شروع آپدیت کاردکس----------------------------------------')
 
