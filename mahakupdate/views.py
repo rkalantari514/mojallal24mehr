@@ -1248,6 +1248,9 @@ from collections import defaultdict
 
 
 
+from django.shortcuts import redirect
+from collections import defaultdict
+
 def UpdateMojodi(request):
     # بارگذاری داده‌ها از مدل Kardex
     Mojodi.objects.all().delete()  # این خط تمام رکوردهای Mojodi را حذف می‌کند
@@ -1288,8 +1291,8 @@ def UpdateMojodi(request):
         # محاسبه arzesh
         arzesh = data['stock'] * data['averageprice'] if data['averageprice'] else 0
 
-        # به‌روزرسانی total_stock
-        if total_stock_data[code_kala]['latest_stock'] is None or (data['latest_date'] and data['latest_date'] > total_stock_data[code_kala]['latest_stock']):
+        # به‌روزرسانی total_stock بر اساس آخرین تاریخ
+        if total_stock_data[code_kala]['latest_stock'] is None or (data['latest_date'] and (total_stock_data[code_kala]['latest_stock'] is None or data['latest_date'] > total_stock_data[code_kala]['latest_stock'])):
             total_stock_data[code_kala]['latest_stock'] = data['stock']
             total_stock_data[code_kala]['averageprice'] = data['averageprice']
 
@@ -1318,7 +1321,6 @@ def UpdateMojodi(request):
 
     # ریدایرکت به صفحه مورد نظر بعد از اتمام
     return redirect('/updatedb')
-
 
 
 def UpdateMojodi000000(request):
