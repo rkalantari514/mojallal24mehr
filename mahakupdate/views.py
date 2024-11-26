@@ -1,22 +1,17 @@
 from django.conf import settings
 import pyodbc
-from mahakupdate.models import WordCount, Kardex, Person, KalaGroupinfo, Category
+from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category
 from django.shortcuts import render
 from .forms import CategoryForm, KalaForm
 from .models import FactorDetaile
 import os
 import pandas as pd
-import time
-from django.db import transaction
-import time
-from .models import Kardex, Factor, Kala, Storagek, Mtables
+from .models import Factor, Kala, Storagek, Mtables
 from django.utils import timezone
 import jdatetime  # فرض بر این است که برای تبدیل تاریخ هجری شمسی به میلادی استفاده می‌شود
-import time
 from django.db.models import Max, Q
-from django.shortcuts import redirect
-from django.db import transaction
-from .models import Mojodi, Kardex
+from .models import Mojodi
+from django.db.models import Q
 
 
 # sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
@@ -1251,33 +1246,11 @@ from django.shortcuts import redirect
 from collections import defaultdict
 
 
-from collections import defaultdict
-from django.db import transaction
-from django.shortcuts import redirect
-from django.db.models import Q
 
-
-from collections import defaultdict
-from django.db.models import Q
-from django.shortcuts import redirect
-from .models import Kardex, Mojodi
-
-from collections import defaultdict
-from django.db.models import Q
-from django.shortcuts import redirect
-from .models import Kardex, Mojodi
-
-from collections import defaultdict
-from django.db.models import Q
-from django.shortcuts import redirect
-from .models import Kardex, Mojodi
-
-from collections import defaultdict
-from django.db.models import Q
 
 def UpdateMojodi(request):
     # بارگذاری داده‌ها از مدل Kardex
-    Mojodi.objects.all().delete()
+    Mojodi.objects.all().delete()  # این خط تمام رکوردهای Mojodi را حذف می‌کند
     kardex_entries = Kardex.objects.order_by('date', 'radif').select_related('storage', 'kala')
 
     # دیکشنری برای جمع‌آوری اطلاعات
@@ -1287,13 +1260,14 @@ def UpdateMojodi(request):
         'latest_date': None,
         'storage': None,
         'kala': None,
+        'warehousecode': None,
     })
 
     # جمع‌آوری اطلاعات از رکوردهای Kardex
     for entry in kardex_entries:
-        key = entry.code_kala  # فقط کد کالا به عنوان کلید
+        key = (entry.code_kala, entry.warehousecode)  # کلید شامل کد کالا و کد انبار
 
-        # جمع‌آوری موجودی (`stock`)
+        # جمع‌آوری موجودی (`stock`) بر اساس انبار
         mojodi_data[key]['stock'] += entry.count
 
         # بروزرسانی میانگین قیمت و تاریخ آخرین رکورد
@@ -1302,35 +1276,48 @@ def UpdateMojodi(request):
             mojodi_data[key]['latest_date'] = entry.date
             mojodi_data[key]['storage'] = entry.storage
             mojodi_data[key]['kala'] = entry.kala
+            mojodi_data[key]['warehousecode'] = entry.warehousecode
 
     # ایجاد یا به‌روزرسانی رکوردهای موجودی
-    for code_kala, data in mojodi_data.items():
+    total_stock_data = defaultdict(lambda: {
+        'latest_stock': None,
+        'averageprice': None
+    })
+
+    for (code_kala, warehousecode), data in mojodi_data.items():
+        # محاسبه arzesh
         arzesh = data['stock'] * data['averageprice'] if data['averageprice'] else 0
 
-        # استفاده از update_or_create با استفاده از کد کالا
-        mojodi_instance, created = Mojodi.objects.update_or_create(
+        # به‌روزرسانی total_stock
+        if total_stock_data[code_kala]['latest_stock'] is None or (data['latest_date'] and data['latest_date'] > total_stock_data[code_kala]['latest_stock']):
+            total_stock_data[code_kala]['latest_stock'] = data['stock']
+            total_stock_data[code_kala]['averageprice'] = data['averageprice']
+
+        # در اینجا از اطلاعات Mojodi برای ایجاد یا به‌روزرسانی رکورد استفاده می‌کنیم
+        Mojodi.objects.update_or_create(
             code_kala=code_kala,
+            warehousecode=warehousecode,  # برای تفکیک بین متفاوت کدهای انبار
             defaults={
                 'storage': data['storage'],
                 'kala': data['kala'],
                 'stock': data['stock'],
                 'averageprice': data['averageprice'],
                 'arzesh': arzesh,
-                'total_stock': data['stock'],  # استفاده از موجودی برای total_stock
+                'total_stock': total_stock_data[code_kala]['latest_stock'],  # استفاده از آخرین موجودی
             }
         )
 
-    # حذف رکوردهای اضافی در Mojodi
-    current_mojodi_keys = {code_kala for code_kala in mojodi_data.keys()}
+    # حذف رکوردهای اضافی از Mojodi
+    current_mojodi_keys = {(code_kala, warehousecode) for (code_kala, warehousecode) in mojodi_data.keys()}
     mojodi_to_delete = Mojodi.objects.exclude(
-        code_kala__in=current_mojodi_keys
+        warehousecode__in=[item['warehousecode'] for item in mojodi_data.values()],
+        code_kala__in=[item['kala'] for item in mojodi_data.values()]
     )
 
     mojodi_to_delete.delete()  # حذف رکوردها به صورت دسته‌ای
 
-    # ریدایرکت به صفحه مورد نظر
+    # ریدایرکت به صفحه مورد نظر بعد از اتمام
     return redirect('/updatedb')
-
 
 
 
