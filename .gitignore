@@ -1,5 +1,5 @@
 # Ignore SQLite database files
 db.sqlite3
 
-# Ignore migration folders
-*/migrations/
+# Ignore all migrations folders in any subdirectories
+**/migrations/

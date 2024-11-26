@@ -1277,6 +1277,7 @@ from django.db.models import Q
 
 def UpdateMojodi(request):
     # بارگذاری داده‌ها از مدل Kardex
+    Mojodi.objects.all().delete()
     kardex_entries = Kardex.objects.order_by('date', 'radif').select_related('storage', 'kala')
 
     # دیکشنری برای جمع‌آوری اطلاعات

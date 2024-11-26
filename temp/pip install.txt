@@ -39,6 +39,6 @@ Connection-specific DNS Suffix  . :
 
 
 git rm --cached db.sqlite3
-git rm -r --cached */migrations/
+git rm -r --cached **/migrations/
 git commit -m "Remove db.sqlite3 and migrations from git tracking"
 
