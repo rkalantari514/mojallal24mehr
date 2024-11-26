@@ -157,7 +157,7 @@ class Mojodi(models.Model):
     code_kala = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد کالا')
     kala = models.ForeignKey(Kala, on_delete=models.SET_NULL, null=True, blank=True)
     stock=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی')
-    # total_stock=models.FloatField(blank=True, null=True, default=0, verbose_name='کل موجودی ')
+    total_stock=models.FloatField(blank=True, null=True, default=0, verbose_name='کل موجودی ')
     averageprice=models.FloatField(blank=True, null=True, default=0, verbose_name='قیمت میانگین')
     arzesh = models.FloatField(blank=True, null=True, default=0, verbose_name='ارزش')
     class Meta:
