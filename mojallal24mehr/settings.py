@@ -175,3 +175,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Format for displaying run time timestamps in the Django admin site.
 APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds to wait for an explicitly requested job to complete.
+
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'update-every-hour': {
+        'task': 'your_app_name.tasks.update_all_tables_job',
+        'schedule': crontab(minute='7'),  # هر ساعت در دقیقه 0 اجرا می‌شود.
+    },
+}
