@@ -1262,7 +1262,7 @@ def UpdateMojodi(request):
     kardex_entries = Kardex.objects.order_by('date','radif').select_related('storage', 'kala')
     mm=0
     for k in kardex_entries:
-        print(k.pdate,k.warehousecode,k.radif,k.count)
+        print(k.code_kala,k.pdate,k.warehousecode,k.radif,k.count)
         mm+=k.count
     print('mm')
     print(mm)
