@@ -1254,6 +1254,9 @@ from collections import defaultdict
 from django.shortcuts import redirect
 from collections import defaultdict
 
+from django.shortcuts import redirect
+from collections import defaultdict
+
 def UpdateMojodi(request):
     # بارگذاری داده‌ها از مدل Kardex
     Mojodi.objects.all().delete()  # این خط تمام رکوردهای Mojodi را حذف می‌کند
@@ -1286,7 +1289,7 @@ def UpdateMojodi(request):
 
     # ایجاد یا به‌روزرسانی رکوردهای موجودی
     total_stock_data = defaultdict(lambda: {
-        'latest_date': None,  # تغییر نام متغیر
+        'latest_stock': 0,  # تغییر نام متغیر به latest_stock و مقداردهی اولیه به 0
         'averageprice': None
     })
 
@@ -1294,9 +1297,9 @@ def UpdateMojodi(request):
         # محاسبه arzesh
         arzesh = data['stock'] * data['averageprice'] if data['averageprice'] else 0
 
-        # به‌روزرسانی total_stock بر اساس آخرین تاریخ
-        if total_stock_data[code_kala]['latest_date'] is None or (data['latest_date'] and (total_stock_data[code_kala]['latest_date'] is None or data['latest_date'] > total_stock_data[code_kala]['latest_date'])):
-            total_stock_data[code_kala]['latest_date'] = data['latest_date']  # فقط تاریخ را ذخیره کنید
+        # به‌روزرسانی موجودی کل بر اساس آخرین تاریخ
+        if total_stock_data[code_kala]['latest_stock'] is None or (data['latest_date'] and (total_stock_data[code_kala]['latest_stock'] is None or data['latest_date'] > total_stock_data[code_kala]['latest_date'])):
+            total_stock_data[code_kala]['latest_stock'] = data['stock']  # ذخیره موجودی به جای تاریخ
             total_stock_data[code_kala]['averageprice'] = data['averageprice']
 
         # در اینجا از اطلاعات Mojodi برای ایجاد یا به‌روزرسانی رکورد استفاده می‌کنیم
@@ -1309,7 +1312,7 @@ def UpdateMojodi(request):
                 'stock': data['stock'],
                 'averageprice': data['averageprice'],
                 'arzesh': arzesh,
-                'total_stock': total_stock_data[code_kala]['latest_date'],  # اینجا فقط تاریخ را استفاده کنید
+                'total_stock': total_stock_data[code_kala]['latest_stock'],  # استفاده از موجودی به جای تاریخ
             }
         )
 
@@ -1324,6 +1327,7 @@ def UpdateMojodi(request):
 
     # ریدایرکت به صفحه مورد نظر بعد از اتمام
     return redirect('/updatedb')
+
 
 def UpdateMojodi000000(request):
     # بارگذاری داده‌ها از مدل Kardex
