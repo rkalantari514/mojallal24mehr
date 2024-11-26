@@ -34,3 +34,11 @@ Connection-specific DNS Suffix  . :
                                        172.16.1.1
 
 
+
+
+
+
+git rm --cached db.sqlite3
+git rm -r --cached */migrations/
+git commit -m "Remove db.sqlite3 and migrations from git tracking"
+
