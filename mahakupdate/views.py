@@ -1257,16 +1257,28 @@ from collections import defaultdict
 from django.shortcuts import redirect
 from collections import defaultdict
 
+from django.shortcuts import redirect
+from collections import defaultdict
+
+import time
+from collections import defaultdict
+from django.shortcuts import redirect
+from .models import Kardex, Mojodi
+
+
 def UpdateMojodi(request):
+    start_time = time.time()  # زمان شروع تابع
+
+    # حذف تمامی رکوردهای Mojodi
+    Mojodi.objects.all().delete()
+
     # بارگذاری داده‌ها از مدل Kardex
-    Mojodi.objects.all().delete()  # این خط تمام رکوردهای Mojodi را حذف می‌کند
     kardex_entries = Kardex.objects.order_by('date', 'radif').select_related('storage', 'kala')
 
     # دیکشنری برای جمع‌آوری اطلاعات
     mojodi_data = defaultdict(lambda: {
         'stock': 0,
         'averageprice': 0,
-        'latest_date': None,
         'storage': None,
         'kala': None,
         'warehousecode': None,
@@ -1279,53 +1291,40 @@ def UpdateMojodi(request):
         # جمع‌آوری موجودی (`stock`) بر اساس انبار
         mojodi_data[key]['stock'] += entry.count
 
-        # بروزرسانی میانگین قیمت و تاریخ آخرین رکورد
-        if mojodi_data[key]['latest_date'] is None or entry.date > mojodi_data[key]['latest_date']:
-            mojodi_data[key]['averageprice'] = entry.averageprice
-            mojodi_data[key]['latest_date'] = entry.date
-            mojodi_data[key]['storage'] = entry.storage
-            mojodi_data[key]['kala'] = entry.kala
-            mojodi_data[key]['warehousecode'] = entry.warehousecode
+        # بروزرسانی میانگین قیمت و اطلاعات دیگر
+        mojodi_data[key]['averageprice'] = entry.averageprice
+        mojodi_data[key]['storage'] = entry.storage
+        mojodi_data[key]['kala'] = entry.kala
+        mojodi_data[key]['warehousecode'] = entry.warehousecode
 
-    # ایجاد یا به‌روزرسانی رکوردهای موجودی
-    total_stock_data = defaultdict(lambda: {
-        'latest_stock': 0,  # تغییر نام متغیر به latest_stock و مقداردهی اولیه به 0
-        'averageprice': None
-    })
-
+    # ایجاد یا به‌روزرسانی رکوردهای Mojodi
     for (code_kala, warehousecode), data in mojodi_data.items():
         # محاسبه arzesh
         arzesh = data['stock'] * data['averageprice'] if data['averageprice'] else 0
 
-        # به‌روزرسانی موجودی کل بر اساس آخرین تاریخ
-        if total_stock_data[code_kala]['latest_stock'] is None or (data['latest_date'] and (total_stock_data[code_kala]['latest_stock'] is None or data['latest_date'] > total_stock_data[code_kala]['latest_date'])):
-            total_stock_data[code_kala]['latest_stock'] = data['stock']  # ذخیره موجودی به جای تاریخ
-            total_stock_data[code_kala]['averageprice'] = data['averageprice']
-
-        # در اینجا از اطلاعات Mojodi برای ایجاد یا به‌روزرسانی رکورد استفاده می‌کنیم
         Mojodi.objects.update_or_create(
             code_kala=code_kala,
-            warehousecode=warehousecode,  # برای تفکیک بین متفاوت کدهای انبار
+            warehousecode=warehousecode,  # برای تفکیک بین کدهای انبار مختلف
             defaults={
                 'storage': data['storage'],
                 'kala': data['kala'],
                 'stock': data['stock'],
                 'averageprice': data['averageprice'],
                 'arzesh': arzesh,
-                'total_stock': total_stock_data[code_kala]['latest_stock'],  # استفاده از موجودی به جای تاریخ
+                'total_stock': data['stock'],  # استفاده از stock برای موجودی کل
             }
         )
 
-    # حذف رکوردهای اضافی از Mojodi
-    current_mojodi_keys = {(code_kala, warehousecode) for (code_kala, warehousecode) in mojodi_data.keys()}
-    mojodi_to_delete = Mojodi.objects.exclude(
-        warehousecode__in=[item['warehousecode'] for item in mojodi_data.values()],
-        code_kala__in=[item['kala'] for item in mojodi_data.values()]
-    )
+    # محاسبه و بروزرسانی total_stock
+    for code_kala, group in Kardex.objects.values('code_kala').annotate(latest_stock=models.Max('stock')):
+        Mojodi.objects.filter(code_kala=code_kala).update(total_stock=group['latest_stock'])
 
-    mojodi_to_delete.delete()  # حذف رکوردها به صورت دسته‌ای
+    total_time = time.time() - start_time  # محاسبه زمان اجرا
 
-    # ریدایرکت به صفحه مورد نظر بعد از اتمام
+    # چاپ زمان
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+
+    # ریدایرکت به صفحه /updatedb
     return redirect('/updatedb')
 
 
