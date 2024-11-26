@@ -157,6 +157,7 @@ class Mojodi(models.Model):
     code_kala = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد کالا')
     kala = models.ForeignKey(Kala, on_delete=models.SET_NULL, null=True, blank=True)
     stock=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی')
+    total_stock=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی')
     averageprice=models.FloatField(blank=True, null=True, default=0, verbose_name='قیمت میانگین')
     arzesh = models.FloatField(blank=True, null=True, default=0, verbose_name='ارزش')
     class Meta:
@@ -168,6 +169,9 @@ class Mojodi(models.Model):
 
 
         # @receiver(pre_save, sender=Kardex)
+
+
+
 @receiver(pre_save, sender=Factor)
 def convert_pdate_to_date(sender, instance, **kwargs):
     print("Signal convert_pdate_to_date triggered")  # برای دیباگینگ

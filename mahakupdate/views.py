@@ -1256,16 +1256,88 @@ from django.db import transaction
 from django.shortcuts import redirect
 from django.db.models import Q
 
+
+from collections import defaultdict
+from django.db.models import Q
+from django.shortcuts import redirect
+from .models import Kardex, Mojodi
+
+from collections import defaultdict
+from django.db.models import Q
+from django.shortcuts import redirect
+from .models import Kardex, Mojodi
+
+from collections import defaultdict
+from django.db.models import Q
+from django.shortcuts import redirect
+from .models import Kardex, Mojodi
+
 def UpdateMojodi(request):
+    # بارگذاری داده‌ها از مدل Kardex
+
+    kardex_entries = Kardex.objects.order_by('date', 'radif').select_related('storage', 'kala')
+
+    # دیکشنری برای جمع‌آوری اطلاعات
+    mojodi_data = defaultdict(lambda: {
+        'stock': 0,
+        'averageprice': 0,
+        'latest_date': None,
+        'storage': None,
+        'kala': None,
+    })
+
+    # جمع‌آوری اطلاعات از رکوردهای Kardex
+    for entry in kardex_entries:
+        key = (entry.code_kala, entry.warehousecode)  # کلید کلید کالا و انبار
+
+        # جمع‌آوری موجودی (`stock`)
+        mojodi_data[key]['stock'] += entry.count
+
+        # بروزرسانی میانگین قیمت و تاریخ آخرین رکورد
+        if mojodi_data[key]['latest_date'] is None or entry.date > mojodi_data[key]['latest_date']:
+            mojodi_data[key]['averageprice'] = entry.averageprice
+            mojodi_data[key]['latest_date'] = entry.date
+            mojodi_data[key]['storage'] = entry.storage
+            mojodi_data[key]['kala'] = entry.kala
+
+    # ایجاد یا به‌روزرسانی رکوردهای موجودی
+    for (code_kala, warehousecode), data in mojodi_data.items():
+        arzesh = data['stock'] * data['averageprice'] if data['averageprice'] else 0
+
+        # استفاده از update_or_create با استفاده از هر دو فیلد
+        mojodi_instance, created = Mojodi.objects.update_or_create(
+            code_kala=code_kala,
+            warehousecode=warehousecode,
+            defaults={
+                'storage': data['storage'],
+                'kala': data['kala'],
+                'stock': data['stock'],
+                'averageprice': data['averageprice'],
+                'arzesh': arzesh,
+                'total_stock': data['stock'],  # استفاده از موجودی برای total_stock
+            }
+        )
+
+    # حذف رکوردهای اضافی در Mojodi
+    current_mojodi_keys = {(code_kala, warehousecode) for (code_kala, warehousecode) in mojodi_data.keys()}
+    mojodi_to_delete = Mojodi.objects.exclude(
+        Q(code_kala__in=[k[0] for k in current_mojodi_keys]) &
+        Q(warehousecode__in=[k[1] for k in current_mojodi_keys])
+    )
+
+    mojodi_to_delete.delete()  # حذف رکوردها به صورت دسته‌ای
+
+    # ریدایرکت به صفحه مورد نظر
+    return redirect('/updatedb')
+
+
+
+
+
+def UpdateMojodi000000(request):
     # بارگذاری داده‌ها از مدل Kardex
     # kardex_entries = Kardex.objects.all().select_related('storage', 'kala')
     kardex_entries = Kardex.objects.order_by('date','radif').select_related('storage', 'kala')
-    mm=0
-    for k in kardex_entries:
-        print(k.code_kala,k.pdate,k.warehousecode,k.radif,k.count)
-        mm+=k.count
-    print('mm')
-    print(mm)
 
     # دیکشنری برای جمع‌آوری اطلاعات
     mojodi_data = defaultdict(lambda: {
@@ -1467,3 +1539,61 @@ def UpdateMojodi2(request):
         Mojodi.objects.exclude(id__in=updated_mojodi_ids).delete()
 
     return redirect('/updatedb')
+
+
+
+
+
+from django.shortcuts import HttpResponse
+from .models import Kardex
+def temp_compare_kardex_view(request):
+    # اتصال به دیتابیس
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+
+    # خواندن تمام رکوردها از دیتابیس
+    cursor.execute("SELECT * FROM Kardex")
+    db_records = cursor.fetchall()
+
+    # بارگذاری رکوردهای موجود در مدل Kardex
+    model_records = Kardex.objects.all()
+
+    # بارگذاری کدهای کالا و تاریخ ها از رکوردهای مدل
+    existing_kardex = {(k.code_kala, k.pdate): k for k in model_records}
+
+    # متغیر برای ذخیره رکوردهای موجود در دیتابیس که در مدل نیستند
+    missing_in_model = []
+
+    # بررسی رکوردهای دیتابیس
+    for row in db_records:
+        # استفاده از ترکیب کد کالا و تاریخ به عنوان کلید
+        key = (row[4], row[0])  # فرض بر این که index 0 تاریخ و index 4 کد کالا باشد
+
+        if key not in existing_kardex:
+            defaults = {
+                'code_factor': row[6],
+                'percode': row[1],
+                'warehousecode': row[2],
+                'mablaghsanad': row[3],
+                'count': row[7],
+                'averageprice': row[11],
+            }
+            missing_in_model.append((row, defaults))
+
+            # بستن cursor و connection
+    cursor.close()
+    conn.close()
+
+    # نمایش نتایج با استفاده از print
+    print(f"تعداد رکوردهای موجود در دیتابیس: {len(db_records)}")
+    print(f"تعداد رکوردهای یافت شده که در مدل Kardex ذخیره نشده‌اند: {len(missing_in_model)}\n")
+
+    if missing_in_model:
+        print("رکوردهای موجود در دیتابیس که در مدل Kardex ذخیره نشده‌اند:")
+        for record, defaults in missing_in_model:
+            print(f"pdate: {record[0]}, code_kala: {record[4]}, stock: {record[12]}, radif: {record[14]}")
+            print(f"اطلاعات اضافی: {defaults}\n")
+    else:
+        print("هیچ رکوردی یافت نشد که در مدل ذخیره نشده باشد.")
+
+    return HttpResponse("نتایج در ترمینال پرینت شد.", content_type="text/plain")
