@@ -1259,7 +1259,7 @@ from django.db.models import Q
 def UpdateMojodi(request):
     # بارگذاری داده‌ها از مدل Kardex
     # kardex_entries = Kardex.objects.all().select_related('storage', 'kala')
-    kardex_entries = Kardex.objects.filter(code_kala=67143).select_related('storage', 'kala')
+    kardex_entries = Kardex.objects.order_by('date','radif').select_related('storage', 'kala')
     mm=0
     for k in kardex_entries:
         print(k.pdate,k.warehousecode,k.radif,k.count)
