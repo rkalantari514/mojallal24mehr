@@ -1265,64 +1265,79 @@ from collections import defaultdict
 from django.shortcuts import redirect
 from .models import Kardex, Mojodi
 
+import time
+from collections import defaultdict
+from django.db import transaction, connections
+from django.db.models import Max
+from django.shortcuts import redirect
+from .models import Kardex, Mojodi
+
 
 def UpdateMojodi(request):
     start_time = time.time()  # زمان شروع تابع
 
-    # حذف تمامی رکوردهای Mojodi
-    Mojodi.objects.all().delete()
+    # تنظیم timeout برای SQLite
+    connections['default'].connection.execute('PRAGMA busy_timeout = 30000')
 
-    # بارگذاری داده‌ها از مدل Kardex
-    kardex_entries = Kardex.objects.order_by('date', 'radif').select_related('storage', 'kala')
+    try:
+        with transaction.atomic():  # استفاده از تراکنش برای جلوگیری از مشکلات قفل شدن
+            # حذف تمامی رکوردهای Mojodi
+            Mojodi.objects.all().delete()
 
-    # دیکشنری برای جمع‌آوری اطلاعات
-    mojodi_data = defaultdict(lambda: {
-        'stock': 0,
-        'averageprice': 0,
-        'storage': None,
-        'kala': None,
-        'warehousecode': None,
-    })
+            # بارگذاری داده‌ها از مدل Kardex
+            kardex_entries = Kardex.objects.order_by('date', 'radif').select_related('storage', 'kala')
 
-    # جمع‌آوری اطلاعات از رکوردهای Kardex
-    for entry in kardex_entries:
-        key = (entry.code_kala, entry.warehousecode)  # کلید شامل کد کالا و کد انبار
+            # دیکشنری برای جمع‌آوری اطلاعات
+            mojodi_data = defaultdict(lambda: {
+                'stock': 0,
+                'averageprice': 0,
+                'storage': None,
+                'kala': None,
+                'warehousecode': None,
+            })
 
-        # جمع‌آوری موجودی (`stock`) بر اساس انبار
-        mojodi_data[key]['stock'] += entry.count
+            # جمع‌آوری اطلاعات از رکوردهای Kardex
+            for entry in kardex_entries:
+                key = (entry.code_kala, entry.warehousecode)  # کلید شامل کد کالا و کد انبار
 
-        # بروزرسانی میانگین قیمت و اطلاعات دیگر
-        mojodi_data[key]['averageprice'] = entry.averageprice
-        mojodi_data[key]['storage'] = entry.storage
-        mojodi_data[key]['kala'] = entry.kala
-        mojodi_data[key]['warehousecode'] = entry.warehousecode
+                # جمع‌آوری موجودی (`stock`) بر اساس انبار
+                mojodi_data[key]['stock'] += entry.count
 
-    # ایجاد یا به‌روزرسانی رکوردهای Mojodi
-    for (code_kala, warehousecode), data in mojodi_data.items():
-        # محاسبه arzesh
-        arzesh = data['stock'] * data['averageprice'] if data['averageprice'] else 0
+                # بروزرسانی میانگین قیمت و اطلاعات دیگر
+                mojodi_data[key]['averageprice'] = entry.averageprice
+                mojodi_data[key]['storage'] = entry.storage
+                mojodi_data[key]['kala'] = entry.kala
+                mojodi_data[key]['warehousecode'] = entry.warehousecode
 
-        Mojodi.objects.update_or_create(
-            code_kala=code_kala,
-            warehousecode=warehousecode,  # برای تفکیک بین کدهای انبار مختلف
-            defaults={
-                'storage': data['storage'],
-                'kala': data['kala'],
-                'stock': data['stock'],
-                'averageprice': data['averageprice'],
-                'arzesh': arzesh,
-                'total_stock': data['stock'],  # استفاده از stock برای موجودی کل
-            }
-        )
+            # ایجاد یا به‌روزرسانی رکوردهای Mojodi
+            for (code_kala, warehousecode), data in mojodi_data.items():
+                # محاسبه arzesh
+                arzesh = data['stock'] * data['averageprice'] if data['averageprice'] else 0
 
-    # محاسبه و بروزرسانی total_stock
-    for code_kala, group in Kardex.objects.values('code_kala').annotate(latest_stock=models.Max('stock')):
-        Mojodi.objects.filter(code_kala=code_kala).update(total_stock=group['latest_stock'])
+                Mojodi.objects.update_or_create(
+                    code_kala=code_kala,
+                    warehousecode=warehousecode,  # برای تفکیک بین کدهای انبار مختلف
+                    defaults={
+                        'storage': data['storage'],
+                        'kala': data['kala'],
+                        'stock': data['stock'],
+                        'averageprice': data['averageprice'],
+                        'arzesh': arzesh,
+                        'total_stock': data['stock'],  # استفاده از stock برای موجودی کل
+                    }
+                )
 
-    total_time = time.time() - start_time  # محاسبه زمان اجرا
+            # محاسبه و بروزرسانی total_stock
+            for code_kala, group in Kardex.objects.values('code_kala').annotate(latest_stock=Max('stock')):
+                Mojodi.objects.filter(code_kala=code_kala).update(total_stock=group['latest_stock'])
 
-    # چاپ زمان
-    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+        total_time = time.time() - start_time  # محاسبه زمان اجرا
+
+        # چاپ زمان
+        print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+
+    except Exception as e:
+        print(f"خطا در اجرای تابع: {e}")
 
     # ریدایرکت به صفحه /updatedb
     return redirect('/updatedb')
