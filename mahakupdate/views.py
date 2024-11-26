@@ -1272,9 +1272,11 @@ from django.db.models import Q
 from django.shortcuts import redirect
 from .models import Kardex, Mojodi
 
+from collections import defaultdict
+from django.db.models import Q
+
 def UpdateMojodi(request):
     # بارگذاری داده‌ها از مدل Kardex
-
     kardex_entries = Kardex.objects.order_by('date', 'radif').select_related('storage', 'kala')
 
     # دیکشنری برای جمع‌آوری اطلاعات
@@ -1288,7 +1290,7 @@ def UpdateMojodi(request):
 
     # جمع‌آوری اطلاعات از رکوردهای Kardex
     for entry in kardex_entries:
-        key = (entry.code_kala, entry.warehousecode)  # کلید کلید کالا و انبار
+        key = entry.code_kala  # فقط کد کالا به عنوان کلید
 
         # جمع‌آوری موجودی (`stock`)
         mojodi_data[key]['stock'] += entry.count
@@ -1301,13 +1303,12 @@ def UpdateMojodi(request):
             mojodi_data[key]['kala'] = entry.kala
 
     # ایجاد یا به‌روزرسانی رکوردهای موجودی
-    for (code_kala, warehousecode), data in mojodi_data.items():
+    for code_kala, data in mojodi_data.items():
         arzesh = data['stock'] * data['averageprice'] if data['averageprice'] else 0
 
-        # استفاده از update_or_create با استفاده از هر دو فیلد
+        # استفاده از update_or_create با استفاده از کد کالا
         mojodi_instance, created = Mojodi.objects.update_or_create(
             code_kala=code_kala,
-            warehousecode=warehousecode,
             defaults={
                 'storage': data['storage'],
                 'kala': data['kala'],
@@ -1319,17 +1320,15 @@ def UpdateMojodi(request):
         )
 
     # حذف رکوردهای اضافی در Mojodi
-    current_mojodi_keys = {(code_kala, warehousecode) for (code_kala, warehousecode) in mojodi_data.keys()}
+    current_mojodi_keys = {code_kala for code_kala in mojodi_data.keys()}
     mojodi_to_delete = Mojodi.objects.exclude(
-        Q(code_kala__in=[k[0] for k in current_mojodi_keys]) &
-        Q(warehousecode__in=[k[1] for k in current_mojodi_keys])
+        code_kala__in=current_mojodi_keys
     )
 
     mojodi_to_delete.delete()  # حذف رکوردها به صورت دسته‌ای
 
     # ریدایرکت به صفحه مورد نظر
     return redirect('/updatedb')
-
 
 
 
