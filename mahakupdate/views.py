@@ -1251,6 +1251,9 @@ from collections import defaultdict
 from django.shortcuts import redirect
 from collections import defaultdict
 
+from django.shortcuts import redirect
+from collections import defaultdict
+
 def UpdateMojodi(request):
     # بارگذاری داده‌ها از مدل Kardex
     Mojodi.objects.all().delete()  # این خط تمام رکوردهای Mojodi را حذف می‌کند
@@ -1283,7 +1286,7 @@ def UpdateMojodi(request):
 
     # ایجاد یا به‌روزرسانی رکوردهای موجودی
     total_stock_data = defaultdict(lambda: {
-        'latest_stock': None,
+        'latest_date': None,  # تغییر نام متغیر
         'averageprice': None
     })
 
@@ -1292,8 +1295,8 @@ def UpdateMojodi(request):
         arzesh = data['stock'] * data['averageprice'] if data['averageprice'] else 0
 
         # به‌روزرسانی total_stock بر اساس آخرین تاریخ
-        if total_stock_data[code_kala]['latest_stock'] is None or (data['latest_date'] and (total_stock_data[code_kala]['latest_stock'] is None or data['latest_date'] > total_stock_data[code_kala]['latest_stock'])):
-            total_stock_data[code_kala]['latest_stock'] = data['stock']
+        if total_stock_data[code_kala]['latest_date'] is None or (data['latest_date'] and (total_stock_data[code_kala]['latest_date'] is None or data['latest_date'] > total_stock_data[code_kala]['latest_date'])):
+            total_stock_data[code_kala]['latest_date'] = data['latest_date']  # فقط تاریخ را ذخیره کنید
             total_stock_data[code_kala]['averageprice'] = data['averageprice']
 
         # در اینجا از اطلاعات Mojodi برای ایجاد یا به‌روزرسانی رکورد استفاده می‌کنیم
@@ -1306,7 +1309,7 @@ def UpdateMojodi(request):
                 'stock': data['stock'],
                 'averageprice': data['averageprice'],
                 'arzesh': arzesh,
-                'total_stock': total_stock_data[code_kala]['latest_stock'],  # استفاده از آخرین موجودی
+                'total_stock': total_stock_data[code_kala]['latest_date'],  # اینجا فقط تاریخ را استفاده کنید
             }
         )
 
@@ -1321,7 +1324,6 @@ def UpdateMojodi(request):
 
     # ریدایرکت به صفحه مورد نظر بعد از اتمام
     return redirect('/updatedb')
-
 
 def UpdateMojodi000000(request):
     # بارگذاری داده‌ها از مدل Kardex
