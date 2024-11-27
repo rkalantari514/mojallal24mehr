@@ -1284,6 +1284,8 @@ from django.shortcuts import redirect
 from .models import Kardex, Mojodi
 
 
+from django.db.models import Sum
+
 def UpdateMojodi(request):
     # بارگذاری کادرکس‌ها
     kardex_list = list(
@@ -1291,7 +1293,7 @@ def UpdateMojodi(request):
     )
 
     processed_items = {}
-    jj=1
+    jj = 1
     for item in kardex_list:
         storage = item['storage']
         kala = item['kala']
@@ -1311,8 +1313,8 @@ def UpdateMojodi(request):
                 'arzesh': last_kardex_entry.stock * last_kardex_entry.averageprice,
                 'stock': total_count,
             }
-        print(jj,item)
-        jj+=1
+        print(jj, item)
+        jj += 1
 
     # بارگذاری رکوردهای موجود در Mojodi
     mojodi_objects = Mojodi.objects.filter(
@@ -1331,9 +1333,29 @@ def UpdateMojodi(request):
             mojodi.arzesh = data['arzesh']
             mojodi.stock = data['stock']
 
-    # انجام bulk_update
+    # انجام bulk_update برای رکوردهای موجود
     Mojodi.objects.bulk_update(mojodi_objects, ['storage', 'total_stock', 'averageprice', 'arzesh', 'stock'],
                                batch_size=1000)
+
+    # اضافه کردن رکوردهای جدید
+    existing_keys = {(mojodi.code_kala, mojodi.warehousecode) for mojodi in mojodi_objects}
+    new_objects = []
+
+    for (kala, storage), data in processed_items.items():
+        if (kala, storage) not in existing_keys:
+            new_objects.append(Mojodi(
+                code_kala=kala,
+                warehousecode=storage,
+                storage=data['storage'],
+                total_stock=data['total_stock'],
+                averageprice=data['averageprice'],
+                arzesh=data['arzesh'],
+                stock=data['stock']
+            ))
+
+    # ذخیره‌سازی رکوردهای جدید به صورت دسته‌ای
+    if new_objects:
+        Mojodi.objects.bulk_create(new_objects, batch_size=1000)
 
     # حذف ردیف‌های اضافی در Mojodi
     code_kala_list = [kala for (kala, storage) in processed_items.keys()]
@@ -1345,7 +1367,6 @@ def UpdateMojodi(request):
     ).delete()
 
     return redirect('/updatedb')
-
 
 def UpdateMojodi222222(request):
     start_time = time.time()  # زمان شروع تابع
