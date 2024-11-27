@@ -1334,13 +1334,15 @@ def UpdateMojodi(request):
                                batch_size=1000)
 
     # حذف ردیف‌های اضافی در Mojodi
+    code_kala_list = [kala for (kala, storage) in processed_items.keys()]
+    warehousecode_list = [storage for (kala, storage) in processed_items.keys()]
+
     Mojodi.objects.exclude(
-        code_kala__in=processed_items.keys(),
-        warehousecode__in=processed_items.keys()
+        code_kala__in=code_kala_list,
+        warehousecode__in=warehousecode_list
     ).delete()
 
     return redirect('/updatedb')
-
 
 
 def UpdateMojodi222222(request):
