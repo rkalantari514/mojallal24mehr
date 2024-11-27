@@ -1291,7 +1291,7 @@ def UpdateMojodi(request):
     )
 
     processed_items = {}
-
+    jj=1
     for item in kardex_list:
         storage = item['storage']
         kala = item['kala']
@@ -1311,7 +1311,8 @@ def UpdateMojodi(request):
                 'arzesh': last_kardex_entry.stock * last_kardex_entry.averageprice,
                 'stock': total_count,
             }
-            print(item)
+        print(jj,item)
+        jj+=1
 
     # بارگذاری رکوردهای موجود در Mojodi
     mojodi_objects = Mojodi.objects.filter(
