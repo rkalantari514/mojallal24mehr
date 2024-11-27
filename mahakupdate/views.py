@@ -1288,9 +1288,16 @@ from django.db.models import Sum
 
 def UpdateMojodi(request):
     # بارگذاری کادرکس‌ها
-    kardex_list = list(
-        Kardex.objects.select_related('storage', 'kala').order_by('date', 'radif').values('storage', 'kala').distinct()
+    kardex_list2 = list(
+        Kardex.objects.select_related('storage', 'kala').order_by('date', 'radif').values('storage', 'kala')
     )
+
+    # تبدیل به مجموعه (set) برای حذف تکراری‌ها
+    kardex_list = [dict(t) for t in {tuple(d.items()) for d in kardex_list2}]
+
+    print('unique_kardex_list')
+    print(len(kardex_list))  # تعداد منحصر به فرد
+    print(len(kardex_list2))  # تعداد منحصر به فرد
 
     processed_items = {}
     jj = 1
@@ -1328,13 +1335,14 @@ def UpdateMojodi(request):
         if key in processed_items:
             data = processed_items[key]
             mojodi.storage = data['storage']
+            mojodi.kala = data['kala']
             mojodi.total_stock = data['total_stock']
             mojodi.averageprice = data['averageprice']
             mojodi.arzesh = data['arzesh']
             mojodi.stock = data['stock']
 
     # انجام bulk_update برای رکوردهای موجود
-    Mojodi.objects.bulk_update(mojodi_objects, ['storage', 'total_stock', 'averageprice', 'arzesh', 'stock'],
+    Mojodi.objects.bulk_update(mojodi_objects, ['storage','kala', 'total_stock', 'averageprice', 'arzesh', 'stock'],
                                batch_size=1000)
 
     # اضافه کردن رکوردهای جدید
@@ -1347,6 +1355,7 @@ def UpdateMojodi(request):
                 code_kala=kala,
                 warehousecode=storage,
                 storage=data['storage'],
+                kala=data['kala'],
                 total_stock=data['total_stock'],
                 averageprice=data['averageprice'],
                 arzesh=data['arzesh'],
