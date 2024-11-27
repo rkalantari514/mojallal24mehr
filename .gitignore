@@ -2,4 +2,6 @@
 db.sqlite3
 
 # Ignore all migrations folders in any subdirectories
-**/migrations/
+**/migrations/*
+*/migrations/
+ */migrations/*
