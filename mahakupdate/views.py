@@ -1276,19 +1276,24 @@ from django.db.models import Sum
 from django.db.models import Sum
 from django.shortcuts import redirect
 
+import time
+from collections import defaultdict
+from django.db import transaction, connections
+from django.db.models import Max
+from django.shortcuts import redirect
+from .models import Kardex, Mojodi
+
 
 def UpdateMojodi(request):
-    # ابتدا همه کادرکس‌ها را بدون واکشی مجدد از پایگاه داده بارگذاری می‌کنیم
+    # بارگذاری کادرکس‌ها
     kardex_list = list(
         Kardex.objects.select_related('storage', 'kala').order_by('date', 'radif').values('storage', 'kala'))
 
-    # با استفاده از یک دیکشنری برای نگهداری اطلاعات پردازش شده
     processed_items = {}
 
     for item in kardex_list:
         storage = item['storage']
         kala = item['kala']
-        # تعدادی کادرکس مربوط به کالا و انبار مشخص شده را بارگذاری می‌کنیم
         kardex = Kardex.objects.filter(kala=kala, warehousecode=storage).order_by('date', 'radif')
         last_kardex_entry = kardex.last()
 
@@ -1297,7 +1302,6 @@ def UpdateMojodi(request):
 
         if last_kardex_entry:
             total_count = kardex.aggregate(Sum('count'))['count__sum']
-            # ذخیره کردن اطلاعات در دیکشنری به جای افزودن به مجموعه
             processed_items[(kala, storage)] = {
                 'storage': last_kardex_entry.storage,
                 'kala': last_kardex_entry.kala,
@@ -1308,15 +1312,25 @@ def UpdateMojodi(request):
             }
             print(item)
 
-            # به روز رسانی یا ایجاد رکوردها در Mojodi با استفاده از bulk_create
-    mojodi_objects = [
-        Mojodi(
-            code_kala=kala,
-            warehousecode=storage,
-            **data
-        ) for (kala, storage), data in processed_items.items()
-    ]
-    Mojodi.objects.bulk_update(mojodi_objects, ['storage', 'kala', 'total_stock', 'averageprice', 'arzesh', 'stock'],
+    # بارگذاری رکوردهای موجود در Mojodi
+    mojodi_objects = Mojodi.objects.filter(
+        code_kala__in=[kala for (kala, storage) in processed_items.keys()],
+        warehousecode__in=[storage for (kala, storage) in processed_items.keys()]
+    )
+
+    # به‌روزرسانی رکوردها
+    for mojodi in mojodi_objects:
+        key = (mojodi.code_kala, mojodi.warehousecode)
+        if key in processed_items:
+            data = processed_items[key]
+            mojodi.storage = data['storage']
+            mojodi.total_stock = data['total_stock']
+            mojodi.averageprice = data['averageprice']
+            mojodi.arzesh = data['arzesh']
+            mojodi.stock = data['stock']
+
+    # انجام bulk_update
+    Mojodi.objects.bulk_update(mojodi_objects, ['storage', 'total_stock', 'averageprice', 'arzesh', 'stock'],
                                batch_size=1000)
 
     # حذف ردیف‌های اضافی در Mojodi
@@ -1326,7 +1340,6 @@ def UpdateMojodi(request):
     ).delete()
 
     return redirect('/updatedb')
-
 
 
 
@@ -1360,8 +1373,10 @@ def UpdateMojodi222222(request):
 def UpdateMojodi111111(request):
     start_time = time.time()  # زمان شروع تابع
 
-    # تنظیم timeout برای SQLite
-    connections['default'].connection.execute('PRAGMA busy_timeout = 30000')
+    # اطمینان از برقراری اتصال به پایگاه داده
+    db_conn = connections['default']
+    db_conn.ensure_connection()
+    db_conn.connection.execute('PRAGMA busy_timeout = 30000')
 
     try:
         with transaction.atomic():  # استفاده از تراکنش برای جلوگیری از مشکلات قفل شدن
@@ -1416,7 +1431,6 @@ def UpdateMojodi111111(request):
                 Mojodi.objects.filter(code_kala=code_kala).update(total_stock=group['latest_stock'])
 
         total_time = time.time() - start_time  # محاسبه زمان اجرا
-
         # چاپ زمان
         print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
 
