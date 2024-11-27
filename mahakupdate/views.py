@@ -1287,7 +1287,7 @@ from .models import Kardex, Mojodi
 def UpdateMojodi(request):
     # بارگذاری کادرکس‌ها
     kardex_list = list(
-        Kardex.objects.select_related('storage', 'kala').order_by('date', 'radif').values('storage', 'kala'))
+        Kardex.objects.select_related('storage', 'kala').order_by('date', 'radif').values('storage', 'kala')).distinct()
 
     processed_items = {}
 
