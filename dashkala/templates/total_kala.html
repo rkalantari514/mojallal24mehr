@@ -281,6 +281,10 @@
                                         <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
                                             data-field="arzesh">ارزش موجودی
                                         </th>
+                                         <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
+                                            data-field="totalcount">کل موجودی
+                                        </th>
+
 
                                     </tr>
                                     </thead>
@@ -313,6 +317,12 @@
                                                     href="#"
                                                     target="_blank">
                                                 {{ kala.arzesh|floatformat:0 | intcomma:False }}</a></h6></td>
+                                        <td class="card-text text-center"><h6><a
+                                                    href="#"
+                                                    target="_blank">
+                                                {{ kala.total_stock|floatformat:2 }}</a></h6></td>
+
+
                                         </tr>
                                     {% endfor %}
                                     </tbody>
