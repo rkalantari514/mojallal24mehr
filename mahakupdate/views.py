@@ -1272,8 +1272,92 @@ from django.db.models import Max
 from django.shortcuts import redirect
 from .models import Kardex, Mojodi
 
+from django.db.models import Sum
+from django.db.models import Sum
+from django.shortcuts import redirect
+
 
 def UpdateMojodi(request):
+    # ابتدا همه کادرکس‌ها را بدون واکشی مجدد از پایگاه داده بارگذاری می‌کنیم
+    kardex_list = list(
+        Kardex.objects.select_related('storage', 'kala').order_by('date', 'radif').values('storage', 'kala'))
+
+    # با استفاده از یک دیکشنری برای نگهداری اطلاعات پردازش شده
+    processed_items = {}
+
+    for item in kardex_list:
+        storage = item['storage']
+        kala = item['kala']
+        # تعدادی کادرکس مربوط به کالا و انبار مشخص شده را بارگذاری می‌کنیم
+        kardex = Kardex.objects.filter(kala=kala, warehousecode=storage).order_by('date', 'radif')
+        last_kardex_entry = kardex.last()
+
+        kardex2 = Kardex.objects.filter(kala=kala).order_by('date', 'radif')
+        last_kardex_entry2 = kardex2.last()
+
+        if last_kardex_entry:
+            total_count = kardex.aggregate(Sum('count'))['count__sum']
+            # ذخیره کردن اطلاعات در دیکشنری به جای افزودن به مجموعه
+            processed_items[(kala, storage)] = {
+                'storage': last_kardex_entry.storage,
+                'kala': last_kardex_entry.kala,
+                'total_stock': last_kardex_entry2.stock,
+                'averageprice': last_kardex_entry2.averageprice,
+                'arzesh': last_kardex_entry.stock * last_kardex_entry.averageprice,
+                'stock': total_count,
+            }
+            print(item)
+
+            # به روز رسانی یا ایجاد رکوردها در Mojodi با استفاده از bulk_create
+    mojodi_objects = [
+        Mojodi(
+            code_kala=kala,
+            warehousecode=storage,
+            **data
+        ) for (kala, storage), data in processed_items.items()
+    ]
+    Mojodi.objects.bulk_update(mojodi_objects, ['storage', 'kala', 'total_stock', 'averageprice', 'arzesh', 'stock'],
+                               batch_size=1000)
+
+    # حذف ردیف‌های اضافی در Mojodi
+    Mojodi.objects.exclude(
+        code_kala__in=processed_items.keys(),
+        warehousecode__in=processed_items.keys()
+    ).delete()
+
+    return redirect('/updatedb')
+
+
+
+
+def UpdateMojodi222222(request):
+    start_time = time.time()  # زمان شروع تابع
+    kardex_list = Kardex.objects.order_by('date', 'radif').select_related('storage', 'kala').values_list('storage',
+                                                                                                            'kala',
+                                                                                                               flat=False)
+
+
+    for i in kardex_list:
+        kardex=Kardex.objects.order_by('date', 'radif').filter(kala=i[1],warehousecode=i[0])
+        total_count = kardex.aggregate(Sum('count'))['count__sum']
+        Mojodi.objects.update_or_create(
+            code_kala=i[1],
+            warehousecode=i[0],
+            defaults={
+                'storage':kardex.last().storage,
+                'kala':kardex.last().kala,
+                'total_stock':Kardex.objects.order_by('date', 'radif').filter(kala=i[1]).last().stock,
+                'averageprice':Kardex.objects.order_by('date', 'radif').filter(kala=i[1]).last().averageprice,
+                'arzesh':(Kardex.objects.order_by('date', 'radif').filter(kala=i[1]).last().stock)*(Kardex.objects.order_by('date', 'radif').filter(kala=i[1]).last().averageprice),
+                'stock':total_count,
+            }
+        )
+        print(i)
+    return redirect('/updatedb')
+
+
+
+def UpdateMojodi111111(request):
     start_time = time.time()  # زمان شروع تابع
 
     # تنظیم timeout برای SQLite
