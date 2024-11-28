@@ -1301,7 +1301,7 @@ def UpdateMojodi(request):
     start_time = time.time()
 
     # بارگذاری کادرکس‌ها
-    kardex_list2 = Kardex.objects.select_related('storage', 'kala').order_by('date', 'radif').values('warehousecode', 'code_kala').distinct()
+    kardex_list2 = Kardex.objects.select_related('warehousecode', 'code_kala').order_by('date', 'radif').values('warehousecode', 'code_kala').distinct()
     kardex_list = [dict(t) for t in {tuple(d.items()) for d in kardex_list2}]
 
     print(f'Unique kardex count: {len(kardex_list)}')  # تعداد منحصر به فرد
