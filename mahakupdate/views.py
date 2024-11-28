@@ -1376,13 +1376,20 @@ def UpdateMojodi(request):
     if new_objects:
         Mojodi.objects.bulk_create(new_objects, batch_size=1000)
 
+    # # حذف ردیف‌های اضافی در Mojodi
+    # code_kala_list = [code_kala for (code_kala, warehousecode) in processed_items.keys()]
+    # warehousecode_list = [warehousecode for (code_kala, warehousecode) in processed_items.keys()]
+    #
+    # Mojodi.objects.exclude(
+    #     code_kala__in=code_kala_list,
+    #     warehousecode__in=warehousecode_list
+    # ).delete()
+
     # حذف ردیف‌های اضافی در Mojodi
-    code_kala_list = [code_kala for (code_kala, warehousecode) in processed_items.keys()]
-    warehousecode_list = [warehousecode for (code_kala, warehousecode) in processed_items.keys()]
+    keys_to_keep = set((code_kala, warehousecode) for (code_kala, warehousecode) in processed_items.keys())
 
     Mojodi.objects.exclude(
-        code_kala__in=code_kala_list,
-        warehousecode__in=warehousecode_list
+        id__in=[item.id for item in Mojodi.objects.all() if (item.code_kala, item.warehousecode) in keys_to_keep]
     ).delete()
 
     print('Update completed successfully.')

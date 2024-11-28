@@ -42,3 +42,11 @@ git rm --cached db.sqlite3
 git rm -r --cached **/migrations/
 git commit -m "Remove db.sqlite3 and migrations from git tracking"
 
+
+
+# حذف ردیف‌های اضافی در Mojodi
+keys_to_keep = set((code_kala, warehousecode) for (code_kala, warehousecode) in processed_items.keys())
+
+Mojodi.objects.exclude(
+    id__in=[item.id for item in Mojodi.objects.all() if (item.code_kala, item.warehousecode) in keys_to_keep]
+).delete()
