@@ -1293,47 +1293,51 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def UpdateMojodi(request):
-    # بارگذاری کادرکس‌ها
-    kardex_list2 = Kardex.objects.select_related('storage', 'kala').order_by('date', 'radif').values('storage', 'kala')
+import time
+from django.db.models import Sum
+from .models import Kardex, Mojodi
 
-    # تبدیل به مجموعه (set) برای حذف تکراری‌ها
+def UpdateMojodi(request):
+    start_time = time.time()
+
+    # بارگذاری کادرکس‌ها
+    kardex_list2 = Kardex.objects.select_related('storage', 'kala').order_by('date', 'radif').values('warehousecode', 'code_kala').distinct()
     kardex_list = [dict(t) for t in {tuple(d.items()) for d in kardex_list2}]
 
-    logger.info(f'Unique kardex count: {len(kardex_list)}')  # تعداد منحصر به فرد
+    print(f'Unique kardex count: {len(kardex_list)}')  # تعداد منحصر به فرد
 
     processed_items = {}
     jj = 1
 
     for item in kardex_list:
-        storage = item['storage']
-        kala = item['kala']
+        warehousecode = item['warehousecode']
+        code_kala = item['code_kala']
 
         # بارگذاری رکوردهای Kardex مرتبط
-        kardex = Kardex.objects.filter(kala=kala, warehousecode=storage).order_by('date', 'radif')
+        kardex = Kardex.objects.filter(code_kala=code_kala, warehousecode=warehousecode).order_by('date', 'radif')
         last_kardex_entry = kardex.last()
 
         if last_kardex_entry:
             # بارگذاری ورودی آخر برای کالای مشخص
-            last_kardex_entry2 = Kardex.objects.filter(kala=kala).order_by('date', 'radif').last()
+            last_kardex_entry2 = Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif').last()
 
             if last_kardex_entry2:
                 total_count = kardex.aggregate(Sum('count'))['count__sum'] or 0  # جلوگیری از None
-                processed_items[(kala, storage)] = {
+                processed_items[(code_kala, warehousecode)] = {
                     'storage': last_kardex_entry.storage,
                     'kala': last_kardex_entry.kala,
                     'total_stock': last_kardex_entry2.stock,
                     'averageprice': last_kardex_entry2.averageprice,
-                    'arzesh': last_kardex_entry.stock * last_kardex_entry.averageprice,
+                    'arzesh': last_kardex_entry2.stock * last_kardex_entry2.averageprice,
                     'stock': total_count,
                 }
-        logger.info(f'Processed item: {jj}, Storage: {storage}, Kala: {kala}')
+        print(f'Processed item: {jj}, warehousecode: {warehousecode}, code_kala: {code_kala}')
         jj += 1
 
-        # بارگذاری رکوردهای موجود در Mojodi
+    # بارگذاری رکوردهای موجود در Mojodi
     mojodi_objects = Mojodi.objects.filter(
-        code_kala__in=[kala for (kala, storage) in processed_items.keys()],
-        warehousecode__in=[storage for (kala, storage) in processed_items.keys()]
+        code_kala__in=[code_kala for (code_kala, warehousecode) in processed_items.keys()],
+        warehousecode__in=[warehousecode for (code_kala, warehousecode) in processed_items.keys()]
     )
 
     # به‌روزرسانی رکوردها
@@ -1348,19 +1352,18 @@ def UpdateMojodi(request):
             mojodi.arzesh = data['arzesh']
             mojodi.stock = data['stock']
 
-            # انجام bulk_update برای رکوردهای موجود
-    Mojodi.objects.bulk_update(mojodi_objects, ['storage', 'kala', 'total_stock', 'averageprice', 'arzesh', 'stock'],
-                               batch_size=1000)
+    # انجام bulk_update برای رکوردهای موجود
+    Mojodi.objects.bulk_update(mojodi_objects, ['storage', 'kala', 'total_stock', 'averageprice', 'arzesh', 'stock'], batch_size=1000)
 
     # اضافه کردن رکوردهای جدید
     existing_keys = {(mojodi.code_kala, mojodi.warehousecode) for mojodi in mojodi_objects}
     new_objects = []
 
-    for (kala, storage), data in processed_items.items():
-        if (kala, storage) not in existing_keys:
+    for (code_kala, warehousecode), data in processed_items.items():
+        if (code_kala, warehousecode) not in existing_keys:
             new_objects.append(Mojodi(
-                code_kala=kala,
-                warehousecode=storage,
+                code_kala=code_kala,
+                warehousecode=warehousecode,
                 storage=data['storage'],
                 kala=data['kala'],
                 total_stock=data['total_stock'],
@@ -1369,20 +1372,23 @@ def UpdateMojodi(request):
                 stock=data['stock']
             ))
 
-            # ذخیره‌سازی رکوردهای جدید به صورت دسته‌ای
+    # ذخیره‌سازی رکوردهای جدید به صورت دسته‌ای
     if new_objects:
         Mojodi.objects.bulk_create(new_objects, batch_size=1000)
 
-        # حذف ردیف‌های اضافی در Mojodi
-    code_kala_list = [kala for (kala, storage) in processed_items.keys()]
-    warehousecode_list = [storage for (kala, storage) in processed_items.keys()]
+    # حذف ردیف‌های اضافی در Mojodi
+    code_kala_list = [code_kala for (code_kala, warehousecode) in processed_items.keys()]
+    warehousecode_list = [warehousecode for (code_kala, warehousecode) in processed_items.keys()]
 
     Mojodi.objects.exclude(
         code_kala__in=code_kala_list,
         warehousecode__in=warehousecode_list
     ).delete()
 
-    logger.info('Update completed successfully.')
+    print('Update completed successfully.')
+
+    end_time = time.time()
+    print(f'Execution time: {end_time - start_time} seconds')
 
     return redirect('/updatedb')
 
