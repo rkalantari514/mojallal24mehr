@@ -62,8 +62,8 @@ class CategoryAdmin(admin.ModelAdmin):
         model = Category
 
 class KardexAdmin(admin.ModelAdmin):
-    list_display = ['__str__','date','stock','code_kala','kala','count','storage','warehousecode','averageprice']
-    list_filter = ['warehousecode']
+    list_display = ['__str__','date','stock','code_kala','kala','count','storage','warehousecode','averageprice','sync_mojodi']
+    list_filter = ['warehousecode','sync_mojodi']
     # list_editable = ['name','parent','level']
     search_fields = ['pdate','count','code_kala','stock']
 

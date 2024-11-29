@@ -141,6 +141,7 @@ class Kardex(models.Model):
     averageprice=models.FloatField(blank=True, null=True, default=0, verbose_name='قیمت میانگین')
     stock=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی')
     is_prioritized = models.BooleanField(default=False)
+    sync_mojodi = models.BooleanField(default=False, verbose_name='موجودی سینک شده است؟')
 
 
     class Meta:
