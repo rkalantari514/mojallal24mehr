@@ -187,6 +187,8 @@ from django.db import transaction
 from django.utils import timezone
 from .models import Kardex, Mtables, Factor, Kala, Storagek
 
+import math
+
 def UpdateKardex(request):
     t0 = time.time()
     print('شروع آپدیت کاردکس----------------------------------------')
@@ -233,14 +235,24 @@ def UpdateKardex(request):
         if key in existing_kardex:
             kardex_instance = existing_kardex[key]
             # به‌روزرسانی رکورد موجود و تنظیم sync_mojodi به False
-            # updated = False
+            updated = False
             for field, value in defaults.items():
-                if getattr(kardex_instance, field) != value:
-                    setattr(kardex_instance, field, value)
-                    updated = True
+                if isinstance(value, float):
+                    # استفاده از math.isclose برای مقایسه عددی دقیق
+                    if not math.isclose(getattr(kardex_instance, field), value, rel_tol=1e-9):
+                        setattr(kardex_instance, field, value)
+                        print('====================')
+                        updated = True
+                else:
+                    if str(getattr(kardex_instance, field)) != str(value) and getattr(kardex_instance, field) != value:
+                        setattr(kardex_instance, field, value)
+                        print('+++++++++++++++++++++++')
+                        print(getattr(kardex_instance, field) , value)
+                        updated = True
             if updated:
+                print(kardex_instance.code_kala, "---------------------------")
                 kardex_instance.sync_mojodi = False
-            updates.append(kardex_instance)
+                updates.append(kardex_instance)
         else:
             # ایجاد رکورد جدید و تنظیم sync_mojodi به False
             new_records.append(Kardex(
