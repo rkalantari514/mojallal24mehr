@@ -233,7 +233,7 @@ def UpdateKardex(request):
         if key in existing_kardex:
             kardex_instance = existing_kardex[key]
             # به‌روزرسانی رکورد موجود و تنظیم sync_mojodi به False
-            updated = False
+            # updated = False
             for field, value in defaults.items():
                 if getattr(kardex_instance, field) != value:
                     setattr(kardex_instance, field, value)
