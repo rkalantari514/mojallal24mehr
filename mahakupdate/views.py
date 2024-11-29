@@ -1545,7 +1545,7 @@ def UpdateMojodi(request):
                     'kala': last_kardex_entry.kala,
                     'total_stock': last_kardex_entry2.stock,
                     'averageprice': last_kardex_entry2.averageprice,
-                    'arzesh': last_kardex_entry2.stock * last_kardex_entry2.averageprice,
+                    'arzesh': total_count * last_kardex_entry2.averageprice,
                     'stock': total_count,
                 }
                 for k in kardex_entries:
@@ -1664,7 +1664,7 @@ def UpdateMojodidorost1(request):
                     'kala': last_kardex_entry.kala,
                     'total_stock': last_kardex_entry2.stock,
                     'averageprice': last_kardex_entry2.averageprice,
-                    'arzesh': last_kardex_entry2.stock * last_kardex_entry2.averageprice,
+                    'arzesh': total_count * last_kardex_entry2.averageprice,
                     'stock': total_count,
                 }
         print(f'Processed item: {jj}, warehousecode: {warehousecode}, code_kala: {code_kala}')
