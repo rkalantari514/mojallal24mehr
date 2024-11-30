@@ -190,7 +190,6 @@ from .models import Kardex, Mtables, Factor, Kala, Storagek
 import math
 
 def UpdateKardex(request):
-    Mojodi.objects.all().delete()
     t0 = time.time()
     print('شروع آپدیت کاردکس----------------------------------------')
 
