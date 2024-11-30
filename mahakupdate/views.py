@@ -1525,6 +1525,12 @@ def UpdateMojodi(request):
     # بارگذاری همه رکوردهای Kardex به صورت لیستی از تاپل‌ها
     all_kardex_list = list(Kardex.objects.all().values_list('warehousecode', 'code_kala'))
 
+    # دریافت لیست کد کالاهایی که sync_mojodi=False هستند
+    false_kardex_list = Kardex.objects.filter(sync_mojodi=False).values_list('code_kala', flat=True)
+
+    # به روز رسانی تمام رکوردهای Kardex که code_kala در لیست بالا وجود دارد
+    Kardex.objects.filter(code_kala__in=false_kardex_list).update(sync_mojodi=False)
+
     # بارگذاری کادرکس‌ها که sync_mojodi آنها False است
     kardex_list2 = Kardex.objects.filter(sync_mojodi=False).values('warehousecode', 'code_kala').distinct()
     print(len(kardex_list2))
