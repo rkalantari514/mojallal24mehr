@@ -118,7 +118,6 @@ def Updateall(request):
         '/update/updatekalagroup',
         '/update/mojodi',
     ]
-
     # نگاشت آدرس‌های استاتیک به توابع
     static_view_map = {
         '/update/updatekalagroupinfo': UpdateKalaGroupinfo,
@@ -126,25 +125,20 @@ def Updateall(request):
         '/update/updatekalagroup': UpdateKalaGroup,
         '/update/mojodi': UpdateMojodi,
     }
-
     # چاپ تزئینی برای عیب یابی
     print(f"Request path: {request.path}")
-
     # پردازش آدرس‌های استاتیک
     for static_url in static_urls:
         # if request.path == static_url:
         response = static_view_map[static_url](request)
         responses.append(response.content)
-
             # اگر هیچ آدرس استاتیکی پردازش نشود
     if not responses:
         print("No static URLs were processed.")
-
         # بازگشت به /updatedb
     return redirect('/updatedb')
 
-
-def Updateall1(request):
+def Updateallold(request):
     tables = Mtables.objects.filter(in_use=True).order_by('update_priority')
     view_map = {
         'Fact_Fo': UpdateFactor,
