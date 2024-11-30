@@ -24,7 +24,7 @@ def connect_to_mahak():
     print(sn)
 
     connections = {
-        'DESKTOP-ITU3EHV': ('DESKTOP-ITU3EHV\\MAHAK14', 'mahak'),
+        'DESKTOP-ITU3EHV': ('DESKTOP-ITU3EHV\\MAHAK14', 'mahak2'),
         'TECH_MANAGER': ('TECH_MANAGER\\RKALANTARI', 'mahak'),
         'DESKTOP-1ERPR1M': ('DESKTOP-1ERPR1M\\MAHAK', 'mahak'),
         'RP-MAHAK': ('Ac\\MAHAK', 'mahak')
@@ -190,6 +190,7 @@ from .models import Kardex, Mtables, Factor, Kala, Storagek
 import math
 
 def UpdateKardex(request):
+    Mojodi.objects.all().delete()
     t0 = time.time()
     print('شروع آپدیت کاردکس----------------------------------------')
 
@@ -235,22 +236,29 @@ def UpdateKardex(request):
         if key in existing_kardex:
             kardex_instance = existing_kardex[key]
             # به‌روزرسانی رکورد موجود و تنظیم sync_mojodi به False
+            print('new row #########################')
             updated = False
             for field, value in defaults.items():
-                if isinstance(value, float):
-                    # استفاده از math.isclose برای مقایسه عددی دقیق
-                    if not math.isclose(getattr(kardex_instance, field), value, rel_tol=1e-9):
-                        setattr(kardex_instance, field, value)
-                        print('====================')
-                        updated = True
+                field_value = getattr(kardex_instance, field)
+
+                print('before if--------------------------')
+                print(field_value, value)
+
+                # بررسی اینکه آیا هیچ‌ کدام None نیستند
+                if field_value is None or value is None:
+                    print('One of the values is None, skipping comparison.')
+                    continue  # از مقایسه بگذرید
+
+                # تبدیل به float و مقایسه
+                if float(field_value) != float(value):
+                    print('after if---')
+                    print(field_value, value)
+                    setattr(kardex_instance, field, value)
+                    updated = True
                 else:
-                    if str(getattr(kardex_instance, field)) != str(value) and getattr(kardex_instance, field) != value:
-                        setattr(kardex_instance, field, value)
-                        print('+++++++++++++++++++++++')
-                        print(getattr(kardex_instance, field) , value)
-                        updated = True
+                    print('after if is empty')
             if updated:
-                print(kardex_instance.code_kala, "---------------------------")
+                # print(kardex_instance.code_kala, "---------------------------")
                 kardex_instance.sync_mojodi = False
                 updates.append(kardex_instance)
         else:
@@ -1614,8 +1622,13 @@ def UpdateMojodi(request):
     if new_objects:
         Mojodi.objects.bulk_create(new_objects, batch_size=1000)
 
+    for hh in all_kardex_list:
+        print(hh[0])
+    print("hh77777777777")
+
+
     # حذف ردیف‌های اضافی در Mojodi
-    keys_to_keep = set((k['code_kala'], k['warehousecode']) for k in all_kardex_list)
+    keys_to_keep = set((k[1], k[0]) for k in all_kardex_list)
 
     Mojodi.objects.exclude(
         id__in=Mojodi.objects.filter(code_kala__in=[key[0] for key in keys_to_keep],
