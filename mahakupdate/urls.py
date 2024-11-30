@@ -25,3 +25,5 @@ urlpatterns = [
     path('kala/create/', kala_create_view, name='kala_create'),
 
 ]
+
+

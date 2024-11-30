@@ -80,7 +80,71 @@ def Updatedb(request):
 
 
 # آپدیت همه جدوال که موقع آن است
+from django.shortcuts import redirect
+from django.utils import timezone
+
+from django.shortcuts import redirect
+from django.utils import timezone
+
+from django.shortcuts import redirect
+from django.utils import timezone
+
+
 def Updateall(request):
+    tables = Mtables.objects.filter(in_use=True).order_by('update_priority')
+
+    # نگاشت نام جدول‌ها به توابع مربوطه
+    view_map = {
+        'Fact_Fo': UpdateFactor,
+        'GoodInf': UpdateKala,
+        'Fact_Fo_Detail': UpdateFactorDetail,
+        'Kardex': UpdateKardex,
+        'PerInf': UpdatePerson,
+        'Stores': UpdateStorage,
+    }
+
+    responses = []
+
+    # پردازش بر اساس جداول
+    for t in tables:
+        if (timezone.now() - t.last_update_time).total_seconds() / 60 / t.update_period > 0.0005:
+            response = view_map[t.name](request)
+            responses.append(response.content)
+
+            # آدرس‌های استاتیک
+    static_urls = [
+        '/update/updatekalagroupinfo',
+        '/update/createkalagroup',
+        '/update/updatekalagroup',
+        '/update/mojodi',
+    ]
+
+    # نگاشت آدرس‌های استاتیک به توابع
+    static_view_map = {
+        '/update/updatekalagroupinfo': UpdateKalaGroupinfo,
+        '/update/createkalagroup': CreateKalaGroup,
+        '/update/updatekalagroup': UpdateKalaGroup,
+        '/update/mojodi': UpdateMojodi,
+    }
+
+    # چاپ تزئینی برای عیب یابی
+    print(f"Request path: {request.path}")
+
+    # پردازش آدرس‌های استاتیک
+    for static_url in static_urls:
+        # if request.path == static_url:
+        response = static_view_map[static_url](request)
+        responses.append(response.content)
+
+            # اگر هیچ آدرس استاتیکی پردازش نشود
+    if not responses:
+        print("No static URLs were processed.")
+
+        # بازگشت به /updatedb
+    return redirect('/updatedb')
+
+
+def Updateall1(request):
     tables = Mtables.objects.filter(in_use=True).order_by('update_priority')
     view_map = {
         'Fact_Fo': UpdateFactor,
@@ -1335,6 +1399,7 @@ def kala_create_view(request):
 
 
 def UpdateKalaGroupinfo(request):
+    print('def UpdateKalaGroupinfo=========================================')
     # مسیر فایل اکسل
     file_path = os.path.join(settings.BASE_DIR, 'temp', 'kala_group.xlsx')  # خواندن فایل اکسل با Pandas
     df = pd.read_excel(file_path)
@@ -1393,6 +1458,7 @@ def update_categories_from_kala_groupinfo():
 
 
 def CreateKalaGroup(request):
+    print('def CreateKalaGroup==========================')
     update_categories_from_kala_groupinfo()
     return redirect('/updatedb')
 
@@ -1433,6 +1499,7 @@ def update_kala_categories():
 
 
 def UpdateKalaGroup(request):
+    print('def UpdateKalaGroup(request):================')
     update_kala_categories()
     return redirect('/updatedb')
 
