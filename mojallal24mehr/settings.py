@@ -180,5 +180,5 @@ APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds to wait for an explicitly requested 
 # settings.py
 
 JOB_SCHEDULER_SETTINGS = {
-    'max_runtime': 60,  # افزایش زمان به 60 ثانیه
+    'max_runtime': 2000,  # افزایش زمان به 60 ثانیه
 }
