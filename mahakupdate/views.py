@@ -13,6 +13,8 @@ from django.db.models import Max, Q
 from .models import Mojodi
 from django.db.models import Q
 
+from .sendtogap import send_to_admin
+
 
 # sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
 
@@ -91,6 +93,7 @@ from django.utils import timezone
 
 
 def Updateall(request):
+    send_to_admin('شروع آپدیت کل')
     tables = Mtables.objects.filter(in_use=True).order_by('update_priority')
 
     # نگاشت نام جدول‌ها به توابع مربوطه
@@ -136,6 +139,8 @@ def Updateall(request):
     if not responses:
         print("No static URLs were processed.")
         # بازگشت به /updatedb
+
+    send_to_admin('پایان آپدیت کل')
     return redirect('/updatedb')
 
 def Updateallold(request):
