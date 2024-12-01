@@ -1,4 +1,4 @@
-from django.contrib.sites import requests
+import requests
 
 
 def send_to_admin(data):

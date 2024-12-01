@@ -93,6 +93,7 @@ from django.utils import timezone
 
 
 def Updateall(request):
+    t0 = time.time()
     send_to_admin('شروع آپدیت کل')
     tables = Mtables.objects.filter(in_use=True).order_by('update_priority')
 
@@ -141,6 +142,15 @@ def Updateall(request):
         # بازگشت به /updatedb
 
     send_to_admin('پایان آپدیت کل')
+    tend = time.time()
+    total_time = tend - t0
+
+    data1=(f"زمان کل: {total_time:.2f} ثانیه")
+    send_to_admin('data1')
+
+
+
+
     return redirect('/updatedb')
 
 def Updateallold(request):
@@ -1034,6 +1044,7 @@ def UpdateKala(request):
 
 
 def UpdatePerson(request):
+    send_to_admin('شروع آپدیت افراد')
     t0 = time.time()
     print('شروع آپدیت افراد--------------------------------------------')
 
