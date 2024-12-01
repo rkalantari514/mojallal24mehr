@@ -177,3 +177,8 @@ APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Format for displaying run time 
 APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds to wait for an explicitly requested job to complete.
 
 
+# settings.py
+
+JOB_SCHEDULER_SETTINGS = {
+    'max_runtime': 60,  # افزایش زمان به 60 ثانیه
+}
