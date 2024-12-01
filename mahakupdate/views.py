@@ -146,7 +146,7 @@ def Updateall(request):
     total_time = tend - t0
 
     data1=(f"زمان کل: {total_time:.2f} ثانیه")
-    send_to_admin('data1')
+    send_to_admin(data1)
 
 
 
