@@ -9,6 +9,7 @@ urlpatterns = [
     # path('', Updatedb, name="updatedb"),
     path('updatedb', Updatedb, name="updatedb"),
     path('updateall', Updateall, name="updateall"),
+
     path('update/factor', UpdateFactor, name="updatefactor"),
     path('update/factor-detail', UpdateFactorDetail, name="updatefactordetail"),
     path('update/kala', UpdateKala, name="updatekala"),

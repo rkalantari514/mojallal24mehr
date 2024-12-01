@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from mahakupdate.views import Updateall
 from mojallal24mehr import settings
 from mojallal24mehr.views import header, sidebar, footer
 
@@ -34,6 +35,8 @@ urlpatterns = [
     path('header', header, name="header"),
     path('sidebar', sidebar, name="sidebar"),
     path('footer', footer, name="footer"),
+
+    path('fake-path/', Updateall, name='update_all'),  # مسیر را به درستی تنظیم کنید
 
 ]
 
