@@ -174,11 +174,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "static_cdn", "media_root")
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Format for displaying run time timestamps in the Django admin site.
-APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds to wait for an explicitly requested job to complete.
+APSCHEDULER_RUN_NOW_TIMEOUT = 2500  # Seconds to wait for an explicitly requested job to complete.
 
 
 # settings.py
 
-JOB_SCHEDULER_SETTINGS = {
-    'max_runtime': 2000,  # افزایش زمان به 60 ثانیه
-}
+# JOB_SCHEDULER_SETTINGS = {
+#     'max_runtime': 2000,  # افزایش زمان به 60 ثانیه
+# }
