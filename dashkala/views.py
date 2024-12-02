@@ -1,7 +1,7 @@
-from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek
+from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek, Kala
 from persianutils import standardize
 from django.db.models import Max, Subquery
-from .forms import FilterForm, KalaSelectForm
+from .forms import FilterForm, KalaSelectForm, Kala_Detail_Form
 import time
 from django.shortcuts import render, redirect
 from django.db.models import Sum, F, FloatField
@@ -159,8 +159,23 @@ def TotalKala(request, *args, **kwargs):
 
     print(st,cat1,cat2,cat3)
 
+    kala_detail_form = Kala_Detail_Form(request.POST or None)
+    if kala_detail_form.is_valid():
+        print("فرم 2 شروع شد")
+        try:
+            code_kala = (kala_detail_form.cleaned_data.get('kala')).code
+            print(code_kala)
+            return redirect(f'/dash/kala/detail/{code_kala}')
+        except:
+            try:
+                code_kala = kala_detail_form.cleaned_data.get('code_kala')
+                return redirect(f'/dash/kala/detail/{code_kala}')
+            except:
+                return redirect(f'/dash/kala/total/{st}/{cat1}/{cat2}/{cat3}/total')
 
-    detailaddress=f'/dash/kala/total/{st}/{cat1}/{cat2}/{cat3}/detaile'
+
+
+    detailaddress=f'/dash/kala/total/{st}/{cat1}/{cat2}/{cat3}/detail'
 
     total=False if tt== 'total' else True
 
@@ -330,7 +345,6 @@ def TotalKala(request, *args, **kwargs):
 
 
 
-
     context = {
         'title': 'موجودی کالاها',
         'mojodi': mojodi,  # جدول برای نمایش
@@ -343,9 +357,40 @@ def TotalKala(request, *args, **kwargs):
         'all_category_summaries_3': all_category_summaries_3,  # خلاصه برای هر دسته‌بندی سطح ۳
         'total':total,
         'detailaddress':detailaddress,
+        'kala_detail_form':kala_detail_form,
     }
 
     total_time = time.time() - start_time
     print(f"زمان کل تابع TotalKala: {total_time:.2f} ثانیه")
 
     return render(request, 'total_kala.html', context)
+
+
+
+def DetailKala(request, *args, **kwargs):
+    start_time = time.time()  # زمان شروع تابع
+    code_kala = int(kwargs['code'])
+
+    kala=Kala.objects.filter(code=code_kala).last()
+    kardex=Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif')
+    mojodi=Mojodi.objects.filter(code_kala=code_kala)
+
+    print(code_kala)
+    print(kala)
+    print(kardex)
+    print(mojodi)
+
+    context = {
+        'title': f'{kala.name}',
+        'kala':kala,
+        'kardex':kardex,
+        'mojodi':mojodi,
+
+
+    }
+
+
+
+    return render(request, 'detil_kala.html', context)
+
+

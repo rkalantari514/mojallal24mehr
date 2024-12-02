@@ -1,7 +1,7 @@
 from django import forms
-from django.forms import ModelChoiceField, ModelMultipleChoiceField
-
+from django.forms import ModelChoiceField, ModelMultipleChoiceField, TextInput
 from mahakupdate.models import Kala, Storagek, Category
+from persianutils import standardize
 
 
 class FilterForm(forms.Form):
@@ -50,4 +50,25 @@ class KalaSelectForm(forms.Form):
     )
 
 
+def fix_persian_characters(value):
+    return standardize(value)
+
+class KModelChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return fix_persian_characters(obj.name)
+
+class Kala_Detail_Form(forms.Form):
+    kala = KModelChoiceField(
+        widget=forms.Select(attrs={'placeholder': 'کالا', 'class': 'selectpicker', 'data-live-search': "true"}),
+        queryset=Kala.objects.all(),
+        label='نام کالا',
+        required=False,
+        # empty_label='------',
+    )
+
+    code_kala = forms.IntegerField(
+        widget=forms.TextInput(attrs={'placeholder': 'کد کالا', 'class': 'form-control' }),
+        label='کد کالا',
+        required=False,
+    )
 

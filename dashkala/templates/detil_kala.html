@@ -1,0 +1,132 @@
+{% extends 'shared/_MainLayout.html' %}
+{% load humanize %}
+{% load static %}
+{% block content %}
+    <div class="content-wrapper">
+
+
+    <div class="row">
+
+
+        <div class="col-md-4 mb-30">
+            <div class="col-xl-12 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="d-block d-md-flex justify-content-between">
+                            <div class="d-block">
+                                <h5 class="card-title pb-0 border-0 ">{{ kala.name }}</h5>
+                                <h6 class="card-title pb-0 border-0">در دسته بندی
+                                    :{{ kala.category.parent.parent.name }}--{{ kala.category.parent.name }}--{{ kala.category.name }}</h6>
+                                <h6 class="card-title pb-0 border-0">موجودی فعلی: {{ mojodi.last.total_stock }}</h6>
+                            </div>
+
+                        </div>
+                        <div class="table-responsive mt-15 ">
+                            <h6 class="card-title pb-0 border-0">موجودی انبارها</h6>
+                            <table class="table center-aligned-table mb-0">
+                                <thead>
+                                <tr class="text-dark">
+                                    <th>نام انبار</th>
+                                    <th>موجودی</th>
+                                    <th>قیمت میانگین</th>
+                                    <th>ارزش</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for m in mojodi %}
+                                    <tr class="text-dark">
+                                    <td>{{ m.storage.name }}</td>
+                                    <td>{{ m.stock }}</td>
+                                    <td>{{ m.averageprice|intword }}</td>
+                                    <td>{{ m.arzesh|intword }}</td>
+
+                                {% endfor %}
+
+                                </tr>
+
+
+                                </tbody>
+                            </table>
+
+
+                        </div>
+                        <div class="table-responsive mt-15 ">
+                            <h6 class="card-title pb-0 border-0">گردش انبارها</h6>
+                            <table class="table center-aligned-table mb-0">
+                                <thead>
+                                <tr class="text-dark">
+                                    <th>تاریخ</th>
+                                    <th>نام انبار</th>
+                                    <th>تغییرات</th>
+                                    <th>موجودی</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for k in kardex %}
+                                    <tr class="text-dark">
+                                    <td>{{ k.pdate }}</td>
+                                    <td>{{ k.storage.name }}</td>
+                                    {% if k.count < 0 %}
+                                        <h6>
+                                            <td class="text-success" style="direction:ltr">
+                                                <i class="mb-10 text-success float-right fa fa-arrow-down"> </i>{{ k.count }}
+                                            </td>
+                                        </h6>
+                                    {% else %}
+                                        <h6>
+                                            <td class="text-primary" style="direction:ltr">
+                                                <i class="mb-10 text-primary float-right fa fa-arrow-up"> </i>{{ k.count }}</td>
+                                        </h6>
+                                    {% endif %}
+                                    <td>{{ k.stock }}</td>
+
+                                {% endfor %}
+
+                                </tr>
+
+
+                                </tbody>
+                            </table>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+
+        <div class="col-md-8 mb-30">
+            left
+        </div>
+
+
+    </div>
+{% endblock %}
+
+
+
+
+
+
+{% block myjs %}
+
+
+
+{% endblock %}
+
+
+{% block date %}
+    <script src="{% static 'js/table1/tableExport.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-locale-all.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-export.min.js' %}"></script>
+    <script src="{% static 'js/table1/natural-sorting.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-filter-control.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-print.min.js' %}"></script>
+    <script src="{% static 'js/table1/jspdf.min.js' %}"></script>
+    <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
+
+{% endblock %}
