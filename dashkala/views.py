@@ -150,6 +150,12 @@ def load_categories_level3(request):
 
 
 def TotalKala(request, *args, **kwargs):
+    print('request.POST')
+    print(request.POST)
+    print('request')
+    print(request)
+
+
     start_time = time.time()  # زمان شروع تابع
     st = kwargs['st']
     cat1 = kwargs['cat1']
@@ -160,8 +166,9 @@ def TotalKala(request, *args, **kwargs):
     print(st,cat1,cat2,cat3)
 
     kala_detail_form = Kala_Detail_Form(request.POST or None)
-    if kala_detail_form.is_valid():
+    if 'submit_form' in request.POST and request.POST['submit_form'] == 'kala_detail' and kala_detail_form.is_valid():
         print("فرم 2 شروع شد")
+        print(request.POST['submit_form'])
         try:
             code_kala = (kala_detail_form.cleaned_data.get('kala')).code
             print(code_kala)
@@ -200,8 +207,9 @@ def TotalKala(request, *args, **kwargs):
         field_value = form.cleaned_data.get(field_name)
         return field_value.id if field_value else default
 
-    if kala_select_form.is_valid():
+    if 'submit_form' in request.POST and request.POST['submit_form'] == 'kala_select' and kala_select_form.is_valid():
         print("فرم شروع شد")
+        print(request.POST['submit_form'])
         storage = get_cleaned_data_or_default(kala_select_form, 'storage')
         category1 = get_cleaned_data_or_default(kala_select_form, 'category1')
         category2 = get_cleaned_data_or_default(kala_select_form, 'category2')
