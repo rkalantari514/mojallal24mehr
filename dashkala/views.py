@@ -388,11 +388,19 @@ def DetailKala(request, *args, **kwargs):
     print(kardex)
     print(mojodi)
 
+
+    # دریافت آخرین رکورد از هر تاریخ
+    latest_records = Kardex.objects.values('date').annotate(latest_id=Max('id'))
+    latest_ids = [record['latest_id'] for record in latest_records]
+    kardex_records = Kardex.objects.filter(id__in=latest_ids).order_by('date')
+
+
     context = {
         'title': f'{kala.name}',
         'kala':kala,
         'kardex':kardex,
         'mojodi':mojodi,
+        'kardex_records': kardex_records,
 
 
     }
