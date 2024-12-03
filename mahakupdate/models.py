@@ -152,6 +152,13 @@ class Kardex(models.Model):
     def __str__(self):
         return str(self.pdate)  # تصحیح به str
 
+    def lname(self):
+        try:
+            person = Person.objects.get(code=self.percode)
+            return person.lname
+        except Person.DoesNotExist:
+            return 'موجودی اول دوره'
+
 class Mojodi(models.Model):
     warehousecode=models.IntegerField(blank = True,null = True,default=0, verbose_name='کد انبار')
     storage = models.ForeignKey(Storagek, on_delete=models.SET_NULL,blank=True, null=True)
@@ -225,6 +232,12 @@ class Person(models.Model):
         verbose_name_plural = 'افراد'
     def __str__(self):
         return f'{self.name}  {self.lname}'
+
+
+
+
+
+
 
 class WordCount(models.Model):
     word = models.CharField(max_length=100, unique=True, verbose_name='کلمه')  # کلید واژه
