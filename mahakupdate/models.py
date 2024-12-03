@@ -126,23 +126,22 @@ class Storagek(models.Model):
 
 
 class Kardex(models.Model):
-    pdate=models.CharField(blank = True,null = True,max_length=150, verbose_name='تاریخ شمسی')
+    pdate = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ شمسی')
     date = models.DateField(blank=True, null=True, verbose_name='تاریخ میلادی')
-    percode=models.IntegerField(blank = True,null = True,default=0, verbose_name='کد شخص')
-    warehousecode=models.IntegerField(blank = True,null = True,default=0, verbose_name='کد انبار')
-    storage = models.ForeignKey(Storagek, on_delete=models.SET_NULL,blank=True, null=True)
-    mablaghsanad=models.FloatField(blank=True, null=True, default=0, verbose_name='مبلغ سند')
+    percode = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد شخص')
+    warehousecode = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد انبار')
+    storage = models.ForeignKey(Storagek, on_delete=models.SET_NULL, blank=True, null=True)
+    mablaghsanad = models.FloatField(blank=True, null=True, default=0, verbose_name='مبلغ سند')
     code_kala = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد کالا')
-    radif = models.IntegerField(blank=True, null=True, default=0, verbose_name='ردیف در فاکتور')  #برای سورت کردن لازم است
-    kala = models.ForeignKey(Kala, on_delete=models.SET_NULL,blank=True, null=True)
-    code_factor=models.IntegerField(blank=True, null=True, default=0, verbose_name='کد فاکتور')
-    factor = models.ForeignKey(Factor, on_delete=models.SET_NULL,blank=True, null=True)
-    count=models.FloatField(blank=True, null=True, default=0, verbose_name='تعداد')
-    averageprice=models.FloatField(blank=True, null=True, default=0, verbose_name='قیمت میانگین')
-    stock=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی')
+    radif = models.IntegerField(blank=True, null=True, default=0, verbose_name='ردیف در فاکتور')  # برای سورت کردن لازم است
+    kala = models.ForeignKey(Kala, on_delete=models.SET_NULL, blank=True, null=True)
+    code_factor = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد فاکتور')
+    factor = models.ForeignKey(Factor, on_delete=models.SET_NULL, blank=True, null=True)
+    count = models.FloatField(blank=True, null=True, default=0, verbose_name='تعداد')
+    averageprice = models.FloatField(blank=True, null=True, default=0, verbose_name='قیمت میانگین')
+    stock = models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی')
     is_prioritized = models.BooleanField(default=False)
     sync_mojodi = models.BooleanField(default=False, verbose_name='موجودی سینک شده است؟')
-
 
     class Meta:
         verbose_name = 'کاردکس انبار'
@@ -154,8 +153,11 @@ class Kardex(models.Model):
 
     def lname(self):
         try:
-            person = Person.objects.get(code=self.percode)
-            return person.lname
+            person = Person.objects.filter(code=self.percode).first()  # استفاده از filter و first
+            if person:
+                return person.lname
+            else:
+                return 'موجودی اول دوره'
         except Person.DoesNotExist:
             return 'موجودی اول دوره'
 
