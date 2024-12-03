@@ -62,7 +62,7 @@ class CategoryAdmin(admin.ModelAdmin):
         model = Category
 
 class KardexAdmin(admin.ModelAdmin):
-    list_display = ['__str__','date','stock','code_kala','kala','count','storage','warehousecode','averageprice','sync_mojodi']
+    list_display = ['__str__','date','stock','code_kala','kala','count','percode','storage','warehousecode','averageprice','sync_mojodi']
     list_filter = ['warehousecode','sync_mojodi']
     # list_editable = ['name','parent','level']
     search_fields = ['pdate','count','code_kala','stock']
@@ -80,10 +80,10 @@ class MojodiAdmin(admin.ModelAdmin):
 
 
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['__str__','name','lname','group']
+    list_display = ['__str__','code','name','lname','group']
     # list_filter = ['level','parent',]
     # list_editable = ['name','parent','level']
-    search_fields = ['name','lname','group']
+    search_fields = ['name','code','lname','group']
 
     class Meta:
         model = Person

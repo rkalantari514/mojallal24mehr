@@ -57,6 +57,7 @@
                                 <tr class="text-dark">
                                     <th>تاریخ</th>
                                     <th>نام انبار</th>
+                                    <th>فرد</th>
                                     <th>تغییرات</th>
                                     <th>موجودی</th>
                                 </tr>
@@ -66,6 +67,7 @@
                                     <tr class="text-dark">
                                     <td>{{ k.pdate }}</td>
                                     <td>{{ k.storage.name }}</td>
+                                    <td>{{ k.percode }}</td>
                                     {% if k.count < 0 %}
                                         <h6>
                                             <td class="text-success" style="direction:ltr">
