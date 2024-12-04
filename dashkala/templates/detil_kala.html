@@ -56,6 +56,8 @@
                                     <th>تاریخ</th>
                                     <th>نام انبار</th>
                                     <th>شخص</th>
+{#                                    <th></th>#}
+                                    <th></th>
                                     <th>نوع گردش</th>
                                     <th>تغییرات</th>
                                     <th>موجودی</th>
@@ -67,7 +69,9 @@
                                     <td>{{ k.pdate }}</td>
                                     <td>{{ k.storage.name }}</td>
                                     <td>{{ k.lname }}</td>
-                                    <td>{{ k.gardesh_type }}</td>
+{#                                    <td><i class="fa fa-retweet"><i class="fa fa-archive"></i> <i class="fa fa-truck text-instagram fa-2x"><i class="fa fa-question-circle-o"><i class="fa fa-shopping-cart"></i><i class="fa fa-hand-lizard-o"><span class="ti-shopping-cart"></span></i></td>#}
+                                    <td><i class="{{ k.gardesh_type.2 }} fa-2x"></td>
+                                    <td class="{{ k.gardesh_type.1 }}">{{ k.gardesh_type.0 }}</td>
                                     {% if k.count < 0 %}
                                         <h6>
                                             <td class="text-success" style="direction:ltr">

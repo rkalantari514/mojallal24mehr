@@ -164,13 +164,13 @@ class Kardex(models.Model):
 
     def gardesh_type(self):
         types = {
-            1: 'فروش',
-            2: 'خرید',
-            3: 'موجودی اول دوره',
-            6: 'خروج داخلی',
-            7: 'ورود داخلی'
+            1: ('فروش','text-success','fa fa-shopping-cart text-success'),
+            2: ('خرید','text-primary','fa fa-truck text-primary'),
+            3: ('موجودی اول دوره','text-dark','fa fa-archive text-facebook'),
+            6: ('خروج داخلی','text-success','fa fa-retweet text-text-instagram'),
+            7: ('ورود داخلی','text-success','fa fa-retweet text-primary')
         }
-        return types.get(self.ktype, 'تعیین نشده')
+        return types.get(self.ktype, ('نامعلوم','text-success','fa fa-question-o'))
 
 
 class Mojodi(models.Model):
