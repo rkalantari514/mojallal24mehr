@@ -298,6 +298,7 @@ def UpdateKardex(request):
             'warehousecode': row[2],
             'mablaghsanad': row[3],
             'count': row[7],
+            'ktype': row[5],
             'averageprice': row[11],
         }
 
@@ -347,7 +348,7 @@ def UpdateKardex(request):
     # ذخیره‌سازی دسته‌ای
     if updates or new_records:
         with transaction.atomic():
-            Kardex.objects.bulk_update(updates, ['code_factor', 'percode', 'warehousecode', 'mablaghsanad', 'count',
+            Kardex.objects.bulk_update(updates, ['code_factor', 'percode', 'warehousecode', 'mablaghsanad', 'count','ktype',
                                                  'averageprice', 'sync_mojodi'])
             Kardex.objects.bulk_create(new_records)
             print(f"{len(updates) + len(new_records)} رکورد به‌روز رسانی یا ایجاد شد.")

@@ -129,6 +129,7 @@ class Kardex(models.Model):
     pdate = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ شمسی')
     date = models.DateField(blank=True, null=True, verbose_name='تاریخ میلادی')
     percode = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد شخص')
+    ktype = models.IntegerField(blank=True, null=True, default=0, verbose_name='نوع گردش')
     warehousecode = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد انبار')
     storage = models.ForeignKey(Storagek, on_delete=models.SET_NULL, blank=True, null=True)
     mablaghsanad = models.FloatField(blank=True, null=True, default=0, verbose_name='مبلغ سند')
