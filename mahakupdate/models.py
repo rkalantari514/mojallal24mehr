@@ -162,6 +162,17 @@ class Kardex(models.Model):
         except Person.DoesNotExist:
             return 'موجودی اول دوره'
 
+    def gardesh_type(self):
+        types = {
+            1: 'فروش',
+            2: 'خرید',
+            3: 'موجودی اول دوره',
+            6: 'خروج داخلی',
+            7: 'ورود داخلی'
+        }
+        return types.get(self.ktype, 'تعیین نشده')
+
+
 class Mojodi(models.Model):
     warehousecode=models.IntegerField(blank = True,null = True,default=0, verbose_name='کد انبار')
     storage = models.ForeignKey(Storagek, on_delete=models.SET_NULL,blank=True, null=True)
