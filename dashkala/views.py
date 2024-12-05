@@ -394,21 +394,21 @@ def DetailKala(request, *args, **kwargs):
     print(kala.latest_mojodi())
     print('kala.related_kalas')
     print(kala.related_kalas())
-    rel_kala=[]
-    o=0
-    for kal in kala.related_kalas():
-        print(o)
-        o+=1
-        rel_kala.append(
-            (
-                kal.code,
-                kal.name,
-                kal.latest_mojodi(),
-                kal.total_sales(),
-                kal.s_m_ratio,
-                kal.code,
-            )
-        )
+    # rel_kala=[]
+    # o=0
+    # for kal in kala.related_kalas():
+    #     print(o)
+    #     o+=1
+    #     rel_kala.append(
+    #         (
+    #             kal.code,
+    #             kal.name,
+    #             kal.latest_mojodi(),
+    #             kal.total_sales(),
+    #             kal.s_m_ratio,
+    #             kal.code,
+    #         )
+    #     )
 
 
 
@@ -424,7 +424,7 @@ def DetailKala(request, *args, **kwargs):
         'kardex':kardex,
         'mojodi':mojodi,
         'kardex_records': kardex_records,
-        'rel_kala':rel_kala,
+        # 'rel_kala':rel_kala,
 
 
     }
