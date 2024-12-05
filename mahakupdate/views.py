@@ -2318,19 +2318,15 @@ def Update_Sales_Mojodi_Ratio(request):
     start_time = time.time()  # زمان شروع تابع
     current_date = datetime.now().date()
 
-    # دریافت کالاهایی که نیاز به به‌روزرسانی دارند و کاردکس دارند
-    kalas = Kala.objects.exclude(last_updated_ratio=current_date).prefetch_related(
-        'kardex_set'  # فرض بر این است که رابطه بین Kala و Kardex از طریق 'kardex_set' است
-    )
+    # دریافت یک لیست یکتا از کد کالاهای موجود در Kardex
+    kala_code_in_kardex = Kardex.objects.values_list('code_kala', flat=True).distinct()
 
-    # فیلتر کردن کالاهایی که هیچ کاردکسی ندارند
-    kalas_with_kardex = [
-        kala for kala in kalas if Kardex.objects.filter(code_kala=kala.code).exists()
-    ]
+    # فیلتر کردن کالاها با استفاده از کدهای یکتا و حذف کالاهایی که به‌روزرسانی شده‌اند
+    kalas = Kala.objects.exclude(last_updated_ratio=current_date).filter(code__in=kala_code_in_kardex)
 
-    print(f'کالاهای قابل پردازش: {len(kalas_with_kardex)}')
+    print(f'کالاهای قابل پردازش: {kalas.count()}')
 
-    for con, kala in enumerate(kalas_with_kardex, start=1):
+    for con, kala in enumerate(kalas, start=1):
         print('------------------------')
         print(kala.last_updated_ratio, current_date)
         print(con)
@@ -2393,7 +2389,6 @@ def Update_Sales_Mojodi_Ratio(request):
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
 
     return redirect('/updatedb')
-
 
 def Update_Sales_Mojodi_Ratio1(request):
     start_time = time.time()  # زمان شروع تابع
