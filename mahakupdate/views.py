@@ -2326,20 +2326,20 @@ def Update_Sales_Mojodi_Ratio(request):
 
     print(f'کالاهای قابل پردازش: {kalas.count()}')
 
+    # بارگذاری تمام فروش‌ها و کاردکس‌ها در یک پرس‌وجو برای کاهش تعداد پرس‌وجوها
+    total_sales_data = Kardex.objects.filter(ktype=1, code_kala__in=kala_code_in_kardex).values('code_kala').annotate(total=Sum('count'))
+    kardex_records = Kardex.objects.filter(code_kala__in=kala_code_in_kardex).order_by('date')
+
+    # دیکشنری برای نگهداری مجموع فروش هر کالا
+    total_sales_dict = {data['code_kala']: -1 * (data['total'] or 0) for data in total_sales_data}
+
     for con, kala in enumerate(kalas, start=1):
         print('------------------------')
         print(kala.last_updated_ratio, current_date)
         print(con)
 
-        # دریافت مجموع فروش از ابتدای دوره تا حال
-        total_sales = Kardex.objects.filter(
-            code_kala=kala.code,
-            ktype=1
-        ).aggregate(total=Sum('count'))['total'] or 0
-        total_sales = -1 * total_sales
-
         # محاسبه تاریخ شروع از اولین تاریخ موجود در کاردکس
-        first_kardex_date = Kardex.objects.filter(code_kala=kala.code).aggregate(first_date=Min('date'))['first_date']
+        first_kardex_date = kardex_records.filter(code_kala=kala.code).aggregate(first_date=Min('date'))['first_date']
         if not first_kardex_date:
             continue  # اگر کاردکسی وجود نداشت، ادامه دهید
 
@@ -2347,19 +2347,16 @@ def Update_Sales_Mojodi_Ratio(request):
         start_day = datetime.combine(first_kardex_date, datetime.min.time())
         end_day = datetime.now()
 
-        # دریافت تمام کاردکس‌های مربوط به کالا در یک پرس‌وجو
-        kardex_records = Kardex.objects.filter(
-            code_kala=kala.code,
-            date__range=(start_day, end_day)
-        ).order_by('date')
+        # فیلتر کردن کاردکس‌های مربوط به کالا
+        relevant_kardex_records = kardex_records.filter(code_kala=kala.code, date__range=(start_day, end_day))
 
         # محاسبه میانگین موجودی
         total_stock = 0
         days_count = 0
-        last_stock = 0  # موجودی آخرین کاردکس
+        last_stock = None  # موجودی آخرین کاردکس
 
         # حلقه برای محاسبه موجودی روزانه
-        for kardex in kardex_records:
+        for kardex in relevant_kardex_records:
             # اگر موجودی تغییر کرده باشد، آن را به total_stock اضافه می‌کنیم
             if kardex.stock != last_stock:
                 total_stock += kardex.stock
@@ -2367,8 +2364,8 @@ def Update_Sales_Mojodi_Ratio(request):
                 last_stock = kardex.stock  # به‌روزرسانی موجودی آخرین کاردکس
 
         # اگر هیچ روزی موجودی ثبت نشده باشد، از موجودی آخرین کاردکس استفاده می‌کنیم
-        if days_count == 0 and kardex_records.exists():
-            last_kardex = kardex_records.last()
+        if days_count == 0 and relevant_kardex_records.exists():
+            last_kardex = relevant_kardex_records.last()
             total_stock += last_kardex.stock
             days_count = 1
 
@@ -2376,6 +2373,7 @@ def Update_Sales_Mojodi_Ratio(request):
         ave_mojodi = total_stock / days_count if days_count > 0 else 0
 
         # محاسبه نسبت فروش به میانگین موجودی
+        total_sales = total_sales_dict.get(kala.code, 0)
         ratio = total_sales / ave_mojodi if ave_mojodi != 0 else 0
 
         # به‌روزرسانی فیلدهای مربوطه در مدل Kala
@@ -2389,7 +2387,6 @@ def Update_Sales_Mojodi_Ratio(request):
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
 
     return redirect('/updatedb')
-
 
 def Update_Sales_Mojodi_Ratio1(request):
     start_time = time.time()  # زمان شروع تابع
