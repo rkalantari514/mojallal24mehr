@@ -193,23 +193,24 @@
                                     <th>نام کالا</th>
                                     <th>موجودی</th>
                                     <th>کل فروش از ابتدای دوره</th>
-{#                                    <th>نسبت فروش به میانگین موجودی</th>#}
+                                    <th>نسبت فروش به میانگین موجودی</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {% for k in kala.related_kalas %}
-                                    <tr class="text-dark clickable-row" onclick="window.open('/dash/kala/detail/{{ k.code }}', '_blank')">
+                                    <tr class="text-dark clickable-row"
+                                        onclick="window.open('/dash/kala/detail/{{ k.code }}', '_blank')">
                                         <td>{{ k.code }}</td>
                                         <td>{{ k.name }}</td>
-{#                                        <td>{{ k.latest_mojodi }}</td>#}
-{#                                        <td>{{ k.total_sales|floatformat:2 }}</td>#}
+                                        <td>{{ k.latest_mojodi }}</td>
+                                        <td>{{ k.total_sales|floatformat:2 }}</td>
                                         <td>{{ k.s_m_ratio|floatformat:2 }}</td>
-{#                                    <td>{{ k.0 }}</td>#}
-{#                                        <td>{{ k.1 }}</td>#}
-{#                                        <td>{{ k.2 }}</td>#}
-{#                                        <td>{{ k.3|floatformat:2 }}</td>#}
-{#                                        <td>{{ k.4|floatformat:2 }}</td>#}
-{#                                    </tr>#}
+                                        {#                                    <td>{{ k.0 }}</td>#}
+                                        {#                                        <td>{{ k.1 }}</td>#}
+                                        {#                                        <td>{{ k.2 }}</td>#}
+                                        {#                                        <td>{{ k.3|floatformat:2 }}</td>#}
+                                        {#                                        <td>{{ k.4|floatformat:2 }}</td>#}
+                                    </tr>
                                 {% endfor %}
 
 
