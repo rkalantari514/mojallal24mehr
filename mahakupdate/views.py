@@ -2347,30 +2347,30 @@ def Update_Sales_Mojodi_Ratio(request):
         start_day = datetime.combine(first_kardex_date, datetime.min.time())
         end_day = datetime.now()
 
-        # متغیرها برای نگهداری میانگین موجودی و مجموع موجودی روزانه
+        # دریافت تمام کاردکس‌های مربوط به کالا در یک پرس‌وجو
+        kardex_records = Kardex.objects.filter(
+            code_kala=kala.code,
+            date__range=(start_day, end_day)
+        ).order_by('date')
+
+        # محاسبه میانگین موجودی
         total_stock = 0
         days_count = 0
+        last_stock = 0  # موجودی آخرین کاردکس
 
-        # حلقه برای هر روز در بازه زمانی از اولین تاریخ تا اکنون
-        for single_date in (start_day + timedelta(n) for n in range((end_day - start_day).days + 1)):
-            # دریافت آخرین کاردکس روز
-            kardex = Kardex.objects.filter(
-                code_kala=kala.code,
-                date=single_date.date()
-            ).order_by('-date').first()
-
-            if kardex:
+        # حلقه برای محاسبه موجودی روزانه
+        for kardex in kardex_records:
+            # اگر موجودی تغییر کرده باشد، آن را به total_stock اضافه می‌کنیم
+            if kardex.stock != last_stock:
                 total_stock += kardex.stock
                 days_count += 1
-            else:
-                # استفاده از آخرین موجودی قبلی اگر برای آن روز کاردکس وجود نداشت
-                last_kardex = Kardex.objects.filter(
-                    code_kala=kala.code,
-                    date__lt=single_date.date()
-                ).order_by('-date').first()
-                if last_kardex:
-                    total_stock += last_kardex.stock
-                    days_count += 1
+                last_stock = kardex.stock  # به‌روزرسانی موجودی آخرین کاردکس
+
+        # اگر هیچ روزی موجودی ثبت نشده باشد، از موجودی آخرین کاردکس استفاده می‌کنیم
+        if days_count == 0 and kardex_records.exists():
+            last_kardex = kardex_records.last()
+            total_stock += last_kardex.stock
+            days_count = 1
 
         # محاسبه میانگین موجودی
         ave_mojodi = total_stock / days_count if days_count > 0 else 0
@@ -2389,6 +2389,7 @@ def Update_Sales_Mojodi_Ratio(request):
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
 
     return redirect('/updatedb')
+
 
 def Update_Sales_Mojodi_Ratio1(request):
     start_time = time.time()  # زمان شروع تابع
