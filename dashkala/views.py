@@ -380,7 +380,7 @@ def DetailKala(request, *args, **kwargs):
     code_kala = int(kwargs['code'])
 
     kala=Kala.objects.filter(code=code_kala).last()
-    kardex=Kardex.objects.filter(code_kala=code_kala).order_by('date', 'id')
+    kardex=Kardex.objects.filter(code_kala=code_kala).order_by('date', '-id')
     mojodi=Mojodi.objects.filter(code_kala=code_kala)
 
     print(code_kala)
