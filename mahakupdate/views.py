@@ -2312,9 +2312,98 @@ from datetime import datetime, timedelta
 from django.db.models import Sum, Min
 from django.shortcuts import render
 from .models import Kala, Kardex
-
+#
+# (day0,stock0),
+# (day1,stock1),
+# (day2,stock2),
+# (day3,stock3),
+# (day4,stock4),
+# (day5,stock5),
+# (day6,stock6),
+# (day7,stock7),
+# (day8,stock8),
+# (day9,stock9),
+#
+# area=0
+# for s in list:
+#     s+=
+# یا
+# area=
+# (dey1-day0)*stock0+
+# (dey2-day1)*stock1+
+# (dey3-day2)*stock2+
+# ......
+# (dey10-day9)*stock2+
+# (today-day10)*stock10
+#
+#
+# ave=-1*area/(today-dey1)
+#
+#
 
 def Update_Sales_Mojodi_Ratio(request):
+    start_time = time.time()  # زمان شروع تابع
+    current_date = datetime.now().date()
+
+    # دریافت یک لیست یکتا از کد کالاهای موجود در Kardex
+    kala_code_in_kardex = Kardex.objects.values_list('code_kala', flat=True).distinct()
+
+    # فیلتر کردن کالاها با استفاده از کدهای یکتا و حذف کالاهایی که به‌روزرسانی شده‌اند
+    kalas = Kala.objects.exclude(last_updated_ratio=current_date).filter(code__in=kala_code_in_kardex)
+
+    print(f'کالاهای قابل پردازش: {kalas.count()}')
+
+    for con, kala in enumerate(kalas, start=1):
+        print('------------------------')
+        print(kala.last_updated_ratio, current_date)
+        print(con)
+
+        # دریافت تمام کاردکس‌های مربوط به کالا
+        kardex_records = Kardex.objects.filter(code_kala=kala.code).order_by('date')
+
+        # محاسبه مساحت زیر نمودار
+        total_area = 0
+        last_date = None
+        last_stock = 0
+
+        for kardex in kardex_records:
+            if last_date is not None:
+                # محاسبه مساحت مستطیل
+                area = (kardex.date - last_date).days * last_stock
+                total_area += area
+
+                # به‌روزرسانی تاریخ و موجودی آخرین کاردکس
+            last_date = kardex.date
+            last_stock = kardex.stock
+
+            # محاسبه مساحت برای آخرین دوره تا تاریخ امروز
+        if last_date is not None:
+            area = (current_date - last_date).days * last_stock
+            total_area += area
+
+            # محاسبه میانگین موجودی
+        total_days = (current_date - kardex_records.first().date).days
+        ave_mojodi = -1 * total_area / total_days if total_days > 0 else 0
+
+        # محاسبه نسبت فروش به میانگین موجودی
+        total_sales = Kardex.objects.filter(code_kala=kala.code, ktype=1).aggregate(total=Sum('count'))['total'] or 0
+        total_sales = -1 * total_sales
+        ratio = total_sales / ave_mojodi if ave_mojodi != 0 else 0
+
+        # به‌روزرسانی فیلدهای مربوطه در مدل Kala
+        kala.s_m_ratio = ratio
+        kala.last_updated_ratio = current_date
+        kala.save()
+
+        print(kala.last_updated_ratio, current_date)
+
+    total_time = time.time() - start_time  # محاسبه زمان اجرا
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+
+    return redirect('/updatedb')
+
+
+def Update_Sales_Mojodi_Ratio2(request):
     start_time = time.time()  # زمان شروع تابع
     current_date = datetime.now().date()
 
