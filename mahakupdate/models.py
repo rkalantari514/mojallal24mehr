@@ -90,7 +90,7 @@ class Kala(models.Model):
         end_day = datetime.today()
         start_day = end_day - timedelta(days=30)
 
-        total_sales = Kardex.objects.filter(
+        total_sales =-1* Kardex.objects.filter(
             ktype=1,
             date__range=(start_day, end_day)
         ).aggregate(total=Sum('count'))['total']
@@ -101,7 +101,7 @@ class Kala(models.Model):
         end_day = datetime.today()
         start_day = end_day - timedelta(days=7)
 
-        total_sales = Kardex.objects.filter(
+        total_sales =-1* Kardex.objects.filter(
             ktype=1,
             date__range=(start_day, end_day)
         ).aggregate(total=Sum('count'))['total']
