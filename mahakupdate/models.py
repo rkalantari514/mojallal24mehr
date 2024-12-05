@@ -1,9 +1,12 @@
+from datetime import datetime
+
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 import jdatetime
 from django.utils import timezone
-
+from datetime import datetime, timedelta
+from django.db.models import Sum
 
 # Create your models here.
 
@@ -75,6 +78,38 @@ class Kala(models.Model):
 
     def __str__(self):
         return self.name
+
+    def total_arzesh(self):
+        latest_mojodi = Mojodi.objects.filter(code_kala=self.code).last()
+        if latest_mojodi:
+            ta = latest_mojodi.total_stock * latest_mojodi.averageprice
+            return ta if ta is not None else 0
+        return 0
+
+    def last_month_sales(self):
+        end_day = datetime.today()
+        start_day = end_day - timedelta(days=30)
+
+        total_sales = Kardex.objects.filter(
+            ktype=1,
+            date__range=(start_day, end_day)
+        ).aggregate(total=Sum('count'))['total']
+        return total_sales if total_sales is not None else 0
+
+
+    def last_week_sales(self):
+        end_day = datetime.today()
+        start_day = end_day - timedelta(days=7)
+
+        total_sales = Kardex.objects.filter(
+            ktype=1,
+            date__range=(start_day, end_day)
+        ).aggregate(total=Sum('count'))['total']
+        return total_sales if total_sales is not None else 0
+
+
+
+
 
 
 class Factor(models.Model):
@@ -166,9 +201,9 @@ class Kardex(models.Model):
         types = {
             1: ('فروش','text-success','fa fa-shopping-cart text-success'),
             2: ('خرید','text-primary','fa fa-truck text-primary'),
-            3: ('موجودی اول دوره','text-dark','fa fa-archive text-facebook'),
-            6: ('خروج داخلی','text-success','fa fa-retweet text-text-instagram'),
-            7: ('ورود داخلی','text-success','fa fa-retweet text-primary')
+            3: ('موجودی اول دوره','text-facebook','fa fa-archive text-facebook'),
+            6: ('خروج داخلی','text-danger','fa fa-retweet text-text-danger'),
+            7: ('ورود داخلی','text-facebook','fa fa-retweet text-facebook')
         }
         return types.get(self.ktype, ('نامعلوم','text-success','fa fa-question-o'))
 
