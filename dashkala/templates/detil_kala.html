@@ -5,93 +5,93 @@
     <div class="content-wrapper">
 
     <div class="page-title">
-      <div class="row">
-          <div class="col-sm-6">
-              <h4 class="mb-0"> {{ kala.name }}</h4>
-              <br>
-              <h6 class="card-title pb-0 border-0">در دسته بندی
-                                    :{{ kala.category.parent.parent.name }}|{{ kala.category.parent.name }}|{{ kala.category.name }}</h6>
-          </div>
-          <div class="col-sm-6">
-            <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
-              <li class="breadcrumb-item"><a href="/" class="default-color">خانه</a></li>
-              <li class="breadcrumb-item active">{{ kala.name }}</li>
+        <div class="row">
+            <div class="col-sm-6">
+                <h4 class="mb-0"> {{ kala.name }}</h4>
+                <br>
+                <h6 class="card-title pb-0 border-0">در دسته بندی
+                    :{{ kala.category.parent.parent.name }}|{{ kala.category.parent.name }}|{{ kala.category.name }}</h6>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
+                    <li class="breadcrumb-item"><a href="/" class="default-color">خانه</a></li>
+                    <li class="breadcrumb-item active">{{ kala.name }}</li>
 
-            </ol>
-          </div>
+                </ol>
+            </div>
         </div>
-      </div>
+    </div>
 
     <div class="row">
         <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-          <div class="card card-statistics h-100">
-            <div class="card-body">
-              <div class="clearfix">
-                <div class="float-left icon-box bg-danger rounded-circle">
+            <div class="card card-statistics h-100">
+                <div class="card-body">
+                    <div class="clearfix">
+                        <div class="float-left icon-box bg-danger rounded-circle">
                   <span class="text-white">
                     <i class="fa fa-bar-chart-o highlight-icon" aria-hidden="true"></i>
                   </span>
+                        </div>
+                        <div class="float-right text-right">
+                            <p class="card-text text-dark">کل موجودی</p>
+                            <h4>{{ mojodi.last.total_stock }}</h4>
+                        </div>
+                    </div>
                 </div>
-                <div class="float-right text-right">
-                  <p class="card-text text-dark">کل موجودی</p>
-                  <h4>{{ mojodi.last.total_stock }}</h4>
-                </div>
-              </div>
             </div>
-          </div>
         </div>
         <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-          <div class="card card-statistics h-100">
-            <div class="card-body">
-              <div class="clearfix">
-                <div class="float-left icon-box bg-primary rounded-circle">
+            <div class="card card-statistics h-100">
+                <div class="card-body">
+                    <div class="clearfix">
+                        <div class="float-left icon-box bg-primary rounded-circle">
                   <span class="text-white">
                     <i class="fa fa-dollar highlight-icon" aria-hidden="true"></i>
                   </span>
+                        </div>
+                        <div class="float-right text-right">
+                            <p class="card-text text-dark">ارزش موجودی</p>
+                            <h4>{{ kala.total_arzesh|intword }}ریال</h4>
+                        </div>
+                    </div>
                 </div>
-                <div class="float-right text-right">
-                  <p class="card-text text-dark">ارزش موجودی</p>
-                  <h4>{{ kala.total_arzesh|intword }}ریال</h4>
-                </div>
-              </div>
             </div>
-          </div>
         </div>
         <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-          <div class="card card-statistics h-100">
-            <div class="card-body">
-              <div class="clearfix">
-                <div class="float-left icon-box bg-warning rounded-circle">
+            <div class="card card-statistics h-100">
+                <div class="card-body">
+                    <div class="clearfix">
+                        <div class="float-left icon-box bg-warning rounded-circle">
                   <span class="text-white">
                     <i class="fa fa-shopping-cart highlight-icon" aria-hidden="true"></i>
                   </span>
+                        </div>
+                        <div class="float-right text-right">
+                            <p class="card-text text-dark">تعداد کل فروش از ابتدای دوره</p>
+                            <h4>{{ kala.total_sales }}</h4>
+                        </div>
+                    </div>
                 </div>
-                <div class="float-right text-right">
-                  <p class="card-text text-dark">تعداد فروش ماه اخیر</p>
-                  <h4>{{ kala.last_month_sales }}</h4>
-                </div>
-              </div>
             </div>
-          </div>
         </div>
         <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-          <div class="card card-statistics h-100">
-            <div class="card-body">
-              <div class="clearfix">
-                <div class="float-left icon-box bg-info rounded-circle">
+            <div class="card card-statistics h-100">
+                <div class="card-body">
+                    <div class="clearfix">
+                        <div class="float-left icon-box bg-info rounded-circle">
                   <span class="text-white">
                     <i class="fa fa-calendar-check-o highlight-icon" aria-hidden="true"></i>
                   </span>
+                        </div>
+                        <div class="float-right text-right">
+                            <p class="card-text text-dark">نسبت فروش به موجودی از ابتدای دوره </p>
+                            <h4>{{ kala.sales_mojodi_ratio|floatformat:2 }}</h4>
+                        </div>
+                    </div>
                 </div>
-                <div class="float-right text-right">
-                  <p class="card-text text-dark">نسبت فروش به موجودی در ماه اخیر </p>
-                  <h4>{{ kala.m_sales_mojodi_ratio|floatformat:2 }}</h4>
-                </div>
-              </div>
             </div>
-          </div>
         </div>
-      </div>
+    </div>
 
     <div class="row">
         <div class="col-md-5 mb-30">
@@ -144,7 +144,7 @@
                                     <th>تاریخ</th>
                                     <th>نام انبار</th>
                                     <th>شخص</th>
-{#                                    <th></th>#}
+                                    {#                                    <th></th>#}
                                     <th></th>
                                     <th>نوع گردش</th>
                                     <th>تغییرات</th>
@@ -182,6 +182,35 @@
                                 </tbody>
                             </table>
                         </div>
+                        <br>
+                        <div class="table-responsive mt-15 ">
+                            <h6 class="card-title pb-0 border-0">وضعیت هم گروهی ها</h6>
+                            <table class="table center-aligned-table mb-0">
+                                <thead>
+
+                                <tr class="text-dark">
+                                    <th>کد کالا</th>
+                                    <th>نام کالا</th>
+                                    <th>موجودی</th>
+                                    <th>کل فروش از ابتدای دوره</th>
+                                    <th>نسبت فروش به میانگین موجودی</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for k in rel_kala %}
+                                    <tr class="text-dark clickable-row" onclick="window.open('/dash/kala/detail/{{ k.5 }}', '_blank')">
+                                        <td>{{ k.0 }}</td>
+                                        <td>{{ k.1 }}</td>
+                                        <td>{{ k.2 }}</td>
+                                        <td>{{ k.3|floatformat:2 }}</td>
+                                        <td>{{ k.4|floatformat:2 }}</td>
+                                    </tr>
+                                {% endfor %}
+
+
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -192,20 +221,20 @@
             <div class="card card-statistics h-100">
                 <div class="card-body">
                     <h5 class="card-title pb-0 border-0 ">نمودار موجودی</h5>
-{#                    <table class="charts-css line">#}
-{#                    <table class="charts-css line hide-data hide-label">#}
-{#                        <thead>#}
-{#                        <tr>#}
-{#                            <th scope="col">تاریخ</th>#}
-{#                            <th scope="col">موجودی</th>#}
-{#                        </tr>#}
-{#                        </thead>#}
-{#                        <tbody> {% for record in kardex_records %}#}
-{#                            <tr>#}
-{#                                <td>{{ record.date }}</td>#}
-{#                                <td style="--start: 0; --size: calc({{ record.stock }});">{{ record.stock }}</td>#}
-{#                            </tr> {% endfor %} </tbody>#}
-{#                    </table>#}
+                    {#                    <table class="charts-css line">#}
+                    {#                    <table class="charts-css line hide-data hide-label">#}
+                    {#                        <thead>#}
+                    {#                        <tr>#}
+                    {#                            <th scope="col">تاریخ</th>#}
+                    {#                            <th scope="col">موجودی</th>#}
+                    {#                        </tr>#}
+                    {#                        </thead>#}
+                    {#                        <tbody> {% for record in kardex_records %}#}
+                    {#                            <tr>#}
+                    {#                                <td>{{ record.date }}</td>#}
+                    {#                                <td style="--start: 0; --size: calc({{ record.stock }});">{{ record.stock }}</td>#}
+                    {#                            </tr> {% endfor %} </tbody>#}
+                    {#                    </table>#}
 
                 </div>
             </div>

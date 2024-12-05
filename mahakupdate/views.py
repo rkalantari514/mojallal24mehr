@@ -121,6 +121,7 @@ def Updateall(request):
         '/update/createkalagroup',
         '/update/updatekalagroup',
         '/update/mojodi',
+        '/update/updatsmratio',
     ]
     # نگاشت آدرس‌های استاتیک به توابع
     static_view_map = {
@@ -128,6 +129,7 @@ def Updateall(request):
         '/update/createkalagroup': CreateKalaGroup,
         '/update/updatekalagroup': UpdateKalaGroup,
         '/update/mojodi': UpdateMojodi,
+        '/update/updatsmratio':Update_Sales_Mojodi_Ratio,
     }
     # چاپ تزئینی برای عیب یابی
     print(f"Request path: {request.path}")
@@ -1484,7 +1486,7 @@ def update_kala_categories():
 
     # پیمایش کالاها و تعیین دسته‌بندی مناسب برای هر کالا
     for kala in kalas:
-        group_infos = KalaGroupinfo.objects.all()
+        group_infos = KalaGroupinfo.objects.order_by('-id').all()
         category_found = False  # متغیری برای پیگیری پیدا شدن دسته‌بندی
 
         for group in group_infos:
@@ -2304,3 +2306,90 @@ def temp_compare_kardex_view(request):
         print("هیچ رکوردی یافت نشد که در مدل ذخیره نشده باشد.")
 
     return HttpResponse("نتایج در ترمینال پرینت شد.", content_type="text/plain")
+
+
+from datetime import datetime, timedelta
+from django.db.models import Sum, Min
+from django.shortcuts import render
+from .models import Kala, Kardex
+
+def Update_Sales_Mojodi_Ratio(request):
+    start_time = time.time()  # زمان شروع تابع
+
+    current_date = datetime.now().date()
+
+    kalas = Kala.objects.exclude(last_updated_ratio = current_date)
+    print('kalas.count()')
+    print(kalas.count())
+    con=1
+    for kala in kalas:
+        print('------------------------')
+        print(kala.last_updated_ratio,current_date)
+        print(con)
+        con+=1
+
+        if kala.last_updated_ratio == current_date:
+            print('continue')
+            continue
+
+        # دریافت مجموع فروش از ابتدای دوره تا حال
+        total_sales = Kardex.objects.filter(
+            code_kala=kala.code,
+            ktype=1
+        ).aggregate(total=Sum('count'))['total'] or 0
+        total_sales = -1 * total_sales
+
+        # محاسبه تاریخ شروع از اولین تاریخ موجود در کاردکس
+        first_kardex_date = Kardex.objects.filter(code_kala=kala.code).aggregate(first_date=Min('date'))['first_date']
+        if not first_kardex_date:
+            continue  # اگر کاردکسی وجود نداشت، ادامه دهید
+
+        # تبدیل first_kardex_date به datetime
+        start_day = datetime.combine(first_kardex_date, datetime.min.time())
+        end_day = datetime.now()
+
+        # متغیرها برای نگهداری میانگین موجودی و مجموع موجودی روزانه
+        total_stock = 0
+        days_count = 0
+
+        # حلقه برای هر روز در بازه زمانی از اولین تاریخ تا اکنون
+        for single_date in (start_day + timedelta(n) for n in range((end_day - start_day).days + 1)):
+            # دریافت آخرین کاردکس روز
+            kardex = Kardex.objects.filter(
+                code_kala=kala.code,
+                date=single_date.date()
+            ).order_by('-date').first()
+
+            if kardex:
+                total_stock += kardex.stock
+                days_count += 1
+            else:
+                # استفاده از آخرین موجودی قبلی اگر برای آن روز کاردکس وجود نداشت
+                last_kardex = Kardex.objects.filter(
+                    code_kala=kala.code,
+                    date__lt=single_date.date()
+                ).order_by('-date').first()
+                if last_kardex:
+                    total_stock += last_kardex.stock
+                    days_count += 1
+
+        # محاسبه میانگین موجودی
+        ave_mojodi = total_stock / days_count if days_count > 0 else 0
+
+        # محاسبه نسبت فروش به میانگین موجودی
+        if ave_mojodi == 0:
+            ratio = 0
+        else:
+            ratio = total_sales / ave_mojodi
+
+        # به‌روزرسانی فیلدهای مربوطه در مدل Kala
+        kala.s_m_ratio = ratio
+        kala.last_updated_ratio = current_date
+
+        kala.save()
+        print(kala.last_updated_ratio, current_date)
+    total_time = time.time() - start_time  # محاسبه زمان اجرا
+    # چاپ زمان
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+
+    return redirect('/updatedb')

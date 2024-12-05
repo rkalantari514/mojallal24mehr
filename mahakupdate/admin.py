@@ -18,7 +18,7 @@ class MtablesAdmin(admin.ModelAdmin):
 
 
 class KalaAdmin(admin.ModelAdmin):
-    list_display = ['__str__','name', 'code','category']
+    list_display = ['__str__','name', 'code','category','s_m_ratio','last_updated_ratio']
     list_filter = ['category']
     list_editable = ['category']
     search_fields = ['name', 'code']
@@ -90,7 +90,7 @@ class PersonAdmin(admin.ModelAdmin):
 
 
 class KalaGroupinfoAdmin(admin.ModelAdmin):
-    list_display = ['__str__','code','contain','cat3','cat2','cat1']
+    list_display = ['__str__','id','code','contain','cat3','cat2','cat1']
     # list_filter = ['level','parent',]
     # list_editable = ['name','parent','level']
     # search_fields = ['name','lname','group']
