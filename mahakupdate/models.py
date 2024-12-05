@@ -90,26 +90,70 @@ class Kala(models.Model):
         end_day = datetime.today()
         start_day = end_day - timedelta(days=30)
 
-        total_sales =-1* Kardex.objects.filter(
+        total_sales = Kardex.objects.filter(
+            code_kala=self.code,
             ktype=1,
             date__range=(start_day, end_day)
         ).aggregate(total=Sum('count'))['total']
-        return total_sales if total_sales is not None else 0
+        return -1*total_sales if total_sales is not None else 0
 
 
     def last_week_sales(self):
         end_day = datetime.today()
         start_day = end_day - timedelta(days=7)
 
-        total_sales =-1* Kardex.objects.filter(
+        total_sales = Kardex.objects.filter(
+            code_kala=self.code,
             ktype=1,
             date__range=(start_day, end_day)
         ).aggregate(total=Sum('count'))['total']
-        return total_sales if total_sales is not None else 0
+        return -1*total_sales if total_sales is not None else 0
 
+    from datetime import datetime, timedelta
+    from django.db.models import Sum
 
+    def m_sales_mojodi_ratio(self):
+        # دریافت فروش ماه گذشته
+        ms = self.last_month_sales()
 
+        # محاسبه تاریخ شروع و پایان برای یک ماه گذشته
+        end_day = datetime.today()
+        start_day = end_day - timedelta(days=30)
 
+        # متغیرها برای نگهداری میانگین موجودی و مجموع موجودی روزانه
+        total_stock = 0
+        days_count = 0
+
+        # حلقه برای هر روز در بازه زمانی یک ماه گذشته
+        for single_date in (start_day + timedelta(n) for n in range(30)):
+            # دریافت آخرین کاردکس روز
+            kardex = Kardex.objects.filter(
+                code_kala=self.code,
+                date=single_date
+            ).order_by('-date').first()
+
+            if kardex:
+                total_stock += kardex.stock
+                days_count += 1
+            else:
+                # استفاده از آخرین موجودی قبلی اگر برای آن روز کاردکس وجود نداشت
+                last_kardex = Kardex.objects.filter(
+                    code_kala=self.code,
+                    date__lt=single_date
+                ).order_by('-date').first()
+                if last_kardex:
+                    total_stock += last_kardex.stock
+                    days_count += 1
+
+        # محاسبه میانگین موجودی
+        ave_mojodi = total_stock / days_count if days_count > 0 else 0
+
+        # محاسبه نسبت فروش به میانگین موجودی ماهانه
+        if ave_mojodi == 0:
+            return 0
+
+        mr = ms / ave_mojodi
+        return mr
 
 
 class Factor(models.Model):
