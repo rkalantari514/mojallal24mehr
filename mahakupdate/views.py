@@ -198,6 +198,73 @@ def UpdateFactor(request):
         code = row[0]
         defaults = {
             'pdate': row[4],
+            'mablagh_factor': Decimal(row[5]),  # استفاده از Decimal
+            'takhfif': Decimal(row[6]),          # استفاده از Decimal
+            'create_time': row[38],
+            'darsad_takhfif': Decimal(row[44]),  # استفاده از Decimal
+        }
+
+        if code in current_factors:
+            factor = current_factors[code]
+            if any(round(getattr(factor, attr), 2) != round(value, 2) for attr, value in defaults.items()):  # استفاده از round
+                for attr, value in defaults.items():
+                    setattr(factor, attr, value)
+                factors_to_update.append(factor)
+        else:
+            factors_to_create.append(Factor(code=code, **defaults))
+
+    with transaction.atomic():
+        if factors_to_create:
+            Factor.objects.bulk_create(factors_to_create)
+        if factors_to_update:
+            Factor.objects.bulk_update(factors_to_update,
+                                       ['pdate', 'mablagh_factor', 'takhfif', 'create_time', 'darsad_takhfif'])
+
+        Factor.objects.exclude(code__in=existing_in_mahak).delete()
+
+    tend = time.time()
+    print(f"زمان کل: {tend - t0:.2f} ثانیه")
+    print(f" اتصال به دیتابیس: {t1 - t0:.2f} ثانیه")
+    print(f" زمان آپدیت جدول: {tend - t1:.2f} ثانیه")
+
+    cursor.execute(f"SELECT COUNT(*) FROM Fact_Fo")
+    row_count = cursor.fetchone()[0]
+    cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Fact_Fo'")
+    column_count = cursor.fetchone()[0]
+
+    table = Mtables.objects.filter(name='Fact_Fo').last()
+    table.last_update_time = timezone.now()
+    table.update_duration = tend - t1
+    table.row_count = row_count
+    table.cloumn_count = column_count
+    table.save()
+
+    return redirect('/updatedb')
+
+
+
+
+def UpdateFactor2(request):
+    t0 = time.time()
+    print('شروع آپدیت فاکتور--------------------------------------')
+
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    t1 = time.time()
+
+    cursor.execute("SELECT * FROM Fact_Fo")
+    mahakt_data = cursor.fetchall()
+    existing_in_mahak = {row[0] for row in mahakt_data}
+
+    factors_to_create = []
+    factors_to_update = []
+
+    current_factors = {factor.code: factor for factor in Factor.objects.iterator()}
+
+    for row in mahakt_data:
+        code = row[0]
+        defaults = {
+            'pdate': row[4],
             'mablagh_factor': row[5],
             'takhfif': row[6],
             'create_time': row[38],
@@ -209,6 +276,7 @@ def UpdateFactor(request):
             if any(getattr(factor, attr) != value for attr, value in defaults.items()):
                 for attr, value in defaults.items():
                     setattr(factor, attr, value)
+                print("update.append")
                 factors_to_update.append(factor)
         else:
             factors_to_create.append(Factor(code=code, **defaults))
