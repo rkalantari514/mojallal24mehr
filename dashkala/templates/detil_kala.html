@@ -85,7 +85,7 @@
                         </div>
                         <div class="float-right text-right">
                             <p class="card-text text-dark">نسبت فروش به موجودی از ابتدای دوره </p>
-                            <h4>{{ kala.sales_mojodi_ratio|floatformat:2 }}</h4>
+                            <h4>{{ kala.s_m_ratio|floatformat:2 }}</h4>
                         </div>
                     </div>
                 </div>
@@ -183,20 +183,20 @@
                             </table>
                         </div>
                         <br>
-                        <div class="table-responsive mt-15 ">
-                            <h6 class="card-title pb-0 border-0">وضعیت هم گروهی ها</h6>
-                            <table class="table center-aligned-table mb-0">
-                                <thead>
-
-                                <tr class="text-dark">
-                                    <th>کد کالا</th>
-                                    <th>نام کالا</th>
-                                    <th>موجودی</th>
-                                    <th>کل فروش از ابتدای دوره</th>
-                                    <th>نسبت فروش به میانگین موجودی</th>
-                                </tr>
-                                </thead>
-                                <tbody>
+{#                        <div class="table-responsive mt-15 ">#}
+{#                            <h6 class="card-title pb-0 border-0">وضعیت هم گروهی ها</h6>#}
+{#                            <table class="table center-aligned-table mb-0">#}
+{#                                <thead>#}
+{##}
+{#                                <tr class="text-dark">#}
+{#                                    <th>کد کالا</th>#}
+{#                                    <th>نام کالا</th>#}
+{#                                    <th>موجودی</th>#}
+{#                                    <th>کل فروش از ابتدای دوره</th>#}
+{#                                    <th>نسبت فروش به میانگین موجودی</th>#}
+{#                                </tr>#}
+{#                                </thead>#}
+{#                                <tbody>#}
 {#                                {% for k in kala.related_kalas %}#}
 {#                                    <tr class="text-dark clickable-row"#}
 {#                                        onclick="window.open('/dash/kala/detail/{{ k.code }}', '_blank')">#}
@@ -212,11 +212,11 @@
                                         {#                                        <td>{{ k.4|floatformat:2 }}</td>#}
 {#                                    </tr>#}
 {#                                {% endfor %}#}
-
-
-                                </tbody>
-                            </table>
-                        </div>
+{##}
+{##}
+{#                                </tbody>#}
+{#                            </table>#}
+{#                        </div>#}
                     </div>
                 </div>
             </div>
