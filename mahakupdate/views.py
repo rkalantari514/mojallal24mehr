@@ -12,6 +12,7 @@ import jdatetime  # فرض بر این است که برای تبدیل تاری�
 from django.db.models import Max, Q
 from .models import Mojodi
 from django.db.models import Q
+from decimal import Decimal
 
 from .sendtogap import send_to_admin
 
@@ -209,6 +210,7 @@ def UpdateFactor(request):
             if any(round(getattr(factor, attr), 2) != round(value, 2) for attr, value in defaults.items()):  # استفاده از round
                 for attr, value in defaults.items():
                     setattr(factor, attr, value)
+                print('update.append')
                 factors_to_update.append(factor)
         else:
             factors_to_create.append(Factor(code=code, **defaults))
