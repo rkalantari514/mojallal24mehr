@@ -2383,7 +2383,7 @@ def Update_Sales_Mojodi_Ratio(request):
 
             # محاسبه میانگین موجودی
         total_days = (current_date - kardex_records.first().date).days
-        ave_mojodi = -1 * total_area / total_days if total_days > 0 else 0
+        ave_mojodi = total_area / total_days if total_days > 0 else 0
 
         # محاسبه نسبت فروش به میانگین موجودی
         total_sales = Kardex.objects.filter(code_kala=kala.code, ktype=1).aggregate(total=Sum('count'))['total'] or 0
