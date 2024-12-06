@@ -343,7 +343,7 @@ class Kardex(models.Model):
             1: ('فروش','text-success','fa fa-shopping-cart text-success'),
             2: ('خرید','text-primary','fa fa-truck text-primary'),
             3: ('موجودی اول دوره','text-facebook','fa fa-archive text-facebook'),
-            6: ('خروج داخلی','text-danger','fa fa-retweet text-text-danger'),
+            6: ('خروج داخلی','text-danger','fa fa-retweet text-danger'),
             7: ('ورود داخلی','text-facebook','fa fa-retweet text-facebook')
         }
         return types.get(self.ktype, ('نامعلوم','text-success','fa fa-question-o'))

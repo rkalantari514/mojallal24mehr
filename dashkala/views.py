@@ -383,39 +383,10 @@ def DetailKala(request, *args, **kwargs):
     kardex=Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif')
     mojodi=Mojodi.objects.filter(code_kala=code_kala)
 
-    print(code_kala)
-    print(kala)
-    print(kardex)
-    print(mojodi)
-
-    print('kala')
-    print(kala)
-    print('kala.latest_mojodi')
-    print(kala.latest_mojodi())
-    print('kala.related_kalas')
-    print(kala.related_kalas())
-    # rel_kala=[]
-    # o=0
-    # for kal in kala.related_kalas():
-    #     print(o)
-    #     o+=1
-    #     rel_kala.append(
-    #         (
-    #             kal.code,
-    #             kal.name,
-    #             kal.latest_mojodi(),
-    #             kal.total_sales(),
-    #             kal.s_m_ratio,
-    #             kal.code,
-    #         )
-    #     )
-
-
-
     # دریافت آخرین رکورد از هر تاریخ
-    latest_records = Kardex.objects.values('date').annotate(latest_id=Max('id'))
-    latest_ids = [record['latest_id'] for record in latest_records]
-    kardex_records = Kardex.objects.filter(id__in=latest_ids).order_by('date')
+    # latest_records = Kardex.objects.values('date').annotate(latest_id=Max('id'))
+    # latest_ids = [record['latest_id'] for record in latest_records]
+    # kardex_records = Kardex.objects.filter(id__in=latest_ids).order_by('date')
 
 
     context = {
@@ -423,14 +394,14 @@ def DetailKala(request, *args, **kwargs):
         'kala':kala,
         'kardex':kardex,
         'mojodi':mojodi,
-        'kardex_records': kardex_records,
+        # 'kardex_records': kardex_records,
         # 'rel_kala':rel_kala,
 
 
     }
 
-
-
+    total_time = time.time() - start_time  # محاسبه زمان اجرا
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
     return render(request, 'detil_kala.html', context)
 
 
