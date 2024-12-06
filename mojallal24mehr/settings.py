@@ -97,12 +97,36 @@ WSGI_APPLICATION = 'mojallal24mehr.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 #
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if sn in ('DESKTOP-ITU3EHV','TECH_MANAGER','DESKTOP-1ERPR1M'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'yaskabod',  # نام دیتابیسی که می‌خواهید استفاده کنید
+            'USER': 'root',  # نام کاربری شما
+            'PASSWORD': 'YASRolikali514',  # پسوردی که برای کاربر root انتخاب کردید
+            'HOST': 'localhost',  # یا '127.0.0.1'
+            'PORT': '3306',  # پورت پیش‌فرض
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # صرف نظر شد
