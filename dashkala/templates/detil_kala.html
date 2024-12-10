@@ -183,40 +183,40 @@
                             </table>
                         </div>
                         <br>
-{#                        <div class="table-responsive mt-15 ">#}
-{#                            <h6 class="card-title pb-0 border-0">وضعیت هم گروهی ها</h6>#}
-{#                            <table class="table center-aligned-table mb-0">#}
-{#                                <thead>#}
-{##}
-{#                                <tr class="text-dark">#}
-{#                                    <th>کد کالا</th>#}
-{#                                    <th>نام کالا</th>#}
-{#                                    <th>موجودی</th>#}
-{#                                    <th>کل فروش از ابتدای دوره</th>#}
-{#                                    <th>نسبت فروش به میانگین موجودی</th>#}
-{#                                </tr>#}
-{#                                </thead>#}
-{#                                <tbody>#}
-{#                                {% for k in kala.related_kalas %}#}
-{#                                    <tr class="text-dark clickable-row"#}
-{#                                        onclick="window.open('/dash/kala/detail/{{ k.code }}', '_blank')">#}
-{#                                        <td>{{ k.code }}</td>#}
-{#                                        <td>{{ k.name }}</td>#}
-{#                                        <td>{{ k.latest_mojodi }}</td>#}
-{#                                        <td>{{ k.total_sales|floatformat:2 }}</td>#}
-{#                                        <td>{{ k.s_m_ratio|floatformat:2 }}</td>#}
-                                        {#                                    <td>{{ k.0 }}</td>#}
-                                        {#                                        <td>{{ k.1 }}</td>#}
-                                        {#                                        <td>{{ k.2 }}</td>#}
-                                        {#                                        <td>{{ k.3|floatformat:2 }}</td>#}
-                                        {#                                        <td>{{ k.4|floatformat:2 }}</td>#}
-{#                                    </tr>#}
-{#                                {% endfor %}#}
-{##}
-{##}
-{#                                </tbody>#}
-{#                            </table>#}
-{#                        </div>#}
+                        <div class="table-responsive mt-15 ">
+                            <h6 class="card-title pb-0 border-0">وضعیت هم گروهی ها</h6>
+                            <table class="table center-aligned-table mb-0">
+                                <thead>
+
+                                <tr class="text-dark">
+                                    <th>کد کالا</th>
+                                    <th>نام کالا</th>
+                                    <th>موجودی</th>
+                                    <th>کل فروش از ابتدای دوره</th>
+                                    <th>نسبت فروش به میانگین موجودی</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for k in kala.related_kalas %}
+                                    <tr class="text-dark clickable-row"
+                                        onclick="window.open('/dash/kala/detail/{{ k.code }}', '_blank')">
+                                        <td>{{ k.code }}</td>
+                                        <td>{{ k.name }}</td>
+                                        <td>{{ k.latest_mojodi }}</td>
+                                        <td>{{ k.total_sales|floatformat:2 }}</td>
+                                        <td>{{ k.s_m_ratio|floatformat:2 }}</td>
+{#                                                                            <td>{{ k.0 }}</td>#}
+{#                                                                                <td>{{ k.1 }}</td>#}
+{#                                                                                <td>{{ k.2 }}</td>#}
+{#                                                                                <td>{{ k.3|floatformat:2 }}</td>#}
+{#                                                                                <td>{{ k.4|floatformat:2 }}</td>#}
+                                    </tr>
+                                {% endfor %}
+
+
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
