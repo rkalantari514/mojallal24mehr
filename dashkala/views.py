@@ -360,9 +360,6 @@ def DetailKala(request, *args, **kwargs):
     kardex = Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif')
     mojodi = Mojodi.objects.filter(code_kala=code_kala)
 
-
-
-    # related_kalas = kala.related_kalas()
     related_kalas = Kala.objects.filter(category=kala.category)
 
     rel_kala = []
@@ -372,12 +369,10 @@ def DetailKala(request, *args, **kwargs):
             {
                 'code': k.code,
                 'name': k.name,
-                'latest_mojodi': f'{k.latest_mojodi:.1f}',
-                'total_sales': f'{k.total_sales:.1f}',
-                's_m_ratio': f'{k.s_m_ratio:.2f}',
-
+                'latest_mojodi': f'{float(k.latest_mojodi()):.1f}' if k.latest_mojodi is not None else '0.0',
+                'total_sales': f'{float(k.total_sales()):.1f}' if k.total_sales is not None else '0.0',
+                's_m_ratio': f'{float(k.s_m_ratio):.2f}' if k.s_m_ratio is not None else '0.00',
             }
-
         )
 
     context = {
@@ -386,7 +381,6 @@ def DetailKala(request, *args, **kwargs):
         'kardex': kardex,
         'mojodi': mojodi,
         'rel_kala': rel_kala,
-
     }
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
