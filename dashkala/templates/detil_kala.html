@@ -197,7 +197,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for k in kala.related_kalas %}
+                                {% for k in rel_kala %}
                                     <tr class="text-dark clickable-row"
                                         onclick="window.open('/dash/kala/detail/{{ k.code }}', '_blank')">
                                         <td>{{ k.code }}</td>

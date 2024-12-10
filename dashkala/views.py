@@ -8,6 +8,7 @@ from django.db.models import Sum, F, FloatField
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
+
 def fix_persian_characters(value):
     return standardize(value)
 
@@ -146,11 +147,7 @@ def load_categories_level3(request):
     return render(request, 'partials/category_dropdown_list_options.html', {'categories': categories})
 
 
-
-
-
 def TotalKala(request, *args, **kwargs):
-
     start_time = time.time()  # زمان شروع تابع
     st = kwargs['st']
     cat1 = kwargs['cat1']
@@ -169,12 +166,9 @@ def TotalKala(request, *args, **kwargs):
             except:
                 return redirect(f'/dash/kala/total/{st}/{cat1}/{cat2}/{cat3}/total')
 
+    detailaddress = f'/dash/kala/total/{st}/{cat1}/{cat2}/{cat3}/detail'
 
-
-    detailaddress=f'/dash/kala/total/{st}/{cat1}/{cat2}/{cat3}/detail'
-
-    total=False if tt== 'total' else True
-
+    total = False if tt == 'total' else True
 
     # جستجو در مدل‌ها
     formst = Storagek.objects.filter(id=int(st)).last() if st != 'all' else None
@@ -270,7 +264,7 @@ def TotalKala(request, *args, **kwargs):
                 Sum(F('stock') * F('averageprice'), output_field=FloatField()) / Coalesce(
                     Sum(F('stock'), output_field=FloatField()), 1.0), 0.0))['weighted_avg_value'],
         }
-        if storage_mojodi.values('kala').distinct().count()>0:
+        if storage_mojodi.values('kala').distinct().count() > 0:
             all_storage_summaries.append(storage_summary)
 
     # ساخت خلاصه برای هر دسته‌بندی سطح ۳
@@ -292,7 +286,7 @@ def TotalKala(request, *args, **kwargs):
                 Sum(F('stock') * F('averageprice'), output_field=FloatField()) / Coalesce(
                     Sum(F('stock'), output_field=FloatField()), 1.0), 0.0))['weighted_avg_value'],
         }
-        if category_mojodi.values('kala').distinct().count() >0:
+        if category_mojodi.values('kala').distinct().count() > 0:
             all_category_summaries_1.append(category_summary)
 
     all_category_summaries_2 = []
@@ -316,7 +310,6 @@ def TotalKala(request, *args, **kwargs):
         if category_mojodi.values('kala').distinct().count() > 0:
             all_category_summaries_2.append(category_summary)
 
-
     all_category_summaries_3 = []
     categories = Category.objects.filter(level=3)
 
@@ -335,10 +328,8 @@ def TotalKala(request, *args, **kwargs):
                 Sum(F('stock') * F('averageprice'), output_field=FloatField()) / Coalesce(
                     Sum(F('stock'), output_field=FloatField()), 1.0), 0.0))['weighted_avg_value'],
         }
-        if category_mojodi.values('kala').distinct().count() >0:
+        if category_mojodi.values('kala').distinct().count() > 0:
             all_category_summaries_3.append(category_summary)
-
-
 
     context = {
         'title': 'موجودی کالاها',
@@ -350,9 +341,9 @@ def TotalKala(request, *args, **kwargs):
         'all_category_summaries_1': all_category_summaries_1,  # خلاصه برای هر دسته‌بندی سطح 1
         'all_category_summaries_2': all_category_summaries_2,  # خلاصه برای هر دسته‌بندی سطح 2
         'all_category_summaries_3': all_category_summaries_3,  # خلاصه برای هر دسته‌بندی سطح ۳
-        'total':total,
-        'detailaddress':detailaddress,
-        'kala_detail_form':kala_detail_form,
+        'total': total,
+        'detailaddress': detailaddress,
+        'kala_detail_form': kala_detail_form,
     }
 
     total_time = time.time() - start_time
@@ -361,34 +352,40 @@ def TotalKala(request, *args, **kwargs):
     return render(request, 'total_kala.html', context)
 
 
-
 def DetailKala(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
     code_kala = int(kwargs['code'])
 
-    kala=Kala.objects.filter(code=code_kala).last()
-    kardex=Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif')
-    mojodi=Mojodi.objects.filter(code_kala=code_kala)
+    kala = Kala.objects.filter(code=code_kala).last()
+    kardex = Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif')
+    mojodi = Mojodi.objects.filter(code_kala=code_kala)
 
-    # دریافت آخرین رکورد از هر تاریخ
-    # latest_records = Kardex.objects.values('date').annotate(latest_id=Max('id'))
-    # latest_ids = [record['latest_id'] for record in latest_records]
-    # kardex_records = Kardex.objects.filter(id__in=latest_ids).order_by('date')
+    related_kalas = kala.related_kalas()
 
+    rel_kala = []
+
+    for k in related_kalas:
+        rel_kala.append(
+            {
+                'code': k.code,
+                'name': k.name,
+                'latest_mojodi': k.latest_mojodi,
+                'total_sales': k.total_sales,
+                's_m_ratio': k.s_m_ratio,
+
+            }
+
+        )
 
     context = {
         'title': f'{kala.name}',
-        'kala':kala,
-        'kardex':kardex,
-        'mojodi':mojodi,
-        # 'kardex_records': kardex_records,
-        # 'rel_kala':rel_kala,
-
+        'kala': kala,
+        'kardex': kardex,
+        'mojodi': mojodi,
+        'rel_kala': rel_kala,
 
     }
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
     return render(request, 'detil_kala.html', context)
-
-
