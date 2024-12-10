@@ -372,9 +372,9 @@ def DetailKala(request, *args, **kwargs):
             {
                 'code': k.code,
                 'name': k.name,
-                'latest_mojodi': k.latest_mojodi,
-                'total_sales': k.total_sales,
-                's_m_ratio': k.s_m_ratio,
+                'latest_mojodi': f'{k.latest_mojodi:.1f}',
+                'total_sales': f'{k.total_sales:.1f}',
+                's_m_ratio': f'{k.s_m_ratio:.2f}',
 
             }
 
