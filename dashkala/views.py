@@ -420,7 +420,7 @@ def DetailKala(request, *args, **kwargs):
     kardex = Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif')
     mojodi = Mojodi.objects.filter(code_kala=code_kala)
 
-    related_kalas = Kala.objects.filter(category=kala.category)
+    related_kalas = Kala.objects.filter(category=kala.category).order_by('-s_m_ratio')
 
     rel_kala = []
 
