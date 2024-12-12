@@ -280,13 +280,20 @@
             {% endfor %}
         ];
 
-        var backgroundColors = labels.map((label, index) => {
-            var month = index % 12 + 1;
-            if (month >= 1 && month <= 3) return 'rgba(75, 192, 75, 0.2)';  // سبز
-            if (month >= 4 && month <= 6) return 'rgba(75, 75, 192, 0.2)';  // آبی
-            if (month >= 7 && month <= 9) return 'rgba(192, 75, 75, 0.2)';  // نارنجی
-            return 'rgba(192, 75, 75, 0.2)';  // قرمز
-        });
+        var backgroundColors = [
+            'rgba(75, 192, 75, 0.2)',  // فروردین
+            'rgba(75, 192, 75, 0.2)',  // اردیبهشت
+            'rgba(75, 192, 75, 0.2)',  // خرداد
+            'rgba(75, 75, 192, 0.2)',  // تیر
+            'rgba(75, 75, 192, 0.2)',  // مرداد
+            'rgba(75, 75, 192, 0.2)',  // شهریور
+            'rgba(255, 165, 0, 0.2)',  // مهر
+            'rgba(255, 165, 0, 0.2)',  // آبان
+            'rgba(255, 165, 0, 0.2)',  // آذر
+            'rgba(192, 75, 75, 0.2)',  // دی
+            'rgba(192, 75, 75, 0.2)',  // بهمن
+            'rgba(192, 75, 75, 0.2)'   // اسفند
+        ];
 
         var borderColors = backgroundColors.map((color) => color.replace('0.2', '1'));
 
@@ -330,4 +337,6 @@
     <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
 
 {% endblock %}
+
+
 
