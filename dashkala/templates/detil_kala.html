@@ -51,7 +51,7 @@
                         </div>
                         <div class="float-right text-right">
                             <p class="card-text text-dark">ارزش موجودی</p>
-                            <h4>{{ kala.total_arzesh|intword }}  ریال</h4>
+                            <h4>{{ kala.total_arzesh|intword }} ریال</h4>
                         </div>
                     </div>
                 </div>
@@ -191,8 +191,8 @@
                                 <tr class="text-dark">
                                     <th>کد کالا</th>
                                     <th>نام کالا</th>
-{#                                    <th>موجودی</th>#}
-{#                                    <th>کل فروش از ابتدای دوره</th>#}
+                                    {#                                    <th>موجودی</th>#}
+                                    {#                                    <th>کل فروش از ابتدای دوره</th>#}
                                     <th>نسبت فروش به میانگین موجودی</th>
                                 </tr>
                                 </thead>
@@ -202,14 +202,14 @@
                                         onclick="window.open('/dash/kala/detail/{{ k.code }}', '_blank')">
                                         <td>{{ k.code }}</td>
                                         <td>{{ k.name }}</td>
-{#                                        <td>{{ k.latest_mojodi }}</td>#}
-{#                                        <td>{{ k.total_sales }}</td>#}
+                                        {#                                        <td>{{ k.latest_mojodi }}</td>#}
+                                        {#                                        <td>{{ k.total_sales }}</td>#}
                                         <td>{{ k.s_m_ratio }}</td>
-{#                                                                            <td>{{ k.0 }}</td>#}
-{#                                                                                <td>{{ k.1 }}</td>#}
-{#                                                                                <td>{{ k.2 }}</td>#}
-{#                                                                                <td>{{ k.3|floatformat:2 }}</td>#}
-{#                                                                                <td>{{ k.4|floatformat:2 }}</td>#}
+                                        {#                                                                            <td>{{ k.0 }}</td>#}
+                                        {#                                                                                <td>{{ k.1 }}</td>#}
+                                        {#                                                                                <td>{{ k.2 }}</td>#}
+                                        {#                                                                                <td>{{ k.3|floatformat:2 }}</td>#}
+                                        {#                                                                                <td>{{ k.4|floatformat:2 }}</td>#}
                                     </tr>
                                 {% endfor %}
 
@@ -227,20 +227,39 @@
             <div class="card card-statistics h-100">
                 <div class="card-body">
                     <h5 class="card-title pb-0 border-0 ">نمودار موجودی</h5>
-                    {#                    <table class="charts-css line">#}
-                    {#                    <table class="charts-css line hide-data hide-label">#}
-                    {#                        <thead>#}
-                    {#                        <tr>#}
-                    {#                            <th scope="col">تاریخ</th>#}
-                    {#                            <th scope="col">موجودی</th>#}
-                    {#                        </tr>#}
-                    {#                        </thead>#}
-                    {#                        <tbody> {% for record in kardex_records %}#}
-                    {#                            <tr>#}
-                    {#                                <td>{{ record.date }}</td>#}
-                    {#                                <td style="--start: 0; --size: calc({{ record.stock }});">{{ record.stock }}</td>#}
-                    {#                            </tr> {% endfor %} </tbody>#}
-                    {#                    </table>#}
+
+
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>
+                                تاریخ
+                            </th>
+                            <th>
+                                موجودی
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for k in kardex %}
+
+                            <tr>
+                                <td>
+                                    {{ k.pdate }}
+                                </td>
+                                <td>
+                                    {{ k.stock }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+
+                    </table>
+
+
+<canvas id="myChart" width="400" height="400"></canvas>
+
+
 
                 </div>
             </div>
@@ -257,6 +276,38 @@
 
 
 {% block myjs %}
+
+    <canvas id="myChart" width="400" height="400"></canvas>
+    <script>
+        var data = {
+            labels: [
+                {% for item in chart1_data %}
+                    '{{ item.month_name }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'میزان فروش ماهانه',
+                data: [
+                    {% for item in chart1_data %}
+                        {{ item.total_count }},
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        var options = {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        };
+
+        drawChart('myChart', 'bar', data, options);
+    </script>
 
 
 
@@ -275,3 +326,5 @@
     <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
 
 {% endblock %}
+
+

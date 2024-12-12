@@ -1,3 +1,5 @@
+from django.contrib.gis.measure import pretty_name
+
 from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek, Kala
 from persianutils import standardize
 from django.db.models import Max, Subquery
@@ -7,7 +9,7 @@ from django.shortcuts import render, redirect
 from django.db.models import Sum, F, FloatField
 from django.db.models.functions import Coalesce
 from django.utils import timezone
-
+from django.db.models.functions import TruncMonth
 
 def fix_persian_characters(value):
     return standardize(value)
@@ -369,11 +371,53 @@ def DetailKala(request, *args, **kwargs):
             {
                 'code': k.code,
                 'name': k.name,
-                # 'latest_mojodi': f'{float(k.latest_mojodi()):.1f}' if k.latest_mojodi is not None else '0.0',
-                # 'total_sales': f'{float(k.total_sales()):.1f}' if k.total_sales is not None else '0.0',
                 's_m_ratio': f'{float(k.s_m_ratio):.2f}' if k.s_m_ratio is not None else '0.00',
             }
         )
+
+    # پردازش داده‌ها
+    kardex_data = Kardex.objects.filter(code_kala=code_kala, ktype=1)
+
+    chart1_data_dict = {}
+
+    for item in kardex_data:
+        pdate = item.pdate
+        year, month, _ = map(int, pdate.split('/'))
+        key = f"{year}/{month}"
+        if key not in chart1_data_dict:
+            chart1_data_dict[key] = 0
+        chart1_data_dict[key] += item.count
+
+    month_names = {
+        1: 'فروردین',
+        2: 'اردیبهشت',
+        3: 'خرداد',
+        4: 'تیر',
+        5: 'مرداد',
+        6: 'شهریور',
+        7: 'مهر',
+        8: 'آبان',
+        9: 'آذر',
+        10: 'دی',
+        11: 'بهمن',
+        12: 'اسفند'
+    }
+
+    final_data = []
+    for key, total_count in chart1_data_dict.items():
+        year, month = map(int, key.split('/'))
+        month_name = f"{month_names[month]}{str(year)[-2:]}"
+        final_data.append({
+            'year': year,
+            'month': month,
+            'month_name': month_name,
+            'total_count': -total_count  # ضرب در منفی
+        })
+
+    final_data = sorted(final_data, key=lambda x: (x['year'], x['month']))
+
+    for f in final_data:
+        print(f)
 
     context = {
         'title': f'{kala.name}',
@@ -381,6 +425,7 @@ def DetailKala(request, *args, **kwargs):
         'kardex': kardex,
         'mojodi': mojodi,
         'rel_kala': rel_kala,
+        'chart1_data': final_data,
     }
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
