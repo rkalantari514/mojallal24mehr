@@ -281,9 +281,10 @@
         ];
 
         var backgroundColors = labels.map((label, index) => {
-            if (index % 12 < 3) return 'rgba(75, 192, 75, 0.2)';  // سبز
-            if (index % 12 < 6) return 'rgba(75, 75, 192, 0.2)';  // آبی
-            if (index % 12 < 9) return 'rgba(192, 75, 75, 0.2)';  // نارنجی
+            var month = index % 12 + 1;
+            if (month >= 1 && month <= 3) return 'rgba(75, 192, 75, 0.2)';  // سبز
+            if (month >= 4 && month <= 6) return 'rgba(75, 75, 192, 0.2)';  // آبی
+            if (month >= 7 && month <= 9) return 'rgba(192, 75, 75, 0.2)';  // نارنجی
             return 'rgba(192, 75, 75, 0.2)';  // قرمز
         });
 
@@ -292,11 +293,11 @@
         var data = {
             labels: labels,
             datasets: [{
-                label: 'فروش ماهاهه',
+                label: 'موجودی',
                 data: dataValues,
-                {#backgroundColor: backgroundColors,#}
-                {#borderColor: borderColors,#}
-                {#borderWidth: 1#}
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 1
             }]
         };
 
@@ -329,5 +330,4 @@
     <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
 
 {% endblock %}
-
 
