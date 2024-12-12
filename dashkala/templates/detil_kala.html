@@ -7,10 +7,7 @@
     <div class="page-title">
         <div class="row">
             <div class="col-sm-6">
-                <h4 class="mb-0"> {{ kala.name }}</h4>
-                <br>
-                <h6 class="card-title pb-0 border-0">در دسته بندی
-                    :{{ kala.category.parent.parent.name }}|{{ kala.category.parent.name }}|{{ kala.category.name }}</h6>
+                <h3 class="mb-0 text-facebook"> {{ kala.name }}</h3>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
@@ -100,9 +97,22 @@
                     <div class="card-body">
                         <div class="d-block d-md-flex justify-content-between">
                             <div class="d-block">
-                                <h5 class="card-title pb-0 border-0 ">{{ kala.name }}</h5>
-                                <h6 class="card-title pb-0 border-0">در دسته بندی
-                                    :{{ kala.category.parent.parent.name }}--{{ kala.category.parent.name }}--{{ kala.category.name }}</h6>
+{#                                <h4 class="card-title text-facebook pb-0 border-0 ">{{ kala.name }}</h4>#}
+                                <h6 class="card-title pb-0 border-0">
+                                    <button type="button" class="btn btn-success">
+                                        {{ kala.category.parent.parent.name }}
+{#                                        <span class="badge badge-light">4</span>#}
+                                    </button>
+                                    <button type="button" class="btn btn-info">
+                                        {{ kala.category.parent.name }}
+{#                                        <span class="badge badge-light">6</span>#}
+                                    </button>
+                                    <button type="button" class="btn btn-primary">
+                                        {{ kala.category.name }}
+{#                                        <span class="badge badge-light">4</span>#}
+                                    </button>
+
+                                </h6>
                                 <h6 class="card-title pb-0 border-0">موجودی فعلی: {{ mojodi.last.total_stock }}</h6>
                             </div>
 
@@ -117,7 +127,7 @@
             <div class="card card-statistics h-100">
                 <div class="card-body">
                     <h5 class="card-title pb-0 border-0 ">میزان فروش ماهانه</h5>
-<canvas id="myChart" ></canvas>
+                    <canvas id="myChart"></canvas>
 
                 </div>
             </div>
@@ -132,7 +142,7 @@
             <div class="col-xl-12 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body">
-                           <div class="table-responsive mt-15 ">
+                        <div class="table-responsive mt-15 ">
                             <h6 class="card-title pb-0 border-0">موجودی انبارها</h6>
                             <table class="table center-aligned-table mb-0">
                                 <thead>
@@ -249,7 +259,7 @@
         <div class="col-md-7 mb-30">
             <div class="card card-statistics h-100">
                 <div class="card-body">
-                    <h5 class="card-title pb-0 border-0 ">میزان  ماهانه</h5>
+                    <h5 class="card-title pb-0 border-0 ">میزان ماهانه</h5>
                 </div>
             </div>
 
