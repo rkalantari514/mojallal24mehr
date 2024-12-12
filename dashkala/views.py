@@ -10,6 +10,7 @@ from django.db.models import Sum, F, FloatField
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.db.models.functions import TruncMonth
+from khayyam import JalaliDate, JalaliDatetime
 
 def fix_persian_characters(value):
     return standardize(value)
@@ -354,32 +355,31 @@ def TotalKala(request, *args, **kwargs):
     return render(request, 'total_kala.html', context)
 
 
+
 def DetailKala(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
     code_kala = int(kwargs['code'])
 
-    kala = Kala.objects.filter(code=code_kala).last()
-    kardex = Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif')
-    mojodi = Mojodi.objects.filter(code_kala=code_kala)
+    # دریافت ماه و سال جاری شمسی
+    today_jalali = JalaliDate.today()
+    current_year = today_jalali.year
+    current_month = today_jalali.month
 
-    related_kalas = Kala.objects.filter(category=kala.category)
-
-    rel_kala = []
-
-    for k in related_kalas:
-        rel_kala.append(
-            {
-                'code': k.code,
-                'name': k.name,
-                's_m_ratio': f'{float(k.s_m_ratio):.2f}' if k.s_m_ratio is not None else '0.00',
-            }
-        )
+    # تعریف بازه زمانی: 12 ماه گذشته تا ماه جاری
+    month_list = []
+    for i in range(12):
+        month = current_month - i
+        year = current_year
+        if month < 1:
+            month += 12
+            year -= 1
+        month_list.append((year, month))
+    month_list.reverse()  # ترتیب به صورت قدیمی به جدید
 
     # پردازش داده‌ها
     kardex_data = Kardex.objects.filter(code_kala=code_kala, ktype=1)
 
     chart1_data_dict = {}
-
     for item in kardex_data:
         pdate = item.pdate
         year, month, _ = map(int, pdate.split('/'))
@@ -404,8 +404,9 @@ def DetailKala(request, *args, **kwargs):
     }
 
     final_data = []
-    for key, total_count in chart1_data_dict.items():
-        year, month = map(int, key.split('/'))
+    for year, month in month_list:
+        key = f"{year}/{month}"
+        total_count = chart1_data_dict.get(key, 0)
         month_name = f"{month_names[month]}{str(year)[-2:]}"
         final_data.append({
             'year': year,
@@ -414,10 +415,23 @@ def DetailKala(request, *args, **kwargs):
             'total_count': -total_count  # ضرب در منفی
         })
 
-    final_data = sorted(final_data, key=lambda x: (x['year'], x['month']))
+    # بازگشت به قالب اصلی
+    kala = Kala.objects.filter(code=code_kala).last()
+    kardex = Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif')
+    mojodi = Mojodi.objects.filter(code_kala=code_kala)
 
-    for f in final_data:
-        print(f)
+    related_kalas = Kala.objects.filter(category=kala.category)
+
+    rel_kala = []
+
+    for k in related_kalas:
+        rel_kala.append(
+            {
+                'code': k.code,
+                'name': k.name,
+                's_m_ratio': f'{float(k.s_m_ratio):.2f}' if k.s_m_ratio is not None else '0.00',
+            }
+        )
 
     context = {
         'title': f'{kala.name}',

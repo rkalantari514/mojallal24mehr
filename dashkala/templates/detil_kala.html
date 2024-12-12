@@ -107,7 +107,32 @@
                             </div>
 
                         </div>
-                        <div class="table-responsive mt-15 ">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-7 mb-30">
+            <div class="card card-statistics h-100">
+                <div class="card-body">
+                    <h5 class="card-title pb-0 border-0 ">میزان فروش ماهانه</h5>
+<canvas id="myChart" ></canvas>
+
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+
+    <div class="row">
+        <div class="col-md-5 mb-30">
+            <div class="col-xl-12 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                           <div class="table-responsive mt-15 ">
                             <h6 class="card-title pb-0 border-0">موجودی انبارها</h6>
                             <table class="table center-aligned-table mb-0">
                                 <thead>
@@ -221,46 +246,10 @@
                 </div>
             </div>
         </div>
-
-
         <div class="col-md-7 mb-30">
             <div class="card card-statistics h-100">
                 <div class="card-body">
-                    <h5 class="card-title pb-0 border-0 ">نمودار موجودی</h5>
-
-
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>
-                                تاریخ
-                            </th>
-                            <th>
-                                موجودی
-                            </th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for k in kardex %}
-
-                            <tr>
-                                <td>
-                                    {{ k.pdate }}
-                                </td>
-                                <td>
-                                    {{ k.stock }}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-
-                    </table>
-
-
-<canvas id="myChart" width="400" height="400"></canvas>
-
-
-
+                    <h5 class="card-title pb-0 border-0 ">میزان  ماهانه</h5>
                 </div>
             </div>
 
@@ -268,6 +257,8 @@
 
 
     </div>
+
+
 {% endblock %}
 
 
@@ -277,24 +268,35 @@
 
 {% block myjs %}
 
-    <canvas id="myChart" width="400" height="400"></canvas>
     <script>
+        var labels = [
+            {% for item in chart1_data %}
+                '{{ item.month_name }}',
+            {% endfor %}
+        ];
+        var dataValues = [
+            {% for item in chart1_data %}
+                {{ item.total_count }},
+            {% endfor %}
+        ];
+
+        var backgroundColors = labels.map((label, index) => {
+            if (index % 12 < 3) return 'rgba(75, 192, 75, 0.2)';  // سبز
+            if (index % 12 < 6) return 'rgba(75, 75, 192, 0.2)';  // آبی
+            if (index % 12 < 9) return 'rgba(192, 75, 75, 0.2)';  // نارنجی
+            return 'rgba(192, 75, 75, 0.2)';  // قرمز
+        });
+
+        var borderColors = backgroundColors.map((color) => color.replace('0.2', '1'));
+
         var data = {
-            labels: [
-                {% for item in chart1_data %}
-                    '{{ item.month_name }}',
-                {% endfor %}
-            ],
+            labels: labels,
             datasets: [{
-                label: 'میزان فروش ماهانه',
-                data: [
-                    {% for item in chart1_data %}
-                        {{ item.total_count }},
-                    {% endfor %}
-                ],
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
+                label: 'فروش ماهاهه',
+                data: dataValues,
+                {#backgroundColor: backgroundColors,#}
+                {#borderColor: borderColors,#}
+                {#borderWidth: 1#}
             }]
         };
 
@@ -308,6 +310,7 @@
 
         drawChart('myChart', 'bar', data, options);
     </script>
+
 
 
 
