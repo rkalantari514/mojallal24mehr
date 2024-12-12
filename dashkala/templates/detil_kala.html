@@ -7,7 +7,23 @@
     <div class="page-title">
         <div class="row">
             <div class="col-sm-6">
-                <h3 class="mb-0 text-facebook"> {{ kala.name }}</h3>
+                <h4 class="mb-0 text-facebook"> {{ kala.name }}
+
+                                    <button type="button" class="btn btn-success">
+                                        {{ kala.category.parent.parent.name }}
+{#                                        <span class="badge badge-light">4</span>#}
+                                    </button>
+                                    <button type="button" class="btn btn-info">
+                                        {{ kala.category.parent.name }}
+{#                                        <span class="badge badge-light">6</span>#}
+                                    </button>
+                                    <button type="button" class="btn btn-primary">
+                                        {{ kala.category.name }}
+{#                                        <span class="badge badge-light">4</span>#}
+                                    </button>
+</h4>
+
+
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
@@ -98,21 +114,21 @@
                         <div class="d-block d-md-flex justify-content-between">
                             <div class="d-block">
 {#                                <h4 class="card-title text-facebook pb-0 border-0 ">{{ kala.name }}</h4>#}
-                                <h6 class="card-title pb-0 border-0">
-                                    <button type="button" class="btn btn-success">
-                                        {{ kala.category.parent.parent.name }}
+{#                                <h6 class="card-title pb-0 border-0">#}
+{#                                    <button type="button" class="btn btn-success">#}
+{#                                        {{ kala.category.parent.parent.name }}#}
 {#                                        <span class="badge badge-light">4</span>#}
-                                    </button>
-                                    <button type="button" class="btn btn-info">
-                                        {{ kala.category.parent.name }}
+{#                                    </button>#}
+{#                                    <button type="button" class="btn btn-info">#}
+{#                                        {{ kala.category.parent.name }}#}
 {#                                        <span class="badge badge-light">6</span>#}
-                                    </button>
-                                    <button type="button" class="btn btn-primary">
-                                        {{ kala.category.name }}
+{#                                    </button>#}
+{#                                    <button type="button" class="btn btn-primary">#}
+{#                                        {{ kala.category.name }}#}
 {#                                        <span class="badge badge-light">4</span>#}
-                                    </button>
-
-                                </h6>
+{#                                    </button>#}
+{##}
+{#                                </h6>#}
                                 <h6 class="card-title pb-0 border-0">موجودی فعلی: {{ mojodi.last.total_stock }}</h6>
                             </div>
 
@@ -310,7 +326,7 @@
         var data = {
             labels: labels,
             datasets: [{
-                label: 'موجودی',
+                label: 'فروش ماهانه',
                 data: dataValues,
                 backgroundColor: backgroundColors,
                 borderColor: borderColors,
