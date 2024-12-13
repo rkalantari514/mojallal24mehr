@@ -11,7 +11,7 @@ from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.db.models.functions import TruncMonth
 from khayyam import JalaliDate, JalaliDatetime
-
+from datetime import date
 def fix_persian_characters(value):
     return standardize(value)
 
@@ -433,6 +433,12 @@ def DetailKala(request, *args, **kwargs):
             }
         )
 
+    today = date.today()
+
+    rosob = (today - Kardex.objects.filter(code_kala=code_kala, ktype=1).order_by('date', 'radif').last().date).days if Kardex.objects.filter(code_kala=code_kala, ktype=1).exists() else 0
+    rosobper = min(rosob / 30 * 100, 100)
+
+
     context = {
         'title': f'{kala.name}',
         'kala': kala,
@@ -440,6 +446,8 @@ def DetailKala(request, *args, **kwargs):
         'mojodi': mojodi,
         'rel_kala': rel_kala,
         'chart1_data': final_data,
+        'rosob':rosob,
+        'rosobper':rosobper,
     }
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا

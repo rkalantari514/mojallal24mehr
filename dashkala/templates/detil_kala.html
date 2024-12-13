@@ -8,22 +8,22 @@
         <div class="row">
             <div class="col-sm-6">
                 <h3 class="mb-0 text-facebook"> {{ kala.name }}</h3>
-                                                <h6 >
-                                                    <br>
-                                    <button type="button" class="btn btn-success">
-                                        {{ kala.category.parent.parent.name }}
-{#                                        <span class="badge badge-light">4</span>#}
-                                    </button>
-                                    <button type="button" class="btn btn-info">
-                                        {{ kala.category.parent.name }}
-{#                                        <span class="badge badge-light">6</span>#}
-                                    </button>
-                                    <button type="button" class="btn btn-primary">
-                                        {{ kala.category.name }}
-{#                                        <span class="badge badge-light">4</span>#}
-                                    </button>
+                <h6>
+                    <br>
+                    <button type="button" class="btn btn-success">
+                        {{ kala.category.parent.parent.name }}
+                        {#                                        <span class="badge badge-light">4</span>#}
+                    </button>
+                    <button type="button" class="btn btn-info">
+                        {{ kala.category.parent.name }}
+                        {#                                        <span class="badge badge-light">6</span>#}
+                    </button>
+                    <button type="button" class="btn btn-primary">
+                        {{ kala.category.name }}
+                        {#                                        <span class="badge badge-light">4</span>#}
+                    </button>
 
-                                </h6>
+                </h6>
 
             </div>
             <div class="col-sm-6">
@@ -36,6 +36,7 @@
         </div>
     </div>
 
+    <!-- ردیف اول خلاصه ها -->
     <div class="row">
         <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
             <div class="card card-statistics h-100">
@@ -106,7 +107,72 @@
             </div>
         </div>
     </div>
-
+    <!-- ردیف رتبه ها -->
+    <div class="card card-statistics">
+        <div class="card-body bg-white">
+            <h5 class="card-title">رکورد ها و جایگاه کالا </h5>
+            <div class="row">
+                <div class="col-xl-3 col-sm-6">
+                    <div class="row">
+                        <div class="col-md-7 col-sm-7 col-7 align-self-center">
+                            <span>رسوب کالا در انبار</span>
+                            <h4 class="text-danger fw-6 mt-10">{{ rosob }} روز </h4>
+                        </div>
+                        <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">
+                   <span class="round-chart mb-0" data-percent={{ rosobper }} data-size="80" data-width="4" data-color="#dc3545">
+                       <span class="percent" style="width: 80px; height: 80px; line-height: 80px;">-</span>
+{#                       <canvas height="80" width="80"></canvas>#}
+                   </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-sm-6">
+                    <div class="row">
+                        <div class="col-md-7 col-sm-7 col-7 align-self-center">
+                            <span>درصد پایین</span>
+                            <h4 class="text-success fw-6 mt-10">460 اشتراک</h4>
+                        </div>
+                        <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">
+                   <span class="round-chart mb-0" data-percent="77" data-size="80" data-width="4" data-color="#28a745">
+                       <span class="percent" style="width: 80px; height: 80px; line-height: 80px;">77</span>
+{#                       <canvas height="80" width="80"></canvas>#}
+                   </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-sm-6">
+                    <div class="row">
+                        <div class="col-md-7 col-sm-7 col-7 align-self-center">
+                            <span>افزایش مقدار</span>
+                            <h4 class="text-info fw-6 mt-10">کل 560 تومان</h4>
+                        </div>
+                        <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">
+                 <span class="round-chart mb-0" data-percent="56" data-size="80" data-width="4" data-color="#17a2b8">
+                     <span class="percent" style="width: 80px; height: 80px; line-height: 80px;">56</span>
+{#                     <canvas height="80" width="80"></canvas>#}
+                 </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-sm-6">
+                    <div class="row">
+                        <div class="col-md-7 col-sm-7 col-7 align-self-center">
+                            <span>کاربر جدید هر روز</span>
+                            <h4 class="text-warning fw-6 mt-10">5,546</h4>
+                        </div>
+                        <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">
+                 <span class="round-chart mb-0" data-percent="80" data-size="80" data-width="4" data-color="#ffc107">
+                     <span class="percent" style="width: 80px; height: 80px; line-height: 80px;">80</span>
+{#                     <canvas height="80" width="80"></canvas>#}
+                 </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <!-- ردیف کلیات و نمودار فروش -->
     <div class="row">
         <div class="col-md-5 mb-30">
             <div class="col-xl-12 mb-30">
@@ -118,15 +184,15 @@
                                 <h6 class="card-title pb-0 border-0">
                                     <button type="button" class="btn btn-success">
                                         {{ kala.category.parent.parent.name }}
-{#                                        <span class="badge badge-light">4</span>#}
+                                        {#                                        <span class="badge badge-light">4</span>#}
                                     </button>
                                     <button type="button" class="btn btn-info">
                                         {{ kala.category.parent.name }}
-{#                                        <span class="badge badge-light">6</span>#}
+                                        {#                                        <span class="badge badge-light">6</span>#}
                                     </button>
                                     <button type="button" class="btn btn-primary">
                                         {{ kala.category.name }}
-{#                                        <span class="badge badge-light">4</span>#}
+                                        {#                                        <span class="badge badge-light">4</span>#}
                                     </button>
 
                                 </h6>
@@ -353,15 +419,7 @@
 
 
 {% block date %}
-    <script src="{% static 'js/table1/tableExport.min.js' %}"></script>
-    <script src="{% static 'js/table1/bootstrap-table.min.js' %}"></script>
-    <script src="{% static 'js/table1/bootstrap-table-locale-all.min.js' %}"></script>
-    <script src="{% static 'js/table1/bootstrap-table-export.min.js' %}"></script>
-    <script src="{% static 'js/table1/natural-sorting.js' %}"></script>
-    <script src="{% static 'js/table1/bootstrap-table-filter-control.min.js' %}"></script>
-    <script src="{% static 'js/table1/bootstrap-table-print.min.js' %}"></script>
-    <script src="{% static 'js/table1/jspdf.min.js' %}"></script>
-    <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
+
 
 {% endblock %}
 
