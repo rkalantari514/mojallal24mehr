@@ -436,9 +436,18 @@ def DetailKala(request, *args, **kwargs):
     today = date.today()
 
     # محاسبه تفاوت روزها با بررسی موجود بودن داده‌ها
-    rosob = (today - Kardex.objects.filter(code_kala=code_kala, ktype=1).order_by('date',
-                                                                                  'radif').last().date).days if Kardex.objects.filter(
-        code_kala=code_kala, ktype=1).exists() else 0
+
+
+
+    try:
+        rosob = (today - Kardex.objects.filter(code_kala=code_kala, ktype=1).order_by('date',
+                                                                                      'radif').last().date).days if Kardex.objects.filter(
+            code_kala=code_kala, ktype=1).exists() else (
+                    today - Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif').first().date).days
+
+    except:
+        rosob =0
+
 
     # بررسی موجودی کالا و تنظیم rosob
     last_mojodi = mojodi.last()

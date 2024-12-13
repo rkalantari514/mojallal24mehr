@@ -307,35 +307,35 @@
                                             </thead>
                                             <tbody>
                                             {% for kala in mojodi %}
-                                                <tr>
 
-                                                    <td class="card-text text-center"><h6><a href="#"
+                                                   <tr>
+                                                    <td class="card-text text-center"><h6><a href="/dash/kala/detail/{{ kala.kala.code }}"
                                                                                              target="_blank">
                                                         {{ kala.kala.category.name }}</a></h6></td>
-                                                    <td class="card-text text-center"><h6><a href="#"
+                                                    <td class="card-text text-center"><h6><a href="/dash/kala/detail/{{ kala.kala.code }}"
                                                                                              target="_blank">
                                                         {{ kala.code_kala }}</a></h6></td>
 
                                                     <td class="card-text text-center"><h6><a
-                                                            href="#"
+                                                            href="/dash/kala/detail/{{ kala.kala.code }}"
                                                             target="_blank">
                                                         {{ kala.kala.name }}</a></h6></td>
 
                                                     <td class="card-text text-center"><h6><a
-                                                            href="#"
+                                                            href="/dash/kala/detail/{{ kala.kala.code }}"
                                                             target="_blank">
                                                         {{ kala.storage.name }}</a></h6></td>
 
                                                     <td class="card-text text-center"><h6><a
-                                                            href="#"
+                                                            href="/dash/kala/detail/{{ kala.kala.code }}"
                                                             target="_blank">
                                                         {{ kala.stock|floatformat:2 }}</a></h6></td>
                                                     <td class="card-text text-center"><h6><a
-                                                            href="#"
+                                                            href="/dash/kala/detail/{{ kala.kala.code }}"
                                                             target="_blank">
                                                         {{ kala.arzesh|floatformat:0 | intcomma:False }}</a></h6></td>
                                                     <td class="card-text text-center"><h6><a
-                                                            href="#"
+                                                            href="/dash/kala/detail/{{ kala.kala.code }}"
                                                             target="_blank">
                                                         {{ kala.total_stock|floatformat:2 }}</a></h6></td>
 
