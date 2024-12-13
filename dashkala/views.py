@@ -435,9 +435,24 @@ def DetailKala(request, *args, **kwargs):
 
     today = date.today()
 
-    rosob = (today - Kardex.objects.filter(code_kala=code_kala, ktype=1).order_by('date', 'radif').last().date).days if Kardex.objects.filter(code_kala=code_kala, ktype=1).exists() else 0
+    # محاسبه تفاوت روزها با بررسی موجود بودن داده‌ها
+    rosob = (today - Kardex.objects.filter(code_kala=code_kala, ktype=1).order_by('date',
+                                                                                  'radif').last().date).days if Kardex.objects.filter(
+        code_kala=code_kala, ktype=1).exists() else 0
+
+    # بررسی موجودی کالا و تنظیم rosob
+    last_mojodi = mojodi.last()
+    if last_mojodi and last_mojodi.total_stock == 0:
+        rosob = 0
+
+    # محاسبه درصد rosob
     rosobper = min(rosob / 30 * 100, 100)
 
+    # ایجاد لیست یکتا از s_m_ratio و پیدا کردن رتبه
+    s_m_ratios = list(set(k.s_m_ratio for k in related_kalas))
+    s_m_ratios.sort(reverse=True)  # مرتب‌سازی نزولی
+    rank = s_m_ratios.index(kala.s_m_ratio) + 1
+    rankper = (len(s_m_ratios) - rank) / (len(s_m_ratios) - 1) * 100 if len(s_m_ratios) > 1 else 100
 
     context = {
         'title': f'{kala.name}',
@@ -448,6 +463,8 @@ def DetailKala(request, *args, **kwargs):
         'chart1_data': final_data,
         'rosob':rosob,
         'rosobper':rosobper,
+        'rank':rank,
+        'rankper':rankper,
     }
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
