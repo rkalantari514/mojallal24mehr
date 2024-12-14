@@ -1,13 +1,17 @@
-from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek
+from django.contrib.gis.measure import pretty_name
+
+from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek, Kala
 from persianutils import standardize
 from django.db.models import Max, Subquery
-from .forms import FilterForm, KalaSelectForm
+from .forms import FilterForm, KalaSelectForm, Kala_Detail_Form
 import time
 from django.shortcuts import render, redirect
 from django.db.models import Sum, F, FloatField
 from django.db.models.functions import Coalesce
 from django.utils import timezone
-
+from django.db.models.functions import TruncMonth
+from khayyam import JalaliDate, JalaliDatetime
+from datetime import date
 def fix_persian_characters(value):
     return standardize(value)
 
@@ -146,9 +150,6 @@ def load_categories_level3(request):
     return render(request, 'partials/category_dropdown_list_options.html', {'categories': categories})
 
 
-
-
-
 def TotalKala(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
     st = kwargs['st']
@@ -156,14 +157,21 @@ def TotalKala(request, *args, **kwargs):
     cat2 = kwargs['cat2']
     cat3 = kwargs['cat3']
     tt = kwargs['total']
+    kala_detail_form = Kala_Detail_Form(request.POST or None)
+    if 'submit_form' in request.POST and request.POST['submit_form'] == 'kala_detail' and kala_detail_form.is_valid():
+        try:
+            code_kala = (kala_detail_form.cleaned_data.get('kala')).code
+            return redirect(f'/dash/kala/detail/{code_kala}')
+        except:
+            try:
+                code_kala = kala_detail_form.cleaned_data.get('code_kala')
+                return redirect(f'/dash/kala/detail/{code_kala}')
+            except:
+                return redirect(f'/dash/kala/total/{st}/{cat1}/{cat2}/{cat3}/total')
 
-    print(st,cat1,cat2,cat3)
+    detailaddress = f'/dash/kala/total/{st}/{cat1}/{cat2}/{cat3}/detail'
 
-
-    detailaddress=f'/dash/kala/total/{st}/{cat1}/{cat2}/{cat3}/detaile'
-
-    total=False if tt== 'total' else True
-
+    total = False if tt == 'total' else True
 
     # جستجو در مدل‌ها
     formst = Storagek.objects.filter(id=int(st)).last() if st != 'all' else None
@@ -185,8 +193,7 @@ def TotalKala(request, *args, **kwargs):
         field_value = form.cleaned_data.get(field_name)
         return field_value.id if field_value else default
 
-    if kala_select_form.is_valid():
-        print("فرم شروع شد")
+    if 'submit_form' in request.POST and request.POST['submit_form'] == 'kala_select' and kala_select_form.is_valid():
         storage = get_cleaned_data_or_default(kala_select_form, 'storage')
         category1 = get_cleaned_data_or_default(kala_select_form, 'category1')
         category2 = get_cleaned_data_or_default(kala_select_form, 'category2')
@@ -260,7 +267,7 @@ def TotalKala(request, *args, **kwargs):
                 Sum(F('stock') * F('averageprice'), output_field=FloatField()) / Coalesce(
                     Sum(F('stock'), output_field=FloatField()), 1.0), 0.0))['weighted_avg_value'],
         }
-        if storage_mojodi.values('kala').distinct().count()>0:
+        if storage_mojodi.values('kala').distinct().count() > 0:
             all_storage_summaries.append(storage_summary)
 
     # ساخت خلاصه برای هر دسته‌بندی سطح ۳
@@ -282,7 +289,7 @@ def TotalKala(request, *args, **kwargs):
                 Sum(F('stock') * F('averageprice'), output_field=FloatField()) / Coalesce(
                     Sum(F('stock'), output_field=FloatField()), 1.0), 0.0))['weighted_avg_value'],
         }
-        if category_mojodi.values('kala').distinct().count() >0:
+        if category_mojodi.values('kala').distinct().count() > 0:
             all_category_summaries_1.append(category_summary)
 
     all_category_summaries_2 = []
@@ -306,7 +313,6 @@ def TotalKala(request, *args, **kwargs):
         if category_mojodi.values('kala').distinct().count() > 0:
             all_category_summaries_2.append(category_summary)
 
-
     all_category_summaries_3 = []
     categories = Category.objects.filter(level=3)
 
@@ -325,11 +331,8 @@ def TotalKala(request, *args, **kwargs):
                 Sum(F('stock') * F('averageprice'), output_field=FloatField()) / Coalesce(
                     Sum(F('stock'), output_field=FloatField()), 1.0), 0.0))['weighted_avg_value'],
         }
-        if category_mojodi.values('kala').distinct().count() >0:
+        if category_mojodi.values('kala').distinct().count() > 0:
             all_category_summaries_3.append(category_summary)
-
-
-
 
     context = {
         'title': 'موجودی کالاها',
@@ -341,11 +344,138 @@ def TotalKala(request, *args, **kwargs):
         'all_category_summaries_1': all_category_summaries_1,  # خلاصه برای هر دسته‌بندی سطح 1
         'all_category_summaries_2': all_category_summaries_2,  # خلاصه برای هر دسته‌بندی سطح 2
         'all_category_summaries_3': all_category_summaries_3,  # خلاصه برای هر دسته‌بندی سطح ۳
-        'total':total,
-        'detailaddress':detailaddress,
+        'total': total,
+        'detailaddress': detailaddress,
+        'kala_detail_form': kala_detail_form,
     }
 
     total_time = time.time() - start_time
     print(f"زمان کل تابع TotalKala: {total_time:.2f} ثانیه")
 
     return render(request, 'total_kala.html', context)
+
+
+
+def DetailKala(request, *args, **kwargs):
+    start_time = time.time()  # زمان شروع تابع
+    code_kala = int(kwargs['code'])
+
+    # دریافت ماه و سال جاری شمسی
+    today_jalali = JalaliDate.today()
+    current_year = today_jalali.year
+    current_month = today_jalali.month
+
+    # تعریف بازه زمانی: 12 ماه گذشته تا ماه جاری
+    month_list = []
+    for i in range(12):
+        month = current_month - i
+        year = current_year
+        if month < 1:
+            month += 12
+            year -= 1
+        month_list.append((year, month))
+    month_list.reverse()  # ترتیب به صورت قدیمی به جدید
+
+    # پردازش داده‌ها
+    kardex_data = Kardex.objects.filter(code_kala=code_kala, ktype=1)
+
+    chart1_data_dict = {}
+    for item in kardex_data:
+        pdate = item.pdate
+        year, month, _ = map(int, pdate.split('/'))
+        key = f"{year}/{month}"
+        if key not in chart1_data_dict:
+            chart1_data_dict[key] = 0
+        chart1_data_dict[key] += item.count
+
+    month_names = {
+        1: 'فروردین',
+        2: 'اردیبهشت',
+        3: 'خرداد',
+        4: 'تیر',
+        5: 'مرداد',
+        6: 'شهریور',
+        7: 'مهر',
+        8: 'آبان',
+        9: 'آذر',
+        10: 'دی',
+        11: 'بهمن',
+        12: 'اسفند'
+    }
+
+    final_data = []
+    for year, month in month_list:
+        key = f"{year}/{month}"
+        total_count = chart1_data_dict.get(key, 0)
+        month_name = f"{month_names[month]}{str(year)[-2:]}"
+        final_data.append({
+            'year': year,
+            'month': month,
+            'month_name': month_name,
+            'total_count': -total_count  # ضرب در منفی
+        })
+
+    # بازگشت به قالب اصلی
+    kala = Kala.objects.filter(code=code_kala).last()
+    kardex = Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif')
+    mojodi = Mojodi.objects.filter(code_kala=code_kala)
+
+    related_kalas = Kala.objects.filter(category=kala.category).order_by('-s_m_ratio')
+
+    rel_kala = []
+
+    for k in related_kalas:
+        rel_kala.append(
+            {
+                'code': k.code,
+                'name': k.name,
+                's_m_ratio': f'{float(k.s_m_ratio):.2f}' if k.s_m_ratio is not None else '0.00',
+            }
+        )
+
+    today = date.today()
+
+    # محاسبه تفاوت روزها با بررسی موجود بودن داده‌ها
+
+
+
+    try:
+        rosob = (today - Kardex.objects.filter(code_kala=code_kala, ktype=1).order_by('date',
+                                                                                      'radif').last().date).days if Kardex.objects.filter(
+            code_kala=code_kala, ktype=1).exists() else (
+                    today - Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif').first().date).days
+
+    except:
+        rosob =0
+
+
+    # بررسی موجودی کالا و تنظیم rosob
+    last_mojodi = mojodi.last()
+    if last_mojodi and last_mojodi.total_stock == 0:
+        rosob = 0
+
+    # محاسبه درصد rosob
+    rosobper = min(rosob / 30 * 100, 100)
+
+    # ایجاد لیست یکتا از s_m_ratio و پیدا کردن رتبه
+    s_m_ratios = list(set(k.s_m_ratio for k in related_kalas))
+    s_m_ratios.sort(reverse=True)  # مرتب‌سازی نزولی
+    rank = s_m_ratios.index(kala.s_m_ratio) + 1
+    rankper = (len(s_m_ratios) - rank) / (len(s_m_ratios) - 1) * 100 if len(s_m_ratios) > 1 else 100
+
+    context = {
+        'title': f'{kala.name}',
+        'kala': kala,
+        'kardex': kardex,
+        'mojodi': mojodi,
+        'rel_kala': rel_kala,
+        'chart1_data': final_data,
+        'rosob':rosob,
+        'rosobper':rosobper,
+        'rank':rank,
+        'rankper':rankper,
+    }
+
+    total_time = time.time() - start_time  # محاسبه زمان اجرا
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+    return render(request, 'detil_kala.html', context)

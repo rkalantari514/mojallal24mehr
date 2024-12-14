@@ -1,97 +1,108 @@
 {% load static %}
 <!--=================================
  header start-->
- 
+
 {#<nav class="admin-header header-dark navbar navbar-default col-lg-12 col-12 p-0 fixed-top d-flex flex-row">#}
 <nav class="admin-header navbar navbar-default col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
-  <!-- logo -->
-  <div class="text-left navbar-brand-wrapper">
-      <a class="navbar-brand brand-logo" href="/"><img src="{% static 'images/yassmojalal.png' %}" alt="" ></a>
-{#    <a class="navbar-brand brand-logo" href="index.html"><img src="images/logo-white.png" alt=""></a>#}
-{#    <a class="navbar-brand brand-logo-mini" href="index.html"><img src="images/logo-icon-light.png" alt=""></a>#}
-    <a class="navbar-brand brand-logo-mini" href="/"><img src="{% static 'images/yassmojalal.png' %}" alt="" ></a>
-  </div>
-  <!-- Top bar left -->
-  <ul class="nav navbar-nav mr-auto">
-    <li class="nav-item">
-      <a id="button-toggle" class="button-toggle-nav inline-block ml-20 pull-left" href="javascript:void(0);"><i class="zmdi zmdi-menu ti-align-right"></i></a>
-    </li>
-    <li class="nav-item">
-      <div class="search">
-        <a class="search-btn not_click" href="javascript:void(0);"></a>
-        <div class="search-box not-click">
-          <input type="text" class="not-click form-control" placeholder="جستجو" value="" name="search">
-          <button class="search-button" type="submit"> <i class="fa fa-search not-click"></i></button>
-        </div>
-      </div>
-    </li>
-  </ul>
-  <!-- top bar right -->
-  <ul class="nav navbar-nav ml-auto">
-    <li class="nav-item fullscreen">
-      <a id="btnFullscreen" href="#" class="nav-link" ><i class="ti-fullscreen"></i></a>
-    </li>
-    <li class="nav-item dropdown ">
-      <a class="nav-link top-nav" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-        <i class="ti-bell"></i>
-        <span class="badge badge-danger notification-status"> </span>
-      </a>
-      <div class="dropdown-menu dropdown-menu-right dropdown-big dropdown-notifications">
-        <div class="dropdown-header notifications">
-          <strong>اطلاعیه ها</strong>
-          <span class="badge badge-pill badge-warning">05</span>
-        </div>
-        <div class="dropdown-divider"></div>
-        <a href="#" class="dropdown-item">کاربر جدید ثبت شده <small class="float-right text-muted time">همین حالا</small> </a>
-        <a href="#" class="dropdown-item">فاکتور جدید دریافت شد <small class="float-right text-muted time">22 دقیقه</small> </a>
-        <a href="#" class="dropdown-item">گزارش خطا سرور<small class="float-right text-muted time">7 ساعت</small> </a>
-        <a href="#" class="dropdown-item">گزارش پایگاه داده<small class="float-right text-muted time">1 روز</small> </a>
-        <a href="#" class="dropdown-item">تایید سفارش<small class="float-right text-muted time">2 روز</small> </a>
-      </div>
-    </li>
-    <li class="nav-item dropdown ">
-      <a class="nav-link top-nav" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="true"> <i class=" ti-view-grid"></i> </a>
-      <div class="dropdown-menu dropdown-menu-right dropdown-big">
-        <div class="dropdown-header">
-          <strong>لینک های سریع</strong>
-        </div>
-        <div class="dropdown-divider"></div> 
-        <div class="nav-grid">
-          <a href="#" class="nav-grid-item"><i class="ti-files text-primary"></i><h5>وظیفه جدید</h5></a>
-          <a href="#" class="nav-grid-item"><i class="ti-check-box text-success"></i><h5>اختصاص وظیفه</h5></a>
-        </div>
-        <div class="nav-grid">
-          <a href="#" class="nav-grid-item"><i class="ti-pencil-alt text-warning"></i><h5>اضافه کردن دستور</h5></a>
-          <a href="#" class="nav-grid-item"><i class="ti-truck text-danger "></i><h5>سفارشات جدید</h5></a>
-        </div>
-      </div>
-    </li>
-      {% if user.is_authenticated %}
-    <li class="nav-item dropdown mr-30">
-      <a class="nav-link nav-pill user-avatar" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-        <img src="images/profile-avatar.jpg" alt="avatar">
-      </a>
-      <div class="dropdown-menu dropdown-menu-right">
-        <div class="dropdown-header">
-          <div class="media">
-            <div class="media-body">
-              <h5 class="mt-0 mb-0">{{ user.first_name }} {{ user.last_name }}</h5>
-              <span>{{ user.email }}</span>
+    <!-- logo -->
+    <div class="text-left navbar-brand-wrapper">
+        <a class="navbar-brand brand-logo" href="/"><img src="{% static 'images/yassmojalal.png' %}" alt=""></a>
+        {#    <a class="navbar-brand brand-logo" href="index.html"><img src="images/logo-white.png" alt=""></a>#}
+        {#    <a class="navbar-brand brand-logo-mini" href="index.html"><img src="images/logo-icon-light.png" alt=""></a>#}
+        <a class="navbar-brand brand-logo-mini" href="/"><img src="{% static 'images/yassmojalal.png' %}" alt=""></a>
+    </div>
+    <!-- Top bar left -->
+    <ul class="nav navbar-nav mr-auto">
+        <li class="nav-item">
+            <a id="button-toggle" class="button-toggle-nav inline-block ml-20 pull-left" href="javascript:void(0);"><i
+                    class="zmdi zmdi-menu ti-align-right"></i></a>
+        </li>
+        <li class="nav-item">
+            <div class="search">
+                <a class="search-btn not_click" href="javascript:void(0);"></a>
+                <div class="search-box not-click">
+                    <input type="text" class="not-click form-control" placeholder="جستجو" value="" name="search">
+                    <button class="search-button" type="submit"><i class="fa fa-search not-click"></i></button>
+                </div>
             </div>
-          </div>
-        </div>
-        <div class="dropdown-divider"></div>
-        <a class="dropdown-item" href="#"><i class="text-secondary ti-reload"></i>فعالیت</a>
-        <a class="dropdown-item" href="#"><i class="text-success ti-email"></i>پیام</a>
-        <a class="dropdown-item" href="#"><i class="text-warning ti-user"></i>پروفایل</a>
-        <a class="dropdown-item" href="#"><i class="text-dark ti-layers-alt"></i>پروژه ها <span class="badge badge-info">6</span> </a>
-        <div class="dropdown-divider"></div>
-        <a class="dropdown-item" href="#"><i class="text-info ti-settings"></i>تنظیمات</a>
-        <a class="dropdown-item" href="#"><i class="text-danger ti-unlock"></i>خروج</a>
-      </div>
-    </li>
-      {% endif %}
-  </ul>
+        </li>
+    </ul>
+    <!-- top bar right -->
+    <ul class="nav navbar-nav ml-auto">
+        <li class="nav-item fullscreen">
+            <a id="btnFullscreen" href="#" class="nav-link"><i class="ti-fullscreen"></i></a>
+        </li>
+        <li class="nav-item dropdown ">
+            <a class="nav-link top-nav" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+               aria-expanded="false">
+                <i class="ti-bell"></i>
+                <span class="badge badge-danger notification-status"> </span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right dropdown-big dropdown-notifications">
+                <div class="dropdown-header notifications">
+                    <strong>اطلاعیه ها</strong>
+                    <span class="badge badge-pill badge-warning">05</span>
+                </div>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item">کاربر جدید ثبت شده <small class="float-right text-muted time">همین
+                    حالا</small> </a>
+                <a href="#" class="dropdown-item">فاکتور جدید دریافت شد <small class="float-right text-muted time">22
+                    دقیقه</small> </a>
+                <a href="#" class="dropdown-item">گزارش خطا سرور<small class="float-right text-muted time">7
+                    ساعت</small> </a>
+                <a href="#" class="dropdown-item">گزارش پایگاه داده<small class="float-right text-muted time">1
+                    روز</small> </a>
+                <a href="#" class="dropdown-item">تایید سفارش<small class="float-right text-muted time">2 روز</small>
+                </a>
+            </div>
+        </li>
+        <li class="nav-item dropdown ">
+            <a class="nav-link top-nav" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+               aria-expanded="true"> <i class=" ti-view-grid"></i> </a>
+            <div class="dropdown-menu dropdown-menu-right dropdown-big">
+                <div class="dropdown-header">
+                    <strong>لینک های سریع</strong>
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="nav-grid">
+                    <a href="#" class="nav-grid-item"><i class="ti-files text-primary"></i><h5>وظیفه جدید</h5></a>
+                    <a href="#" class="nav-grid-item"><i class="ti-check-box text-success"></i><h5>اختصاص وظیفه</h5></a>
+                </div>
+                <div class="nav-grid">
+                    <a href="#" class="nav-grid-item"><i class="ti-pencil-alt text-warning"></i><h5>اضافه کردن
+                        دستور</h5></a>
+                    <a href="#" class="nav-grid-item"><i class="ti-truck text-danger "></i><h5>سفارشات جدید</h5></a>
+                </div>
+            </div>
+        </li>
+        {% if user.is_authenticated %}
+            <li class="nav-item dropdown mr-30">
+                <a class="nav-link nav-pill user-avatar" data-toggle="dropdown" href="#" role="button"
+                   aria-haspopup="true" aria-expanded="false">
+                    <img src="images/profile-avatar.jpg" alt="avatar">
+                </a>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <div class="dropdown-header">
+                        <div class="media">
+                            <div class="media-body">
+                                <h5 class="mt-0 mb-0">{{ user.first_name }} {{ user.last_name }}</h5>
+                                <span>{{ user.email }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#"><i class="text-secondary ti-reload"></i>فعالیت</a>
+                    <a class="dropdown-item" href="#"><i class="text-success ti-email"></i>پیام</a>
+                    <a class="dropdown-item" href="#"><i class="text-warning ti-user"></i>پروفایل</a>
+                    <a class="dropdown-item" href="#"><i class="text-dark ti-layers-alt"></i>پروژه ها <span
+                            class="badge badge-info">6</span> </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#"><i class="text-info ti-settings"></i>تنظیمات</a>
+                    <a class="dropdown-item" href="#"><i class="text-danger ti-unlock"></i>خروج</a>
+                </div>
+            </li>
+        {% endif %}
+    </ul>
 </nav>
 
 <!--=================================

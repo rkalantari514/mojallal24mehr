@@ -12,6 +12,7 @@ import jdatetime  # فرض بر این است که برای تبدیل تاری�
 from django.db.models import Max, Q
 from .models import Mojodi
 from django.db.models import Q
+from decimal import Decimal
 
 from .sendtogap import send_to_admin
 
@@ -121,6 +122,7 @@ def Updateall(request):
         '/update/createkalagroup',
         '/update/updatekalagroup',
         '/update/mojodi',
+        '/update/updatsmratio',
     ]
     # نگاشت آدرس‌های استاتیک به توابع
     static_view_map = {
@@ -128,6 +130,7 @@ def Updateall(request):
         '/update/createkalagroup': CreateKalaGroup,
         '/update/updatekalagroup': UpdateKalaGroup,
         '/update/mojodi': UpdateMojodi,
+        '/update/updatsmratio': Update_Sales_Mojodi_Ratio,
     }
     # چاپ تزئینی برای عیب یابی
     print(f"Request path: {request.path}")
@@ -136,7 +139,7 @@ def Updateall(request):
         # if request.path == static_url:
         response = static_view_map[static_url](request)
         responses.append(response.content)
-            # اگر هیچ آدرس استاتیکی پردازش نشود
+        # اگر هیچ آدرس استاتیکی پردازش نشود
     if not responses:
         print("No static URLs were processed.")
         # بازگشت به /updatedb
@@ -145,13 +148,11 @@ def Updateall(request):
     tend = time.time()
     total_time = tend - t0
 
-    data1=(f"زمان کل: {total_time:.2f} ثانیه")
+    data1 = (f"زمان کل: {total_time:.2f} ثانیه")
     send_to_admin(data1)
 
-
-
-
     return redirect('/updatedb')
+
 
 def Updateallold(request):
     tables = Mtables.objects.filter(in_use=True).order_by('update_priority')
@@ -175,7 +176,99 @@ def Updateallold(request):
 
 
 # آپدیت فاکتور
+
+
+
+
+from decimal import Decimal
+
+from decimal import Decimal
+from django.db import transaction
+from django.utils import timezone
+from django.shortcuts import redirect
+from .models import Factor, Mtables  # فرض می‌کنیم که Factor و Mtables مدل‌های شما هستند
+
 def UpdateFactor(request):
+    t0 = time.time()
+    print('شروع آپدیت فاکتور--------------------------------------')
+
+    conn = connect_to_mahak()  # تابع تخمینی برای اتصال به پایگاه داده Mahak
+    cursor = conn.cursor()
+    t1 = time.time()
+
+    cursor.execute("SELECT * FROM Fact_Fo")
+    mahakt_data = cursor.fetchall()
+    existing_in_mahak = {row[0] for row in mahakt_data}
+
+    factors_to_create = []
+    factors_to_update = []
+
+    current_factors = {factor.code: factor for factor in Factor.objects.iterator()}
+
+    for row in mahakt_data:
+        code = row[0]
+        defaults = {
+            'pdate': row[4],
+            'mablagh_factor': Decimal(row[5]),
+            'takhfif': Decimal(row[6]),
+            'create_time': row[38],
+            'darsad_takhfif': Decimal(row[44]),
+        }
+
+        if code in current_factors:
+            factor = current_factors[code]
+            if any(
+                (isinstance(getattr(factor, attr), (int, float, Decimal)) and
+                 Decimal(getattr(factor, attr)).quantize(Decimal('0.00')) != Decimal(value).quantize(Decimal('0.00'))) or
+                 (isinstance(getattr(factor, attr), str) and getattr(factor, attr) != str(value))
+                for attr, value in defaults.items()
+            ):
+                # پرینت مقادیر برای شناسایی
+                for attr, value in defaults.items():
+                    current_value = getattr(factor, attr)
+                    print(f"Comparing {attr}: current_value={current_value}, new_value={value}")
+                    if isinstance(current_value, (int, float, Decimal)):
+                        print(f"Rounded current_value={Decimal(current_value).quantize(Decimal('0.00'))}, new_value={Decimal(value).quantize(Decimal('0.00'))}")
+                    else:
+                        print(f"String comparison: current_value={current_value}, new_value={value}")
+
+                for attr, value in defaults.items():
+                    setattr(factor, attr, value)
+                print('update.append')
+                factors_to_update.append(factor)
+        else:
+            factors_to_create.append(Factor(code=code, **defaults))
+
+    with transaction.atomic():
+        if factors_to_create:
+            Factor.objects.bulk_create(factors_to_create)
+        if factors_to_update:
+            Factor.objects.bulk_update(factors_to_update,
+                                       ['pdate', 'mablagh_factor', 'takhfif', 'create_time', 'darsad_takhfif'])
+
+        Factor.objects.exclude(code__in=existing_in_mahak).delete()
+
+    tend = time.time()
+    print(f"زمان کل: {tend - t0:.2f} ثانیه")
+    print(f" اتصال به دیتابیس: {t1 - t0:.2f} ثانیه")
+    print(f" زمان آپدیت جدول: {tend - t1:.2f} ثانیه")
+
+    cursor.execute(f"SELECT COUNT(*) FROM Fact_Fo")
+    row_count = cursor.fetchone()[0]
+    cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Fact_Fo'")
+    column_count = cursor.fetchone()[0]
+
+    table = Mtables.objects.filter(name='Fact_Fo').last()
+    table.last_update_time = timezone.now()
+    table.update_duration = tend - t1
+    table.row_count = row_count
+    table.column_count = column_count
+    table.save()
+
+    return redirect('/updatedb')
+
+
+def UpdateFactor2(request):
     t0 = time.time()
     print('شروع آپدیت فاکتور--------------------------------------')
 
@@ -207,6 +300,7 @@ def UpdateFactor(request):
             if any(getattr(factor, attr) != value for attr, value in defaults.items()):
                 for attr, value in defaults.items():
                     setattr(factor, attr, value)
+                print("update.append")
                 factors_to_update.append(factor)
         else:
             factors_to_create.append(Factor(code=code, **defaults))
@@ -262,6 +356,7 @@ from .models import Kardex, Mtables, Factor, Kala, Storagek
 
 import math
 
+
 def UpdateKardex(request):
     t0 = time.time()
     print('شروع آپدیت کاردکس----------------------------------------')
@@ -298,6 +393,7 @@ def UpdateKardex(request):
             'warehousecode': row[2],
             'mablaghsanad': row[3],
             'count': row[7],
+            'ktype': row[5],
             'averageprice': row[11],
         }
 
@@ -347,8 +443,9 @@ def UpdateKardex(request):
     # ذخیره‌سازی دسته‌ای
     if updates or new_records:
         with transaction.atomic():
-            Kardex.objects.bulk_update(updates, ['code_factor', 'percode', 'warehousecode', 'mablaghsanad', 'count',
-                                                 'averageprice', 'sync_mojodi'])
+            Kardex.objects.bulk_update(updates,
+                                       ['code_factor', 'percode', 'warehousecode', 'mablaghsanad', 'count', 'ktype',
+                                        'averageprice', 'sync_mojodi'])
             Kardex.objects.bulk_create(new_records)
             print(f"{len(updates) + len(new_records)} رکورد به‌روز رسانی یا ایجاد شد.")
 
@@ -444,11 +541,6 @@ def UpdateKardex(request):
     table.save()
 
     return redirect('/updatedb')
-
-
-
-
-
 
 
 def UpdateKardexdorost(request):
@@ -534,7 +626,6 @@ def UpdateKardexdorost(request):
         ).delete()
         print(f"{len(keys_to_delete)} رکورد اضافی حذف شد.")
 
-
     # اجرای حلقه جایگزین سیگنال‌ها
     kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala', 'storage').all())
     updates = []
@@ -611,11 +702,6 @@ def UpdateKardexdorost(request):
     table.save()
 
     return redirect('/updatedb')
-
-
-
-
-
 
 
 def UpdateKardex1(request):
@@ -1483,7 +1569,7 @@ def update_kala_categories():
 
     # پیمایش کالاها و تعیین دسته‌بندی مناسب برای هر کالا
     for kala in kalas:
-        group_infos = KalaGroupinfo.objects.all()
+        group_infos = KalaGroupinfo.objects.order_by('-id').all()
         category_found = False  # متغیری برای پیگیری پیدا شدن دسته‌بندی
 
         for group in group_infos:
@@ -1518,9 +1604,6 @@ from django.db import transaction
 from django.shortcuts import redirect
 from collections import defaultdict
 
-
-
-
 from django.shortcuts import redirect
 from collections import defaultdict
 
@@ -1555,7 +1638,6 @@ from django.db import transaction, connections
 from django.db.models import Max
 from django.shortcuts import redirect
 from .models import Kardex, Mojodi
-
 
 from django.db.models import Sum
 
@@ -1565,21 +1647,16 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 import time
 from django.db.models import Sum
 from .models import Kardex, Mojodi
 
-
-
 from django.db.models import F  # اضافه کردن این خط
 
 from django.db.models import F  # اضافه کردن این خط
-
 
 from django.db.models import F
 
-
 import time
 from django.db.models import Sum
 from .models import Kardex, Mojodi
@@ -1593,10 +1670,130 @@ from .models import Kardex, Mojodi
 
 import time
 from django.db import transaction
+from .models import Kardex, Mojodi
+from django.shortcuts import redirect
+from django.db import transaction
+import time
 from .models import Kardex, Mojodi
 
 
 def UpdateMojodi(request):
+    start_time = time.time()
+
+    # دریافت لیست کد کالاهایی که sync_mojodi=False هستند
+    false_kardex_list = list(Kardex.objects.filter(sync_mojodi=False).values_list('code_kala', flat=True))
+
+    # بارگذاری رکوردهای Kardex مورد نظر فقط یک بار
+    kardex_to_update = Kardex.objects.filter(code_kala__in=false_kardex_list)
+
+    # به روز رسانی sync_mojodi به False
+    kardex_to_update.update(sync_mojodi=True)
+    print(f'Updated {kardex_to_update.count()} Kardex records.')
+
+    # بارگذاری کادرکس‌ها که sync_mojodi آنها True است
+    kardex_list2 = kardex_to_update.values('warehousecode', 'code_kala').distinct()
+    kardex_list = [dict(t) for t in {tuple(d.items()) for d in kardex_list2}]
+
+    processed_items = {}
+    jj = 1
+
+    # بارگذاری تمام رکوردهای Kardex که sync_mojodi آنها True است
+    all_kardex = kardex_to_update.order_by('date', 'radif')
+    print('Sample Kardex records:', [(k.date, k.code_kala, k.warehousecode, k.count) for k in all_kardex[:5]])
+
+    # ایجاد دیکشنری برای تسهیل دسترسی
+    kardex_dict = {}
+    for k in all_kardex:
+        key = (k.code_kala, k.warehousecode)
+        if key not in kardex_dict:
+            kardex_dict[key] = []
+        kardex_dict[key].append(k)
+
+    for k in kardex_list:
+        warehousecode = k['warehousecode']
+        code_kala = k['code_kala']
+        if (code_kala, warehousecode) in kardex_dict:
+            kardex_entries = kardex_dict[(code_kala, warehousecode)]
+            last_kardex_entry = kardex_entries[-1]
+            last_kardex_entry2 = Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif').last()
+
+            if last_kardex_entry2:
+                total_count = sum(k.count for k in kardex_entries)
+                processed_items[(code_kala, warehousecode)] = {
+                    'storage': last_kardex_entry.storage,
+                    'kala': last_kardex_entry.kala,
+                    'total_stock': last_kardex_entry2.stock,
+                    'averageprice': last_kardex_entry2.averageprice,
+                    'arzesh': total_count * last_kardex_entry2.averageprice,
+                    'stock': total_count,
+                }
+
+        print(f'Processed item: {jj}, warehousecode: {warehousecode}, code_kala: {code_kala}')
+        jj += 1
+
+    print('Processed items:', processed_items)
+
+    # بارگذاری رکوردهای موجود در Mojodi
+    mojodi_objects = Mojodi.objects.filter(
+        code_kala__in=[code_kala for (code_kala, warehousecode) in processed_items.keys()],
+        warehousecode__in=[warehousecode for (code_kala, warehousecode) in processed_items.keys()]
+    )
+
+    print('Existing Mojodi records:', mojodi_objects.count())
+
+    # به‌روزرسانی رکوردها
+    for mojodi in mojodi_objects:
+        key = (mojodi.code_kala, mojodi.warehousecode)
+        if key in processed_items:
+            data = processed_items[key]
+            mojodi.storage = data['storage']
+            mojodi.kala = data['kala']
+            mojodi.total_stock = data['total_stock']
+            mojodi.averageprice = data['averageprice']
+            mojodi.arzesh = data['arzesh']
+            mojodi.stock = data['stock']
+
+            # انجام bulk_update برای رکوردهای موجود
+    Mojodi.objects.bulk_update(mojodi_objects, ['storage', 'kala', 'total_stock', 'averageprice', 'arzesh', 'stock'],
+                               batch_size=1000)
+
+    # اضافه کردن رکوردهای جدید
+    existing_keys = {(mojodi.code_kala, mojodi.warehousecode) for mojodi in mojodi_objects}
+    new_objects = []
+
+    for (code_kala, warehousecode), data in processed_items.items():
+        if (code_kala, warehousecode) not in existing_keys:
+            new_objects.append(Mojodi(
+                code_kala=code_kala,
+                warehousecode=warehousecode,
+                storage=data['storage'],
+                kala=data['kala'],
+                total_stock=data['total_stock'],
+                averageprice=data['averageprice'],
+                arzesh=data['arzesh'],
+                stock=data['stock']
+            ))
+
+            # ذخیره‌سازی رکوردهای جدید به صورت دسته‌ای
+    if new_objects:
+        Mojodi.objects.bulk_create(new_objects, batch_size=1000)
+
+        # حذف ردیف‌های اضافی در Mojodi
+    keys_to_keep = set((k[1], k[0]) for k in Kardex.objects.values_list('warehousecode', 'code_kala'))
+
+    Mojodi.objects.exclude(
+        id__in=Mojodi.objects.filter(code_kala__in=[key[0] for key in keys_to_keep],
+                                     warehousecode__in=[key[1] for key in keys_to_keep]).values_list('id', flat=True)
+    ).delete()
+
+    print('Update completed successfully.')
+
+    end_time = time.time()
+    print(f'Execution time: {end_time - start_time} seconds')
+
+    return redirect('/updatedb')
+
+def UpdateMojodidorostsqlite(request):
     start_time = time.time()
 
     # بارگذاری همه رکوردهای Kardex به صورت لیستی از تاپل‌ها
@@ -1708,7 +1905,6 @@ def UpdateMojodi(request):
         print(hh[0])
     print("hh77777777777")
 
-
     # حذف ردیف‌های اضافی در Mojodi
     keys_to_keep = set((k[1], k[0]) for k in all_kardex_list)
 
@@ -1745,7 +1941,8 @@ def UpdateMojodidorost1(request):
         warehousecode__in=[item['warehousecode'] for item in kardex_list]
     ).order_by('date', 'radif')
 
-    print('Sample Kardex records:', [(k.date, k.code_kala, k.warehousecode, k.count) for k in all_kardex[:5]])  # نمایش 5 رکورد اول با ویژگی‌های بیشتر
+    print('Sample Kardex records:', [(k.date, k.code_kala, k.warehousecode, k.count) for k in
+                                     all_kardex[:5]])  # نمایش 5 رکورد اول با ویژگی‌های بیشتر
 
     kardex_dict = {}
     for k in all_kardex:
@@ -1800,7 +1997,8 @@ def UpdateMojodidorost1(request):
             mojodi.stock = data['stock']
 
     # انجام bulk_update برای رکوردهای موجود
-    Mojodi.objects.bulk_update(mojodi_objects, ['storage', 'kala', 'total_stock', 'averageprice', 'arzesh', 'stock'], batch_size=1000)
+    Mojodi.objects.bulk_update(mojodi_objects, ['storage', 'kala', 'total_stock', 'averageprice', 'arzesh', 'stock'],
+                               batch_size=1000)
 
     # اضافه کردن رکوردهای جدید
     existing_keys = {(mojodi.code_kala, mojodi.warehousecode) for mojodi in mojodi_objects}
@@ -1842,7 +2040,8 @@ def UpdateMojodidorost(request):
     start_time = time.time()
 
     # بارگذاری کادرکس‌ها
-    kardex_list2 = Kardex.objects.select_related('warehousecode', 'code_kala').order_by('date', 'radif').values('warehousecode', 'code_kala').distinct()
+    kardex_list2 = Kardex.objects.select_related('warehousecode', 'code_kala').order_by('date', 'radif').values(
+        'warehousecode', 'code_kala').distinct()
     kardex_list = [dict(t) for t in {tuple(d.items()) for d in kardex_list2}]
 
     print(f'Unique kardex count: {len(kardex_list)}')  # تعداد منحصر به فرد
@@ -1894,7 +2093,8 @@ def UpdateMojodidorost(request):
             mojodi.stock = data['stock']
 
     # انجام bulk_update برای رکوردهای موجود
-    Mojodi.objects.bulk_update(mojodi_objects, ['storage', 'kala', 'total_stock', 'averageprice', 'arzesh', 'stock'], batch_size=1000)
+    Mojodi.objects.bulk_update(mojodi_objects, ['storage', 'kala', 'total_stock', 'averageprice', 'arzesh', 'stock'],
+                               batch_size=1000)
 
     # اضافه کردن رکوردهای جدید
     existing_keys = {(mojodi.code_kala, mojodi.warehousecode) for mojodi in mojodi_objects}
@@ -1941,32 +2141,30 @@ def UpdateMojodidorost(request):
     return redirect('/updatedb')
 
 
-
 def UpdateMojodi222222(request):
     start_time = time.time()  # زمان شروع تابع
     kardex_list = Kardex.objects.order_by('date', 'radif').select_related('storage', 'kala').values_list('storage',
-                                                                                                            'kala',
-                                                                                                               flat=False)
-
+                                                                                                         'kala',
+                                                                                                         flat=False)
 
     for i in kardex_list:
-        kardex=Kardex.objects.order_by('date', 'radif').filter(kala=i[1],warehousecode=i[0])
+        kardex = Kardex.objects.order_by('date', 'radif').filter(kala=i[1], warehousecode=i[0])
         total_count = kardex.aggregate(Sum('count'))['count__sum']
         Mojodi.objects.update_or_create(
             code_kala=i[1],
             warehousecode=i[0],
             defaults={
-                'storage':kardex.last().storage,
-                'kala':kardex.last().kala,
-                'total_stock':Kardex.objects.order_by('date', 'radif').filter(kala=i[1]).last().stock,
-                'averageprice':Kardex.objects.order_by('date', 'radif').filter(kala=i[1]).last().averageprice,
-                'arzesh':(Kardex.objects.order_by('date', 'radif').filter(kala=i[1]).last().stock)*(Kardex.objects.order_by('date', 'radif').filter(kala=i[1]).last().averageprice),
-                'stock':total_count,
+                'storage': kardex.last().storage,
+                'kala': kardex.last().kala,
+                'total_stock': Kardex.objects.order_by('date', 'radif').filter(kala=i[1]).last().stock,
+                'averageprice': Kardex.objects.order_by('date', 'radif').filter(kala=i[1]).last().averageprice,
+                'arzesh': (Kardex.objects.order_by('date', 'radif').filter(kala=i[1]).last().stock) * (
+                    Kardex.objects.order_by('date', 'radif').filter(kala=i[1]).last().averageprice),
+                'stock': total_count,
             }
         )
         print(i)
     return redirect('/updatedb')
-
 
 
 def UpdateMojodi111111(request):
@@ -2043,7 +2241,7 @@ def UpdateMojodi111111(request):
 def UpdateMojodi000000(request):
     # بارگذاری داده‌ها از مدل Kardex
     # kardex_entries = Kardex.objects.all().select_related('storage', 'kala')
-    kardex_entries = Kardex.objects.order_by('date','radif').select_related('storage', 'kala')
+    kardex_entries = Kardex.objects.order_by('date', 'radif').select_related('storage', 'kala')
 
     # دیکشنری برای جمع‌آوری اطلاعات
     mojodi_data = defaultdict(lambda: {
@@ -2097,6 +2295,7 @@ def UpdateMojodi000000(request):
 
     # ریدایرکت به صفحه مورد نظر
     return redirect('/updatedb')
+
 
 def UpdateMojodi0(request):
     # ابتدا تمام رکوردهای کاردکس را بر اساس تاریخ مرتب می‌کنیم
@@ -2247,11 +2446,10 @@ def UpdateMojodi2(request):
     return redirect('/updatedb')
 
 
-
-
-
 from django.shortcuts import HttpResponse
 from .models import Kardex
+
+
 def temp_compare_kardex_view(request):
     # اتصال به دیتابیس
     conn = connect_to_mahak()
@@ -2303,3 +2501,258 @@ def temp_compare_kardex_view(request):
         print("هیچ رکوردی یافت نشد که در مدل ذخیره نشده باشد.")
 
     return HttpResponse("نتایج در ترمینال پرینت شد.", content_type="text/plain")
+
+
+from datetime import datetime, timedelta
+from django.db.models import Sum, Min
+from django.shortcuts import render
+from .models import Kala, Kardex
+
+
+#
+# (day0,stock0),
+# (day1,stock1),
+# (day2,stock2),
+# (day3,stock3),
+# (day4,stock4),
+# (day5,stock5),
+# (day6,stock6),
+# (day7,stock7),
+# (day8,stock8),
+# (day9,stock9),
+#
+# area=0
+# for s in list:
+#     s+=
+# یا
+# area=
+# (dey1-day0)*stock0+
+# (dey2-day1)*stock1+
+# (dey3-day2)*stock2+
+# ......
+# (dey10-day9)*stock2+
+# (today-day10)*stock10
+#
+#
+# ave=-1*area/(today-dey1)
+#
+#
+
+def Update_Sales_Mojodi_Ratio(request):
+    start_time = time.time()  # زمان شروع تابع
+    current_date = datetime.now().date()
+
+    # دریافت یک لیست یکتا از کد کالاهای موجود در Kardex
+    kala_code_in_kardex = Kardex.objects.values_list('code_kala', flat=True).distinct()
+
+    # فیلتر کردن کالاها با استفاده از کدهای یکتا و حذف کالاهایی که به‌روزرسانی شده‌اند
+    kalas = Kala.objects.exclude(last_updated_ratio=current_date).filter(code__in=kala_code_in_kardex)
+
+    print(f'کالاهای قابل پردازش: {kalas.count()}')
+
+    for con, kala in enumerate(kalas, start=1):
+        print('------------------------')
+        print(kala.last_updated_ratio, current_date)
+        print(con)
+
+        # دریافت تمام کاردکس‌های مربوط به کالا
+        kardex_records = Kardex.objects.filter(code_kala=kala.code).order_by('date')
+
+        # محاسبه مساحت زیر نمودار
+        total_area = 0
+        last_date = None
+        last_stock = 0
+
+        for kardex in kardex_records:
+            if last_date is not None:
+                # محاسبه مساحت مستطیل
+                area = (kardex.date - last_date).days * last_stock
+                total_area += area
+
+                # به‌روزرسانی تاریخ و موجودی آخرین کاردکس
+            last_date = kardex.date
+            last_stock = kardex.stock
+
+            # محاسبه مساحت برای آخرین دوره تا تاریخ امروز
+        if last_date is not None:
+            area = (current_date - last_date).days * last_stock
+            total_area += area
+
+            # محاسبه میانگین موجودی
+        total_days = (current_date - kardex_records.first().date).days
+        ave_mojodi = total_area / total_days if total_days > 0 else 0
+
+        # محاسبه نسبت فروش به میانگین موجودی
+        total_sales = Kardex.objects.filter(code_kala=kala.code, ktype=1).aggregate(total=Sum('count'))['total'] or 0
+        total_sales = -1 * total_sales
+        ratio = total_sales / ave_mojodi if ave_mojodi != 0 else 0
+
+        # به‌روزرسانی فیلدهای مربوطه در مدل Kala
+        kala.s_m_ratio = ratio
+        kala.last_updated_ratio = current_date
+        kala.save()
+
+        print(kala.last_updated_ratio, current_date)
+
+    total_time = time.time() - start_time  # محاسبه زمان اجرا
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+
+    return redirect('/updatedb')
+
+
+def Update_Sales_Mojodi_Ratio2(request):
+    start_time = time.time()  # زمان شروع تابع
+    current_date = datetime.now().date()
+
+    # دریافت یک لیست یکتا از کد کالاهای موجود در Kardex
+    kala_code_in_kardex = Kardex.objects.values_list('code_kala', flat=True).distinct()
+
+    # فیلتر کردن کالاها با استفاده از کدهای یکتا و حذف کالاهایی که به‌روزرسانی شده‌اند
+    kalas = Kala.objects.exclude(last_updated_ratio=current_date).filter(code__in=kala_code_in_kardex)
+
+    print(f'کالاهای قابل پردازش: {kalas.count()}')
+
+    # بارگذاری تمام فروش‌ها و کاردکس‌ها در یک پرس‌وجو برای کاهش تعداد پرس‌وجوها
+    total_sales_data = Kardex.objects.filter(ktype=1, code_kala__in=kala_code_in_kardex).values('code_kala').annotate(
+        total=Sum('count'))
+    kardex_records = Kardex.objects.filter(code_kala__in=kala_code_in_kardex).order_by('date')
+
+    # دیکشنری برای نگهداری مجموع فروش هر کالا
+    total_sales_dict = {data['code_kala']: -1 * (data['total'] or 0) for data in total_sales_data}
+
+    for con, kala in enumerate(kalas, start=1):
+        print('------------------------')
+        print(kala.last_updated_ratio, current_date)
+        print(con)
+
+        # محاسبه تاریخ شروع از اولین تاریخ موجود در کاردکس
+        first_kardex_date = kardex_records.filter(code_kala=kala.code).aggregate(first_date=Min('date'))['first_date']
+        if not first_kardex_date:
+            continue  # اگر کاردکسی وجود نداشت، ادامه دهید
+
+        # تبدیل first_kardex_date به datetime
+        start_day = datetime.combine(first_kardex_date, datetime.min.time())
+        end_day = datetime.now()
+
+        # فیلتر کردن کاردکس‌های مربوط به کالا
+        relevant_kardex_records = kardex_records.filter(code_kala=kala.code, date__range=(start_day, end_day))
+
+        # محاسبه میانگین موجودی
+        total_stock = 0
+        days_count = 0
+        last_stock = None  # موجودی آخرین کاردکس
+
+        # حلقه برای محاسبه موجودی روزانه
+        for kardex in relevant_kardex_records:
+            # اگر موجودی تغییر کرده باشد، آن را به total_stock اضافه می‌کنیم
+            if kardex.stock != last_stock:
+                total_stock += kardex.stock
+                days_count += 1
+                last_stock = kardex.stock  # به‌روزرسانی موجودی آخرین کاردکس
+
+        # اگر هیچ روزی موجودی ثبت نشده باشد، از موجودی آخرین کاردکس استفاده می‌کنیم
+        if days_count == 0 and relevant_kardex_records.exists():
+            last_kardex = relevant_kardex_records.last()
+            total_stock += last_kardex.stock
+            days_count = 1
+
+        # محاسبه میانگین موجودی
+        ave_mojodi = total_stock / days_count if days_count > 0 else 0
+
+        # محاسبه نسبت فروش به میانگین موجودی
+        total_sales = total_sales_dict.get(kala.code, 0)
+        ratio = total_sales / ave_mojodi if ave_mojodi != 0 else 0
+
+        # به‌روزرسانی فیلدهای مربوطه در مدل Kala
+        kala.s_m_ratio = ratio
+        kala.last_updated_ratio = current_date
+        kala.save()
+
+        print(kala.last_updated_ratio, current_date)
+
+    total_time = time.time() - start_time  # محاسبه زمان اجرا
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+
+    return redirect('/updatedb')
+
+
+def Update_Sales_Mojodi_Ratio1(request):
+    start_time = time.time()  # زمان شروع تابع
+
+    current_date = datetime.now().date()
+
+    kalas = Kala.objects.exclude(last_updated_ratio=current_date)
+    print('kalas.count()')
+    print(kalas.count())
+    con = 1
+    for kala in kalas:
+        print('------------------------')
+        print(kala.last_updated_ratio, current_date)
+        print(con)
+        con += 1
+
+        if kala.last_updated_ratio == current_date:
+            print('continue')
+            continue
+
+        # دریافت مجموع فروش از ابتدای دوره تا حال
+        total_sales = Kardex.objects.filter(
+            code_kala=kala.code,
+            ktype=1
+        ).aggregate(total=Sum('count'))['total'] or 0
+        total_sales = -1 * total_sales
+
+        # محاسبه تاریخ شروع از اولین تاریخ موجود در کاردکس
+        first_kardex_date = Kardex.objects.filter(code_kala=kala.code).aggregate(first_date=Min('date'))['first_date']
+        if not first_kardex_date:
+            continue  # اگر کاردکسی وجود نداشت، ادامه دهید
+
+        # تبدیل first_kardex_date به datetime
+        start_day = datetime.combine(first_kardex_date, datetime.min.time())
+        end_day = datetime.now()
+
+        # متغیرها برای نگهداری میانگین موجودی و مجموع موجودی روزانه
+        total_stock = 0
+        days_count = 0
+
+        # حلقه برای هر روز در بازه زمانی از اولین تاریخ تا اکنون
+        for single_date in (start_day + timedelta(n) for n in range((end_day - start_day).days + 1)):
+            # دریافت آخرین کاردکس روز
+            kardex = Kardex.objects.filter(
+                code_kala=kala.code,
+                date=single_date.date()
+            ).order_by('-date').first()
+
+            if kardex:
+                total_stock += kardex.stock
+                days_count += 1
+            else:
+                # استفاده از آخرین موجودی قبلی اگر برای آن روز کاردکس وجود نداشت
+                last_kardex = Kardex.objects.filter(
+                    code_kala=kala.code,
+                    date__lt=single_date.date()
+                ).order_by('-date').first()
+                if last_kardex:
+                    total_stock += last_kardex.stock
+                    days_count += 1
+
+        # محاسبه میانگین موجودی
+        ave_mojodi = total_stock / days_count if days_count > 0 else 0
+
+        # محاسبه نسبت فروش به میانگین موجودی
+        if ave_mojodi == 0:
+            ratio = 0
+        else:
+            ratio = total_sales / ave_mojodi
+
+        # به‌روزرسانی فیلدهای مربوطه در مدل Kala
+        kala.s_m_ratio = ratio
+        kala.last_updated_ratio = current_date
+
+        kala.save()
+        print(kala.last_updated_ratio, current_date)
+    total_time = time.time() - start_time  # محاسبه زمان اجرا
+    # چاپ زمان
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+
+    return redirect('/updatedb')
