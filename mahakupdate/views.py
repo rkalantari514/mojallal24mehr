@@ -1698,6 +1698,10 @@ from .models import Kardex, Mojodi
 # return redirect('/updatedb')
 
 
+from django.utils import timezone
+from datetime import timedelta
+
+
 def UpdateMojodi(request):
     # Kardex.objects.all().update(sync_mojodi=False)
     # return redirect('/updatedb')
@@ -1711,7 +1715,6 @@ def UpdateMojodi(request):
 
     # به روز رسانی sync_mojodi به True
     kardex_to_update.update(sync_mojodi=True)
-    print(f'Updated {kardex_to_update.count()} Kardex records.')
 
     # بارگذاری کادرکس‌ها که sync_mojodi آنها True است
     kardex_list = kardex_to_update.values('warehousecode', 'code_kala').distinct()
@@ -1722,7 +1725,6 @@ def UpdateMojodi(request):
 
     # بارگذاری تمام رکوردهای Kardex که sync_mojodi آنها True است
     all_kardex = kardex_to_update.order_by('date', 'radif')
-    print('Sample Kardex records:', [(k.date, k.code_kala, k.warehousecode, k.count) for k in all_kardex[:5]])
 
     # ایجاد دیکشنری برای تسهیل دسترسی
     kardex_dict = {}
@@ -1755,7 +1757,13 @@ def UpdateMojodi(request):
                 # محاسبه mojodi_roz
             mojodi_roz = 0
             last_stock = 0
-            date_range = [k2.date for k2 in kardex_entries]
+
+            # تعیین تاریخ شروع و پایان
+            first_date = Kardex.objects.filter(code_kala=code_kala).order_by('date').first().date
+            last_date = Kardex.objects.filter(code_kala=code_kala).order_by('date').last().date
+
+            # ایجاد لیست همه تاریخ‌ها بین اولین و آخرین تاریخ
+            date_range = [first_date + timedelta(days=i) for i in range((last_date - first_date).days + 1)]
 
             for single_date in date_range:
                 # پیدا کردن آخرین کاردکس در تاریخ خاص
@@ -1769,15 +1777,11 @@ def UpdateMojodi(request):
         print(f'Processed item: {jj}, warehousecode: {warehousecode}, code_kala: {code_kala}')
         jj += 1
 
-    print('Processed items:', processed_items)
-
-    # بارگذاری رکوردهای موجود در Mojodi
+        # بارگذاری رکوردهای موجود در Mojodi
     mojodi_objects = Mojodi.objects.filter(
         code_kala__in=[code_kala for (code_kala, warehousecode) in processed_items.keys()],
         warehousecode__in=[warehousecode for (code_kala, warehousecode) in processed_items.keys()]
     )
-
-    print('Existing Mojodi records:', mojodi_objects.count())
 
     # به‌روزرسانی رکوردها
     for mojodi in mojodi_objects:
@@ -1836,7 +1840,6 @@ def UpdateMojodi(request):
     print(f'Execution time: {end_time - start_time} seconds')
 
     return redirect('/updatedb')
-
 
 
 
