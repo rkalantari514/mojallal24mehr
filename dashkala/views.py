@@ -463,6 +463,9 @@ def DetailKala(request, *args, **kwargs):
     rank = s_m_ratios.index(kala.s_m_ratio) + 1
     rankper = (len(s_m_ratios) - rank) / (len(s_m_ratios) - 1)  if len(s_m_ratios) > 1 else 1
 
+    m_r_s=kala.total_sales()/mojodi.last().mojodi_roz*100
+
+
     context = {
         'title': f'{kala.name}',
         'kala': kala,
@@ -474,6 +477,7 @@ def DetailKala(request, *args, **kwargs):
         'rosobper':rosobper,
         'rank':rank,
         'rankper':rankper,
+        'm_r_s':m_r_s,
     }
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا

@@ -83,6 +83,9 @@ class Kala(models.Model):
     def __str__(self):
         return self.name
 
+
+
+
     def latest_mojodi(self):
         latest_mojodi = Mojodi.objects.filter(code_kala=self.code).last()
         if latest_mojodi:
