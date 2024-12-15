@@ -18,7 +18,7 @@ class MtablesAdmin(admin.ModelAdmin):
 
 
 class KalaAdmin(admin.ModelAdmin):
-    list_display = ['__str__','name', 'code','category','s_m_ratio','last_updated_ratio']
+    list_display = ['__str__','name', 'code','category','s_m_ratio','total_sale']
     list_filter = ['category']
     list_editable = ['category']
     search_fields = ['name', 'code']

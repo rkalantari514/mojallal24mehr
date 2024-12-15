@@ -99,6 +99,7 @@
                         <div class="float-right text-right">
                             <p class="card-text text-dark">تعداد کل فروش از ابتدای دوره</p>
                             <h4>{{ kala.total_sales }}</h4>
+                            <h4>{{ kala.total_sale }}</h4>
                         </div>
                     </div>
                 </div>
@@ -115,7 +116,7 @@
                         </div>
                         <div class="float-right text-right">
                             <p class="card-text text-dark">نسبت فروش به موجودی از ابتدای دوره </p>
-                            <h4>{{ kala.s_m_ratio|floatformat:2 }}</h4>
+                            <h4>{{ kala.s_m_ratio|floatformat:4 }}</h4>
                         <p class="card-text text-dark">موجودی × روز </p>
                             <h4>{{ mojodi.last.mojodi_roz|floatformat:2 }}</h4>
                         <p class="card-text text-dark">نسبت فروش به موجودی روز</p>

@@ -71,6 +71,7 @@ class Kala(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name='kalas', verbose_name='دسته‌بندی',blank = True,null = True)
     s_m_ratio=models.FloatField(default=0, verbose_name='نسبت فروش به میانگین موجودی')
     last_updated_ratio = models.DateField(blank=True, null=True, verbose_name='آخرین تاریخ به‌روزرسانی')
+    total_sale=models.FloatField(default=0, verbose_name='کل فروش')
     # l_mojodi=models.FloatField(default=0, verbose_name='آخرین موجودی')
     # t_sales=models.FloatField(default=0, verbose_name='کل فروش')
 
