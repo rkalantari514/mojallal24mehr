@@ -70,7 +70,7 @@ class KardexAdmin(admin.ModelAdmin):
     class Meta:
         model = Kardex
 class MojodiAdmin(admin.ModelAdmin):
-    list_display = ['__str__','stock','total_stock','code_kala','kala','storage','warehousecode','averageprice','arzesh']
+    list_display = ['__str__','stock','total_stock','code_kala','kala','storage','warehousecode','averageprice','mojodi_roz']
     list_filter = ['warehousecode']
     # list_editable = ['name','parent','level']
     search_fields = ['code_kala','stock']

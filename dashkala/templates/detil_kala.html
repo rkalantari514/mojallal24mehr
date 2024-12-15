@@ -2,6 +2,21 @@
 {% load humanize %}
 {% load static %}
 {% block content %}
+    <style>
+        .circle-progress .in .text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .circle-progress .in .value {
+            font-size: 20px; /* تنظیم اندازه متن */
+        } </style>
+
+
+
     <div class="content-wrapper">
 
     <div class="page-title">
@@ -118,10 +133,14 @@
                             <span>رسوب کالا در انبار</span>
                             <h4 class="text-danger fw-6 mt-10">{{ rosob }} روز </h4>
                         </div>
-                        <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">
-                   <span class="round-chart mb-0" data-percent={{ rosobper }} data-size="80" data-width="4" data-color="#dc3545">
-                       <span class="percent" style="width: 80px; height: 80px; line-height: 80px;">-</span>
-                   </span>
+                        <div class="col-4">
+                            <div id="circle1" class="circle-progress">
+                                <div class="in">
+                                    <div class="text">
+                                        <h3 class="value">{{ rosob }}</h3>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -131,28 +150,45 @@
                             <span>رتبه نسبت فروش به موجودی</span>
                             <h4 class="text-success fw-6 mt-10">رتبه{{ rank }} در گروه</h4>
                         </div>
-                        <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">
-                   <span class="round-chart mb-0" data-percent={{ rankper }} data-size="80" data-width="4" data-color="#28a745">
-                       <span class="percent" style="width: 80px; height: 80px; line-height: 80px;">---</span>
-{#                       <canvas height="80" width="80"></canvas>#}
-                   </span>
+                        <div class="col-4">
+                            <div id="circle2" class="circle-progress">
+                                <div class="in">
+                                    <div class="text">
+                                        <h3 class="value">{{ rank }}</h3>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+{#                        <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">#}
+{#                   <span class="round-chart mb-0" data-percent={{ rankper }} data-size="80" data-width="4"#}
+{#                         data-color="#28a745">#}
+{#                       <span class="percent" style="width: 80px; height: 80px; line-height: 80px;">---</span>#}
+{#                   </span>#}
+{#                        </div>#}
                     </div>
                 </div>
-                <div class="col-xl-3 col-sm-6">
-                    <div class="row">
-                        <div class="col-md-7 col-sm-7 col-7 align-self-center">
-                            <span>=======</span>
-                            <h4 class="text-info fw-6 mt-10">=======</h4>
-                        </div>
-                        <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">
-                 <span class="round-chart mb-0" data-percent="56" data-size="80" data-width="4" data-color="#17a2b8">
-                     <span class="percent" style="width: 80px; height: 80px; line-height: 80px;">56</span>
-{#                     <canvas height="80" width="80"></canvas>#}
-                 </span>
-                        </div>
-                    </div>
-                </div>
+
+
+{#                <div class="col-xl-3 col-sm-6">#}
+{#                    <div class="row">#}
+{#                        <div class="col-md-7 col-sm-7 col-7 align-self-center">#}
+{#                            <span>=======</span>#}
+{#                            <h4 class="text-info fw-6 mt-10">=======</h4>#}
+{#                        </div>#}
+{##}
+{#                        <div class="col-4">#}
+{#                            <div id="circle1" class="circle-progress">#}
+{#                                <div class="in">#}
+{#                                    <div class="text">#}
+{#                                        <h4 class="value">200</h4>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+
+
                 <div class="col-xl-3 col-sm-6">
                     <div class="row">
                         <div class="col-md-7 col-sm-7 col-7 align-self-center">
@@ -411,6 +447,58 @@
         drawChart('myChart', 'bar', data, options);
     </script>
 
+    <script src="{% static 'js/plugins/jquery-circle-progress/circle-progress.min.js' %}"></script>
+    <script>
+        function getColor(value) {
+            // تغییر رنگ بر اساس مقدار value
+            if (value <= 1/12) {
+                return ["#00FF00", "#00FF00"]; // سبز
+            } else if (value <= 2/12) {
+                return ["#FFFF00", "#FFFF00"]; // زرد
+            } else if (value <= 3/12) {
+                return ["#FFA500", "#FFA500"]; // نارنجی
+            } else {
+                return ["#FF0000", "#FF0000"]; // قرمز
+            }
+        }
+
+        var value = {{ rosobper }}; // محاسبه مقدار value بر اساس تعداد روزهای رسوب
+
+        $('#circle1').circleProgress({
+            value: value,
+            size: 80, // do not delete this
+            fill: {
+                gradient: getColor(value)
+            },
+            animation: {
+                duration: 2000
+            }
+        });
+
+
+        $('#circle2').circleProgress({
+            {#value: 0.25,#}
+            value: {{ rankper }},
+            size: 80, // do not delete this
+            fill: {
+                gradient: ["#EC4433", "#FE9500"]
+            },
+            animation: {
+                duration: 2000
+            }
+        });
+        $('#circle3').circleProgress({
+            {#value: {{ rosobper }},#}
+            value: .0016556291390728,
+            size: 80, // do not delete this
+            fill: {
+                gradient: ["#00CDFF", "#1E74FD"]
+            },
+            animation: {
+                duration: 2000
+            }
+        });
+    </script>
 
 
 

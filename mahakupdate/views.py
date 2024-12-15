@@ -1677,7 +1677,176 @@ import time
 from .models import Kardex, Mojodi
 
 
+# kardex_to_update = Kardex.objects.filter(code_kala__in=false_kardex_list)
+# kalalst1=[]
+# for k1 in kardex_to_update:
+#     kalalst1.append(k1.code_cala)
+# for k3 in kalalst1:
+#     kardex3=Kardex.objects.filter(code_kala=k3).order_by('date', 'radif')
+#     datalist = []
+#     for k2 in kardex3:
+#         datalist.append(k2.date)
+#
+#     md=0
+#     for d in :
+#         md+= Kardex.objects.filter(code_kala=k3,date=d).order_by('date', 'radif').last().stock
+#
+#     Mojodi.objects.filter(code_kala=k3).mojodi_roz=md
+#     Mojodi.objects.filter(code_kala=k3).mojodi_roz.save()
+
+# Kardex.objects.all().update(sync_mojodi=False)
+# return redirect('/updatedb')
+
+
 def UpdateMojodi(request):
+    # Kardex.objects.all().update(sync_mojodi=False)
+    # return redirect('/updatedb')
+    start_time = time.time()
+
+    # دریافت لیست کد کالاهایی که sync_mojodi=False هستند
+    false_kardex_list = list(Kardex.objects.filter(sync_mojodi=False).values_list('code_kala', flat=True))
+
+    # بارگذاری رکوردهای Kardex مورد نظر فقط یک بار
+    kardex_to_update = Kardex.objects.filter(code_kala__in=false_kardex_list)
+
+    # به روز رسانی sync_mojodi به True
+    kardex_to_update.update(sync_mojodi=True)
+    print(f'Updated {kardex_to_update.count()} Kardex records.')
+
+    # بارگذاری کادرکس‌ها که sync_mojodi آنها True است
+    kardex_list = kardex_to_update.values('warehousecode', 'code_kala').distinct()
+    kardex_list = [dict(t) for t in {tuple(d.items()) for d in kardex_list}]
+
+    processed_items = {}
+    jj = 1
+
+    # بارگذاری تمام رکوردهای Kardex که sync_mojodi آنها True است
+    all_kardex = kardex_to_update.order_by('date', 'radif')
+    print('Sample Kardex records:', [(k.date, k.code_kala, k.warehousecode, k.count) for k in all_kardex[:5]])
+
+    # ایجاد دیکشنری برای تسهیل دسترسی
+    kardex_dict = {}
+    for k in all_kardex:
+        key = (k.code_kala, k.warehousecode)
+        if key not in kardex_dict:
+            kardex_dict[key] = []
+        kardex_dict[key].append(k)
+
+        # محاسبه mojodi_roz و به روز رسانی موجودی Mojodi
+    mojodi_updates = {}
+    for k in kardex_list:
+        warehousecode = k['warehousecode']
+        code_kala = k['code_kala']
+        if (code_kala, warehousecode) in kardex_dict:
+            kardex_entries = kardex_dict[(code_kala, warehousecode)]
+            last_kardex_entry = kardex_entries[-1]
+            last_kardex_entry2 = Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif').last()
+
+            if last_kardex_entry2:
+                processed_items[(code_kala, warehousecode)] = {
+                    'storage': last_kardex_entry.storage,
+                    'kala': last_kardex_entry.kala,
+                    'total_stock': last_kardex_entry2.stock,
+                    'averageprice': last_kardex_entry2.averageprice,
+                    'arzesh': last_kardex_entry2.stock * last_kardex_entry2.averageprice,
+                    'stock': last_kardex_entry2.stock,
+                }
+
+                # محاسبه mojodi_roz
+            mojodi_roz = 0
+            last_stock = 0
+            date_range = [k2.date for k2 in kardex_entries]
+
+            for single_date in date_range:
+                # پیدا کردن آخرین کاردکس در تاریخ خاص
+                daily_kardex_entries = [k for k in kardex_entries if k.date == single_date]
+                if daily_kardex_entries:
+                    last_stock = daily_kardex_entries[-1].stock
+                mojodi_roz += last_stock
+
+            mojodi_updates[code_kala] = mojodi_roz
+
+        print(f'Processed item: {jj}, warehousecode: {warehousecode}, code_kala: {code_kala}')
+        jj += 1
+
+    print('Processed items:', processed_items)
+
+    # بارگذاری رکوردهای موجود در Mojodi
+    mojodi_objects = Mojodi.objects.filter(
+        code_kala__in=[code_kala for (code_kala, warehousecode) in processed_items.keys()],
+        warehousecode__in=[warehousecode for (code_kala, warehousecode) in processed_items.keys()]
+    )
+
+    print('Existing Mojodi records:', mojodi_objects.count())
+
+    # به‌روزرسانی رکوردها
+    for mojodi in mojodi_objects:
+        key = (mojodi.code_kala, mojodi.warehousecode)
+        if key in processed_items:
+            data = processed_items[key]
+            mojodi.storage = data['storage']
+            mojodi.kala = data['kala']
+            mojodi.total_stock = data['total_stock']
+            mojodi.averageprice = data['averageprice']
+            mojodi.arzesh = data['arzesh']
+            mojodi.stock = data['stock']
+
+            # به‌روزرسانی mojodi_roz
+            if mojodi.code_kala in mojodi_updates:
+                mojodi.mojodi_roz = mojodi_updates[mojodi.code_kala]
+
+                # انجام bulk_update برای رکوردهای موجود
+    Mojodi.objects.bulk_update(mojodi_objects,
+                               ['storage', 'kala', 'total_stock', 'averageprice', 'arzesh', 'stock', 'mojodi_roz'],
+                               batch_size=1000)
+
+    # اضافه کردن رکوردهای جدید
+    existing_keys = {(mojodi.code_kala, mojodi.warehousecode) for mojodi in mojodi_objects}
+    new_objects = []
+
+    for (code_kala, warehousecode), data in processed_items.items():
+        if (code_kala, warehousecode) not in existing_keys:
+            new_objects.append(Mojodi(
+                code_kala=code_kala,
+                warehousecode=warehousecode,
+                storage=data['storage'],
+                kala=data['kala'],
+                total_stock=data['total_stock'],
+                averageprice=data['averageprice'],
+                arzesh=data['arzesh'],
+                stock=data['stock'],
+                mojodi_roz=mojodi_updates.get(code_kala, 0)  # Adding mojodi_roz for new records
+            ))
+
+            # ذخیره‌سازی رکوردهای جدید به صورت دسته‌ای
+    if new_objects:
+        Mojodi.objects.bulk_create(new_objects, batch_size=1000)
+
+        # حذف ردیف‌های اضافی در Mojodi
+    keys_to_keep = set((k[1], k[0]) for k in Kardex.objects.values_list('warehousecode', 'code_kala'))
+
+    Mojodi.objects.exclude(
+        id__in=Mojodi.objects.filter(code_kala__in=[key[0] for key in keys_to_keep],
+                                     warehousecode__in=[key[1] for key in keys_to_keep]).values_list('id', flat=True)
+    ).delete()
+
+    print('Update completed successfully.')
+
+    end_time = time.time()
+    print(f'Execution time: {end_time - start_time} seconds')
+
+    return redirect('/updatedb')
+
+
+
+
+
+
+
+
+
+
+def UpdateMojodi0925(request):
     start_time = time.time()
 
     # دریافت لیست کد کالاهایی که sync_mojodi=False هستند

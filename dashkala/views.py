@@ -455,13 +455,13 @@ def DetailKala(request, *args, **kwargs):
         rosob = 0
 
     # محاسبه درصد rosob
-    rosobper = min(rosob / 30 * 100, 100)
+    rosobper = rosob / 365
 
     # ایجاد لیست یکتا از s_m_ratio و پیدا کردن رتبه
     s_m_ratios = list(set(k.s_m_ratio for k in related_kalas))
     s_m_ratios.sort(reverse=True)  # مرتب‌سازی نزولی
     rank = s_m_ratios.index(kala.s_m_ratio) + 1
-    rankper = (len(s_m_ratios) - rank) / (len(s_m_ratios) - 1) * 100 if len(s_m_ratios) > 1 else 100
+    rankper = (len(s_m_ratios) - rank) / (len(s_m_ratios) - 1)  if len(s_m_ratios) > 1 else 1
 
     context = {
         'title': f'{kala.name}',

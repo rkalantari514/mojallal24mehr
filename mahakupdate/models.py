@@ -359,8 +359,10 @@ class Mojodi(models.Model):
     kala = models.ForeignKey(Kala, on_delete=models.SET_NULL, null=True, blank=True)
     stock=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی')
     total_stock=models.FloatField(blank=True, null=True, default=0, verbose_name='کل موجودی ')
+    mojodi_roz=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی روز ')
     averageprice=models.FloatField(blank=True, null=True, default=0, verbose_name='قیمت میانگین')
     arzesh = models.FloatField(blank=True, null=True, default=0, verbose_name='ارزش')
+
     class Meta:
         verbose_name = 'موجودی کالا'
         verbose_name_plural = 'موجودی کالاها'
