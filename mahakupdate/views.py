@@ -1763,7 +1763,10 @@ def UpdateMojodi(request):
             last_date = Kardex.objects.filter(code_kala=code_kala).order_by('date').last().date
 
             # ایجاد لیست همه تاریخ‌ها بین اولین و آخرین تاریخ
-            date_range = [first_date + timedelta(days=i) for i in range((last_date - first_date).days + 1)]
+            try:
+                date_range = [first_date + timedelta(days=i) for i in range((last_date - first_date).days + 1)]
+            except:
+                continue
 
             for single_date in date_range:
                 # پیدا کردن آخرین کاردکس در تاریخ خاص
