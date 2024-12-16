@@ -539,6 +539,11 @@ def UpdateKardex(request):
     table.row_count = row_count
     table.column_count = column_count
     table.save()
+    kardex_falt = Kardex.objects.filter(date='2107-09-01').last()
+    if kardex_falt:
+        kardex_falt.date = datetime.strptime('2024-08-31', '%Y-%m-%d').date()
+        kardex_falt.pdate = '1403/06/10'
+        kardex_falt.save()  # ذخیره تغییرات
 
     return redirect('/updatedb')
 
