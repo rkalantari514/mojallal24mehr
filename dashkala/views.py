@@ -420,7 +420,7 @@ def DetailKala(request, *args, **kwargs):
     kardex = Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif')
     mojodi = Mojodi.objects.filter(code_kala=code_kala)
 
-    related_kalas = Kala.objects.filter(category=kala.category).order_by('-s_m_ratio')
+    related_kalas = Kala.objects.filter(category=kala.category).order_by('-total_sale')
 
     rel_kala = []
 
@@ -429,6 +429,7 @@ def DetailKala(request, *args, **kwargs):
             {
                 'code': k.code,
                 'name': k.name,
+                'total_sale': k.total_sale,
                 's_m_ratio': f'{float(k.s_m_ratio):.2f}' if k.s_m_ratio is not None else '0.00',
             }
         )

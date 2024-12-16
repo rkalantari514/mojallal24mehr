@@ -1780,8 +1780,6 @@ def UpdateMojodi(request):
                 if daily_kardex_entries:
                     # last_stock = daily_kardex_entries[-1].stock
                     last_stock = daily_kardex_entries.stock
-
-
                 mojodi_roz += last_stock
                 print(last_stock,mojodi_roz)
                 print('---------------')
