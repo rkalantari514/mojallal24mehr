@@ -1712,6 +1712,7 @@ def UpdateMojodi(request):
 
     # بارگذاری رکوردهای Kardex مورد نظر فقط یک بار
     kardex_to_update = Kardex.objects.filter(code_kala__in=false_kardex_list)
+    # kardex_to_update = Kardex.objects.filter(code_kala=70179)
 
     # به روز رسانی sync_mojodi به True
     kardex_to_update.update(sync_mojodi=True)
@@ -1771,12 +1772,19 @@ def UpdateMojodi(request):
             # ایجاد لیست همه تاریخ‌ها بین اولین و آخرین تاریخ
 
             for single_date in date_range:
+                print(single_date)
                 # پیدا کردن آخرین کاردکس در تاریخ خاص
-                daily_kardex_entries = [k for k in kardex_entries if k.date == single_date]
-                if daily_kardex_entries:
-                    last_stock = daily_kardex_entries[-1].stock
-                mojodi_roz += last_stock
+                # daily_kardex_entries = [k for k in kardex_entries if k.date == single_date]
+                daily_kardex_entries=Kardex.objects.filter(code_kala=code_kala,date=single_date).order_by('radif','date').last()
 
+                if daily_kardex_entries:
+                    # last_stock = daily_kardex_entries[-1].stock
+                    last_stock = daily_kardex_entries.stock
+
+
+                mojodi_roz += last_stock
+                print(last_stock,mojodi_roz)
+                print('---------------')
             mojodi_updates[code_kala] = mojodi_roz
 
         print(f'Processed item: {jj}, warehousecode: {warehousecode}, code_kala: {code_kala}')
