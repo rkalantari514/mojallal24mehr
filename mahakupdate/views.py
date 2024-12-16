@@ -1760,14 +1760,15 @@ def UpdateMojodi(request):
             last_stock = 0
 
             # تعیین تاریخ شروع و پایان
-            first_date = Kardex.objects.filter(code_kala=code_kala).order_by('date').first().date
-            last_date = Kardex.objects.filter(code_kala=code_kala).order_by('date').last().date
 
-            # ایجاد لیست همه تاریخ‌ها بین اولین و آخرین تاریخ
+
             try:
+                first_date = Kardex.objects.filter(code_kala=code_kala).order_by('date').first().date
+                last_date = Kardex.objects.filter(code_kala=code_kala).order_by('date').last().date
                 date_range = [first_date + timedelta(days=i) for i in range((last_date - first_date).days + 1)]
             except:
                 continue
+            # ایجاد لیست همه تاریخ‌ها بین اولین و آخرین تاریخ
 
             for single_date in date_range:
                 # پیدا کردن آخرین کاردکس در تاریخ خاص
