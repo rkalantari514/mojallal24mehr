@@ -417,7 +417,7 @@ def DetailKala(request, *args, **kwargs):
 
     # بازگشت به قالب اصلی
     kala = Kala.objects.filter(code=code_kala).last()
-    kardex = Kardex.objects.filter(code_kala=code_kala).order_by('date', '-radif')
+    kardex = Kardex.objects.filter(code_kala=code_kala).order_by('date', 'id')
     mojodi = Mojodi.objects.filter(code_kala=code_kala)
 
     related_kalas = Kala.objects.filter(category=kala.category).order_by('-s_m_ratio')
