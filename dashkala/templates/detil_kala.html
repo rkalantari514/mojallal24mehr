@@ -3,20 +3,6 @@
 {% load static %}
 {% block content %}
 
- <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.css' rel='stylesheet' />
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.11.3/main.min.js'></script>
-
-    <!-- کتابخانه moment و moment-jalaali -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-jalaali/0.3.1/moment-jalaali.min.js"></script>
-
-    <style>
-        /* برای نمایش تاریخ به زبان فارسی */
-        .fc-daygrid-event {
-            direction: rtl; /* جهت متن راست به چپ */
-        }
-    </style>
-
     <style>
         .circle-progress .in .text {
             position: absolute;
@@ -527,43 +513,6 @@
     </script>
 
 
-<script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
-
-            // ایجاد یک نمونه تقویم
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth', // نوع نمای تقویم
-                events: [
-                    {
-                        title: 'رویداد 1',
-                        start: '2024-12-20' // تاریخ میلادی
-                    },
-                    {
-                        title: 'رویداد 2',
-                        start: '2024-12-25' // تاریخ میلادی
-                    }
-                ],
-                dateDidMount: function(info) {
-                    // تبدیل تاریخ‌ها به شمسی
-                    var jalaliDate = moment(info.date).locale('fa').format('jYYYY/jM/jD');
-                    info.el.innerHTML = jalaliDate; // نمایش تاریخ شمسی در تقویم
-                },
-                // برای نمایش صحیح نام ماه‌ها به زبان فارسی
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,dayGridWeek,dayGridDay'
-                },
-                // تبدیل عنوان ماه‌ها به شمسی
-                monthNames: moment.months(),
-                // نمایش عنوان تقویم به زبان فارسی
-                dayHeaderFormat: { week: { code: 'dddd' } }
-            });
-
-            calendar.render();
-        });
-    </script>
 {% endblock %}
 
 
