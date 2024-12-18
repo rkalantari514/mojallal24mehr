@@ -12,6 +12,10 @@ from django.utils import timezone
 from django.db.models.functions import TruncMonth
 from khayyam import JalaliDate, JalaliDatetime
 from datetime import date
+import jdatetime
+from django.shortcuts import render
+
+
 def fix_persian_characters(value):
     return standardize(value)
 
@@ -355,6 +359,44 @@ def TotalKala(request, *args, **kwargs):
     return render(request, 'total_kala.html', context)
 
 
+def generate_calendar_data(month, year):
+    # مشخص کردن اولین و آخرین روز ماه
+    first_day_of_month = jdatetime.date(year, month, 1)
+    print('first_day_of_month')
+    print(first_day_of_month)
+    # برای بدست آوردن آخرین روز ماه شمسی
+
+    lday=first_day_of_month + jdatetime.timedelta(days=30)
+
+    if lday.month!=month:
+        lday = first_day_of_month + jdatetime.timedelta(days=29)
+        if lday.month != month:
+            lday = first_day_of_month + jdatetime.timedelta(days=28)
+
+    print('lday')
+    print(lday)
+
+
+
+    last_day_of_month = jdatetime.date(year, month, (first_day_of_month + jdatetime.timedelta(days=32)).day).replace(
+        day=1) - jdatetime.timedelta(days=1)
+
+    last_day_of_month=lday
+
+    print('last_day_of_month')
+    print(last_day_of_month)
+
+    # تولید لیستی از روزهای ماه
+    days_in_month = [
+        {
+            'jyear': (first_day_of_month + jdatetime.timedelta(days=i)).year,
+            'jmonth': (first_day_of_month + jdatetime.timedelta(days=i)).month,
+            'jday': (first_day_of_month + jdatetime.timedelta(days=i)).day
+        }
+        for i in range((last_day_of_month - first_day_of_month).days + 1)
+    ]
+
+    return days_in_month
 
 def DetailKala(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
@@ -430,6 +472,7 @@ def DetailKala(request, *args, **kwargs):
                 'code': k.code,
                 'name': k.name,
                 'total_sale': k.total_sale,
+                'mojodi_roz':k.total_sale/k.s_m_ratio if (k.s_m_ratio is not None and k.s_m_ratio != 0) else '0.00',
                 's_m_ratio': f'{float(k.s_m_ratio):.2f}' if k.s_m_ratio is not None else '0.00',
             }
         )
@@ -469,6 +512,21 @@ def DetailKala(request, *args, **kwargs):
     except:
         m_r_s = 0
 
+    current_year = 1403
+    current_month = 9
+
+    days_in_month = generate_calendar_data(current_month, current_year)
+
+    for day in days_in_month:
+        print(day)
+
+
+
+
+
+
+
+
     context = {
         'title': f'{kala.name}',
         'kala': kala,
@@ -481,6 +539,9 @@ def DetailKala(request, *args, **kwargs):
         'rank':rank,
         'rankper':rankper,
         'm_r_s':m_r_s,
+
+        'days_in_month': days_in_month,
+        # 'first_weekday': first_weekday,
     }
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
