@@ -359,44 +359,52 @@ def TotalKala(request, *args, **kwargs):
     return render(request, 'total_kala.html', context)
 
 
+import jdatetime
+from datetime import datetime
+
+
 def generate_calendar_data(month, year):
-    # مشخص کردن اولین و آخرین روز ماه
+    # مشخص کردن اولین روز ماه
     first_day_of_month = jdatetime.date(year, month, 1)
-    print('first_day_of_month')
-    print(first_day_of_month)
+
+    # روز شروع ماه (شنبه = 0, یکشنبه = 1, ...)
+    start_day_of_week = first_day_of_month.weekday()
+
     # برای بدست آوردن آخرین روز ماه شمسی
+    lday = first_day_of_month + jdatetime.timedelta(days=30)
 
-    lday=first_day_of_month + jdatetime.timedelta(days=30)
-
-    if lday.month!=month:
+    if lday.month != month:
         lday = first_day_of_month + jdatetime.timedelta(days=29)
         if lday.month != month:
             lday = first_day_of_month + jdatetime.timedelta(days=28)
 
-    print('lday')
-    print(lday)
+    last_day_of_month = lday
 
+    # تولید ماتریس روزهای ماه
+    days_in_month = []
 
-
-    last_day_of_month = jdatetime.date(year, month, (first_day_of_month + jdatetime.timedelta(days=32)).day).replace(
-        day=1) - jdatetime.timedelta(days=1)
-
-    last_day_of_month=lday
-
-    print('last_day_of_month')
-    print(last_day_of_month)
-
-    # تولید لیستی از روزهای ماه
-    days_in_month = [
-        {
-            'jyear': (first_day_of_month + jdatetime.timedelta(days=i)).year,
-            'jmonth': (first_day_of_month + jdatetime.timedelta(days=i)).month,
-            'jday': (first_day_of_month + jdatetime.timedelta(days=i)).day
+    week = [None] * start_day_of_week  # اضافه کردن روزهای خالی
+    for i in range((last_day_of_month - first_day_of_month).days + 1):
+        current_day = first_day_of_month + jdatetime.timedelta(days=i)
+        day_info = {
+            'jyear': current_day.year,
+            'jmonth': current_day.month,
+            'jday': current_day.day,
+            'sales': 0  # تعداد فروش فرضی
         }
-        for i in range((last_day_of_month - first_day_of_month).days + 1)
-    ]
+        week.append(day_info)
+        if len(week) == 7 or current_day == last_day_of_month:
+            days_in_month.append(week)
+            week = []
+
+    # اضافه کردن هفته‌ای که کمتر از 7 روز است
+    if len(week) > 0:
+        days_in_month.append(week + [None] * (7 - len(week)))
 
     return days_in_month
+
+
+
 
 def DetailKala(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
@@ -513,10 +521,11 @@ def DetailKala(request, *args, **kwargs):
         m_r_s = 0
 
     current_year = 1403
-    current_month = 9
+    current_month = 10
+    months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+    month_name = months[current_month - 1]
 
     days_in_month = generate_calendar_data(current_month, current_year)
-
     for day in days_in_month:
         print(day)
 
@@ -541,7 +550,8 @@ def DetailKala(request, *args, **kwargs):
         'm_r_s':m_r_s,
 
         'days_in_month': days_in_month,
-        # 'first_weekday': first_weekday,
+        'month_name': month_name,
+        'year': current_year,
     }
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
