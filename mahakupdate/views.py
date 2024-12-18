@@ -448,6 +448,8 @@ def UpdateKardex(request):
                                         'averageprice', 'sync_mojodi'])
             Kardex.objects.bulk_create(new_records)
             print(f"{len(updates) + len(new_records)} رکورد به‌روز رسانی یا ایجاد شد.")
+            send_to_admin(f"{len(updates)} به روز رسانی کاردکس")
+            send_to_admin(f"{len(new_records)}کاردکس جدید")
 
     t2 = time.time()
     print('آپدیت انجام شد')
@@ -464,6 +466,7 @@ def UpdateKardex(request):
             radif__in=[key[3] for key in keys_to_delete]
         ).delete()
         print(f"{len(keys_to_delete)} رکورد اضافی حذف شد.")
+        send_to_admin(f"{len(keys_to_delete)}کاردکس حذف")
 
     # اجرای حلقه جایگزین سیگنال‌ها
     kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala', 'storage').all())
