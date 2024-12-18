@@ -1767,27 +1767,30 @@ def UpdateMojodi(request):
 
             # تعیین تاریخ شروع و پایان
 
+            from datetime import timedelta
 
             try:
-                first_date = Kardex.objects.filter(code_kala=code_kala).order_by('date').first().date
-                last_date = Kardex.objects.filter(code_kala=code_kala).order_by('date').last().date
+                kardex_entries = Kardex.objects.filter(code_kala=code_kala).order_by('date')
+                first_date = kardex_entries.first().date
+                last_date = kardex_entries.last().date
                 date_range = [first_date + timedelta(days=i) for i in range((last_date - first_date).days + 1)]
-            except:
+            except Exception as e:
+                print(f"Error: {e}")
                 continue
-            # ایجاد لیست همه تاریخ‌ها بین اولین و آخرین تاریخ
+
+            mojodi_roz = 0
+            # ایجاد دیکشنری برای ذخیره ورودی‌های کاردکس بر اساس تاریخ
+            daily_kardex_dict = {entry.date: entry for entry in kardex_entries}
 
             for single_date in date_range:
-                print(single_date)
-                # پیدا کردن آخرین کاردکس در تاریخ خاص
-                # daily_kardex_entries = [k for k in kardex_entries if k.date == single_date]
-                daily_kardex_entries=Kardex.objects.filter(code_kala=code_kala,date=single_date).order_by('radif','date').last()
+                daily_kardex_entry = daily_kardex_dict.get(single_date)
 
-                if daily_kardex_entries:
-                    # last_stock = daily_kardex_entries[-1].stock
-                    last_stock = daily_kardex_entries.stock
-                mojodi_roz += last_stock
-                print(last_stock,mojodi_roz)
-                print('---------------')
+                if daily_kardex_entry:
+                    last_stock = daily_kardex_entry.stock
+                    mojodi_roz += last_stock
+                    print(last_stock, mojodi_roz)
+                    print('---------------')
+
             mojodi_updates[code_kala] = mojodi_roz
 
         print(f'Processed item: {jj}, warehousecode: {warehousecode}, code_kala: {code_kala}')
