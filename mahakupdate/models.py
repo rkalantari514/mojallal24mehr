@@ -71,6 +71,7 @@ class Kala(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name='kalas', verbose_name='دسته‌بندی',blank = True,null = True)
     s_m_ratio=models.FloatField(default=0, verbose_name='نسبت فروش به میانگین موجودی')
     last_updated_ratio = models.DateField(blank=True, null=True, verbose_name='آخرین تاریخ به‌روزرسانی')
+    total_sale=models.FloatField(default=0, verbose_name='کل فروش')
     # l_mojodi=models.FloatField(default=0, verbose_name='آخرین موجودی')
     # t_sales=models.FloatField(default=0, verbose_name='کل فروش')
 
@@ -82,6 +83,9 @@ class Kala(models.Model):
 
     def __str__(self):
         return self.name
+
+
+
 
     def latest_mojodi(self):
         latest_mojodi = Mojodi.objects.filter(code_kala=self.code).last()
@@ -359,8 +363,10 @@ class Mojodi(models.Model):
     kala = models.ForeignKey(Kala, on_delete=models.SET_NULL, null=True, blank=True)
     stock=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی')
     total_stock=models.FloatField(blank=True, null=True, default=0, verbose_name='کل موجودی ')
+    mojodi_roz=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی روز ')
     averageprice=models.FloatField(blank=True, null=True, default=0, verbose_name='قیمت میانگین')
     arzesh = models.FloatField(blank=True, null=True, default=0, verbose_name='ارزش')
+
     class Meta:
         verbose_name = 'موجودی کالا'
         verbose_name_plural = 'موجودی کالاها'

@@ -12,6 +12,10 @@ from django.utils import timezone
 from django.db.models.functions import TruncMonth
 from khayyam import JalaliDate, JalaliDatetime
 from datetime import date
+import jdatetime
+from django.shortcuts import render
+
+
 def fix_persian_characters(value):
     return standardize(value)
 
@@ -355,6 +359,52 @@ def TotalKala(request, *args, **kwargs):
     return render(request, 'total_kala.html', context)
 
 
+import jdatetime
+from datetime import datetime
+
+
+def generate_calendar_data(month, year):
+    # مشخص کردن اولین روز ماه
+    first_day_of_month = jdatetime.date(year, month, 1)
+
+    # روز شروع ماه (شنبه = 0, یکشنبه = 1, ...)
+    start_day_of_week = first_day_of_month.weekday()
+
+    # برای بدست آوردن آخرین روز ماه شمسی
+    lday = first_day_of_month + jdatetime.timedelta(days=30)
+
+    if lday.month != month:
+        lday = first_day_of_month + jdatetime.timedelta(days=29)
+        if lday.month != month:
+            lday = first_day_of_month + jdatetime.timedelta(days=28)
+
+    last_day_of_month = lday
+
+    # تولید ماتریس روزهای ماه
+    days_in_month = []
+
+    week = [None] * start_day_of_week  # اضافه کردن روزهای خالی
+    for i in range((last_day_of_month - first_day_of_month).days + 1):
+        current_day = first_day_of_month + jdatetime.timedelta(days=i)
+        day_info = {
+            'jyear': current_day.year,
+            'jmonth': current_day.month,
+            'jday': current_day.day,
+            'sales': 0  # تعداد فروش فرضی
+        }
+        week.append(day_info)
+        if len(week) == 7 or current_day == last_day_of_month:
+            days_in_month.append(week)
+            week = []
+
+    # اضافه کردن هفته‌ای که کمتر از 7 روز است
+    if len(week) > 0:
+        days_in_month.append(week + [None] * (7 - len(week)))
+
+    return days_in_month
+
+
+
 
 def DetailKala(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
@@ -420,7 +470,7 @@ def DetailKala(request, *args, **kwargs):
     kardex = Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif')
     mojodi = Mojodi.objects.filter(code_kala=code_kala)
 
-    related_kalas = Kala.objects.filter(category=kala.category).order_by('-s_m_ratio')
+    related_kalas = Kala.objects.filter(category=kala.category).order_by('-total_sale')
 
     rel_kala = []
 
@@ -429,6 +479,8 @@ def DetailKala(request, *args, **kwargs):
             {
                 'code': k.code,
                 'name': k.name,
+                'total_sale': k.total_sale,
+                'mojodi_roz':k.total_sale/k.s_m_ratio if (k.s_m_ratio is not None and k.s_m_ratio != 0) else '0.00',
                 's_m_ratio': f'{float(k.s_m_ratio):.2f}' if k.s_m_ratio is not None else '0.00',
             }
         )
@@ -455,13 +507,34 @@ def DetailKala(request, *args, **kwargs):
         rosob = 0
 
     # محاسبه درصد rosob
-    rosobper = min(rosob / 30 * 100, 100)
+    rosobper = rosob / 365
 
     # ایجاد لیست یکتا از s_m_ratio و پیدا کردن رتبه
     s_m_ratios = list(set(k.s_m_ratio for k in related_kalas))
     s_m_ratios.sort(reverse=True)  # مرتب‌سازی نزولی
     rank = s_m_ratios.index(kala.s_m_ratio) + 1
-    rankper = (len(s_m_ratios) - rank) / (len(s_m_ratios) - 1) * 100 if len(s_m_ratios) > 1 else 100
+    rankper = (len(s_m_ratios) - rank) / (len(s_m_ratios) - 1)  if len(s_m_ratios) > 1 else 1
+
+    try:
+        m_r_s = kala.total_sales() / mojodi.last().mojodi_roz * 100
+    except:
+        m_r_s = 0
+
+    current_year = 1403
+    current_month = 10
+    months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+    month_name = months[current_month - 1]
+
+    days_in_month = generate_calendar_data(current_month, current_year)
+    for day in days_in_month:
+        print(day)
+
+
+
+
+
+
+
 
     context = {
         'title': f'{kala.name}',
@@ -474,6 +547,11 @@ def DetailKala(request, *args, **kwargs):
         'rosobper':rosobper,
         'rank':rank,
         'rankper':rankper,
+        'm_r_s':m_r_s,
+
+        'days_in_month': days_in_month,
+        'month_name': month_name,
+        'year': current_year,
     }
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا

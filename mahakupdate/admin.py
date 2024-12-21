@@ -18,7 +18,7 @@ class MtablesAdmin(admin.ModelAdmin):
 
 
 class KalaAdmin(admin.ModelAdmin):
-    list_display = ['__str__','name', 'code','category','s_m_ratio','last_updated_ratio']
+    list_display = ['__str__','name', 'code','category','s_m_ratio','total_sale']
     list_filter = ['category']
     list_editable = ['category']
     search_fields = ['name', 'code']
@@ -70,7 +70,7 @@ class KardexAdmin(admin.ModelAdmin):
     class Meta:
         model = Kardex
 class MojodiAdmin(admin.ModelAdmin):
-    list_display = ['__str__','stock','total_stock','code_kala','kala','storage','warehousecode','averageprice','arzesh']
+    list_display = ['__str__','stock','total_stock','code_kala','kala','storage','warehousecode','averageprice','mojodi_roz']
     list_filter = ['warehousecode']
     # list_editable = ['name','parent','level']
     search_fields = ['code_kala','stock']

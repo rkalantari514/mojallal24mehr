@@ -2,350 +2,423 @@
 {% load humanize %}
 {% load static %}
 {% block content %}
+
+    <style>
+        .circle-progress .in .text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .circle-progress .in .value {
+            font-size: 20px; /* تنظیم اندازه متن */
+        }
+
+
+    </style>
+    <style>
+        .calendar-table {
+            table-layout: fixed;
+        }
+
+        .calendar-table th, .calendar-table td {
+            width: 14.28%; /* مساوی تقسیم کردن ستون‌ها */
+            height: 100px; /* تنظیم ارتفاع سلول‌ها */
+            text-align: center;
+            vertical-align: top;
+            border: 1px solid #ddd;
+        }
+
+        .calendar-table .fc-day-top {
+            background-color: #f9f9f9; /* رنگ پس‌زمینه کم‌رنگ */
+        }
+
+        .calendar-table .fc-day-number {
+            font-weight: bold;
+        }
+
+        .calendar-table .fc-sales-number {
+            color: #888;
+        }
+
+    </style>
+
     <div class="content-wrapper">
 
-    <div class="page-title">
-        <div class="row">
-            <div class="col-sm-6">
-                <h3 class="mb-0 text-facebook"> {{ kala.name }}</h3>
-                <h6>
-                    <br>
-                    <button type="button" class="btn btn-success">
-                        {{ kala.category.parent.parent.name }}
-                        {#                                        <span class="badge badge-light">4</span>#}
-                    </button>
-                    <button type="button" class="btn btn-info">
-                        {{ kala.category.parent.name }}
-                        {#                                        <span class="badge badge-light">6</span>#}
-                    </button>
-                    <button type="button" class="btn btn-primary">
-                        {{ kala.category.name }}
-                        {#                                        <span class="badge badge-light">4</span>#}
-                    </button>
-
-                </h6>
-
-            </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
-                    <li class="breadcrumb-item"><a href="/" class="default-color">خانه</a></li>
-                    <li class="breadcrumb-item active">{{ kala.name }}</li>
-
-                </ol>
-            </div>
-        </div>
-    </div>
-
-    <!-- ردیف اول خلاصه ها -->
-    <div class="row">
-        <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-            <div class="card card-statistics h-100">
-                <div class="card-body">
-                    <div class="clearfix">
-                        <div class="float-left icon-box bg-danger rounded-circle">
-                  <span class="text-white">
-                    <i class="fa fa-bar-chart-o highlight-icon" aria-hidden="true"></i>
-                  </span>
-                        </div>
-                        <div class="float-right text-right">
-                            <p class="card-text text-dark">کل موجودی</p>
-                            <h4>{{ mojodi.last.total_stock }}</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-            <div class="card card-statistics h-100">
-                <div class="card-body">
-                    <div class="clearfix">
-                        <div class="float-left icon-box bg-primary rounded-circle">
-                  <span class="text-white">
-                    <i class="fa fa-dollar highlight-icon" aria-hidden="true"></i>
-                  </span>
-                        </div>
-                        <div class="float-right text-right">
-                            <p class="card-text text-dark">ارزش موجودی</p>
-                            <h4>{{ kala.total_arzesh|intword }} ریال</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-            <div class="card card-statistics h-100">
-                <div class="card-body">
-                    <div class="clearfix">
-                        <div class="float-left icon-box bg-warning rounded-circle">
-                  <span class="text-white">
-                    <i class="fa fa-shopping-cart highlight-icon" aria-hidden="true"></i>
-                  </span>
-                        </div>
-                        <div class="float-right text-right">
-                            <p class="card-text text-dark">تعداد کل فروش از ابتدای دوره</p>
-                            <h4>{{ kala.total_sales }}</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-            <div class="card card-statistics h-100">
-                <div class="card-body">
-                    <div class="clearfix">
-                        <div class="float-left icon-box bg-info rounded-circle">
-                  <span class="text-white">
-                    <i class="fa fa-calendar-check-o highlight-icon" aria-hidden="true"></i>
-                  </span>
-                        </div>
-                        <div class="float-right text-right">
-                            <p class="card-text text-dark">نسبت فروش به موجودی از ابتدای دوره </p>
-                            <h4>{{ kala.s_m_ratio|floatformat:2 }}</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- ردیف رتبه ها -->
-    <div class="card card-statistics">
-        <div class="card-body bg-white">
-            <h5 class="card-title">رکورد ها و جایگاه کالا </h5>
+        <div class="page-title">
             <div class="row">
-                <div class="col-xl-3 col-sm-6">
-                    <div class="row">
-                        <div class="col-md-7 col-sm-7 col-7 align-self-center">
-                            <span>رسوب کالا در انبار</span>
-                            <h4 class="text-danger fw-6 mt-10">{{ rosob }} روز </h4>
-                        </div>
-                        <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">
-                   <span class="round-chart mb-0" data-percent={{ rosobper }} data-size="80" data-width="4" data-color="#dc3545">
-                       <span class="percent" style="width: 80px; height: 80px; line-height: 80px;">-</span>
-                   </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-sm-6">
-                    <div class="row">
-                        <div class="col-md-7 col-sm-7 col-7 align-self-center">
-                            <span>رتبه نسبت فروش به موجودی</span>
-                            <h4 class="text-success fw-6 mt-10">رتبه{{ rank }} در گروه</h4>
-                        </div>
-                        <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">
-                   <span class="round-chart mb-0" data-percent={{ rankper }} data-size="80" data-width="4" data-color="#28a745">
-                       <span class="percent" style="width: 80px; height: 80px; line-height: 80px;">---</span>
-{#                       <canvas height="80" width="80"></canvas>#}
-                   </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-sm-6">
-                    <div class="row">
-                        <div class="col-md-7 col-sm-7 col-7 align-self-center">
-                            <span>=======</span>
-                            <h4 class="text-info fw-6 mt-10">=======</h4>
-                        </div>
-                        <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">
-                 <span class="round-chart mb-0" data-percent="56" data-size="80" data-width="4" data-color="#17a2b8">
-                     <span class="percent" style="width: 80px; height: 80px; line-height: 80px;">56</span>
-{#                     <canvas height="80" width="80"></canvas>#}
-                 </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-sm-6">
-                    <div class="row">
-                        <div class="col-md-7 col-sm-7 col-7 align-self-center">
-                            <span>++++++++</span>
-                            <h4 class="text-warning fw-6 mt-10">++++++</h4>
-                        </div>
-                        <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">
-                 <span class="round-chart mb-0" data-percent="80" data-size="80" data-width="4" data-color="#ffc107">
-                     <span class="percent" style="width: 80px; height: 80px; line-height: 80px;">80</span>
-{#                     <canvas height="80" width="80"></canvas>#}
-                 </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <br>
-    <!-- ردیف کلیات و نمودار فروش -->
-    <div class="row">
-        <div class="col-md-5 mb-30">
-            <div class="col-xl-12 mb-30">
-                <div class="card card-statistics h-100">
-                    <div class="card-body">
-                        <div class="d-block d-md-flex justify-content-between">
-                            <div class="d-block">
-                                <h4 class="card-title text-facebook pb-0 border-0 text-center">{{ kala.name }}</h4>
-                                <h6 class="card-title pb-0 border-0">
-                                    <button type="button" class="btn btn-success">
-                                        {{ kala.category.parent.parent.name }}
-                                        {#                                        <span class="badge badge-light">4</span>#}
-                                    </button>
-                                    <button type="button" class="btn btn-info">
-                                        {{ kala.category.parent.name }}
-                                        {#                                        <span class="badge badge-light">6</span>#}
-                                    </button>
-                                    <button type="button" class="btn btn-primary">
-                                        {{ kala.category.name }}
-                                        {#                                        <span class="badge badge-light">4</span>#}
-                                    </button>
-
-                                </h6>
-                                <h6 class="card-title pb-0 border-0">موجودی فعلی: {{ mojodi.last.total_stock }}</h6>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <div class="col-md-7 mb-30">
-            <div class="card card-statistics h-100">
-                <div class="card-body">
-                    <h5 class="card-title pb-0 border-0 ">میزان فروش ماهانه</h5>
-                    <canvas id="myChart"></canvas>
-
-                </div>
-            </div>
-
-        </div>
-
-
-    </div>
-
-    <div class="row">
-        <div class="col-md-5 mb-30">
-            <div class="col-xl-12 mb-30">
-                <div class="card card-statistics h-100">
-                    <div class="card-body">
-                        <div class="table-responsive mt-15 ">
-                            <h6 class="card-title pb-0 border-0">موجودی انبارها</h6>
-                            <table class="table center-aligned-table mb-0">
-                                <thead>
-                                <tr class="text-dark">
-                                    <th>نام انبار</th>
-                                    <th>موجودی</th>
-                                    <th>قیمت میانگین</th>
-                                    <th>ارزش</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for m in mojodi %}
-                                    <tr class="text-dark">
-                                    <td>{{ m.storage.name }}</td>
-                                    <td>{{ m.stock }}</td>
-                                    <td>{{ m.averageprice|intword }}</td>
-                                    <td>{{ m.arzesh|intword }}</td>
-
-                                {% endfor %}
-
-                                </tr>
-
-
-                                </tbody>
-                            </table>
-
-
-                        </div>
-                        <div class="table-responsive mt-15 ">
-                            <h6 class="card-title pb-0 border-0">گردش انبارها</h6>
-                            <table class="table center-aligned-table mb-0">
-                                <thead>
-                                <tr class="text-dark">
-                                    <th>تاریخ</th>
-                                    <th>نام انبار</th>
-                                    <th>شخص</th>
-                                    {#                                    <th></th>#}
-                                    <th></th>
-                                    <th>نوع گردش</th>
-                                    <th>تغییرات</th>
-                                    <th>موجودی</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for k in kardex %}
-                                    <tr class="text-dark">
-                                    <td>{{ k.pdate }}</td>
-                                    <td>{{ k.storage.name }}</td>
-                                    <td>{{ k.lname }}</td>
-                                    <td><i class="{{ k.gardesh_type.2 }} fa-lg"></td>
-                                    <td class="{{ k.gardesh_type.1 }}">{{ k.gardesh_type.0 }}</td>
-                                    {% if k.count < 0 %}
-                                        <h6>
-                                            <td class="text-success" style="direction:ltr">
-                                                <i class="mb-10 text-success float-right fa fa-arrow-down"> </i>{{ k.count }}
-                                            </td>
-                                        </h6>
-                                    {% else %}
-                                        <h6>
-                                            <td class="text-primary" style="direction:ltr">
-                                                <i class="mb-10 text-primary float-right fa fa-arrow-up"> </i>{{ k.count }}
-                                            </td>
-                                        </h6>
-                                    {% endif %}
-                                    <td>{{ k.stock }}</td>
-
-                                {% endfor %}
-
-                                </tr>
-
-
-                                </tbody>
-                            </table>
-                        </div>
+                <div class="col-sm-6">
+                    <h3 class="mb-0 text-facebook"> {{ kala.name }}</h3>
+                    <h6>
                         <br>
-                        <div class="table-responsive mt-15 ">
-                            <h6 class="card-title pb-0 border-0">وضعیت هم گروهی ها</h6>
-                            <table class="table center-aligned-table mb-0">
-                                <thead>
+                        <button type="button" class="btn btn-success">
+                            {{ kala.category.parent.parent.name }}
+                        </button>
+                        <button type="button" class="btn btn-info">
+                            {{ kala.category.parent.name }}
+                        </button>
+                        <button type="button" class="btn btn-primary">
+                            {{ kala.category.name }}
+                        </button>
 
-                                <tr class="text-dark">
-                                    <th>کد کالا</th>
-                                    <th>نام کالا</th>
-                                    {#                                    <th>موجودی</th>#}
-                                    {#                                    <th>کل فروش از ابتدای دوره</th>#}
-                                    <th>نسبت فروش به میانگین موجودی</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for k in rel_kala %}
-                                    <tr class="text-dark clickable-row"
-                                        onclick="window.open('/dash/kala/detail/{{ k.code }}', '_blank')">
-                                        <td>{{ k.code }}</td>
-                                        <td>{{ k.name }}</td>
-                                        {#                                        <td>{{ k.latest_mojodi }}</td>#}
-                                        {#                                        <td>{{ k.total_sales }}</td>#}
-                                        <td>{{ k.s_m_ratio }}</td>
-                                        {#                                                                            <td>{{ k.0 }}</td>#}
-                                        {#                                                                                <td>{{ k.1 }}</td>#}
-                                        {#                                                                                <td>{{ k.2 }}</td>#}
-                                        {#                                                                                <td>{{ k.3|floatformat:2 }}</td>#}
-                                        {#                                                                                <td>{{ k.4|floatformat:2 }}</td>#}
-                                    </tr>
-                                {% endfor %}
+                    </h6>
 
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
+                        <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
+                        <li class="breadcrumb-item active">{{ kala.name }}</li>
 
-                                </tbody>
-                            </table>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- ردیف اول خلاصه ها -->
+        <div class="row">
+            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="clearfix">
+                            <div class="float-left icon-box bg-danger rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-bar-chart-o highlight-icon" aria-hidden="true"></i>
+    </span>
+                            </div>
+                            <div class="float-right text-right">
+                                <p class="card-text text-dark"> کل موجودی</p>
+                                <h4>{{ mojodi.last.total_stock }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="clearfix">
+                            <div class="float-left icon-box bg-primary rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-dollar highlight-icon" aria-hidden="true"></i>
+    </span>
+                            </div>
+                            <div class="float-right text-right">
+                                <p class="card-text text-dark"> ارزش موجودی</p>
+                                <h4>{{ kala.total_arzesh|intword }} ریال</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="clearfix">
+                            <div class="float-left icon-box bg-warning rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-shopping-cart highlight-icon" aria-hidden="true"></i>
+    </span>
+                            </div>
+                            <div class="float-right text-right">
+                                <p class="card-text text-dark"> تعداد کل فروش از ابتدای دوره</p>
+                                <h4>{{ kala.total_sales }}</h4>
+                                <h4>{{ kala.total_sale }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="clearfix">
+                            <div class="float-left icon-box bg-info rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-calendar-check-o highlight-icon" aria-hidden="true"></i>
+    </span>
+                            </div>
+                            <div class="float-right text-right">
+                                <p class="card-text text-dark"> نسبت فروش به موجودی از ابتدای دوره </p>
+                                <h4>{{ kala.s_m_ratio|floatformat:4 }}</h4>
+                                <p class="card-text text-dark"> موجودی × روز </p>
+                                <h4>{{ mojodi.last.mojodi_roz|floatformat:2 }}</h4>
+                                <p class="card-text text-dark"> نسبت فروش به موجودی روز</p>
+                                <h4>{{ m_r_s|floatformat:2 }}</h4>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-7 mb-30">
-            <div class="card card-statistics h-100">
-                <div class="card-body">
-                    <h5 class="card-title pb-0 border-0 ">میزان ماهانه</h5>
+        <!-- ردیف رتبه ها -->
+        <div class="card card-statistics">
+            <div class="card-body bg-white">
+                <h5 class="card-title"> رکورد ها و جایگاه کالا </h5>
+                <div class="row">
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="row">
+                            <div class="col-md-7 col-sm-7 col-7 align-self-center">
+                                <span> رسوب کالا در انبار</span>
+                                <h4 class="text-danger fw-6 mt-10">{{ rosob }} روز </h4>
+                            </div>
+                            <div class="col-4">
+                                <div id="circle1" class="circle-progress">
+                                    <div class="in">
+                                        <div class="text">
+                                            <h3 class="value">{{ rosob }}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="row">
+                            <div class="col-md-7 col-sm-7 col-7 align-self-center">
+                                <span> رتبه نسبت فروش به موجودی</span>
+                                <h4 class="text-success fw-6 mt-10"> رتبه{{ rank }} در گروه</h4>
+                            </div>
+                            <div class="col-4">
+                                <div id="circle2" class="circle-progress">
+                                    <div class="in">
+                                        <div class="text">
+                                            <h3 class="value">{{ rank }}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {#                        <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">#}{#                   <span class="round-chart mb-0" data-percent={{ rankper }} data-size="80" data-width="4"#}{#                         data-color="#28a745">#}{#                       <span class="percent" style="width: 80px; height: 80px; line-height: 80px;">---</span>#}{#                   </span>#}{#                        </div>#}
+                        </div>
+
+                    </div>
+                    {#                <div class="col-xl-3 col-sm-6">#}{#                    <div class="row">#}{#                        <div class="col-md-7 col-sm-7 col-7 align-self-center">#}{#                            <span>=======</span>#}{#                            <h4 class="text-info fw-6 mt-10">=======</h4>#}{#                        </div>#}{##}{#                        <div class="col-4">#}{#                            <div id="circle1" class="circle-progress">#}{#                                <div class="in">#}{#                                    <div class="text">#}{#                                        <h4 class="value">200</h4>#}{#                                    </div>#}{#                                </div>#}{#                            </div>#}{#                        </div>#}{#                    </div>#}{#                </div>#}
+
+
+                    <div class="col-xl-3 col-sm-6">
+                        <div class="row">
+                            <div class="col-md-7 col-sm-7 col-7 align-self-center">
+                                <span> + + + + + + + +</span>
+                                <h4 class="text-warning fw-6 mt-10"> + + + + + +</h4>
+                            </div>
+                            <div class="col-md-5 col-sm-5 col-5 align-self-center text-right">
+    <span class="round-chart mb-0" data-percent="80" data-size="80" data-width="4" data-color="#ffc107">
+    <span class="percent" style="width: 80px; height: 80px; line-height: 80px;">80</span >
+        {#                     <canvas height="80" width="80"></canvas>#}
+    </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <!-- ردیف کلیات و نمودار فروش -->
+        <div class="row">
+            <div class="col-md-5 mb-30">
+                <div class="col-xl-12 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="d-block d-md-flex justify-content-between">
+                                <div class="d-block">
+                                    <h4 class="card-title text-facebook pb-0 border-0 text-center">{{ kala.name }}</h4>
+                                    <h6 class="card-title pb-0 border-0">
+                                        <button type="button" class="btn btn-success">
+                                            {{ kala.category.parent.parent.name }}
+                                            {#                                        <span class="badge badge-light">4</span>#}
+                                        </button>
+                                        <button type="button" class="btn btn-info"
+                                        >
+                                            {{ kala.category.parent.name }}{#                                        <span class="badge badge-light">6</span>#}
+                                        </button>
+                                        <button type="button" class="btn btn-primary"
+                                        >
+                                            {{ kala.category.name }}{#                                        <span class="badge badge-light">4</span>#}
+                                        </button>
+
+                                    </h6>
+                                    <h6 class="card-title pb-0 border-0"> موجودی
+                                        فعلی: {{ mojodi.last.total_stock }}</h6>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
+
+            <div class="col-md-7 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <h5 class="card-title pb-0 border-0 "> میزان فروش ماهانه</h5>
+                        <canvas id="myChart"></canvas>
+
+                    </div>
+                </div>
+
+            </div>
+
+
         </div>
+        <!-- ردیف موجودی انبار و تقویم -->
+        <div class="row">
+            <div class="col-md-5 mb-30">
+                <div class="col-xl-12 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="table-responsive mt-15 ">
+                                <h6 class="card-title pb-0 border-0"> موجودی انبارها</h6>
+                                <table class="table center-aligned-table mb-0">
+                                    <thead>
+                                    <tr class="text-dark">
+                                        <th> نام انبار</th>
+                                        <th> موجودی</th>
+                                        <th> قیمت میانگین</th>
+                                        <th> ارزش</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for m in mojodi %}
+                                        <tr class="text-dark">
+                                        <td>{{ m.storage.name }}</td>
+                                        <td>{{ m.stock }}</td>
+                                        <td>{{ m.averageprice|intword }}</td>
+                                        <td>{{ m.arzesh|intword }}</td>
+
+                                    {% endfor %}
+
+                                    </tr>
+
+
+                                    </tbody>
+                                </table>
+
+
+                            </div>
+                            <div class="table-responsive mt-15 ">
+                                <h6 class="card-title pb-0 border-0"> گردش انبارها</h6>
+                                <table class="table center-aligned-table mb-0">
+                                    <thead>
+                                    <tr class="text-dark">
+                                        <th> تاریخ</th>
+                                        <th> نام انبار</th>
+                                        <th> شخص</th>
+                                        <th></th>
+                                        <th> نوع گردش</th>
+                                        <th> تغییرات</th>
+                                        <th> موجودی</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for k in kardex %}
+                                        <tr class="text-dark">
+                                        <td>{{ k.pdate }}</td>
+                                        <td>{{ k.storage.name }}</td>
+                                        <td>{{ k.lname }}</td>
+                                        <td><i class="{{ k.gardesh_type.2 }} fa-lg"></td>
+                                        <td class="{{ k.gardesh_type.1 }}">{{ k.gardesh_type.0 }}</td>
+                                        {% if k.count < 0 %}
+                                            <h6>
+                                                <td class="text-success" style="direction:ltr">
+                                                    <i class=
+                                                               "mb-10 text-success float-right fa fa-arrow-down"
+                                                    > </i>{{ k.count }}
+                                                </td>
+                                            </h6>{% else %}
+                                            <h6>
+                                                <td class="text-primary" style="direction:ltr">
+                                                    <i class=
+                                                               "mb-10 text-primary float-right fa fa-arrow-up">
+                                                    </i>{{ k.count }}
+                                                </td>
+                                            </h6>
+                                        {% endif %}
+                                        <td>{{ k.stock }}</td>
+
+                                    {% endfor %}
+
+                                    </tr>
+
+
+                                    </tbody>
+                                </table>
+                            </div>
+                            <br>
+                            <div class="table-responsive mt-15 ">
+                                <h6 class="card-title pb-0 border-0"> وضعیت هم گروهی ها</h6>
+                                <table class="table center-aligned-table mb-0">
+                                    <thead>
+
+                                    <tr class="text-dark">
+                                        <th> کد کالا</th>
+                                        <th> نام کالا</th>
+                                        <th> کل فروش</th>
+                                        <th> موجودی×روز</th>
+                                        <th> نسبت فروش به میانگین موجودی</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for k in rel_kala %}
+                                        <tr class="text-dark clickable-row"
+                                            onclick="window.open('/dash/kala/detail/{{ k.code }}', '_blank')">
+                                            <td>{{ k.code }}</td>
+                                            <td>{{ k.name }}</td>
+                                            <td>{{ k.total_sale }}</td>
+                                            <td>{{ k.mojodi_roz|floatformat:0 }}</td>
+                                            <td>{{ k.s_m_ratio|floatformat:2 }}</td>
+                                        </tr>
+                                    {% endfor %}
+
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- تقویم -->
+
+            <div class="col-md-7 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <h5 class="card-title pb-0 border-0 "> میزان ماهانه</h5>
+
+                        <div class="text-center mb-4"><h2>{{ month_name }} {{ year }}</h2></div>
+                        <table class="table table-bordered calendar-table">
+                            <thead class="thead-light">
+                            <tr>
+                                <th>شنبه</th>
+                                <th>یکشنبه</th>
+                                <th>دوشنبه</th>
+                                <th>سه‌شنبه</th>
+                                <th>چهارشنبه</th>
+                                <th>پنج‌شنبه</th>
+                                <th>جمعه</th>
+                            </tr>
+                            </thead>
+                            <tbody> {% for week in days_in_month %}
+                                <tr> {% for day in week %}{% if day %}
+                                    <td>
+                                        <div class="fc-day-top"><span class="fc-day-number">{{ day.jday }}</span> <span
+                                                class="fc-sales-number">{{ day.sales }}</span> <!-- نمایش تعداد فروش -->
+                                        </div>
+                                    </td>{% else %}
+                                    <td></td> {% endif %} {% endfor %} </tr> {% endfor %} </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    </div >
 
 
     </div>
@@ -411,7 +484,66 @@
         drawChart('myChart', 'bar', data, options);
     </script>
 
+    <script src="{% static 'js/plugins/jquery-circle-progress/circle-progress.min.js' %}"></script>
+    <script>
+        function getColor(value) {
+            // تغییر رنگ بر اساس مقدار value
+            if (value <= 1 / 12) {
+                return ["#00FF00", "#00FF00"]; // سبز
+            } else if (value <= 2 / 12) {
+                return ["#FFFF00", "#FFFF00"]; // زرد
+            } else if (value <= 3 / 12) {
+                return ["#FFA500", "#FFA500"]; // نارنجی
+            } else {
+                return [
 
+                    "#FF0000", "#FF0000"];    // قرمز
+            }
+        }
+
+        var value = {{ rosobper }}; // محاسبه مقدار value بر اساس تعداد روزهای رسوب
+
+        $('#circle1').circleProgress({
+            value: value,
+            size: 80,   // do not delete this
+        fill: {
+            gradient: getColor(value)
+        }
+        ,
+        animation: {
+            duration: 2000
+        }
+        })
+        ;
+
+
+        $('#circle2').circleProgress({
+            {#value: 0.25,#}
+            value: {{ rankper }},
+            size: 80,    // do not delete this
+        fill: {
+            gradient: ["#EC4433", "#FE9500"]
+        }
+        ,
+        animation: {
+            duration: 2000
+        }
+        })
+        ;
+        $('#circle3').circleProgress({
+            {#value: {{ rosobper }},#}
+            value: .0016556291390728,
+            size: 80,    // do not delete this
+        fill: {
+            gradient: ["#00CDFF", "#1E74FD"]
+        }
+        ,
+        animation: {
+            duration: 2000
+        }
+        })
+        ;
+    </script>
 
 
 {% endblock %}
