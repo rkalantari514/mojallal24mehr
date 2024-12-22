@@ -363,7 +363,7 @@ import jdatetime
 from datetime import datetime
 
 
-def generate_calendar_data(month, year):
+def generate_calendar_data(month, year, kardex_data):
     # مشخص کردن اولین روز ماه
     first_day_of_month = jdatetime.date(year, month, 1)
 
@@ -386,11 +386,15 @@ def generate_calendar_data(month, year):
     week = [None] * start_day_of_week  # اضافه کردن روزهای خالی
     for i in range((last_day_of_month - first_day_of_month).days + 1):
         current_day = first_day_of_month + jdatetime.timedelta(days=i)
+        sales = sum(item.count for item in kardex_data if item.date == current_day and item.ktype == 1) * -1
+        kharid = sum(item.count for item in kardex_data if item.date == current_day and item.ktype == 2)
+
         day_info = {
             'jyear': current_day.year,
             'jmonth': current_day.month,
             'jday': current_day.day,
-            'sales': 0  # تعداد فروش فرضی
+            'sales': sales,  # تعداد فروش
+            'kharid': kharid  # تعداد خرید
         }
         week.append(day_info)
         if len(week) == 7 or current_day == last_day_of_month:
@@ -405,101 +409,62 @@ def generate_calendar_data(month, year):
 
 
 
-
 def DetailKala(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
     code_kala = int(kwargs['code'])
+    # دریافت تاریخ شمسی امروز
+    month = request.GET.get('month', None)
+    year = request.GET.get('year', None)
 
-    # دریافت ماه و سال جاری شمسی
-    today_jalali = JalaliDate.today()
-    current_year = today_jalali.year
-    current_month = today_jalali.month
+    if month is not None and year is not None:
+        current_month = int(month)
+        current_year = int(year)
+    else:
+        today_jalali = JalaliDate.today()
+        current_year = today_jalali.year
+        current_month = today_jalali.month
 
-    # تعریف بازه زمانی: 12 ماه گذشته تا ماه جاری
-    month_list = []
-    for i in range(12):
-        month = current_month - i
-        year = current_year
-        if month < 1:
-            month += 12
-            year -= 1
-        month_list.append((year, month))
-    month_list.reverse()  # ترتیب به صورت قدیمی به جدید
+        # پردازش داده‌ها از مدل Kardex
+    kardex_data = Kardex.objects.filter(code_kala=code_kala)
 
-    # پردازش داده‌ها
-    kardex_data = Kardex.objects.filter(code_kala=code_kala, ktype=1)
-
-    chart1_data_dict = {}
-    for item in kardex_data:
-        pdate = item.pdate
-        year, month, _ = map(int, pdate.split('/'))
-        key = f"{year}/{month}"
-        if key not in chart1_data_dict:
-            chart1_data_dict[key] = 0
-        chart1_data_dict[key] += item.count
-
-    month_names = {
-        1: 'فروردین',
-        2: 'اردیبهشت',
-        3: 'خرداد',
-        4: 'تیر',
-        5: 'مرداد',
-        6: 'شهریور',
-        7: 'مهر',
-        8: 'آبان',
-        9: 'آذر',
-        10: 'دی',
-        11: 'بهمن',
-        12: 'اسفند'
-    }
-
-    final_data = []
-    for year, month in month_list:
-        key = f"{year}/{month}"
-        total_count = chart1_data_dict.get(key, 0)
-        month_name = f"{month_names[month]}{str(year)[-2:]}"
+    # تعریف final_data بر اساس kardex_data
+    final_data = []  # تقریباً به شکل مورد نیاز
+    for k in kardex_data:
         final_data.append({
-            'year': year,
-            'month': month,
-            'month_name': month_name,
-            'total_count': -total_count  # ضرب در منفی
+            'date': k.date,
+            'sales': k.count if k.ktype == 1 else 0,
+            'kharid': k.count if k.ktype == 2 else 0,
         })
 
-    # بازگشت به قالب اصلی
-    kala = Kala.objects.filter(code=code_kala).last()
+    # پر کردن داده‌های فروش و خرید برای هر روز در ماه
+    days_in_month = generate_calendar_data(current_month, current_year, kardex_data)
+
+    # ادامه تابع...
+    kala = Kala.objects.get(code=code_kala)
     kardex = Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif')
     mojodi = Mojodi.objects.filter(code_kala=code_kala)
 
     related_kalas = Kala.objects.filter(category=kala.category).order_by('-total_sale')
-
-    rel_kala = []
-
-    for k in related_kalas:
-        rel_kala.append(
-            {
-                'code': k.code,
-                'name': k.name,
-                'total_sale': k.total_sale,
-                'mojodi_roz':k.total_sale/k.s_m_ratio if (k.s_m_ratio is not None and k.s_m_ratio != 0) else '0.00',
-                's_m_ratio': f'{float(k.s_m_ratio):.2f}' if k.s_m_ratio is not None else '0.00',
-            }
-        )
+    rel_kala = [
+        {
+            'code': k.code,
+            'name': k.name,
+            'total_sale': k.total_sale,
+            'mojodi_roz': k.total_sale / k.s_m_ratio if (k.s_m_ratio is not None and k.s_m_ratio != 0) else '0.00',
+            's_m_ratio': f'{float(k.s_m_ratio):.2f}' if k.s_m_ratio is not None else '0.00',
+        }
+        for k in related_kalas
+    ]
 
     today = date.today()
 
-    # محاسبه تفاوت روزها با بررسی موجود بودن داده‌ها
-
-
-
+    # محاسبات مربوط به rosob
     try:
-        rosob = (today - Kardex.objects.filter(code_kala=code_kala, ktype=1).order_by('date',
-                                                                                      'radif').last().date).days if Kardex.objects.filter(
+        rosob = (today - Kardex.objects.filter(code_kala=code_kala, ktype=1).order_by('date', 'radif').last().date).days if Kardex.objects.filter(
             code_kala=code_kala, ktype=1).exists() else (
                     today - Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif').first().date).days
-
     except:
-        rosob =0
-
+        rosob = 0
 
     # بررسی موجودی کالا و تنظیم rosob
     last_mojodi = mojodi.last()
@@ -513,28 +478,18 @@ def DetailKala(request, *args, **kwargs):
     s_m_ratios = list(set(k.s_m_ratio for k in related_kalas))
     s_m_ratios.sort(reverse=True)  # مرتب‌سازی نزولی
     rank = s_m_ratios.index(kala.s_m_ratio) + 1
-    rankper = (len(s_m_ratios) - rank) / (len(s_m_ratios) - 1)  if len(s_m_ratios) > 1 else 1
+    rankper = (len(s_m_ratios) - rank) / (len(s_m_ratios) - 1) if len(s_m_ratios) > 1 else 1
 
     try:
         m_r_s = kala.total_sales() / mojodi.last().mojodi_roz * 100
     except:
         m_r_s = 0
 
-    current_year = 1403
-    current_month = 10
+    # نام ماه و سال برای تقویم
     months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
     month_name = months[current_month - 1]
 
-    days_in_month = generate_calendar_data(current_month, current_year)
-    for day in days_in_month:
-        print(day)
-
-
-
-
-
-
-
+    days_in_month = generate_calendar_data(current_month, current_year, kardex_data)
 
     context = {
         'title': f'{kala.name}',
@@ -542,13 +497,12 @@ def DetailKala(request, *args, **kwargs):
         'kardex': kardex,
         'mojodi': mojodi,
         'rel_kala': rel_kala,
-        'chart1_data': final_data,
-        'rosob':rosob,
-        'rosobper':rosobper,
-        'rank':rank,
-        'rankper':rankper,
-        'm_r_s':m_r_s,
-
+        'chart1_data': final_data,  # قرار دادن final_data
+        'rosob': rosob,
+        'rosobper': rosobper,
+        'rank': rank,
+        'rankper': rankper,
+        'm_r_s': m_r_s,
         'days_in_month': days_in_month,
         'month_name': month_name,
         'year': current_year,

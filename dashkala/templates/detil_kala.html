@@ -18,32 +18,59 @@
 
 
     </style>
-    <style>
-        .calendar-table {
-            table-layout: fixed;
-        }
+<style>
+    .calendar-table {
+        table-layout: fixed;
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-        .calendar-table th, .calendar-table td {
-            width: 14.28%; /* مساوی تقسیم کردن ستون‌ها */
-            height: 100px; /* تنظیم ارتفاع سلول‌ها */
-            text-align: center;
-            vertical-align: top;
-            border: 1px solid #ddd;
-        }
+    .calendar-table th, .calendar-table td {
+        width: 14.28%;
+        height: 100px;
+        text-align: center;
+        vertical-align: top;
+        border: 1px solid #ddd;
+    }
 
-        .calendar-table .fc-day-top {
-            background-color: #f9f9f9; /* رنگ پس‌زمینه کم‌رنگ */
-        }
+    .calendar-table th {
+        height: auto; /* تغییر ارتفاع ستون هدر */
+    }
 
-        .calendar-table .fc-day-number {
-            font-weight: bold;
-        }
+    .calendar-table .fc-day-top {
+        background-color: #f9f9f9; /* رنگ پس‌زمینه کم‌رنگ */
+        position: relative; /* برای قرار دادن فرزندان */
+        height: 100%; /* ارتفاع کامل سلول */
+    }
 
-        .calendar-table .fc-sales-number {
-            color: #888;
-        }
+    .calendar-table .fc-day-number {
+        font-weight: bold;
+        display: block;
+        margin: 0; /* لغو حاشیه */
+        padding-top: 10px; /* فاصله با بالای سلول */
+    }
 
-    </style>
+    .calendar-table .fc-kharid-number,
+    .calendar-table .fc-sales-number {
+        font-size: 1.2rem; /* اندازه متن */
+    }
+
+    .calendar-table .fc-kharid-number {
+        color: #007bff; /* رنگ سبد خرید */
+        position: absolute;
+        bottom: 5px; /* فاصله از پایین سلول */
+        left: 5px; /* فاصله از چپ سلول */
+        text-align: left; /* تراز چپ */
+    }
+
+    .calendar-table .fc-sales-number {
+        color: #28a745; /* رنگ کامیون */
+        position: absolute;
+        bottom: 5px; /* فاصله از پایین سلول */
+        right: 5px; /* فاصله از راست سلول */
+        text-align: right; /* تراز راست */
+    }
+</style>
 
     <div class="content-wrapper">
 
@@ -386,30 +413,55 @@
             <div class="col-md-7 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body">
-                        <h5 class="card-title pb-0 border-0 "> میزان ماهانه</h5>
-
+                        <h5 class="card-title pb-0 border-0 "> خرید و فروش روزانه</h5>
                         <div class="text-center mb-4"><h2>{{ month_name }} {{ year }}</h2></div>
-                        <table class="table table-bordered calendar-table">
-                            <thead class="thead-light">
-                            <tr>
-                                <th>شنبه</th>
-                                <th>یکشنبه</th>
-                                <th>دوشنبه</th>
-                                <th>سه‌شنبه</th>
-                                <th>چهارشنبه</th>
-                                <th>پنج‌شنبه</th>
-                                <th>جمعه</th>
-                            </tr>
-                            </thead>
-                            <tbody> {% for week in days_in_month %}
-                                <tr> {% for day in week %}{% if day %}
-                                    <td>
-                                        <div class="fc-day-top"><span class="fc-day-number">{{ day.jday }}</span> <span
-                                                class="fc-sales-number">{{ day.sales }}</span> <!-- نمایش تعداد فروش -->
-                                        </div>
-                                    </td>{% else %}
-                                    <td></td> {% endif %} {% endfor %} </tr> {% endfor %} </tbody>
-                        </table>
+
+<div id="calendarf">
+<div class="calendar-header">
+    <button id="prev-month" class="btn btn-secondary">&lt;</button>
+    <span>{{ month_name }} {{ year }}</span>
+    <button id="next-month" class="btn btn-secondary">&gt;</button>
+</div>
+
+<table class="table table-bordered calendar-table">
+    <thead class="thead-light">
+        <tr>
+            <th>شنبه</th>
+            <th>یکشنبه</th>
+            <th>دوشنبه</th>
+            <th>سه‌شنبه</th>
+            <th>چهارشنبه</th>
+            <th>پنج‌شنبه</th>
+            <th>جمعه</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for week in days_in_month %}
+        <tr>
+            {% for day in week %}
+            {% if day %}
+            <td>
+                <div class="fc-day-top">
+                    <span class="fc-day-number">{{ day.jday }}</span>
+                    {% if day.kharid > 0 %}
+                    <span class="fc-kharid-number"><i class="fa fa-truck"></i> {{ day.kharid }}</span>
+                    {% endif %}
+                    {% if day.sales > 0 %}
+                    <span class="fc-sales-number">{{ day.sales }} <i class="fa fa-shopping-cart"></i></span>
+                    {% endif %}
+                </div>
+            </td>
+            {% else %}
+            <td></td>
+            {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+
                     </div>
                 </div>
             </div>
@@ -516,7 +568,6 @@
         })
         ;
 
-
         $('#circle2').circleProgress({
             {#value: 0.25,#}
             value: {{ rankper }},
@@ -544,6 +595,53 @@
         })
         ;
     </script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+$(document).ready(function() {
+    var currentYear = {{ year }};
+    var currentMonth = {{ current_month }};
+
+    function loadCalendar(month, year) {
+        $.ajax({
+            url: '/dash/kala/detail/{{ code_kala }}',
+            type: 'GET',
+            data: {
+                month: month,
+                year: year
+            },
+            success: function(data) {
+                // فرض کنید که داده‌های جدید تقویم در div با id "calendar" قرار می‌گیرند
+                $('#calendarf').html(data);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading calendar: ', error);
+            }
+        });
+    }
+
+    $('#prev-month').click(function() {
+        if (currentMonth === 1) {
+            currentMonth = 12;
+            currentYear -= 1;
+        } else {
+            currentMonth -= 1;
+        }
+        loadCalendar(currentMonth, currentYear);
+    });
+
+    $('#next-month').click(function() {
+        if (currentMonth === 12) {
+            currentMonth = 1;
+            currentYear += 1;
+        } else {
+            currentMonth += 1;
+        }
+        loadCalendar(currentMonth, currentYear);
+    });
+});
+</script>
+
 
 
 {% endblock %}
