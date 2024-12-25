@@ -1,0 +1,124 @@
+           <!-- تقویم -->
+<!-- partial_kala.html -->
+ <!-- تقویم --> 
+            <div id="calendarf" >
+
+                <div class="card card-statistics h-100"> 
+                    <div class="card-body"> 
+                        <h5 class="card-title pb-0 border-0 "> خرید و فروش روزانه</h5> 
+                        <div class="text-center mb-4"> 
+                            <h2>{{ month_name }} {{ year }}</h2>
+                        </div> <div class="calendar-header"> 
+                        <button id="prev-month" class="btn btn-secondary">&lt;</button> 
+                        <span>{{ month_name }} {{ year }}</span> 
+                        <button id="next-month" class="btn btn-secondary">&gt;</button> 
+                    </div> <table class="table table-bordered calendar-table"> 
+                        <thead class="thead-light"> 
+                        <tr> 
+                            <th>شنبه</th> 
+                            <th>یکشنبه</th> 
+                            <th>دوشنبه</th> 
+                            <th>سه‌شنبه</th> 
+                            <th>چهارشنبه</th> 
+                            <th>پنج‌شنبه</th> 
+                            <th>جمعه</th> 
+                        </tr> 
+                        </thead> 
+                        <tbody> 
+                        {% for week in days_in_month %} 
+                            <tr> 
+                                {% for day in week %} {% if day %} 
+                                    <td> 
+                                        <div class="fc-day-top"> 
+                                            <span class="fc-day-number">{{ day.jday }}</span>
+                                            {% if day.kharid > 0 %} 
+                                                <span class="fc-kharid-number">
+                                                    <i class="fa fa-truck">
+                                                        
+                                                    </i> {{ day.kharid }}</span> 
+                                            {% endif %} 
+                                            {% if day.sales > 0 %} 
+                                                <span class="fc-sales-number">{{ day.sales }} 
+                                                    <i class="fa fa-shopping-cart"></i>
+                                                </span> 
+                                            {% endif %} 
+                                        </div> 
+                                    </td> 
+                                {% else %} 
+                                    <td>
+                                    
+                                    </td> 
+                                {% endif %} 
+                                {% endfor %} 
+                            </tr> 
+                        {% endfor %} 
+                        </tbody> 
+                    </table> 
+                    </div> 
+                </div> 
+            </div>
+
+
+<script>
+
+$(document).ready(function() {
+    var currentYear = {{ year }};
+    var currentMonth = {{ month }};
+    var code1 = {{ code_kala }};
+    var url = `/dash/kala/detail/${code1}`;
+
+    console.log("Initial setup");
+    console.log("Current Year: " + currentYear);
+    console.log("Current Month: " + currentMonth);
+    console.log("Code1: " + code1);
+    console.log("Initial URL: " + url);
+
+    function loadCalendar(month, year) {
+        console.log("Loading calendar for month: " + month + ", year: " + year);
+        console.log("URL being used for AJAX call: " + url);
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: { month: month, year: year, code1: code1 },
+            success: function(data) {
+                console.log("AJAX call success");
+                $('#calendarf').html(data);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading calendar: ', error);
+                console.error('XHR:', xhr);
+                console.error('Status:', status);
+            }
+        });
+    }
+
+    $('#prev-month').click(function(e) {
+        e.preventDefault(); // جلوگیری از رفتار پیش‌فرض کلیک
+        if (currentMonth === 1) {
+            currentMonth = 12;
+            currentYear -= 1;
+        } else {
+            currentMonth -= 1;
+        }
+        console.log("Previous month clicked. New Month: " + currentMonth + ", Year: " + currentYear);
+        loadCalendar(currentMonth, currentYear);
+    });
+
+    $('#next-month').click(function(e) {
+        e.preventDefault(); // جلوگیری از رفتار پیش‌فرض کلیک
+        if (currentMonth === 12) {
+            currentMonth = 1;
+            currentYear += 1;
+        } else {
+            currentMonth += 1;
+        }
+        console.log("Next month clicked. New Month: " + currentMonth + ", Year: " + currentYear);
+        loadCalendar(currentMonth, currentYear);
+    });
+});
+
+
+
+
+</script>
