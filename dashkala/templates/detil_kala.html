@@ -558,47 +558,55 @@ $(document).ready(function() {
 {% block myjs %}
 
 <script>
-    var labels = [
-        {% for item in chart1_data %}
-            '{{ item.month_name }}',  // نام ماه
-        {% endfor %}
-    ];
-    var dataValues = [
-        {% for item in chart1_data %}
-            {{ item.total_count }},  // تعداد فروش
-        {% endfor %}
-    ];
+        var labels = [
+            {% for item in chart1_data %}
+                '{{ item.month_name }}',
+            {% endfor %}
+        ];
+        var dataValues = [
+            {% for item in chart1_data %}
+                {{ item.total_count }},
+            {% endfor %}
+        ];
 
-    var backgroundColors = 'rgba(75, 192, 75, 0.2)';
-    var borderColors = 'rgba(75, 192, 75, 1)';
+        var backgroundColors = [
+            'rgba(75, 192, 75, 0.2)',  // فروردین
+            'rgba(75, 192, 75, 0.2)',  // اردیبهشت
+            'rgba(75, 192, 75, 0.2)',  // خرداد
+            'rgba(75, 75, 192, 0.2)',  // تیر
+            'rgba(75, 75, 192, 0.2)',  // مرداد
+            'rgba(75, 75, 192, 0.2)',  // شهریور
+            'rgba(255, 165, 0, 0.2)',  // مهر
+            'rgba(255, 165, 0, 0.2)',  // آبان
+            'rgba(255, 165, 0, 0.2)',  // آذر
+            'rgba(192, 75, 75, 0.2)',  // دی
+            'rgba(192, 75, 75, 0.2)',  // بهمن
+            'rgba(192, 75, 75, 0.2)'   // اسفند
+        ];
 
-    var data = {
-        labels: labels,
-        datasets: [{
-            label: 'فروش ماهانه',
-            data: dataValues,
-            backgroundColor: backgroundColors,
-            borderColor: borderColors,
-            borderWidth: 1
-        }]
-    };
+        var borderColors = backgroundColors.map((color) => color.replace('0.2', '1'));
 
-    var options = {
-        scales: {
-            y: {
-                beginAtZero: true
+        var data = {
+            labels: labels,
+            datasets: [{
+                label: 'فروش ماهانه',
+                data: dataValues,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 1
+            }]
+        };
+
+        var options = {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
             }
-        }
-    };
+        };
 
-    var ctx = document.getElementById('myChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: data,
-        options: options
-    });
-</script>
-
+        drawChart('myChart', 'bar', data, options);
+    </script>
 
 
 
