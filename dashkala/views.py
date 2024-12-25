@@ -706,7 +706,7 @@ def DetailKala(request, *args, **kwargs):
     rankper = (len(s_m_ratios) - rank) / (len(s_m_ratios) - 1) if len(s_m_ratios) > 1 else 1
 
     try:
-        m_r_s = kala.total_sales() / mojodi.last().mojodi_roz * 100
+        m_r_s = kala.total_sale / mojodi.last().mojodi_roz * 100
     except:
         m_r_s = 0
 
