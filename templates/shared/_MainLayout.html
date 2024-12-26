@@ -31,7 +31,10 @@
     <!--=================================
      footer -->{% render_partial 'footer' %}
     {% block mapbox %}{% endblock %}
+
     {% include 'shared/_FooterReferences.html' %}
+    {% block jscal %}{% endblock %}
+
     {% block date %}{% endblock %}
     {% block chart %}{% endblock %}
     {% block myjs %}{% endblock %}
