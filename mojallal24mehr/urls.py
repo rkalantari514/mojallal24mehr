@@ -29,6 +29,7 @@ urlpatterns = [
     path('', include('mahakupdate.urls')),
     path('', include('dashboard.urls')),
     path('', include('dashkala.urls')),
+    path('', include('custom_login.urls')),
 
 
     path('header', header, name="header"),

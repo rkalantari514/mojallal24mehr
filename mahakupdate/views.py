@@ -13,6 +13,7 @@ from django.db.models import Max, Q
 from .models import Mojodi
 from django.db.models import Q
 from decimal import Decimal
+from django.contrib.auth.decorators import login_required
 
 from .sendtogap import send_to_admin
 
@@ -51,6 +52,7 @@ def connect_to_mahak():
 
 
 # صفحه عملیات آپدیت
+@login_required(login_url='/login')
 def Updatedb(request):
     tables = Mtables.objects.filter(in_use=True)
     url_mapping = {

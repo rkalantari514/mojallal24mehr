@@ -2,13 +2,14 @@ from django.shortcuts import render
 
 from mahakupdate.models import Factor, FactorDetaile
 from django.db.models import Sum
+from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
 
 
 
-
+@login_required(login_url='/login')
 def Home1(request):
 
     factor=Factor.objects.all()

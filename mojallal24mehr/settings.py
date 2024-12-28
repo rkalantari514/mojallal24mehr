@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'dashboard',
     'dashkala',
     'django_apscheduler',
+    'custom_login',
 
 ]
 
@@ -196,8 +197,5 @@ APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Format for displaying run time 
 APSCHEDULER_RUN_NOW_TIMEOUT = 2500  # Seconds to wait for an explicitly requested job to complete.
 
 
-# settings.py
-
-# JOB_SCHEDULER_SETTINGS = {
-#     'max_runtime': 2000,  # افزایش زمان به 60 ثانیه
-# }
+AUTH_USER_MODEL = 'custom_login.CustomUser'
+#

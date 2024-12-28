@@ -1,5 +1,6 @@
 from django.contrib.gis.measure import pretty_name
 from django.http import HttpResponseBadRequest
+from django.contrib.auth.decorators import login_required
 
 from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek, Kala
 from persianutils import standardize
@@ -20,7 +21,7 @@ from django.shortcuts import render
 def fix_persian_characters(value):
     return standardize(value)
 
-
+@login_required(login_url='/login')
 def DsshKala(request):
     start_time = time.time()  # زمان شروع تابع
     default_storage_id = 3  # می‌توانید این مقدار را به ۳ تنظیم کنید یا از دیتابیس بگیرید
@@ -155,6 +156,7 @@ def load_categories_level3(request):
     return render(request, 'partials/category_dropdown_list_options.html', {'categories': categories})
 
 
+@login_required(login_url='/login')
 def TotalKala(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
     st = kwargs['st']
@@ -407,7 +409,7 @@ def generate_calendar_data(month, year, kardex_data):
 
     return days_in_month
 
-
+@login_required(login_url='/login')
 def DetailKala1(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
 
@@ -575,6 +577,7 @@ def DetailKala1(request, *args, **kwargs):
     return render(request, 'detil_kala.html', context)
 
 
+@login_required(login_url='/login')
 def DetailKala(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
 

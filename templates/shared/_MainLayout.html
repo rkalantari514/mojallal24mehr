@@ -24,7 +24,9 @@
     {% render_partial 'header' %}
     <div class="container-fluid">
         <div class="row">
+        {% if user.is_authenticated %}
             {% render_partial 'sidebar' %}
+        {% endif %}
             {% block content %}{% endblock %}
         </div>
     </div>
