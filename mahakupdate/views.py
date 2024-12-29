@@ -87,7 +87,9 @@ def Updatedb(request):
 import datetime
 
 def Updateall(request):
-    now = datetime.datetime.now()
+    now = datetime.now()
+    print(now.hour)
+    print(now.weekday())
     # بررسی اینکه آیا ساعت بین 1 تا 2 بامداد است
     if now.hour == 1:
         # بررسی اینکه آیا امروز دوشنبه است (0: دوشنبه، 6: یکشنبه)
