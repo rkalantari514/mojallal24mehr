@@ -84,18 +84,17 @@ def Updatedb(request):
     return render(request, 'updatepage.html', context)
 
 
-# آپدیت همه جدوال که موقع آن است
-from django.shortcuts import redirect
-from django.utils import timezone
-
-from django.shortcuts import redirect
-from django.utils import timezone
-
-from django.shortcuts import redirect
-from django.utils import timezone
-
+import datetime
 
 def Updateall(request):
+    now = datetime.datetime.now()
+    # بررسی اینکه آیا ساعت بین 1 تا 2 بامداد است
+    if now.hour == 1:
+        # بررسی اینکه آیا امروز دوشنبه است (0: دوشنبه، 6: یکشنبه)
+        if now.weekday() == 0:
+            send_to_admin('شروع آپدیت کل با ریست کاردکس')
+            Kardex.objects.all().update(sync_mojodi=False)
+
     t0 = time.time()
     send_to_admin('شروع آپدیت کل')
     tables = Mtables.objects.filter(in_use=True).order_by('update_priority')
