@@ -98,4 +98,4 @@ class UserLog(models.Model):
         verbose_name_plural = 'بازدید کاربران'
 
     def __str__(self):
-        return self.user.last_name
+        return f'{self.user.first_name} {self.user.last_name}'
