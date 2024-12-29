@@ -1,6 +1,5 @@
 import requests
-from tenacity import sleep
-
+import time
 
 def send_to_admin(data):
     try:
@@ -49,4 +48,4 @@ def send_to_managers(mobiles,data):
         except:
             print(f'can not send to gap to:{m}')
 
-        sleep(3)
+        time.sleep(3)  # برنامه به مدت 5 ثانیه متوقف می‌شود
