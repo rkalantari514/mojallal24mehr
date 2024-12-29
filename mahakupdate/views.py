@@ -1,5 +1,7 @@
 from django.conf import settings
 import pyodbc
+
+from custom_login.models import UserLog
 from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category
 from django.shortcuts import render
 from .forms import CategoryForm, KalaForm
@@ -151,6 +153,8 @@ def Updateall(request):
     tend = time.time()
     total_time = tend - t0
 
+    userlogcount=UserLog.objects.all().count()
+    send_to_admin(f' مجموع تعداد بازدیدها: {userlogcount}')
     data1 = (f"زمان کل: {total_time:.2f} ثانیه")
     send_to_admin(data1)
 
