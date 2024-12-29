@@ -1780,7 +1780,7 @@ def UpdateMojodi(request):
             from datetime import timedelta
 
             try:
-                kardex_entries = Kardex.objects.filter(code_kala=code_kala).order_by('date')
+                kardex_entries = Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif')
                 first_date = kardex_entries.first().date
                 last_date = kardex_entries.last().date
                 date_range = [first_date + timedelta(days=i) for i in range((last_date - first_date).days + 1)]
