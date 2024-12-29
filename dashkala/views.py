@@ -2,6 +2,7 @@ from django.contrib.gis.measure import pretty_name
 from django.http import HttpResponseBadRequest
 from django.contrib.auth.decorators import login_required
 
+from custom_login.models import UserLog
 from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek, Kala
 from persianutils import standardize
 from django.db.models import Max, Subquery
@@ -160,6 +161,11 @@ def load_categories_level3(request):
 def TotalKala(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
     user=request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(
+            user=user,
+            page='کل کالاها',
+        )
     st = kwargs['st']
     cat1 = kwargs['cat1']
     cat2 = kwargs['cat2']
@@ -582,6 +588,13 @@ def DetailKala1(request, *args, **kwargs):
 @login_required(login_url='/login')
 def DetailKala(request, *args, **kwargs):
     user=request.user
+    code_kala = int(kwargs['code'])
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(
+            user=user,
+            page='جزئیات کالا',
+            code=code_kala,
+        )
     start_time = time.time()  # زمان شروع تابع
 
     # چاپ اطلاعات ورودی

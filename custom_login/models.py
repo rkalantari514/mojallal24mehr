@@ -85,3 +85,17 @@ def resize_avatar(sender, instance, **kwargs):
         ))
         resized_image = crop_image.resize((200, 200), Image.LANCZOS)
         resized_image.save(instance.avatar.path)
+
+
+class UserLog(models.Model):
+    user=models.ForeignKey(CustomUser,blank=True, null=True, on_delete=models.CASCADE ,verbose_name='کاربر')
+    page=models.CharField(max_length=150, verbose_name='صفحه',null=True, blank=True)
+    code=models.CharField(max_length=150, verbose_name='کد',null=True, blank=True)
+    time=models.DateTimeField(auto_now_add=True,verbose_name='زمان بازدید',null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'بازدید کاربر'
+        verbose_name_plural = 'بازدید کاربران'
+
+    def __str__(self):
+        return self.user.last_name
