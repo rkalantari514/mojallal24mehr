@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 
 @login_required(login_url='/login')
 def Home1(request):
+    user=request.user
 
     factor=Factor.objects.all()
     mablagh_factor_total = factor.aggregate(Sum('mablagh_factor'))['mablagh_factor__sum']
@@ -56,7 +57,9 @@ def Home1(request):
     print(mablagh_factor_total)
 
     context = {
+
         'factor': factor,
+        'user': user,
         'mablagh_factor_total':mablagh_factor_total,
         'count_factor_total':count_factor_total,
         'factor_detile':factor_detile,

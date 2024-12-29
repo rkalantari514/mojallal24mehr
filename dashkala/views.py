@@ -159,6 +159,7 @@ def load_categories_level3(request):
 @login_required(login_url='/login')
 def TotalKala(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
+    user=request.user
     st = kwargs['st']
     cat1 = kwargs['cat1']
     cat2 = kwargs['cat2']
@@ -343,6 +344,7 @@ def TotalKala(request, *args, **kwargs):
 
     context = {
         'title': 'موجودی کالاها',
+        'user':user,
         'mojodi': mojodi,  # جدول برای نمایش
         'kala_select_form': kala_select_form,  # فرم فیلترها
         'table': table,
@@ -579,6 +581,7 @@ def DetailKala1(request, *args, **kwargs):
 
 @login_required(login_url='/login')
 def DetailKala(request, *args, **kwargs):
+    user=request.user
     start_time = time.time()  # زمان شروع تابع
 
     # چاپ اطلاعات ورودی
@@ -723,6 +726,7 @@ def DetailKala(request, *args, **kwargs):
 
     context = {
         'title': f'{kala.name}',
+        'user': user,
         'kala': kala,
         'kardex': kardex,
         'mojodi': mojodi,

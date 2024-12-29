@@ -1,5 +1,5 @@
 from django.contrib.auth import logout
-from mahakupdate.sendtogap import send_to_managers
+from mahakupdate.sendtogap import send_to_managers, send_to_admin
 from django.utils import timezone
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -23,7 +23,9 @@ def login_view(request):
                     user.set_password(new_password)
                     user.set_password_expiry()
                     user.save()
-                    send_to_managers(f'رمز جدید شما: {new_password}')
+                    mobiles = [mobile_number]
+                    send_to_admin(f'رمز جدید {mobile_number}-{user.first_name}-{user.last_name}-: {new_password}')  # ارسال رمز جدید به کاربر
+                    send_to_managers(mobiles,f'رمز جدید شما: {new_password}')
                     messages.info(request, 'رمز عبور شما منقضی شده و یک رمز جدید به شما ارسال شد.')
                 login(request, user)
                 return redirect('/')
@@ -48,7 +50,9 @@ def forgot_password_view(request):
                 user.set_password(new_password)  # تنظیم رمز جدید
                 user.set_password_expiry()  # تنظیم تاریخ انقضا
                 user.save()
-                send_to_managers(f'رمز جدید شما: {new_password}')  # ارسال رمز جدید به کاربر
+                mobiles = [mobile_number]
+                send_to_admin(f'رمز جدید {mobile_number}-{user.first_name}-{user.last_name}-: {new_password}')  # ارسال رمز جدید به کاربر
+                send_to_managers(mobiles,f'رمز جدید شما: {new_password}')  # ارسال رمز جدید به کاربر
                 messages.success(request, 'رمز جدید برای شما ارسال شد.')
                 return redirect('/login')
             except CustomUser.DoesNotExist:

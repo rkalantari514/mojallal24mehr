@@ -1,8 +1,11 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.db import models
-from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from datetime import timedelta
+from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from PIL import Image
+import os
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, mobile_number, password=None):
@@ -11,7 +14,7 @@ class CustomUserManager(BaseUserManager):
 
         user = self.model(
             mobile_number=mobile_number,
-            is_active=True,  # اطمینان از اینکه کاربر فعال است
+            is_active=True,
         )
 
         user.set_password(password)
@@ -27,6 +30,16 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+def get_filename_ext(filepath):
+    base_name = os.path.basename(filepath)
+    name, ext = os.path.splitext(base_name)
+    return name, ext
+
+def upload_image_path(instance, filename):
+    name, ext = get_filename_ext(filename)
+    final_name = f"{instance.id}{ext}"
+    return f"profile/{final_name}"
+
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
@@ -34,6 +47,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     password_expiry_date = models.DateTimeField(null=True, blank=True)
+    avatar = models.ImageField(upload_to=upload_image_path, default='unnamed.png', null=True, blank=True, verbose_name='تصویر پروفایل')
 
     objects = CustomUserManager()
 
@@ -56,3 +70,18 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def set_password_expiry(self):
         self.password_expiry_date = timezone.now() + timedelta(days=30)
         self.save()
+
+@receiver(post_save, sender=CustomUser)
+def resize_avatar(sender, instance, **kwargs):
+    if instance.avatar and hasattr(instance.avatar, 'path'):
+        temp_image = Image.open(instance.avatar.path)
+        width, height = temp_image.size
+        min_dimension = min(width, height)
+        crop_image = temp_image.crop((
+            (width - min_dimension) // 2,
+            (height - min_dimension) // 2,
+            (width + min_dimension) // 2,
+            (height + min_dimension) // 2,
+        ))
+        resized_image = crop_image.resize((200, 200), Image.LANCZOS)
+        resized_image.save(instance.avatar.path)

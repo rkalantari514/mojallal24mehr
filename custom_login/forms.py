@@ -34,7 +34,8 @@ class LoginForm(forms.Form):
             user.set_password(new_password)  # تنظیم رمز جدید
             user.set_password_expiry()  # تنظیم تاریخ انقضا
             user.save()
-            send_to_managers(f'رمز جدید شما: {new_password}')  # ارسال رمز جدید به کاربر
+            mobiles=[mobile_number]
+            send_to_managers(mobiles,f'رمز جدید شما: {new_password}')  # ارسال رمز جدید به کاربر
             return True
         except CustomUser.DoesNotExist:
             return False

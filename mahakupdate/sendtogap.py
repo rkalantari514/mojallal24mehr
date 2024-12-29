@@ -1,4 +1,5 @@
 import requests
+from tenacity import sleep
 
 
 def send_to_admin(data):
@@ -16,26 +17,36 @@ def send_to_admin(data):
         }
         print(data)
         response = requests.post('https://api.gap.im/sendMessage/', data=myparams, headers=myheader)
+        print(response)
+
 
     except:
         print('can not send to gap')
 
 
-def send_to_managers(data):
-    try:
-        myparams = {
-            'chat_id': '+989151006447',
-            'type': 'text',
-            'data': data,
-            'reply_keyboard': None,
-            'inline_keyboard': None,
-            'form': None,
-        }
-        myheader = {
-            'token': 'a9827aaae459d060d8ca68f0be07f58f1b39eebe29f457da25f2ceed731ddbf1'
-        }
-        print(data)
-        response = requests.post('https://api.gap.im/sendMessage/', data=myparams, headers=myheader)
+def send_to_managers(mobiles,data):
+    print(mobiles)
+    for m in mobiles:
+        m = m[1:]
+        m=f'+98{m}'
+        print(m)
+        try:
+            myparams = {
+                'chat_id': m,
+                'type': 'text',
+                'data': data,
+                'reply_keyboard': None,
+                'inline_keyboard': None,
+                'form': None,
+            }
+            myheader = {
+                'token': 'a9827aaae459d060d8ca68f0be07f58f1b39eebe29f457da25f2ceed731ddbf1'
+            }
+            print(data)
+            response = requests.post('https://api.gap.im/sendMessage/', data=myparams, headers=myheader)
+            print(response)
 
-    except:
-        print('can not send to gap')
+        except:
+            print(f'can not send to gap to:{m}')
+
+        sleep(3)
