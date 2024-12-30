@@ -2784,7 +2784,7 @@ def Update_Sales_Mojodi_Ratio(request):
         total_sales = sales_dict.get(kala.code, 0)
 
         # محاسبه نسبت فروش به میانگین موجودی
-        ratio = total_sales / m_roz if m_roz != 0 else 0
+        ratio = total_sales / m_roz*100 if m_roz != 0 else 0
 
         # به‌روزرسانی نسبت فروش و کل فروش
         kala.s_m_ratio = ratio
