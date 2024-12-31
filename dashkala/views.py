@@ -1,6 +1,8 @@
 from django.contrib.gis.measure import pretty_name
 from django.http import HttpResponseBadRequest
+from django.contrib.auth.decorators import login_required
 
+from custom_login.models import UserLog
 from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek, Kala
 from persianutils import standardize
 from django.db.models import Max, Subquery
@@ -20,7 +22,7 @@ from django.shortcuts import render
 def fix_persian_characters(value):
     return standardize(value)
 
-
+@login_required(login_url='/login')
 def DsshKala(request):
     start_time = time.time()  # زمان شروع تابع
     default_storage_id = 3  # می‌توانید این مقدار را به ۳ تنظیم کنید یا از دیتابیس بگیرید
@@ -155,8 +157,15 @@ def load_categories_level3(request):
     return render(request, 'partials/category_dropdown_list_options.html', {'categories': categories})
 
 
+@login_required(login_url='/login')
 def TotalKala(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
+    user=request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(
+            user=user,
+            page='کل کالاها',
+        )
     st = kwargs['st']
     cat1 = kwargs['cat1']
     cat2 = kwargs['cat2']
@@ -341,6 +350,7 @@ def TotalKala(request, *args, **kwargs):
 
     context = {
         'title': 'موجودی کالاها',
+        'user':user,
         'mojodi': mojodi,  # جدول برای نمایش
         'kala_select_form': kala_select_form,  # فرم فیلترها
         'table': table,
@@ -407,7 +417,7 @@ def generate_calendar_data(month, year, kardex_data):
 
     return days_in_month
 
-
+@login_required(login_url='/login')
 def DetailKala1(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
 
@@ -575,7 +585,16 @@ def DetailKala1(request, *args, **kwargs):
     return render(request, 'detil_kala.html', context)
 
 
+@login_required(login_url='/login')
 def DetailKala(request, *args, **kwargs):
+    user=request.user
+    code_kala = int(kwargs['code'])
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(
+            user=user,
+            page='جزئیات کالا',
+            code=code_kala,
+        )
     start_time = time.time()  # زمان شروع تابع
 
     # چاپ اطلاعات ورودی
@@ -706,7 +725,7 @@ def DetailKala(request, *args, **kwargs):
     rankper = (len(s_m_ratios) - rank) / (len(s_m_ratios) - 1) if len(s_m_ratios) > 1 else 1
 
     try:
-        m_r_s = kala.total_sales() / mojodi.last().mojodi_roz * 100
+        m_r_s = kala.total_sale / mojodi.last().mojodi_roz * 100
     except:
         m_r_s = 0
 
@@ -720,6 +739,7 @@ def DetailKala(request, *args, **kwargs):
 
     context = {
         'title': f'{kala.name}',
+        'user': user,
         'kala': kala,
         'kardex': kardex,
         'mojodi': mojodi,

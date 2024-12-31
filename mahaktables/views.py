@@ -6,6 +6,7 @@ import os
 
 from mahakupdate.models import Mtables
 from mahakupdate.views import connect_to_mahak
+from django.contrib.auth.decorators import login_required
 
 
 def get_table_columns(cursor, table_name):
@@ -45,6 +46,7 @@ def get_all_table_data(cursor):
         return table_data
 
 
+@login_required(login_url='/login')
 def MTables(request):
     conn = connect_to_mahak()
     cursor = conn.cursor()

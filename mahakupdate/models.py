@@ -364,6 +364,7 @@ class Mojodi(models.Model):
     stock=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی')
     total_stock=models.FloatField(blank=True, null=True, default=0, verbose_name='کل موجودی ')
     mojodi_roz=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی روز ')
+    mojodi_roz_arzesh=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی روز ارزش')
     averageprice=models.FloatField(blank=True, null=True, default=0, verbose_name='قیمت میانگین')
     arzesh = models.FloatField(blank=True, null=True, default=0, verbose_name='ارزش')
 

@@ -79,7 +79,7 @@
             <li class="nav-item dropdown mr-30">
                 <a class="nav-link nav-pill user-avatar" data-toggle="dropdown" href="#" role="button"
                    aria-haspopup="true" aria-expanded="false">
-                    <img src="images/profile-avatar.jpg" alt="avatar">
+                    <img src="{{ user.avatar.url }}" alt="avatar">
                 </a>
                 <div class="dropdown-menu dropdown-menu-right">
                     <div class="dropdown-header">
@@ -98,7 +98,7 @@
                             class="badge badge-info">6</span> </a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="#"><i class="text-info ti-settings"></i>تنظیمات</a>
-                    <a class="dropdown-item" href="#"><i class="text-danger ti-unlock"></i>خروج</a>
+                    <a class="dropdown-item" href="/logout/"><i class="text-danger ti-unlock"></i>خروج</a>
                 </div>
             </li>
         {% endif %}

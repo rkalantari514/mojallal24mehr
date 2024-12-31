@@ -64,13 +64,13 @@ class CategoryAdmin(admin.ModelAdmin):
 class KardexAdmin(admin.ModelAdmin):
     list_display = ['__str__','date','stock','code_kala','kala','count','ktype','percode','storage','warehousecode','averageprice','sync_mojodi']
     list_filter = ['warehousecode','sync_mojodi']
-    # list_editable = ['name','parent','level']
+    list_editable = ['sync_mojodi']
     search_fields = ['pdate','count','code_kala','stock']
 
     class Meta:
         model = Kardex
 class MojodiAdmin(admin.ModelAdmin):
-    list_display = ['__str__','stock','total_stock','code_kala','kala','storage','warehousecode','averageprice','mojodi_roz']
+    list_display = ['__str__','stock','total_stock','code_kala','kala','storage','warehousecode','averageprice','mojodi_roz','mojodi_roz_arzesh']
     list_filter = ['warehousecode']
     # list_editable = ['name','parent','level']
     search_fields = ['code_kala','stock']
