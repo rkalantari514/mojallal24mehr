@@ -582,7 +582,7 @@ def DetailKala1(request, *args, **kwargs):
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
-    return render(request, 'detil_kala.html', context)
+    return render(request, 'detail_kala.html', context)
 
 
 @login_required(login_url='/login')
@@ -762,4 +762,187 @@ def DetailKala(request, *args, **kwargs):
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return render(request, 'partial_kala.html', context)
-    return render(request, 'detil_kala.html', context)
+    return render(request, 'detail_kala.html', context)
+
+@login_required(login_url='/login')
+def CategoryDetail(request, *args, **kwargs):
+    start_time = time.time()  # زمان شروع تابع
+    user=request.user
+
+    cat_id=int(kwargs['id'])
+    cat=Category.objects.filter(id=cat_id).last()
+    cat_level = cat.level
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(
+            user=user,
+            page='جزئیات دسته بندی',
+            code=cat_id,
+        )
+
+    month = request.GET.get('month', None)
+    year = request.GET.get('year', None)
+    print("Query params - Year:", year, "Month:", month)
+
+    # دریافت ماه و سال جاری شمسی
+    today_jalali = JalaliDate.today()
+
+    # دریافت تاریخ شمسی امروز
+    month = request.GET.get('month', None)
+    year = request.GET.get('year', None)
+    print("Request GET params - Year:", year, "Month:", month)
+
+    if month is not None and year is not None:
+        current_month = int(month)
+        current_year = int(year)
+    else:
+        today_jalali = JalaliDate.today()
+        current_year = today_jalali.year
+        current_month = today_jalali.month
+
+    print("Current Year:", current_year, "Current Month:", current_month)
+
+    # تعریف بازه زمانی: 12 ماه گذشته تا ماه جاری
+    month_list = []
+    for i in range(12):
+        month = current_month - i
+        year = current_year
+        if month < 1:
+            month += 12
+            year -= 1
+        month_list.append((year, month))
+    month_list.reverse()  # ترتیب به صورت قدیمی به جدید
+
+    print("Month List:", month_list)
+
+
+    if cat_level==1:
+        kardex_data=Kardex.objects.filter(kala__category=cat, ktype=1)
+    if cat_level==2:
+        kardex_data=Kardex.objects.filter(kala__category__parent=cat, ktype=1)
+    if cat_level==3:
+        kardex_data=Kardex.objects.filter(kala__category__parent__parent=cat, ktype=1)
+
+
+    # پردازش داده‌ها
+
+    chart1_data_dict = {}
+    for item in kardex_data:
+        pdate = item.pdate
+        year, month, _ = map(int, pdate.split('/'))
+        key = f"{year}/{month}"
+        if key not in chart1_data_dict:
+            chart1_data_dict[key] = 0
+        chart1_data_dict[key] += item.count
+
+    month_names = {
+        1: 'فروردین',
+        2: 'اردیبهشت',
+        3: 'خرداد',
+        4: 'تیر',
+        5: 'مرداد',
+        6: 'شهریور',
+        7: 'مهر',
+        8: 'آبان',
+        9: 'آذر',
+        10: 'دی',
+        11: 'بهمن',
+        12: 'اسفند'
+    }
+
+    final_data = []
+    for year, month in month_list:
+        key = f"{year}/{month}"
+        total_count = chart1_data_dict.get(key, 0)
+        month_name = f"{month_names[month]}{str(year)[-2:]}"
+        final_data.append({
+            'year': year,
+            'month': month,
+            'month_name': month_name,
+            'total_count': -total_count  # ضرب در منفی
+        })
+
+    print("Final Data:", final_data)
+
+    # دریافت اطلاعات کالا
+    if cat_level == 3:
+        kalas = Kala.objects.filter(category=cat)
+        kardex = Kardex.objects.filter(kala__category=cat).order_by('date', 'radif')
+        mojodi = Mojodi.objects.filter(kala__category=cat)
+
+    if cat_level==2:
+        kalas = Kala.objects.filter(category__parent=cat)
+        kardex = Kardex.objects.filter(kala__category__parent=cat).order_by('date', 'radif')
+        mojodi = Mojodi.objects.filter(kala__category__parent=cat)
+
+    if cat_level==1:
+        kalas = Kala.objects.filter(category__parent__parent=cat)
+        kardex = Kardex.objects.filter(kala__category__parent__parent=cat).order_by('date', 'radif')
+        mojodi = Mojodi.objects.filter(kala__category__parent__parent=cat)
+
+
+    months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+    month_name = months[current_month - 1]
+
+    if cat_level == 3:
+        kardex_data2 = Kardex.objects.filter(kala__category=cat)
+    if cat_level == 2:
+        kardex_data2 = Kardex.objects.filter(kala__category__parent=cat)
+    if cat_level == 1:
+        kardex_data2 = Kardex.objects.filter(kala__category__parent__parent=cat)
+
+    days_in_month = generate_calendar_data(current_month, current_year, kardex_data2)
+
+
+    cat1 = Category.objects.filter(level=1)
+
+
+    if cat_level==1:
+        print('cat_level==1')
+        par1=cat
+        par2=None
+        cat2=Category.objects.filter(parent=cat)
+        # cat3=Category.objects.filter(parent__parent=cat)
+        cat3=None
+
+
+    if cat_level==2:
+        print('cat_level==2')
+        par1=cat.parent
+        par2=cat
+        cat2=Category.objects.filter(parent=par1)
+        cat3=Category.objects.filter(parent=cat)
+
+    if cat_level==3:
+        print('cat_level==3')
+        par2=cat.parent
+        par1=par2.parent
+        cat2=Category.objects.filter(parent=par1)
+        cat3=Category.objects.filter(parent=par2)
+
+    context = {
+        'title': f'{cat.name}',
+        'user': user,
+        'cat': cat,
+        'cat1': cat1,
+        'cat2': cat2,
+        'cat3': cat3,
+        'par1': par1,
+        'par2': par2,
+        'cat_level': cat_level,
+        'kalas': kalas,
+        'kardex': kardex,
+        'mojodi': mojodi,
+        'chart1_data': final_data,  # داده‌هایی که برای نمودار نیاز داریم
+        'days_in_month': days_in_month,
+        'month_name': month_name,
+        'year': current_year,
+        'month': current_month,
+    }
+
+    total_time = time.time() - start_time  # محاسبه زمان اجرا
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'partial_kala.html', context)
+    return render(request, 'category_detail.html', context)
+

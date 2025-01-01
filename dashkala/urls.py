@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import DsshKala, TotalKala, load_categories_level2, load_categories_level3,DetailKala
+from .views import DsshKala, TotalKala, load_categories_level2, load_categories_level3,DetailKala,CategoryDetail
 from mahaktables.views import MTables
 from django.shortcuts import redirect
 urlpatterns = [
@@ -8,6 +8,9 @@ urlpatterns = [
     path('', lambda request: redirect('/dash/kala/total/all/all/all/all/total', permanent=True)),
     path('dash/kala/total/<st>/<cat1>/<cat2>/<cat3>/<total>', TotalKala, name='total_kala'),
     path('dash/kala/detail/<int:code>/', DetailKala, name='detail_kala'),
+
+
+    path('dash/kala/category/<id>', CategoryDetail, name='categor_ydetail'),
 
     # path('dash/kala/detail/<code>', DetailKala, name='detailkala'),
 
