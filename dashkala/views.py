@@ -935,7 +935,10 @@ def CategoryDetail(request, *args, **kwargs):
          for item in distinct_kalas]
     )
 
-    total_sale = kardex.filter(ktype=1).aggregate(total_count=Sum('count'))['total_count'] * -1
+    try:
+        total_sale = kardex.filter(ktype=1).aggregate(total_count=Sum('count'))['total_count'] * -1
+    except:
+        total_sale=0
 
     mojodi_roz = sum(
         [Mojodi.objects.filter(kala=item['kala']).values_list('mojodi_roz', flat=True).first() for item in
