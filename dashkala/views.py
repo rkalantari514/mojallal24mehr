@@ -815,11 +815,11 @@ def CategoryDetail(request, *args, **kwargs):
     print("Month List:", month_list)
 
 
-    if cat_level==1:
+    if cat_level==3:
         kardex_data=Kardex.objects.filter(kala__category=cat, ktype=1)
     if cat_level==2:
         kardex_data=Kardex.objects.filter(kala__category__parent=cat, ktype=1)
-    if cat_level==3:
+    if cat_level==1:
         kardex_data=Kardex.objects.filter(kala__category__parent__parent=cat, ktype=1)
 
 
