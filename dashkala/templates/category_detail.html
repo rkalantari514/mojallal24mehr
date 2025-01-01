@@ -134,7 +134,7 @@
                             </div>
                             <div class="float-right text-right">
                                 <p class="card-text text-dark"> کل موجودی</p>
-                                <h4>{{ mojodi.last.total_stock }}</h4>
+                                <h4>{{ master_data.totl_mojodi }}</h4>
                             </div>
                         </div>
                     </div>
@@ -150,8 +150,8 @@
     </span>
                             </div>
                             <div class="float-right text-right">
-                                <p class="card-text text-dark"> ارزش موجودی ({{ mojodi.last.averageprice|intword}} ریال)</p>
-                                <h4>{{ kala.total_arzesh|intword }} ریال</h4>
+                                <p class="card-text text-dark"> ارزش موجودی </p>
+                                <h4>{{ master_data.total_arzesh|intword }} ریال</h4>
                             </div>
                         </div>
                     </div>
@@ -168,7 +168,7 @@
                             </div>
                             <div class="float-right text-right">
                                 <p class="card-text text-dark"> تعداد کل فروش از ابتدای دوره</p>
-                                <h4>{{ kala.total_sale }}</h4>
+                                <h4>{{ master_data.total_sale }}</h4>
                             </div>
                         </div>
                     </div>
@@ -185,7 +185,7 @@
                             </div>
                             <div class="float-right text-right">
                                 <p class="card-text text-dark"> درصد فروش به موجودی روز </p>
-                                <h4>{{ kala.s_m_ratio|floatformat:2 }}%</h4>
+                                <h4>{{ master_data.s_m_ratio|floatformat:2 }}%</h4>
                             </div>
                         </div>
                     </div>
@@ -205,7 +205,7 @@
                             </div>
                             <div class="float-right text-right">
                                 <p class="card-text text-dark">موجودی × روز از ابتدای دوره</p>
-                                <h4>{{ mojodi.last.mojodi_roz }}</h4>
+                                <h4>{{ master_data.mojodi_roz|intword }}</h4>
                             </div>
                         </div>
                     </div>
@@ -222,7 +222,7 @@
                             </div>
                             <div class="float-right text-right">
                                 <p class="card-text text-dark">موجودی روز ارزش میانگین</p>
-                                <h4>{{ mojodi.last.mojodi_roz_arzesh|intword }} ریال روز</h4>
+                                <h4>{{ master_data.mojodi_roz_arzesh|intword }} ریال روز</h4>
                             </div>
                         </div>
                     </div>
