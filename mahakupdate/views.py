@@ -1,6 +1,7 @@
 from django.conf import settings
 import pyodbc
-
+from django.db.models import Min
+from datetime import datetime
 from custom_login.models import UserLog
 from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category
 from django.shortcuts import render
@@ -8,22 +9,32 @@ from .forms import CategoryForm, KalaForm
 from .models import FactorDetaile
 import os
 import pandas as pd
-from .models import Factor, Kala, Storagek, Mtables
-from django.utils import timezone
-import jdatetime  # فرض بر این است که برای تبدیل تاریخ هجری شمسی به میلادی استفاده می‌شود
-from django.db.models import Max, Q
-from .models import Mojodi
+import jdatetime
 from django.db.models import Q
-from decimal import Decimal
 from django.contrib.auth.decorators import login_required
-
+from .models import Kala, Storagek
+from decimal import Decimal
+from .models import Factor, Mtables
 from .sendtogap import send_to_admin
-
+from collections import defaultdict
+from django.db import transaction, connections
+from django.db.models import Max
+import logging
+logger = logging.getLogger(__name__)
+from django.db.models import Sum
+from django.shortcuts import redirect
+from django.db import transaction
+import time
+from .models import Kardex, Mojodi
+from django.utils import timezone
+from datetime import timedelta
+from django.shortcuts import HttpResponse
+from .models import Kardex
+from datetime import datetime
 
 # sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
 
 
-# Create your views here.
 def connect_to_mahak():
     sn = os.getenv('COMPUTERNAME')
     print('sn')
@@ -86,7 +97,6 @@ def Updatedb(request):
     return render(request, 'updatepage.html', context)
 
 
-import datetime
 
 def Updateall(request):
     now = datetime.now()
@@ -183,18 +193,6 @@ def Updateallold(request):
 
 
 # آپدیت فاکتور
-
-
-
-
-from decimal import Decimal
-
-from decimal import Decimal
-from django.db import transaction
-from django.utils import timezone
-from django.shortcuts import redirect
-from .models import Factor, Mtables  # فرض می‌کنیم که Factor و Mtables مدل‌های شما هستند
-
 def UpdateFactor(request):
     t0 = time.time()
     print('شروع آپدیت فاکتور--------------------------------------')
@@ -351,17 +349,6 @@ def UpdateFactor2(request):
 
 
 # آپدیت کاردکس
-
-from django.db import transaction
-from django.shortcuts import redirect
-import time
-
-import time
-from django.db import transaction
-from django.utils import timezone
-from .models import Kardex, Mtables, Factor, Kala, Storagek
-
-import math
 
 
 def UpdateKardex(request):
@@ -1576,8 +1563,8 @@ def CreateKalaGroup(request):
 
 def update_kala_categories():
     # گرفتن دسته‌بندی پیش‌فرض "تعیین نشده ۳"
-    default_category = Category.objects.filter(name='تعیین نشده 3', level=3).first()
-
+    default_category = Category.objects.filter(name='تعیین نشده', level=3).first()
+    # Kala.objects.update(category=None)
     # گرفتن تمامی کالاها
     kalas = Kala.objects.all()
     updates = []
@@ -1615,106 +1602,7 @@ def UpdateKalaGroup(request):
     return redirect('/updatedb')
 
 
-from django.db import transaction
-from django.shortcuts import redirect
-from collections import defaultdict
 
-from django.shortcuts import redirect
-from collections import defaultdict
-
-from django.shortcuts import redirect
-from collections import defaultdict
-
-from django.shortcuts import redirect
-from collections import defaultdict
-
-from django.shortcuts import redirect
-from collections import defaultdict
-
-import time
-from collections import defaultdict
-from django.shortcuts import redirect
-from .models import Kardex, Mojodi
-
-import time
-from collections import defaultdict
-from django.db import transaction, connections
-from django.db.models import Max
-from django.shortcuts import redirect
-from .models import Kardex, Mojodi
-
-from django.db.models import Sum
-from django.db.models import Sum
-from django.shortcuts import redirect
-
-import time
-from collections import defaultdict
-from django.db import transaction, connections
-from django.db.models import Max
-from django.shortcuts import redirect
-from .models import Kardex, Mojodi
-
-from django.db.models import Sum
-
-from django.db.models import Sum
-from django.shortcuts import redirect
-import logging
-
-logger = logging.getLogger(__name__)
-
-import time
-from django.db.models import Sum
-from .models import Kardex, Mojodi
-
-from django.db.models import F  # اضافه کردن این خط
-
-from django.db.models import F  # اضافه کردن این خط
-
-from django.db.models import F
-
-import time
-from django.db.models import Sum
-from .models import Kardex, Mojodi
-import time
-from django.db import transaction
-from .models import Kardex, Mojodi
-
-import time
-from django.db import transaction
-from .models import Kardex, Mojodi
-
-import time
-from django.db import transaction
-from .models import Kardex, Mojodi
-from django.shortcuts import redirect
-from django.db import transaction
-import time
-from .models import Kardex, Mojodi
-
-
-# kardex_to_update = Kardex.objects.filter(code_kala__in=false_kardex_list)
-# kalalst1=[]
-# for k1 in kardex_to_update:
-#     kalalst1.append(k1.code_cala)
-# for k3 in kalalst1:
-#     kardex3=Kardex.objects.filter(code_kala=k3).order_by('date', 'radif')
-#     datalist = []
-#     for k2 in kardex3:
-#         datalist.append(k2.date)
-#
-#     md=0
-#     for d in :
-#         md+= Kardex.objects.filter(code_kala=k3,date=d).order_by('date', 'radif').last().stock
-#
-#     Mojodi.objects.filter(code_kala=k3).mojodi_roz=md
-#     Mojodi.objects.filter(code_kala=k3).mojodi_roz.save()
-
-# Kardex.objects.all().update(sync_mojodi=False)
-# return redirect('/updatedb')
-
-
-from django.utils import timezone
-from datetime import timedelta
 
 
 def UpdateMojodi(request):
@@ -1777,7 +1665,6 @@ def UpdateMojodi(request):
 
             # تعیین تاریخ شروع و پایان
 
-            from datetime import timedelta
 
             try:
                 kardex_entries = Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif')
@@ -2657,9 +2544,6 @@ def UpdateMojodi2(request):
     return redirect('/updatedb')
 
 
-from django.shortcuts import HttpResponse
-from .models import Kardex
-
 
 def temp_compare_kardex_view(request):
     # اتصال به دیتابیس
@@ -2714,45 +2598,7 @@ def temp_compare_kardex_view(request):
     return HttpResponse("نتایج در ترمینال پرینت شد.", content_type="text/plain")
 
 
-from datetime import datetime, timedelta
-from django.db.models import Sum, Min
-from django.shortcuts import render
-from .models import Kala, Kardex
 
-
-#
-# (day0,stock0),
-# (day1,stock1),
-# (day2,stock2),
-# (day3,stock3),
-# (day4,stock4),
-# (day5,stock5),
-# (day6,stock6),
-# (day7,stock7),
-# (day8,stock8),
-# (day9,stock9),
-#
-# area=0
-# for s in list:
-#     s+=
-# یا
-# area=
-# (dey1-day0)*stock0+
-# (dey2-day1)*stock1+
-# (dey3-day2)*stock2+
-# ......
-# (dey10-day9)*stock2+
-# (today-day10)*stock10
-#
-#
-# ave=-1*area/(today-dey1)
-#
-#
-
-from django.db.models import Sum
-from django.shortcuts import redirect
-from datetime import datetime
-import time
 
 
 def Update_Sales_Mojodi_Ratio(request):

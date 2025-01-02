@@ -734,7 +734,7 @@ def DetailKala(request, *args, **kwargs):
     months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
     month_name = months[current_month - 1]
 
-    kardex_data2 = Kardex.objects.filter(code_kala=code_kala)
+    kardex_data2 = Kardex.objects.filter(code_kala=code_kala,ktype__in=(1,2))
     days_in_month = generate_calendar_data(current_month, current_year, kardex_data2)
 
     context = {
@@ -815,11 +815,11 @@ def CategoryDetail(request, *args, **kwargs):
     print("Month List:", month_list)
 
 
-    if cat_level==1:
+    if cat_level==3:
         kardex_data=Kardex.objects.filter(kala__category=cat, ktype=1)
     if cat_level==2:
         kardex_data=Kardex.objects.filter(kala__category__parent=cat, ktype=1)
-    if cat_level==3:
+    if cat_level==1:
         kardex_data=Kardex.objects.filter(kala__category__parent__parent=cat, ktype=1)
 
 
@@ -866,17 +866,17 @@ def CategoryDetail(request, *args, **kwargs):
     # دریافت اطلاعات کالا
     if cat_level == 3:
         kalas = Kala.objects.filter(category=cat)
-        kardex = Kardex.objects.filter(kala__category=cat).order_by('date', 'radif')
+        kardex = Kardex.objects.filter(kala__category=cat,ktype__in=(1,2)).order_by('date', 'radif')
         mojodi = Mojodi.objects.filter(kala__category=cat)
 
     if cat_level==2:
         kalas = Kala.objects.filter(category__parent=cat)
-        kardex = Kardex.objects.filter(kala__category__parent=cat).order_by('date', 'radif')
+        kardex = Kardex.objects.filter(kala__category__parent=cat,ktype__in=(1,2)).order_by('date', 'radif')
         mojodi = Mojodi.objects.filter(kala__category__parent=cat)
 
     if cat_level==1:
         kalas = Kala.objects.filter(category__parent__parent=cat)
-        kardex = Kardex.objects.filter(kala__category__parent__parent=cat).order_by('date', 'radif')
+        kardex = Kardex.objects.filter(kala__category__parent__parent=cat,ktype__in=(1,2)).order_by('date', 'radif')
         mojodi = Mojodi.objects.filter(kala__category__parent__parent=cat)
 
 
@@ -884,18 +884,15 @@ def CategoryDetail(request, *args, **kwargs):
     month_name = months[current_month - 1]
 
     if cat_level == 3:
-        kardex_data2 = Kardex.objects.filter(kala__category=cat)
+        kardex_data2 = Kardex.objects.filter(kala__category=cat,ktype__in=(1,2))
     if cat_level == 2:
-        kardex_data2 = Kardex.objects.filter(kala__category__parent=cat)
+        kardex_data2 = Kardex.objects.filter(kala__category__parent=cat,ktype__in=(1,2))
     if cat_level == 1:
-        kardex_data2 = Kardex.objects.filter(kala__category__parent__parent=cat)
+        kardex_data2 = Kardex.objects.filter(kala__category__parent__parent=cat,ktype__in=(1,2))
 
     days_in_month = generate_calendar_data(current_month, current_year, kardex_data2)
 
-
     cat1 = Category.objects.filter(level=1)
-
-
     if cat_level==1:
         print('cat_level==1')
         par1=cat
@@ -903,6 +900,8 @@ def CategoryDetail(request, *args, **kwargs):
         cat2=Category.objects.filter(parent=cat)
         # cat3=Category.objects.filter(parent__parent=cat)
         cat3=None
+
+        distinct_kalas = Mojodi.objects.filter(kala__category__parent__parent=cat).values('kala').distinct()
 
 
     if cat_level==2:
@@ -912,12 +911,55 @@ def CategoryDetail(request, *args, **kwargs):
         cat2=Category.objects.filter(parent=par1)
         cat3=Category.objects.filter(parent=cat)
 
+        distinct_kalas = Mojodi.objects.filter(kala__category__parent=cat).values('kala').distinct()
+
+
     if cat_level==3:
         print('cat_level==3')
         par2=cat.parent
         par1=par2.parent
         cat2=Category.objects.filter(parent=par1)
         cat3=Category.objects.filter(parent=par2)
+
+        distinct_kalas = Mojodi.objects.filter(kala__category=cat).values('kala').distinct()
+
+
+
+    totl_mojodi = sum(
+        [Mojodi.objects.filter(kala=item['kala']).values_list('total_stock', flat=True).first() for item in
+         distinct_kalas])
+
+    total_arzesh = sum(
+        [Mojodi.objects.filter(kala=item['kala']).values_list('total_stock', flat=True).first() *
+         Mojodi.objects.filter(kala=item['kala']).values_list('averageprice', flat=True).first()
+         for item in distinct_kalas]
+    )
+
+    try:
+        total_sale = kardex.filter(ktype=1).aggregate(total_count=Sum('count'))['total_count'] * -1
+    except:
+        total_sale=0
+
+    mojodi_roz = sum(
+        [Mojodi.objects.filter(kala=item['kala']).values_list('mojodi_roz', flat=True).first() for item in
+         distinct_kalas])
+
+    mojodi_roz_arzesh = sum(
+        [Mojodi.objects.filter(kala=item['kala']).values_list('mojodi_roz_arzesh', flat=True).first() for item in
+         distinct_kalas])
+
+    s_m_ratio=total_sale/mojodi_roz*100 if mojodi_roz!=0 else 0
+
+
+    master_data={
+        'totl_mojodi':totl_mojodi,
+        'total_arzesh':total_arzesh,
+        'total_sale':total_sale,
+        's_m_ratio':s_m_ratio,
+        'mojodi_roz':mojodi_roz,
+        'mojodi_roz_arzesh':mojodi_roz_arzesh,
+
+    }
 
     context = {
         'title': f'{cat.name}',
@@ -929,6 +971,10 @@ def CategoryDetail(request, *args, **kwargs):
         'par1': par1,
         'par2': par2,
         'cat_level': cat_level,
+        'master_data':master_data,
+
+
+
         'kalas': kalas,
         'kardex': kardex,
         'mojodi': mojodi,
