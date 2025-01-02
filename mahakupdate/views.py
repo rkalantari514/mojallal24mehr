@@ -12,7 +12,6 @@ import pandas as pd
 import jdatetime
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
-import datetime
 from .models import Kala, Storagek
 from decimal import Decimal
 from .models import Factor, Mtables
@@ -31,7 +30,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.shortcuts import HttpResponse
 from .models import Kardex
-
+from datetime import datetime
 
 # sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
 
