@@ -34,7 +34,7 @@
             height: 100px;
             text-align: center;
             vertical-align: top;
-            border: 1px solid #ddd;
+            border: 1px solid #fdd49a;
         }
 
         .calendar-table th {
@@ -51,7 +51,7 @@
             font-weight: bold;
             display: block;
             margin: 0; /* لغو حاشیه */
-            padding-top: 10px; /* فاصله با بالای سلول */
+            padding-top: 0px; /* فاصله با بالای سلول */
         }
 
         .calendar-table .fc-kharid-number,
@@ -62,16 +62,16 @@
         .calendar-table .fc-kharid-number {
             color: #007bff; /* رنگ سبد خرید */
             position: absolute;
-            bottom: 5px; /* فاصله از پایین سلول */
-            left: 5px; /* فاصله از چپ سلول */
+            bottom: 0px; /* فاصله از پایین سلول */
+            left: 0px; /* فاصله از چپ سلول */
             text-align: left; /* تراز چپ */
         }
 
         .calendar-table .fc-sales-number {
             color: #28a745; /* رنگ کامیون */
             position: absolute;
-            bottom: 5px; /* فاصله از پایین سلول */
-            right: 5px; /* فاصله از راست سلول */
+            bottom: 0px; /* فاصله از پایین سلول */
+            right: 0px; /* فاصله از راست سلول */
             text-align: right; /* تراز راست */
         }
     </style>
@@ -94,17 +94,18 @@
 
                         {% endif %}
                     </div>
-                    <div class="col-sm-6">
-                        <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
-                            <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
-                            <li class="breadcrumb-item active">{{ cat.name }}</li>
 
-                        </ol>
-                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
+                        <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
+                        <li class="breadcrumb-item active">{{ cat.name }}</li>
+
+                    </ol>
                 </div>
             </div>
             <!-- ردیف دسته بندی ها -->
-            <div class="card-body text-center">
+            <div class="text-center">
                 {% for c in cat1 %}
                     {% if c == par1 or c == cat %}
                         <a href="/dash/kala/category/{{ c.id }}">
@@ -119,7 +120,7 @@
 
             </div>
 
-            <div class="card-body text-center">
+            <div class="text-center">
                 {% for c in cat2 %}
                     {% if c == par2 %}
                         <a href="/dash/kala/category/{{ c.id }}">
@@ -133,7 +134,7 @@
                 {% endfor %}
             </div>
 
-            <div class="card-body text-center">
+            <div class="text-center">
                 {% for c in cat3 %}
                     {% if c == cat %}
                         <a href="/dash/kala/category/{{ c.id }}">
@@ -411,120 +412,112 @@
                         <div class="card card-statistics h-100">
                             <div class="card-body">
                                 <div class="table-responsive mt-15 ">
-                                    <h6 class="card-title pb-0 border-0"> موجودی انبارها</h6>
-                                    <table class="table center-aligned-table mb-0">
-                                        <thead>
-                                        <tr class="text-dark">
-                                            <th> نام انبار</th>
-                                            <th> موجودی</th>
-                                            <th> قیمت میانگین</th>
-                                            <th> ارزش</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {#                                    {% for m in mojodi %}#}
-                                        {#                                        <tr class="text-dark">#}
-                                        {#                                        <td>{{ m.storage.name }}</td>#}
-                                        {#                                        <td>{{ m.stock }}</td>#}
-                                        {#                                        <td>{{ m.averageprice|intword }}</td>#}
-                                        {#                                        <td>{{ m.arzesh|intword }}</td>#}
-                                        {##}
-                                        {#                                    {% endfor %}#}
+                                    <h6 class="card-title pb-0 border-0"> کالاهای دسته بندی {{ cat.name }}</h6>
 
-                                        </tr>
+                                    <div class="table-responsive">
+                                        <table
+                                                id="table"
+                                                class="table-striped"
+                                                data-toggle="table"
+                                                data-locale="fa-IR"
+                                                data-search="true"
+                                                data-show-columns="true"
+                                                data-show-export="true"
+                                                data-show-refresh="true"
+                                                data-show-columns-toggle-all="true"
+                                                data-show-pagination-switch="true"
+                                                data-show-toggle="true"
+                                                data-show-fullscreen="true"
+                                                data-buttons="buttons"
+                                                data-search-align="left"
+                                                data-buttons-class="primary"
+                                                data-pagination="true"
+                                                data-show-columns-search="true"
+                                                data-show-footer="true"
+                                                data-page-size="10"
+                                                data-remember-order="true"
+                                                data-sortable="true"
+                                                data-show-search-clear-button="true"
+                                                data-sort-name="smratio"
+                                                data-sort-order="desc"
+                                                data-filter-control="true"
+                                                data-show-print="true"
+                                                data-export-data-type="all"
+                                                data-export-types=['excel']
+                                        >
+                                            <thead>
+                                            <tr class="tr-class-1">
+                                            <th class="card-text text-center" data-sortable="true"
+                                                    data-sorter="numericOnly"
+                                                    data-field="name">نام کالا
+                                                </th>
 
-
-                                        </tbody>
-                                    </table>
-
-
-                                </div>
-                                <div class="table-responsive mt-15 ">
-                                    <h6 class="card-title pb-0 border-0"> گردش انبارها</h6>
-                                    <table class="table center-aligned-table mb-0">
-                                        <thead>
-                                        <tr class="text-dark">
-                                            <th> تاریخ</th>
-                                            <th> نام انبار</th>
-                                            <th> شخص</th>
-                                            <th></th>
-                                            <th> نوع گردش</th>
-                                            <th> تغییرات</th>
-                                            <th> موجودی</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {#                                    {% for k in kardex %}#}
-                                        {#                                        <tr class="text-dark">#}
-                                        {#                                        <td>{{ k.pdate }}</td>#}
-                                        {#                                        <td>{{ k.storage.name }}</td>#}
-                                        {#                                        <td>{{ k.lname }}</td>#}
-                                        {#                                        <td><i class="{{ k.gardesh_type.2 }} fa-lg"></td>#}
-                                        {#                                        <td class="{{ k.gardesh_type.1 }}">{{ k.gardesh_type.0 }}</td>#}
-                                        {#                                        {% if k.count < 0 %}#}
-                                        {#                                            <h6>#}
-                                        {#                                                <td class="text-success" style="direction:ltr">#}
-                                        {#                                                    <i class=#}
-                                        {#                                                               "mb-10 text-success float-right fa fa-arrow-down"#}
-                                        {#                                                    > </i>{{ k.count }}#}
-                                        {#                                                </td>#}
-                                        {#                                            </h6>{% else %}#}
-                                        {#                                            <h6>#}
-                                        {#                                                <td class="text-primary" style="direction:ltr">#}
-                                        {#                                                    <i class=#}
-                                        {#                                                               "mb-10 text-primary float-right fa fa-arrow-up">#}
-                                        {#                                                    </i>{{ k.count }}#}
-                                        {#                                                </td>#}
-                                        {#                                            </h6>#}
-                                        {#                                        {% endif %}#}
-                                        {#                                        <td>{{ k.stock }}</td>#}
-                                        {##}
-                                        {#                                    {% endfor %}#}
-
-                                        </tr>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-sorter="numericOnly"
+                                                    data-field="cat_kala" data-filter-control="select">دسته بندی
+                                                </th>
 
 
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <br>
-                                <div class="table-responsive mt-15 ">
-                                    <h6 class="card-title pb-0 border-0"> وضعیت هم گروهی ها</h6>
-                                    <table class="table center-aligned-table mb-0">
-                                        <thead>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-sorter="numericOnly"
+                                                    data-field="sales">تعداد فروش
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-sorter="numericOnly"
+                                                    data-field="smratio">بازده فروش
+                                                </th>
 
-                                        <tr class="text-dark">
-                                            <th> کد کالا</th>
-                                            <th> نام کالا</th>
-                                            <th> کل فروش</th>
-                                            <th> موجودی×روز</th>
-                                            <th> نسبت فروش به میانگین موجودی</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {% for k in rel_kala %}
-                                            <tr class="text-dark clickable-row"
-                                                onclick="window.open('/dash/kala/detail/{{ k.code }}', '_blank')">
-                                                <td>{{ k.code }}</td>
-                                                <td>{{ k.name }}</td>
-                                                <td>{{ k.total_sale }}</td>
-                                                <td>{{ k.mojodi_roz|floatformat:0 }}</td>
-                                                <td>{{ k.s_m_ratio|floatformat:2 }}</td>
+
+
                                             </tr>
-                                        {% endfor %}
+                                            </thead>
+                                            <tbody>
+                                            {% for kala in kalas %}
+
+                                                   <tr>
+                                                   <td class="card-text text-center"><a
+                                                            href="/dash/kala/detail/{{ kala.code }}"
+                                                            target="_blank">
+                                                        {{ kala.name }}</a></td>
+                                                    <td class="card-text text-center"><a href="/dash/kala/detail/{{ kala.code }}"
+                                                                                             target="_blank">
+                                                        {{ kala.category.name }}</a></td>
+                                                    <td class="card-text text-center"><a href="/dash/kala/detail/{{ kala.code }}"
+                                                                                             target="_blank">
+                                                        {{ kala.total_sale }}</a></td>
+                                                   <td class="card-text text-center"><a href="/dash/kala/detail/{{ kala.code }}"
+                                                                                             target="_blank">
+                                                        {{ kala.s_m_ratio }}</a></td>
 
 
-                                        </tbody>
-                                    </table>
+
+
+
+
+
+
+
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+
+
+
+
+
+
+
+
                                 </div>
-                            </div>
+                              </div>
                         </div>
                     </div>
                 </div>
 
 
-                <!-- تقویم -->
-                <!-- partial_kala.html -->
                 <!-- تقویم -->
                 <div id="calendarf" class="col-md-7 mb-30">
                     <div class="card card-statistics h-100">
@@ -561,10 +554,10 @@
                                                         <span class="fc-kharid-number">
                                                     <i class="fa fa-truck">
 
-                                                    </i> {{ day.kharid }}</span>
+                                                    </i> {{ day.kharid|floatformat:0 }}</span>
                                                     {% endif %}
                                                     {% if day.sales > 0 %}
-                                                        <span class="fc-sales-number">{{ day.sales }}
+                                                        <span class="fc-sales-number">{{ day.sales|floatformat:0 }}
                                                     <i class="fa fa-shopping-cart"></i>
                                                 </span>
                                                     {% endif %}
@@ -734,7 +727,6 @@
         ];
 
 
-
         var data = {
             labels: labels,
             datasets: [{
@@ -767,12 +759,13 @@
                 animateScale: true,
                 animateRotate: true
             }
-            {#scales: {#}
-            {#    y: {#}
-            {#        beginAtZero: true#}
-            {#    }#}
-            {#}#}
-        };
+        {#scales: {#}
+        {#    y: {#}
+        {#        beginAtZero: true#}
+        {#    }#}
+        {#}#}
+        }
+        ;
 
 
         drawChart('donat-forosh', 'doughnut', data, options);
@@ -846,9 +839,46 @@
 
 
 {% block date %}
+    <script src="{% static 'js/table1/tableExport.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-locale-all.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-export.min.js' %}"></script>
+    <script src="{% static 'js/table1/natural-sorting.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-filter-control.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-print.min.js' %}"></script>
+    <script src="{% static 'js/table1/jspdf.min.js' %}"></script>
+    <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
 
+    <script>
+        var $table = $('#table')
 
+        $(function () {
+            $table.bootstrapTable()
+        })
+
+        function idFormatter() {
+            return 'Total'
+        }
+
+        function nameFormatter(data) {
+            return data.length
+        }
+
+        function priceFormatter(data) {
+            var field = this.field
+            return data.map(function (row) {
+                return +row[field].substring(0)
+            }).reduce(function (sum, i) {
+                return sum + i
+            }, 0)
+        }
+
+        function formatMoney(number) {
+            return number.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
+        }
+    </script>
 {% endblock %}
+
 
 
 

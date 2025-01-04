@@ -456,15 +456,15 @@ def DetailKala(request, *args, **kwargs):
     mojodi = Mojodi.objects.filter(code_kala=code_kala)
     related_kalas = Kala.objects.filter(category=kala.category).order_by('-total_sale')
 
-    rel_kala = []
-    for k in related_kalas:
-        rel_kala.append({
-            'code': k.code,
-            'name': k.name,
-            'total_sale': k.total_sale,
-            'mojodi_roz': k.total_sale / k.s_m_ratio if (k.s_m_ratio is not None and k.s_m_ratio != 0) else '0.00',
-            's_m_ratio': f'{float(k.s_m_ratio):.2f}' if k.s_m_ratio is not None else '0.00',
-        })
+    # rel_kala = []
+    # for k in related_kalas:
+    #     rel_kala.append({
+    #         'code': k.code,
+    #         'name': k.name,
+    #         'total_sale': k.total_sale,
+    #         'mojodi_roz': k.total_sale / k.s_m_ratio if (k.s_m_ratio is not None and k.s_m_ratio != 0) else '0.00',
+    #         's_m_ratio': f'{float(k.s_m_ratio):.2f}' if k.s_m_ratio is not None else '0.00',
+    #     })
 
     today = date.today()
 
@@ -510,13 +510,13 @@ def DetailKala(request, *args, **kwargs):
         'kala': kala,
         'kardex': kardex,
         'mojodi': mojodi,
-        'rel_kala': rel_kala,
+        # 'rel_kala': rel_kala,
         'chart1_data': final_data,  # داده‌هایی که برای نمودار نیاز داریم
         'rosob': rosob,
         'rosobper': rosobper,
         'rank': rank,
         'rankper': rankper,
-        'm_r_s': m_r_s,
+        # 'm_r_s': m_r_s,
         'days_in_month': days_in_month,
         'month_name': month_name,
         'year': current_year,
@@ -539,6 +539,7 @@ def CategoryDetail(request, *args, **kwargs):
     cat_id=int(kwargs['id'])
     cat=Category.objects.filter(id=cat_id).last()
     cat_level = cat.level
+
     if user.mobile_number != '09151006447':
         UserLog.objects.create(
             user=user,
@@ -588,6 +589,7 @@ def CategoryDetail(request, *args, **kwargs):
         kardex_data=Kardex.objects.filter(kala__category__parent=cat, ktype=1)
     if cat_level==1:
         kardex_data=Kardex.objects.filter(kala__category__parent__parent=cat, ktype=1)
+
 
 
     # پردازش داده‌ها
@@ -647,6 +649,7 @@ def CategoryDetail(request, *args, **kwargs):
         # mojodi = Mojodi.objects.filter(kala__category__parent__parent=cat)
 
 
+
     months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
     month_name = months[current_month - 1]
 
@@ -656,7 +659,8 @@ def CategoryDetail(request, *args, **kwargs):
         kardex_data2 = Kardex.objects.filter(kala__category__parent=cat,ktype__in=(1,2))
     if cat_level == 1:
         kardex_data2 = Kardex.objects.filter(kala__category__parent__parent=cat,ktype__in=(1,2))
-
+    if cat_level == 0:
+        kardex_data2 = Kardex.objects.filter(ktype__in=(1,2))
     days_in_month = generate_calendar_data(current_month, current_year, kardex_data2)
 
     cat1 = Category.objects.filter(level=1)
@@ -684,7 +688,6 @@ def CategoryDetail(request, *args, **kwargs):
         cat3=Category.objects.filter(parent=par2)
 
         distinct_kalas = Mojodi.objects.filter(kala__category=cat).values('kala').distinct()
-
 
 
     totl_mojodi = sum(
@@ -725,8 +728,8 @@ def CategoryDetail(request, *args, **kwargs):
 
     donat_forosh_data=[]
     if cat_level==1:
-        for category in cat1:
-            kardex5 = Kardex.objects.filter(kala__category__parent__parent=category, ktype=1)
+        for category in cat2:
+            kardex5 = Kardex.objects.filter(kala__category__parent=category, ktype=1)
             total_sale = kardex5.filter(ktype=1).aggregate(total_count=Sum('count'))['total_count'] or 0
             total_sale *= -1
             donat_forosh_data.append({
@@ -735,8 +738,8 @@ def CategoryDetail(request, *args, **kwargs):
             })
 
     if cat_level==2:
-        for category in cat2:
-            kardex5 = Kardex.objects.filter(kala__category__parent=category, ktype=1)
+        for category in cat3:
+            kardex5 = Kardex.objects.filter(kala__category=category, ktype=1)
             total_sale = kardex5.filter(ktype=1).aggregate(total_count=Sum('count'))['total_count'] or 0
             total_sale *= -1
             donat_forosh_data.append({
@@ -756,7 +759,7 @@ def CategoryDetail(request, *args, **kwargs):
 
 
     context = {
-        'title': f'{cat.name}',
+        'title': f'{cat}',
         'cat_id': f'{cat.id}',
         'cat_level': cat_level,
         'user': user,
@@ -775,7 +778,7 @@ def CategoryDetail(request, *args, **kwargs):
         'month': current_month,
 
 
-        # 'kalas': kalas,
+        'kalas': kalas,
         # 'kardex': kardex,
         # 'mojodi': mojodi,
 
