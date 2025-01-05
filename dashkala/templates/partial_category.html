@@ -35,10 +35,10 @@
                                                 <span class="fc-kharid-number">
                                                     <i class="fa fa-truck">
                                                         
-                                                    </i> {{ day.kharid }}</span> 
+                                                    </i> {{ day.kharid|floatformat:0 }}</span>
                                             {% endif %} 
                                             {% if day.sales > 0 %} 
-                                                <span class="fc-sales-number">{{ day.sales }} 
+                                                <span class="fc-sales-number">{{ day.sales|floatformat:0 }}
                                                     <i class="fa fa-shopping-cart"></i>
                                                 </span> 
                                             {% endif %} 
