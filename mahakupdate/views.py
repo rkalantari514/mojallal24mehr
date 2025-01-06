@@ -1564,7 +1564,7 @@ def CreateKalaGroup(request):
 def update_kala_categories():
     # گرفتن دسته‌بندی پیش‌فرض "تعیین نشده ۳"
     default_category = Category.objects.filter(name='تعیین نشده', level=3).first()
-    Kala.objects.update(category=None)
+    # Kala.objects.update(category=None)
     # گرفتن تمامی کالاها
     kalas = Kala.objects.all()
     updates = []
