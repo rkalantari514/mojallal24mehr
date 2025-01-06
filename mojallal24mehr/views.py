@@ -4,7 +4,7 @@ from mahakupdate.models import Category
 
 
 def get_category_tree(parent=None):
-    categories = Category.objects.filter(parent=parent)
+    categories = Category.objects.filter(parent=parent).order_by('-id')
     tree = []
     for category in categories:
         subtree = get_category_tree(category)
