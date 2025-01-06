@@ -16,6 +16,11 @@ import jdatetime
 def fix_persian_characters(value):
     return standardize(value)
 
+
+
+
+
+
 @login_required(login_url='/login')
 def DsshKala(request):
     start_time = time.time()  # زمان شروع تابع
@@ -756,7 +761,6 @@ def CategoryDetail(request, *args, **kwargs):
                 'name': category.name,
                 'count': total_sale
             })
-
 
     context = {
         'title': f'{cat}',

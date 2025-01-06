@@ -24,3 +24,36 @@
 <link rel="stylesheet" href="{% static 'css/charts.min.css' %}">
 
 <style> .clickable-row { cursor: pointer; /* تغییر حالت نمایشگر موس به حالت کلیک */ } </style>
+<style>
+.category-container {
+    display : flex !important;
+    align-items: center !important;
+    justify-content: space-between !important; /* جایگذاری صحیح عناصر */
+    width: 100% !important;
+    direction: rtl !important; /* تنظیم جهت راست به چپ */
+}
+
+.expand-icon {
+    flex-shrink: 0 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    margin-left: 5px !important; /* کاهش فاصله برای راست‌چین */
+    margin-right: 10px !important; /* اضافه کردن فاصله از سمت راست */
+    font-size: 10px !important; /* کاهش اندازه فونت */
+    padding: 5px !important; /* کاهش padding به صفر */
+    width: 20px !important; /* تنظیم عرض کمتر */
+}
+
+
+
+.category-name {
+    flex-grow: 1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    margin-right: 10px !important; /* فاصله مناسب برای راست‌چین */
+    text-align: right !important; /* تنظیم متن به راست */
+}
+
+</style>
