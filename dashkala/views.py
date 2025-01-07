@@ -16,6 +16,11 @@ import jdatetime
 def fix_persian_characters(value):
     return standardize(value)
 
+
+
+
+
+
 @login_required(login_url='/login')
 def DsshKala(request):
     start_time = time.time()  # زمان شروع تابع
@@ -663,7 +668,7 @@ def CategoryDetail(request, *args, **kwargs):
         kardex_data2 = Kardex.objects.filter(ktype__in=(1,2))
     days_in_month = generate_calendar_data(current_month, current_year, kardex_data2)
 
-    cat1 = Category.objects.filter(level=1)
+    cat1 = Category.objects.filter(level=1).order_by('-id')
     if cat_level==1:
         print('cat_level==1')
         par1=cat
@@ -756,7 +761,6 @@ def CategoryDetail(request, *args, **kwargs):
                 'name': category.name,
                 'count': total_sale
             })
-
 
     context = {
         'title': f'{cat}',

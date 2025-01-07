@@ -487,7 +487,7 @@
                                                         {{ kala.total_sale }}</a></td>
                                                    <td class="card-text text-center"><a href="/dash/kala/detail/{{ kala.code }}"
                                                                                              target="_blank">
-                                                        {{ kala.s_m_ratio }}</a></td>
+                                                        {{ kala.s_m_ratio|floatformat:2 }}</a></td>
 
 
 
@@ -877,6 +877,8 @@
             return number.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
         }
     </script>
+
+
 {% endblock %}
 
 

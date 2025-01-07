@@ -26,14 +26,14 @@ SECRET_KEY = 'django-insecure--o*rtwaxd%_%yz7t2505stw(r_l$ftjl^7l$c_nr5k4#hcjgj*
 # SECURITY WARNING: don't run with debug turned on in production!
 
 
-DEBUG = False
-sn = os.getenv('COMPUTERNAME')
-print('sn')
-print(sn)
-if sn in ('DESKTOP-ITU3EHV','TECH_MANAGER','DESKTOP-1ERPR1M'):
-    DEBUG = True
-else:
-    print('DEBUG=False')
+# DEBUG = False
+# sn = os.getenv('COMPUTERNAME')
+# print('sn')
+# print(sn)
+# if sn in ('DESKTOP-ITU3EHV','TECH_MANAGER','DESKTOP-1ERPR1M'):
+#     DEBUG = True
+# else:
+#     print('DEBUG=False')
 
 DEBUG = True
 
