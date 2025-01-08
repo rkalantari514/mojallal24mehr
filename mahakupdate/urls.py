@@ -2,7 +2,7 @@ from django.urls import path
 from . import views, jobs
 from mahakupdate.views import Update_from_mahak, Kala_group, category_create_view, kala_create_view, Updatedb, \
     UpdateFactor, UpdateKala, UpdateFactorDetail, Updateall, UpdateKardex, UpdatePerson, UpdateKalaGroupinfo, \
-    CreateKalaGroup, UpdateKalaGroup, UpdateStorage, UpdateMojodi, Update_Sales_Mojodi_Ratio
+    CreateKalaGroup, UpdateKalaGroup, UpdateStorage, UpdateMojodi, Update_Sales_Mojodi_Ratio, UpdateSanad
 
 urlpatterns = [
     path('1', Update_from_mahak, name="update"),
@@ -20,6 +20,13 @@ urlpatterns = [
     path('update/createkalagroup', CreateKalaGroup, name="createkalagroup"),
     path('update/updatekalagroup', UpdateKalaGroup, name="updatekalagroup"),
     path('update/updatsmratio', Update_Sales_Mojodi_Ratio, name="update_sales_mojodi_ratio"),
+    path('update/sanad', UpdateSanad, name="Update_Sanad"),
+
+
+
+
+
+
 
     path('kalagroup', Kala_group, name="kala_group"),
     path('category/create/', category_create_view, name='category_create'),

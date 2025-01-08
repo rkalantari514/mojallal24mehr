@@ -451,3 +451,16 @@ class WordCount(models.Model):
         verbose_name_plural = 'کلمه'
 
 
+
+class Sanad(models.Model):
+    code = models.IntegerField(verbose_name='کد')
+    tarikh = models.CharField(max_length=150, verbose_name='تاریخ  شمسی')
+    sharh = models.CharField(max_length=300, verbose_name='شرح سند')
+    SanadID = models.IntegerField(verbose_name='شناسه سند')
+
+    class Meta:
+        verbose_name = 'سند'
+        verbose_name_plural = 'اسناد'
+
+    def __str__(self):
+        return f"{self.code} - {self.tarikh}"
