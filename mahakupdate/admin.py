@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo, \
-    Storagek, Mojodi
+    Storagek, Mojodi, Sanad
 
 
 # Register your models here.
@@ -107,6 +107,16 @@ class StoragekAdmin(admin.ModelAdmin):
     class Meta:
         model = Storagek
 
+
+class SanadAdmin(admin.ModelAdmin):
+    list_display = ['__str__','code','tarikh','sharh']
+    # list_filter = ['level','parent',]
+    # list_editable = ['name','parent','level']
+    # search_fields = ['name','lname','group']
+
+    class Meta:
+        model = Sanad
+
 admin.site.register(Mtables, MtablesAdmin)
 admin.site.register(Kala, KalaAdmin)
 admin.site.register(Factor, FactorAdmin)
@@ -118,3 +128,4 @@ admin.site.register(Mojodi, MojodiAdmin)
 admin.site.register(Person, PersonAdmin)
 admin.site.register(KalaGroupinfo, KalaGroupinfoAdmin)
 admin.site.register(Storagek, StoragekAdmin)
+admin.site.register(Sanad, SanadAdmin)

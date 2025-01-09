@@ -1,8 +1,5 @@
-import io  
-import sys  
-from django.shortcuts import render  
-import pyodbc
-import os
+from django.shortcuts import render
+from django.http import JsonResponse
 
 from mahakupdate.models import Mtables
 from mahakupdate.views import connect_to_mahak
@@ -13,6 +10,9 @@ def get_table_columns(cursor, table_name):
     cursor.execute(f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table_name}'")  
     columns = cursor.fetchall()  
     return [col[0] for col in columns]  # استخراج تنها نام ستون‌ها  
+
+
+
 
 
 def get_all_table_data(cursor):  
@@ -59,3 +59,37 @@ def MTables(request):
     # conn.close()
     cursor.close()
     return render(request, 'tables.html', context)
+
+
+
+def search_in_tables(request, search_text):
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    table_data = {}
+    cursor.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'")
+    tables = cursor.fetchall()
+
+    selected_tables = []
+    mtable = Mtables.objects.filter(row_count__range=(1, 100000))
+    for m in mtable:
+        selected_tables.append(m.name)
+
+    for table_name in selected_tables:
+        try:
+            columns = get_table_columns(cursor, table_name)
+            for column in columns:
+                query = f"SELECT COUNT(*) FROM {table_name} WHERE {column} LIKE '%{search_text}%'"
+                cursor.execute(query)
+                count = cursor.fetchone()[0]
+                if count > 0:
+                    print(f"Table: {table_name}, Column: {column}, Count: {count}")
+                    table_data[f"{table_name} ({column})"] = count
+        except Exception as e:
+            print(e)
+
+    cursor.close()
+    return JsonResponse(table_data)
+
+
+
+
