@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <!-- اضافه کردن استایل DataTables -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        .total-row {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        .comparison-table {
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+{% load custom_filters %}
+    <h1>{{ title }}</h1>
+    <p>کاربر: {{ user.username }}</p>
+
+    <!-- جدول مقایسه‌ای -->
+    <h2>جدول مقایسه‌ای</h2>
+    <table id="comparisonTable" class="display">
+        <thead>
+            <tr>
+                <th>نوع</th>
+                <th>مجموع بدهکار</th>
+                <th>مجموع بستانکار</th>
+                <th>مجموع مانده</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in comparison_table %}
+            <tr>
+                <td>{{ row.type }}</td>
+                <td>{{ row.total_bed|accounting_format }}</td>
+                <td>{{ row.total_bes|accounting_format }}</td>
+                <td>{{ row.total_curramount|accounting_format }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- جدول کل -->
+    <h2>جدول کل</h2>
+    <table id="kolTable" class="display">
+        <thead>
+            <tr>
+                <th>کل</th>
+                <th>مجموع بدهکار</th>
+                <th>مجموع بستانکار</th>
+                <th>مجموع مانده</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in table_kol %}
+            <tr {% if row.kol == "جمع کل" %}class="total-row"{% endif %}>
+                <td>{{ row.kol }}</td>
+                <td>{{ row.total_bed|accounting_format }}</td>
+                <td>{{ row.total_bes|accounting_format }}</td>
+                <td>{{ row.total_curramount|accounting_format }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- جدول معین -->
+    <h2>جدول معین</h2>
+    <table id="moinTable" class="display">
+        <thead>
+            <tr>
+                <th>معین</th>
+                <th>مجموع بدهکار</th>
+                <th>مجموع بستانکار</th>
+                <th>مجموع مانده</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in table_moin %}
+            <tr {% if row.moin == "جمع کل" %}class="total-row"{% endif %}>
+                <td>{{ row.moin }}</td>
+                <td>{{ row.total_bed|accounting_format }}</td>
+                <td>{{ row.total_bes|accounting_format }}</td>
+                <td>{{ row.total_curramount|accounting_format }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- جدول تفضیلی -->
+    <h2>جدول تفضیلی</h2>
+    <table id="tafziliTable" class="display">
+        <thead>
+            <tr>
+                <th>تفضیلی</th>
+                <th>مجموع بدهکار</th>
+                <th>مجموع بستانکار</th>
+                <th>مجموع مانده</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in table_tafzili %}
+            <tr {% if row.tafzili == "جمع کل" %}class="total-row"{% endif %}>
+                <td>{{ row.tafzili }}</td>
+                <td>{{ row.total_bed|accounting_format }}</td>
+                <td>{{ row.total_bes|accounting_format }}</td>
+                <td>{{ row.total_curramount|accounting_format }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- اضافه کردن کتابخانه‌های JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script>
+        // فعال کردن DataTables برای تمام جدول‌ها
+        $(document).ready(function() {
+            $('#comparisonTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fa.json" // فارسی‌سازی
+                }
+            });
+            $('#kolTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fa.json" // فارسی‌سازی
+                }
+            });
+            $('#moinTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fa.json" // فارسی‌سازی
+                }
+            });
+            $('#tafziliTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fa.json" // فارسی‌سازی
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'dashkala',
     'django_apscheduler',
     'custom_login',
+    'accounting',
 
 ]
 
