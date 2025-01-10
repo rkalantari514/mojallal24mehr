@@ -491,3 +491,24 @@ class SanadDetail(models.Model):
 
     def __str__(self):
         return f"{self.code}-{self.radif}"
+
+
+
+
+class AccCoding(models.Model):
+    LEVEL_CHOICES = (
+        (1, 'کل'),
+        (2, 'معین'),
+        (3, 'تفضیلی'),
+    )
+    code = models.IntegerField(verbose_name='کد')  # کد دسته‌بندی
+    name = models.CharField(max_length=150, verbose_name='نام دسته‌بندی')
+    level = models.PositiveSmallIntegerField(choices=LEVEL_CHOICES, verbose_name='سطح')
+
+    class Meta:
+        verbose_name = 'کدینگ حسابداری'
+        verbose_name_plural = 'کدینگ ای حسابداری'
+        unique_together = ('code', 'level')  # کد و سطح باید یکتا باشند
+
+    def __str__(self):
+        return f"{self.code} - {self.name} (سطح {self.level})"

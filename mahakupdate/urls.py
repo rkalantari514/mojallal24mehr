@@ -3,7 +3,7 @@ from . import views, jobs
 from mahakupdate.views import Update_from_mahak, Kala_group, category_create_view, kala_create_view, Updatedb, \
     UpdateFactor, UpdateKala, UpdateFactorDetail, Updateall, UpdateKardex, UpdatePerson, UpdateKalaGroupinfo, \
     CreateKalaGroup, UpdateKalaGroup, UpdateStorage, UpdateMojodi, Update_Sales_Mojodi_Ratio, UpdateSanad, \
-    UpdateSanadDetail
+    UpdateSanadDetail, UpdateAccCoding
 
 urlpatterns = [
     path('1', Update_from_mahak, name="update"),
@@ -23,6 +23,7 @@ urlpatterns = [
     path('update/updatsmratio', Update_Sales_Mojodi_Ratio, name="update_sales_mojodi_ratio"),
     path('update/sanad', UpdateSanad, name="Update_Sanad"),
     path('update/sanaddetail', UpdateSanadDetail, name="Update_Sanad-Detail"),
+    path('update/acccoding', UpdateAccCoding, name="Update_Sanad-Detail"),
 
 
 

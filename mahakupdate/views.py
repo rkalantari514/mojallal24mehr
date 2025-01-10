@@ -3,7 +3,7 @@ import pyodbc
 from django.db.models import Min
 from datetime import datetime
 from custom_login.models import UserLog
-from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category, Sanad, SanadDetail
+from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category, Sanad, SanadDetail, AccCoding
 from django.shortcuts import render
 from .forms import CategoryForm, KalaForm
 from .models import FactorDetaile
@@ -78,6 +78,7 @@ def Updatedb(request):
         'Stores': 'update/storage',
         'Sanad': 'update/sanad',
         'Sanad_detail': 'update/sanaddetail',
+        'AccTotals': 'update/acccoding',
 
     }
 
@@ -126,6 +127,7 @@ def Updateall(request):
         'Stores': UpdateStorage,
         'Sanad': UpdateSanad,
         'Sanad_detail': UpdateSanadDetail,
+        'AccTotals': UpdateAccCoding,
     }
 
     responses = []
@@ -2141,5 +2143,91 @@ def UpdateSanadDetail(request):
     table.row_count = row_count
     table.column_count = column_count
     table.save()
+
+    return redirect('/updatedb')
+
+
+
+def UpdateAccCoding(request):
+    t0 = time.time()
+    print('شروع آپدیت کدینگ حسابداری (سطح 1) --------------------------------')
+
+    # اتصال به دیتابیس خارجی
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    t1 = time.time()
+
+    # خواندن داده‌های سطح 1 (کل) از دیتابیس خارجی
+    cursor.execute("SELECT Code, Title FROM AccTotals WHERE Code IS NOT NULL AND Title IS NOT NULL")
+    mahak_data = cursor.fetchall()
+    existing_in_mahak = {int(row[0]) for row in mahak_data}  # کدهای موجود در دیتابیس خارجی
+    print(f"تعداد رکوردهای موجود در دیتابیس خارجی: {len(existing_in_mahak)}")
+
+    # داده‌های فعلی در مدل AccCoding (فقط سطح 1)
+    current_acc_codings = {acc.code: acc for acc in AccCoding.objects.filter(level=1)}
+
+    # لیست‌ها برای ایجاد، به‌روزرسانی و حذف رکوردها
+    acc_codings_to_create = []
+    acc_codings_to_update = []
+    acc_codings_to_delete = []
+
+    BATCH_SIZE = 1000  # اندازه دسته‌ها برای عملیات bulk
+
+    # پردازش داده‌های جدید
+    for row in mahak_data:
+        code = int(row[0])
+        name = row[1] if row[1] is not None else ''
+
+        if code in current_acc_codings:
+            # اگر رکورد وجود دارد، بررسی می‌کنیم که نیاز به به‌روزرسانی دارد یا نه
+            acc_coding = current_acc_codings[code]
+            if acc_coding.name != name:
+                acc_coding.name = name
+                acc_codings_to_update.append(acc_coding)
+        else:
+            # اگر رکورد وجود ندارد، آن را به لیست ایجاد اضافه می‌کنیم
+            acc_codings_to_create.append(AccCoding(code=code, name=name, level=1))
+
+    # Bulk create رکوردهای جدید
+    AccCoding.objects.bulk_create(acc_codings_to_create, batch_size=BATCH_SIZE)
+
+    # Bulk update رکوردهای موجود
+    AccCoding.objects.bulk_update(acc_codings_to_update, ['name'], batch_size=BATCH_SIZE)
+
+    # حذف رکوردهای اضافی
+    current_acc_coding_codes = set(AccCoding.objects.filter(level=1).values_list('code', flat=True))
+    for code in current_acc_coding_codes:
+        if code not in existing_in_mahak:
+            acc_codings_to_delete.append(AccCoding.objects.get(code=code, level=1).id)
+
+    # حذف به صورت دسته‌ای
+    if acc_codings_to_delete:
+        for i in range(0, len(acc_codings_to_delete), BATCH_SIZE):
+            batch = acc_codings_to_delete[i:i + BATCH_SIZE]
+            print(f"حذف شناسه‌ها: {batch}")  # برای بررسی، شناسه‌های حذف را چاپ کنید
+            AccCoding.objects.filter(id__in=batch).delete()
+    else:
+        print("هیچ رکوردی برای حذف وجود ندارد.")
+
+    # محاسبه زمان اجرای کل
+    tend = time.time()
+    total_time = tend - t0
+    db_time = t1 - t0
+    update_time = tend - t1
+
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    print(f"اتصال به دیتابیس: {db_time:.2f} ثانیه")
+    print(f"زمان آپدیت جدول: {update_time:.2f} ثانیه")
+
+    # به‌روزرسانی اطلاعات در جدول Mtables
+    table = Mtables.objects.filter(name='AccCoding').last()
+    if table:
+        table.last_update_time = timezone.now()
+        table.update_duration = update_time
+        table.row_count = AccCoding.objects.filter(level=1).count()
+        table.column_count = 3  # تعداد ستون‌های مدل AccCoding
+        table.save()
+    else:
+        print("جدول Mtables برای AccCoding یافت نشد.")
 
     return redirect('/updatedb')

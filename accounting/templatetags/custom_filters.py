@@ -9,7 +9,7 @@ def accounting_format(value):
     try:
         value = float(value)
         if value < 0:
-            return f"({abs(value):,.0f})"  # نمایش اعداد منفی در پرانتز
-        return f"{value:,.0f}"  # نمایش اعداد مثبت به صورت معمولی
+            return f"({abs(value):,.2f})"  # نمایش اعداد منفی در پرانتز با ۲ رقم اعشار
+        return f"{value:,.2f}"  # نمایش اعداد مثبت با ۲ رقم اعشار
     except (ValueError, TypeError):
         return value

@@ -4,7 +4,8 @@ import time
 from django.db.models import Sum
 
 from custom_login.models import UserLog
-from mahakupdate.models import SanadDetail
+from mahakupdate.models import SanadDetail, AccCoding
+
 
 # Create your views here.
 
@@ -58,8 +59,16 @@ def TarazKol(request, *args, **kwargs):
             total_bes = item['total_bes'] or 0
             total_curramount = item['total_curramount'] or 0  # مقدار curramount
 
+            # دریافت نام دسته‌بندی از مدل AccCoding
+            if key == 'kol':
+                acc_coding = AccCoding.objects.filter(code=item[key], level=1).first()
+                name = acc_coding.name if acc_coding else 'نام نامشخص'
+            else:
+                name = ''
+
             table.append({
                 key: item[key],
+                'name': name,  # اضافه کردن نام دسته‌بندی
                 'total_bed': total_bed,
                 'total_bes': total_bes,
                 'total_curramount': total_curramount,  # اضافه کردن curramount
@@ -72,6 +81,7 @@ def TarazKol(request, *args, **kwargs):
         # اضافه کردن ردیف جمع کل
         table.append({
             key: 'جمع کل',
+            'name': '',  # نام برای ردیف جمع کل خالی است
             'total_bed': total_bed_sum,
             'total_bes': total_bes_sum,
             'total_curramount': total_curramount_sum,  # اضافه کردن curramount
@@ -121,7 +131,6 @@ def TarazKol(request, *args, **kwargs):
     }
 
     return render(request, 'taraz_kol.html', context)
-
 
 
 
