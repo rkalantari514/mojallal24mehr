@@ -470,6 +470,7 @@ class Sanad(models.Model):
 
 class SanadDetail(models.Model):
     code = models.IntegerField(blank=True, null=True,verbose_name='کد')
+    date=models.DateField(blank=True, null=True,verbose_name='تاریخ سند')
     radif = models.IntegerField(blank=True, null=True,verbose_name='ردیف')
     kol = models.IntegerField(blank=True, null=True,verbose_name='کل')
     moin = models.IntegerField(blank=True, null=True,verbose_name='معین')

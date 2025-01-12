@@ -13,7 +13,7 @@ pip install psycopg2
 python -m pip install --upgrade pip setuptools
 pip install celery
 pip install Pillow
-
+pip install JalaliDate
 
 
 INSTALLED_APPS = [

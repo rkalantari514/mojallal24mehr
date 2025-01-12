@@ -118,7 +118,7 @@ class SanadAdmin(admin.ModelAdmin):
         model = Sanad
 
 class SanadDetailAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount']
+    list_display = ['__str__', 'code','date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount']
     list_filter = ['kol', 'moin', 'tafzili']
     # list_editable = ['name','parent','level']
     # search_fields = ['name','lname','group']
