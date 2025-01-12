@@ -2220,7 +2220,7 @@ def UpdateAccCoding(request):
     print(f"زمان آپدیت جدول: {update_time:.2f} ثانیه")
 
     # به‌روزرسانی اطلاعات در جدول Mtables
-    table = Mtables.objects.filter(name='AccCoding').last()
+    table = Mtables.objects.filter(name='AccTotals').last()
     if table:
         table.last_update_time = timezone.now()
         table.update_duration = update_time
