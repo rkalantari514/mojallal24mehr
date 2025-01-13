@@ -45,6 +45,9 @@
         .comparison-table {
             margin-bottom: 40px;
         }
+        .sub-table {
+            margin-left: 20px;
+        }
     </style>
 </head>
 <body>
@@ -75,133 +78,87 @@
         </tbody>
     </table>
 
-<!-- جدول کل -->
-<h2>جدول کل</h2>
-<table id="kolTable" class="display">
-    <thead>
-        <tr>
-            <th>کل</th>
-            <th>نام کل</th>  <!-- ستون جدید برای نام کل -->
-            <th>مجموع بدهکار</th>
-            <th>مجموع بستانکار</th>
-            <th>مجموع مانده</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for row in table_kol %}
-        <tr {% if row.kol == "جمع کل" %}class="total-row"{% endif %}>
-            <td>{{ row.kol }}</td>
-            <td>{{ row.name }}</td>  <!-- نمایش نام کل -->
-            <td>{{ row.total_bed|accounting_format }}</td>
-            <td>{{ row.total_bes|accounting_format }}</td>
-            <td>{{ row.total_curramount|accounting_format }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-    <!-- جدول معین -->
-    <h2>جدول معین</h2>
-    <table id="moinTable" class="display">
+    <!-- نمایش داده‌های سلسله‌مراتبی -->
+    <h2>تراز سلسله‌مراتبی</h2>
+    {% for kol in hierarchical_data %}
+    <table class="sub-table">
+        <thead>
+            <tr>
+                <th>کل</th>
+                <th>نام کل</th>
+                <th>مجموع بدهکار</th>
+                <th>مجموع بستانکار</th>
+                <th>مجموع مانده</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ kol.kol }}</td>
+                <td>{{ kol.name }}</td>
+                <td>{{ kol.total_bed|accounting_format }}</td>
+                <td>{{ kol.total_bes|accounting_format }}</td>
+                <td>{{ kol.total_curramount|accounting_format }}</td>
+            </tr>
+        </tbody>
+    </table>
+    {% for moin in kol.moins %}
+    <table class="sub-table">
         <thead>
             <tr>
                 <th>معین</th>
+                <th>نام معین</th>
                 <th>مجموع بدهکار</th>
                 <th>مجموع بستانکار</th>
                 <th>مجموع مانده</th>
             </tr>
         </thead>
         <tbody>
-            {% for row in table_moin %}
-            <tr {% if row.moin == "جمع کل" %}class="total-row"{% endif %}>
-                <td>{{ row.moin }}</td>
-                <td>{{ row.total_bed|accounting_format }}</td>
-                <td>{{ row.total_bes|accounting_format }}</td>
-                <td>{{ row.total_curramount|accounting_format }}</td>
+            <tr>
+                <td>{{ moin.moin }}</td>
+                <td>{{ moin.name }}</td>
+                <td>{{ moin.total_bed|accounting_format }}</td>
+                <td>{{ moin.total_bes|accounting_format }}</td>
+                <td>{{ moin.total_curramount|accounting_format }}</td>
             </tr>
-            {% endfor %}
         </tbody>
     </table>
-
-    <!-- جدول تفضیلی -->
-    <h2>جدول تفضیلی</h2>
-    <table id="tafziliTable" class="display">
+    {% for tafzili in moin.tafzilis %}
+    <table class="sub-table">
         <thead>
             <tr>
                 <th>تفضیلی</th>
+                <th>نام تفضیلی</th>
                 <th>مجموع بدهکار</th>
                 <th>مجموع بستانکار</th>
                 <th>مجموع مانده</th>
             </tr>
         </thead>
         <tbody>
-            {% for row in table_tafzili %}
-            <tr {% if row.tafzili == "جمع کل" %}class="total-row"{% endif %}>
-                <td>{{ row.tafzili }}</td>
-                <td>{{ row.total_bed|accounting_format }}</td>
-                <td>{{ row.total_bes|accounting_format }}</td>
-                <td>{{ row.total_curramount|accounting_format }}</td>
+            <tr>
+                <td>{{ tafzili.tafzili }}</td>
+                <td>{{ tafzili.name }}</td>
+                <td>{{ tafzili.total_bed|accounting_format }}</td>
+                <td>{{ tafzili.total_bes|accounting_format }}</td>
+                <td>{{ tafzili.total_curramount|accounting_format }}</td>
             </tr>
-            {% endfor %}
         </tbody>
     </table>
+    {% endfor %}
+    {% endfor %}
+    {% endfor %}
 
     <!-- اضافه کردن کتابخانه‌های JavaScript -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script>
-    // تعریف پلاگین سفارشی برای سورت کردن اعداد حسابداری
-    jQuery.extend(jQuery.fn.dataTableExt.oSort, {
-        "accounting-pre": function (a) {
-            a = a.replace(/[^\d\.\-]/g, ""); // حذف همه کاراکترهای غیر عددی
-            if (a.startsWith("(") && a.endsWith(")")) {
-                a = "-" + a.slice(1, -1); // تبدیل پرانتز به علامت منفی
-            }
-            return parseFloat(a);
-        },
-        "accounting-asc": function (a, b) {
-            return a - b;
-        },
-        "accounting-desc": function (a, b) {
-            return b - a;
-        }
-    });
-
-    // فعال کردن DataTables برای تمام جدول‌ها
-    $(document).ready(function() {
-        $('#comparisonTable').DataTable({
-            "columnDefs": [
-                { "type": "accounting", "targets": [1, 2, 3] } // اعمال پلاگین برای ستون‌های عددی
-            ],
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fa.json" // فارسی‌سازی
-            }
+    <script>
+        // فعال کردن DataTables برای جدول مقایسه‌ای
+        $(document).ready(function() {
+            $('#comparisonTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fa.json" // فارسی‌سازی
+                }
+            });
         });
-        $('#kolTable').DataTable({
-            "columnDefs": [
-                { "type": "accounting", "targets": [1, 2, 3] }
-            ],
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fa.json"
-            }
-        });
-        $('#moinTable').DataTable({
-            "columnDefs": [
-                { "type": "accounting", "targets": [1, 2, 3] }
-            ],
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fa.json"
-            }
-        });
-        $('#tafziliTable').DataTable({
-            "columnDefs": [
-                { "type": "accounting", "targets": [1, 2, 3] }
-            ],
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fa.json"
-            }
-        });
-    });
-</script>
+    </script>
 </body>
 </html>

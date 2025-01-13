@@ -2043,7 +2043,10 @@ def UpdateSanadDetail(request):
     BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
 
     # پردازش داده‌های جدید
+    con1=1
     for row in mahakt_data:
+        print(con1)
+        con1+=1
         code = int(row[0])
         radif = int(row[1])
         try:
@@ -2068,7 +2071,7 @@ def UpdateSanadDetail(request):
         if key in current_sanads:
             sanad = current_sanads[key]
             # جستجوی مدل Sanad برای پیدا کردن تاریخ
-            related_sanad = Sanad.objects.filter(code=sanad_code).first()
+            related_sanad = Sanad.objects.filter(code=code).first()
             if related_sanad:
                 tarikh_shamsi = related_sanad.tarikh  # فرض اینکه tarikh یک فیلد است
                 # تبدیل تاریخ شمسی به میلادی

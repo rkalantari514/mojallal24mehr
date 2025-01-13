@@ -63,6 +63,12 @@ def TarazKol(request, *args, **kwargs):
             if key == 'kol':
                 acc_coding = AccCoding.objects.filter(code=item[key], level=1).first()
                 name = acc_coding.name if acc_coding else 'نام نامشخص'
+            elif key == 'moin':
+                acc_coding = AccCoding.objects.filter(code=item[key], level=2).first()
+                name = acc_coding.name if acc_coding else 'نام نامشخص'
+            elif key == 'tafzili':
+                acc_coding = AccCoding.objects.filter(code=item[key], level=3).first()
+                name = acc_coding.name if acc_coding else 'نام نامشخص'
             else:
                 name = ''
 
@@ -94,6 +100,44 @@ def TarazKol(request, *args, **kwargs):
     table_moin, moin_bed_sum, moin_bes_sum, moin_curramount_sum = create_table(moin_totals, 'moin')
     table_tafzili, tafzili_bed_sum, tafzili_bes_sum, tafzili_curramount_sum = create_table(tafzili_totals, 'tafzili')
 
+    # ایجاد ساختار سلسله‌مراتبی
+    hierarchical_data = []
+    for kol in table_kol:
+        if kol['kol'] == 'جمع کل':
+            continue  # از ردیف جمع کل صرف‌نظر می‌کنیم
+        kol_item = {
+            'kol': kol['kol'],
+            'name': kol['name'],
+            'total_bed': kol['total_bed'],
+            'total_bes': kol['total_bes'],
+            'total_curramount': kol['total_curramount'],
+            'moins': []
+        }
+        for moin in table_moin:
+            if moin['moin'] == 'جمع کل':
+                continue  # از ردیف جمع کل صرف‌نظر می‌کنیم
+            moin_item = {
+                'moin': moin['moin'],
+                'name': moin['name'],
+                'total_bed': moin['total_bed'],
+                'total_bes': moin['total_bes'],
+                'total_curramount': moin['total_curramount'],
+                'tafzilis': []
+            }
+            for tafzili in table_tafzili:
+                if tafzili['tafzili'] == 'جمع کل':
+                    continue  # از ردیف جمع کل صرف‌نظر می‌کنیم
+                tafzili_item = {
+                    'tafzili': tafzili['tafzili'],
+                    'name': tafzili['name'],
+                    'total_bed': tafzili['total_bed'],
+                    'total_bes': tafzili['total_bes'],
+                    'total_curramount': tafzili['total_curramount'],
+                }
+                moin_item['tafzilis'].append(tafzili_item)
+            kol_item['moins'].append(moin_item)
+        hierarchical_data.append(kol_item)
+
     # جدول مقایسه‌ای بین جمع‌های کل
     comparison_table = [
         {
@@ -124,13 +168,10 @@ def TarazKol(request, *args, **kwargs):
     context = {
         'title': 'تراز آزمایشی',
         'user': user,
-        'table_kol': table_kol,
-        'table_moin': table_moin,
-        'table_tafzili': table_tafzili,
+        'hierarchical_data': hierarchical_data,  # داده‌های سلسله‌مراتبی
         'comparison_table': comparison_table,
     }
 
     return render(request, 'taraz_kol.html', context)
-
 
 
