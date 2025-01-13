@@ -2118,10 +2118,12 @@ def UpdateSanadDetail(request):
 
     # Bulk create new sanad details
     if sanads_to_create:
+        print('شروع به ساخت')
         SanadDetail.objects.bulk_create(sanads_to_create, batch_size=BATCH_SIZE)
 
     # Bulk update existing sanad details
     if sanads_to_update:
+        print('شروع به آپدیت')
         SanadDetail.objects.bulk_update(sanads_to_update,
                                          ['kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
                                           'sanad_code', 'sanad_type', 'meghdar',
@@ -2138,6 +2140,7 @@ def UpdateSanadDetail(request):
 
     # حذف به صورت دسته‌ای
     if sanads_to_delete:
+        print('شروع به حذف')
         for i in range(0, len(sanads_to_delete), BATCH_SIZE):
             batch = sanads_to_delete[i:i + BATCH_SIZE]
             print(f"حذف شناسه‌ها: {batch}")  # برای بررسی، شناسه‌های حذف را چاپ کنید
