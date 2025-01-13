@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
+
     <!-- اضافه کردن استایل DataTables -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css">
     <style>
@@ -13,7 +14,7 @@
             margin: 0;
             padding: 20px;
         }
-        h1 {
+        h1, h2 {
             color: #333;
             text-align: center;
         }
@@ -37,17 +38,6 @@
         tr:hover {
             background-color: #ddd;
         }
-        .total-row {
-            background-color: #4CAF50;
-            color: white;
-            font-weight: bold;
-        }
-        .comparison-table {
-            margin-bottom: 40px;
-        }
-        .sub-table {
-            margin-left: 20px;
-        }
     </style>
 </head>
 <body>
@@ -55,105 +45,77 @@
     <h1>{{ title }}</h1>
     <p>کاربر: {{ user.username }}</p>
 
-    <!-- جدول مقایسه‌ای -->
-    <h2>جدول مقایسه‌ای</h2>
-    <table id="comparisonTable" class="display">
+    <!-- جدول کل -->
+    <h2>جدول کل</h2>
+    <table id="kolTable" class="display">
         <thead>
             <tr>
-                <th>نوع</th>
+                <th>کل</th>
+                <th>نام کل</th>
+                <th>سطح</th>
                 <th>مجموع بدهکار</th>
                 <th>مجموع بستانکار</th>
                 <th>مجموع مانده</th>
             </tr>
         </thead>
         <tbody>
-            {% for row in comparison_table %}
+            {% for kol in table_kol %}
             <tr>
-                <td>{{ row.type }}</td>
-                <td>{{ row.total_bed|accounting_format }}</td>
-                <td>{{ row.total_bes|accounting_format }}</td>
-                <td>{{ row.total_curramount|accounting_format }}</td>
+                <td>{{ kol.kol }}</td>
+                <td>{{ kol.name }}</td>
+                <td>{{ kol.level }}</td>
+                <td>{{ kol.total_bed|accounting_format }}</td>
+                <td>{{ kol.total_bes|accounting_format }}</td>
+                <td>{{ kol.total_curramount|accounting_format }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <!-- نمایش داده‌های سلسله‌مراتبی -->
-    <h2>تراز سلسله‌مراتبی</h2>
-    {% for kol in hierarchical_data %}
-    <table class="sub-table">
+    <!-- جدول معین -->
+    <h2>جدول معین</h2>
+    <table id="moinTable" class="display">
         <thead>
             <tr>
                 <th>کل</th>
                 <th>نام کل</th>
-                <th>مجموع بدهکار</th>
-                <th>مجموع بستانکار</th>
-                <th>مجموع مانده</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ kol.kol }}</td>
-                <td>{{ kol.name }}</td>
-                <td>{{ kol.total_bed|accounting_format }}</td>
-                <td>{{ kol.total_bes|accounting_format }}</td>
-                <td>{{ kol.total_curramount|accounting_format }}</td>
-            </tr>
-        </tbody>
-    </table>
-    {% for moin in kol.moins %}
-    <table class="sub-table">
-        <thead>
-            <tr>
                 <th>معین</th>
                 <th>نام معین</th>
+                <th>سطح</th>
                 <th>مجموع بدهکار</th>
                 <th>مجموع بستانکار</th>
                 <th>مجموع مانده</th>
             </tr>
         </thead>
         <tbody>
+            {% for moin in table_moin %}
             <tr>
+                <td>{{ moin.kol_num }}</td>
+                <td>{{ moin.kol_name }}</td>
                 <td>{{ moin.moin }}</td>
                 <td>{{ moin.name }}</td>
+                <td>{{ moin.level }}</td>
                 <td>{{ moin.total_bed|accounting_format }}</td>
                 <td>{{ moin.total_bes|accounting_format }}</td>
                 <td>{{ moin.total_curramount|accounting_format }}</td>
             </tr>
+            {% endfor %}
         </tbody>
     </table>
-    {% for tafzili in moin.tafzilis %}
-    <table class="sub-table">
-        <thead>
-            <tr>
-                <th>تفضیلی</th>
-                <th>نام تفضیلی</th>
-                <th>مجموع بدهکار</th>
-                <th>مجموع بستانکار</th>
-                <th>مجموع مانده</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ tafzili.tafzili }}</td>
-                <td>{{ tafzili.name }}</td>
-                <td>{{ tafzili.total_bed|accounting_format }}</td>
-                <td>{{ tafzili.total_bes|accounting_format }}</td>
-                <td>{{ tafzili.total_curramount|accounting_format }}</td>
-            </tr>
-        </tbody>
-    </table>
-    {% endfor %}
-    {% endfor %}
-    {% endfor %}
 
     <!-- اضافه کردن کتابخانه‌های JavaScript -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script>
-        // فعال کردن DataTables برای جدول مقایسه‌ای
+        // فعال کردن DataTables برای جداول
         $(document).ready(function() {
-            $('#comparisonTable').DataTable({
+            $('#kolTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fa.json" // فارسی‌سازی
+                }
+            });
+
+            $('#moinTable').DataTable({
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fa.json" // فارسی‌سازی
                 }
