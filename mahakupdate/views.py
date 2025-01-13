@@ -2024,6 +2024,10 @@ import jdatetime  # کتابخانه برای کار با تاریخ جلالی
 from django.utils import timezone
 
 
+
+
+import jdatetime
+
 def UpdateSanadDetail(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات سند---------------------------------------------------')
@@ -2033,8 +2037,10 @@ def UpdateSanadDetail(request):
 
     # دریافت داده‌ها از دیتابیس خارجی
     cursor.execute(
-        "SELECT code, radif, kol, moin, tafzili, sharh, bed, bes, Sanad_Code, Sanad_Type, Meghdar, SysComment, CurrAmount, UserCreated FROM [mahak].[dbo].[Sanad_detail]")
+        "SELECT code, radif, kol, moin, tafzili, sharh, bed, bes, Sanad_Code, Sanad_Type, "  
+        "Meghdar, SysComment, CurrAmount, UserCreated, VoucherDate FROM [mahak].[dbo].[Sanad_detail]")
     mahakt_data = cursor.fetchall()
+
     existing_in_mahak = {(int(row[0]), int(row[1])) for row in mahakt_data}
     print('تعداد رکوردهای موجود در Mahak:', len(existing_in_mahak))
     sanads_to_create = []
@@ -2043,10 +2049,10 @@ def UpdateSanadDetail(request):
     BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
 
     # پردازش داده‌های جدید
-    con1=1
+    counter=1
     for row in mahakt_data:
-        print(con1)
-        con1+=1
+        print(counter)
+        counter+=1
         code = int(row[0])
         radif = int(row[1])
         try:
@@ -2062,102 +2068,84 @@ def UpdateSanadDetail(request):
             syscomment = row[11] if row[11] is not None else ''
             curramount = Decimal(row[12]) if row[12] is not None else Decimal('0.0000000000')
             usercreated = row[13] if row[13] is not None else ''
-        except (InvalidOperation, ValueError) as e:
-            print(f"خطا در مقدارهای اعشاری برای رکورد {row}: {e}")
+            voucher_date = row[14]  # تاریخ وچر از دیتابیس
+
+            # تبدیل تاریخ شمسی به میلادی
+            year, month, day = map(int, voucher_date.split('/'))
+            gregorian_date = jdatetime.datetime(year, month, day).togregorian()
+            miladi_date = gregorian_date.strftime('%Y-%m-%d')  # تبدیل به فرمت میلادی
+
+        except (ValueError, InvalidOperation) as e:
+            print(f"خطا در پردازش رکورد {row}: {e}. گذر از این رکورد.")
             continue  # این رکورد را بگذرانید
 
         key = (code, radif)
 
         if key in current_sanads:
             sanad = current_sanads[key]
-            # جستجوی مدل Sanad برای پیدا کردن تاریخ
-            related_sanad = Sanad.objects.filter(code=code).first()
-            if related_sanad:
-                tarikh_shamsi = related_sanad.tarikh  # فرض اینکه tarikh یک فیلد است
-                # تبدیل تاریخ شمسی به میلادی
-                year, month, day = map(int, tarikh_shamsi.split('/'))
-                date_miladi = jdatetime.date(year, month, day).togregorian()  # تبدیل تاریخ
+            # بررسی و بروزرسانی فیلدها
+            if (sanad.kol != kol or sanad.moin != moin or sanad.tafzili != tafzili or
+                sanad.sharh != sharh or sanad.bed != bed or sanad.bes != bes or
+                sanad.sanad_code != sanad_code or sanad.sanad_type != sanad_type or
+                sanad.meghdar != meghdar or sanad.syscomment != syscomment or
+                sanad.curramount != curramount or sanad.usercreated != usercreated or
+                sanad.tarikh != voucher_date or sanad.date != miladi_date):  # مقایسه تاریخ میلادی
 
-                # بررسی و بروزرسانی فیلدها (اضافه کردن تاریخ به بررسی)
-                if (
-                        sanad.kol != kol or
-                        sanad.moin != moin or
-                        sanad.tafzili != tafzili or
-                        sanad.sharh != sharh or
-                        sanad.bed != bed or
-                        sanad.bes != bes or
-                        sanad.sanad_code != sanad_code or
-                        sanad.sanad_type != sanad_type or
-                        sanad.meghdar != meghdar or
-                        sanad.syscomment != syscomment or
-                        sanad.curramount != curramount or
-                        sanad.usercreated != usercreated or
-                        sanad.date != date_miladi  # بررسی تغییر تاریخ
-                ):
-                    sanad.kol = kol
-                    sanad.moin = moin
-                    sanad.tafzili = tafzili
-                    sanad.sharh = sharh
-                    sanad.bed = bed
-                    sanad.bes = bes
-                    sanad.sanad_code = sanad_code
-                    sanad.sanad_type = sanad_type
-                    sanad.meghdar = meghdar
-                    sanad.syscomment = syscomment
-                    sanad.curramount = curramount
-                    sanad.usercreated = usercreated
-                    sanad.date = date_miladi  # به‌روزرسانی تاریخ میلادی در SanadDetail
-
-                    sanads_to_update.append(sanad)
+                sanad.kol = kol
+                sanad.moin = moin
+                sanad.tafzili = tafzili
+                sanad.sharh = sharh
+                sanad.bed = bed
+                sanad.bes = bes
+                sanad.sanad_code = sanad_code
+                sanad.sanad_type = sanad_type
+                sanad.meghdar = meghdar
+                sanad.syscomment = syscomment
+                sanad.curramount = curramount
+                sanad.usercreated = usercreated
+                sanad.tarikh = voucher_date  # بروزرسانی تاریخ شمسی
+                sanad.date = miladi_date  # بروزرسانی تاریخ میلادی
+                sanads_to_update.append(sanad)
         else:
-            # ایجاد رکورد جدید
-            sanad_date = None
-            if related_sanad:
-                sanad_date = date_miladi
             sanads_to_create.append(SanadDetail(
-                code=code,
-                radif=radif,
-                kol=kol,
-                moin=moin,
-                tafzili=tafzili,
-                sharh=sharh,
-                bed=bed,
-                bes=bes,
-                sanad_code=sanad_code,
-                sanad_type=sanad_type,
-                meghdar=meghdar,
-                syscomment=syscomment,
-                curramount=curramount,
-                usercreated=usercreated,
-                date=sanad_date  # تاریخ جدید برای رکورد جدید
+                code=code, radif=radif, kol=kol, moin=moin, tafzili=tafzili,
+                sharh=sharh, bed=bed, bes=bes, sanad_code=sanad_code,
+                sanad_type=sanad_type, meghdar=meghdar, syscomment=syscomment,
+                curramount=curramount, usercreated=usercreated,
+                tarikh=voucher_date,  # ذخیره تاریخ شمسی
+                date=miladi_date  # ذخیره تاریخ میلادی
             ))
 
+    # Bulk create new sanad details
     if sanads_to_create:
         SanadDetail.objects.bulk_create(sanads_to_create, batch_size=BATCH_SIZE)
 
+    # Bulk update existing sanad details
     if sanads_to_update:
         SanadDetail.objects.bulk_update(sanads_to_update,
-                                        ['kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
-                                         'sanad_code', 'sanad_type', 'meghdar',
-                                         'syscomment', 'curramount', 'usercreated', 'date'],  # اضافه کردن فیلد تاریخ
-                                        batch_size=BATCH_SIZE)
+                                         ['kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
+                                          'sanad_code', 'sanad_type', 'meghdar',
+                                          'syscomment', 'curramount', 'usercreated', 'tarikh', 'date'],
+                                         batch_size=BATCH_SIZE)
 
-        # حذف رکوردهای اضافی
+    # حذف رکوردهای اضافی
     sanads_to_delete = []
     current_sanad_keys = {(sd.code, sd.radif) for sd in SanadDetail.objects.all()}
+
     for key in current_sanad_keys:
         if key not in existing_in_mahak:
             sanads_to_delete.append(SanadDetail.objects.get(code=key[0], radif=key[1]).id)
 
+    # حذف به صورت دسته‌ای
     if sanads_to_delete:
         for i in range(0, len(sanads_to_delete), BATCH_SIZE):
             batch = sanads_to_delete[i:i + BATCH_SIZE]
-            print(f"حذف شناسه‌ها: {batch}")  # برای بررسی، شناسه‌های حذف را پرینت کنید
+            print(f"حذف شناسه‌ها: {batch}")  # برای بررسی، شناسه‌های حذف را چاپ کنید
             SanadDetail.objects.filter(id__in=batch).delete()
     else:
         print("هیچ رکوردی برای حذف وجود ندارد.")
 
-        # محاسبه زمان اجرای کل
+    # محاسبه زمان اجرای کل
     tend = time.time()
     total_time = tend - t0
     db_time = t1 - t0
@@ -2167,11 +2155,11 @@ def UpdateSanadDetail(request):
     print(f" زمان اتصال به دیتا بیس: {db_time:.2f} ثانیه")
     print(f" زمان آپدیت جدول: {update_time:.2f} ثانیه")
 
-    cursor.execute("SELECT COUNT(*) FROM Sanad_detail")
+    cursor.execute("SELECT COUNT(*) FROM Sanad_detail")  # محاسبه تعداد کل رکوردها
     row_count = cursor.fetchone()[0]
 
     cursor.execute(
-        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Sanad_detail'")
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Sanad_detail'")  # محاسبه تعداد ستون‌ها
     column_count = cursor.fetchone()[0]
 
     # به‌روزرسانی اطلاعات در جدول Mtables
@@ -2183,6 +2171,8 @@ def UpdateSanadDetail(request):
     table.save()
 
     return redirect('/updatedb')
+
+
 
 def UpdateSanadDetail1(request):
     t0 = time.time()
