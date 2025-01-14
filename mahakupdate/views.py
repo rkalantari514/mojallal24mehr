@@ -2136,25 +2136,42 @@ def UpdateSanadDetail(request):
     counter2 = 1
 
     print('تعداد اسناد که آپدیت می‌شوند:', len(sanads_to_update))
-    for sanad in sanads_to_update:
-        print(counter2)
-        counter2 += 1
-        # تبدیل تاریخ شمسی به میلادی
-        voucher_date = sanad.tarikh
-        try:
-            year, month, day = map(int, voucher_date.split('/'))
-            gregorian_date = jdatetime.date(year, month, day).togregorian()
-            miladi_date = gregorian_date.strftime('%Y-%m-%d')
+    # بارگذاری تمامی اسناد موجود
+    # بارگذاری تمامی اسناد با تاریخ میلادی خالی
+    empty_date_sanads = SanadDetail.objects.filter(date__isnull=True)
 
-            if sanad.date != miladi_date:  # اگر تاریخ میلادی نیاز به آپدیت دارد
+    # بروزرسانی تاریخ برای اسناد با تاریخ میلادی خالی
+    for sanad in empty_date_sanads:
+        if sanad.tarikh:  # فرض بر این است که tarikh مقداری دارد
+            # تبدیل تاریخ شمسی به میلادی
+            voucher_date = sanad.tarikh
+            try:
+                year, month, day = map(int, voucher_date.split('/'))
+                gregorian_date = jdatetime.date(year, month, day).togregorian()
+                miladi_date = gregorian_date.strftime('%Y-%m-%d')
+
+                # پر کردن تاریخ میلادی
                 sanad.date = miladi_date
-        except Exception as e:
-            print(f"خطا در تبدیل تاریخ برای {sanad.code}, {sanad.radif}: {e}")
+            except Exception as e:
+                print(f"خطا در تبدیل تاریخ برای {sanad.code}, {sanad.radif}: {e}")
 
-            # بروزرسانی تاریخ‌های میلادی در صورت نیاز
-    if sanads_to_update:
+                # پردازش اسناد جدید و پر کردن تاریخ میلادی
+    for sanad in sanads_to_create:
+        if sanad.tarikh:  # فرض بر این است که tarikh مقداری دارد
+            try:
+                year, month, day = map(int, sanad.tarikh.split('/'))
+                gregorian_date = jdatetime.date(year, month, day).togregorian()
+                miladi_date = gregorian_date.strftime('%Y-%m-%d')
+                sanad.date = miladi_date  # پر کردن تاریخ میلادی برای اسناد جدید
+            except Exception as e:
+                print(f"خطا در تبدیل تاریخ برای سند جدید {sanad.code}, {sanad.radif}: {e}")
+
+                # بروزرسانی تاریخ‌های میلادی در صورت نیاز
+    if empty_date_sanads or sanads_to_create:
         print('شروع به آپدیت تاریخ‌های میلادی')
-        SanadDetail.objects.bulk_update(sanads_to_update, ['date'], batch_size=BATCH_SIZE)
+        SanadDetail.objects.bulk_update(empty_date_sanads.tolist() + sanads_to_create, ['date'], batch_size=BATCH_SIZE)
+
+
 
         # حذف رکوردهای اضافی
     sanads_to_delete = []
