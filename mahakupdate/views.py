@@ -2135,6 +2135,38 @@ def UpdateSanadDetail(request):
                                           ],
                                          batch_size=BATCH_SIZE)
 
+    # پس از بخش پردازش ثبت‌نام (بعد از به‌روزرسانی و ساخت رکوردها)
+    print('بررسی تاریخ')
+    counter2=1
+
+    print('sanads_to_update.count')
+    print(sanads_to_update.count())
+    for sanad in sanads_to_update:
+        print(counter2)
+        counter2+=1
+        # تبدیل تاریخ شمسی به میلادی
+        voucher_date = sanad.tarikh
+        try:
+            year, month, day = map(int, voucher_date.split('/'))
+            gregorian_date = jdatetime.date(year, month, day).togregorian()  # استفاده صحیح از jdatetime.date
+            miladi_date = gregorian_date.strftime('%Y-%m-%d')
+
+            if sanad.date != miladi_date:  # اگر تاریخ میلادی نیاز به آپدیت دارد
+                sanad.date = miladi_date
+                sanads_to_update.append(sanad)
+        except Exception as e:
+            print(f"خطا در تبدیل تاریخ برای {sanad.code}, {sanad.radif}: {e}")
+
+            # بروزرسانی تاریخ‌های میلادی در صورت نیاز
+    if sanads_to_update:
+        print('شروع به آپدیت تاریخ‌های میلادی')
+        SanadDetail.objects.bulk_update(sanads_to_update, ['date'], batch_size=BATCH_SIZE)
+
+
+
+
+
+
     # حذف رکوردهای اضافی
     sanads_to_delete = []
     current_sanad_keys = {(sd.code, sd.radif) for sd in SanadDetail.objects.all()}
