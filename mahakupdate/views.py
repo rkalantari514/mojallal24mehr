@@ -2071,9 +2071,9 @@ def UpdateSanadDetail(request):
             voucher_date = row[14]  # تاریخ وچر از دیتابیس
 
             # تبدیل تاریخ شمسی به میلادی
-            year, month, day = map(int, voucher_date.split('/'))
-            gregorian_date = jdatetime.datetime(year, month, day).togregorian()
-            miladi_date = gregorian_date.strftime('%Y-%m-%d')  # تبدیل به فرمت میلادی
+            # year, month, day = map(int, voucher_date.split('/'))
+            # gregorian_date = jdatetime.datetime(year, month, day).togregorian()
+            # miladi_date = gregorian_date.strftime('%Y-%m-%d')  # تبدیل به فرمت میلادی
 
         except (ValueError, InvalidOperation) as e:
             print(f"خطا در پردازش رکورد {row}: {e}. گذر از این رکورد.")
@@ -2089,7 +2089,10 @@ def UpdateSanadDetail(request):
                 sanad.sanad_code != sanad_code or sanad.sanad_type != sanad_type or
                 sanad.meghdar != meghdar or sanad.syscomment != syscomment or
                 sanad.curramount != curramount or sanad.usercreated != usercreated or
-                sanad.tarikh != voucher_date or sanad.date != miladi_date):  # مقایسه تاریخ میلادی
+                sanad.tarikh != voucher_date
+                    # or
+                    # sanad.date != miladi_date
+            ):  # مقایسه تاریخ میلادی
 
                 sanad.kol = kol
                 sanad.moin = moin
@@ -2104,7 +2107,7 @@ def UpdateSanadDetail(request):
                 sanad.curramount = curramount
                 sanad.usercreated = usercreated
                 sanad.tarikh = voucher_date  # بروزرسانی تاریخ شمسی
-                sanad.date = miladi_date  # بروزرسانی تاریخ میلادی
+                # sanad.date = miladi_date  # بروزرسانی تاریخ میلادی
                 sanads_to_update.append(sanad)
         else:
             sanads_to_create.append(SanadDetail(
@@ -2113,7 +2116,7 @@ def UpdateSanadDetail(request):
                 sanad_type=sanad_type, meghdar=meghdar, syscomment=syscomment,
                 curramount=curramount, usercreated=usercreated,
                 tarikh=voucher_date,  # ذخیره تاریخ شمسی
-                date=miladi_date  # ذخیره تاریخ میلادی
+                # date=miladi_date  # ذخیره تاریخ میلادی
             ))
 
     # Bulk create new sanad details
@@ -2127,7 +2130,9 @@ def UpdateSanadDetail(request):
         SanadDetail.objects.bulk_update(sanads_to_update,
                                          ['kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
                                           'sanad_code', 'sanad_type', 'meghdar',
-                                          'syscomment', 'curramount', 'usercreated', 'tarikh', 'date'],
+                                          'syscomment', 'curramount', 'usercreated', 'tarikh',
+                                          # 'date'
+                                          ],
                                          batch_size=BATCH_SIZE)
 
     # حذف رکوردهای اضافی
