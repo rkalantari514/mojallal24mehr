@@ -2139,8 +2139,7 @@ def UpdateSanadDetail(request):
     print('بررسی تاریخ')
     counter2=1
 
-    print('sanads_to_update.count')
-    print(sanads_to_update.count())
+    print('تعداد اسناد که آپدیت می‌شوند:', len(sanads_to_update))
     for sanad in sanads_to_update:
         print(counter2)
         counter2+=1
