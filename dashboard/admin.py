@@ -17,7 +17,7 @@ class MasterInfoAdmin(admin.ModelAdmin):
 
 @admin.register(MasterReport)
 class MasterReportAdmin(admin.ModelAdmin):
-    list_display = ('day', 'total_mojodi', 'value_of_purchased_goods', 'cost_of_sold_goods', 'revenue_from_sales')
+    list_display = ('day', 'total_mojodi', 'value_of_purchased_goods', 'baha_tamam_forosh', 'daramad_forosh')
     search_fields = ('day',)
     list_filter = ('day',)
 

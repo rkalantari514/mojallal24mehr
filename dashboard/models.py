@@ -40,8 +40,8 @@ class MasterReport(models.Model):
     day = models.DateField(verbose_name='روز')
     total_mojodi = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='کل موجودی')
     value_of_purchased_goods = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='ارزش کالای خریداری شده')
-    cost_of_sold_goods = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='بهای تمام شده کالای فروخته شده')
-    revenue_from_sales = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='درآمد از فروش')
+    baha_tamam_forosh = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='بهای تمام شده کالای فروخته شده')
+    daramad_forosh = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='درآمد از فروش')
 
     class Meta:
         verbose_name = 'گزارش کلی'

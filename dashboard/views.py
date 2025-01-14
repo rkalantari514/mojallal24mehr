@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-from mahakupdate.models import Factor, FactorDetaile
+from mahakupdate.models import Factor, FactorDetaile, SanadDetail
 from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
 
@@ -95,7 +95,6 @@ def Home1(request):
 
 
 # تنظیمات لاگ‌گیری
-logger = logging.getLogger(__name__)
 
 from django.shortcuts import render
 from django.utils import timezone
@@ -106,6 +105,22 @@ import time
 import logging
 
 # تنظیمات لاگ‌گیری
+
+from django.utils import timezone
+from django.db.models import Sum, Q
+from datetime import timedelta
+import jdatetime
+import time
+import logging
+
+
+from django.utils import timezone
+from django.db.models import Sum
+from datetime import timedelta
+import jdatetime
+import time
+import logging
+
 logger = logging.getLogger(__name__)
 
 def CreateReport(request):
@@ -131,33 +146,39 @@ def CreateReport(request):
     # تاریخ جاری
     end_date_gregorian = timezone.now().date()
 
-    # لیست برای ذخیره رکوردهای جدید
-    reports_to_create = []
+    # شناسایی تمامی روزها بین تاریخ شروع و پایان گزارش
+    report_days = MasterReport.objects.filter(day__range=(start_date_gregorian, end_date_gregorian))
+    if time.time() != 1:
+        report_days = MasterReport.objects.filter(day__range=(start_date_gregorian, end_date_gregorian)).order_by(
+            '-day')[:10]
 
-    # ایجاد رکوردهای روزانه از تاریخ شروع تا تاریخ جاری
-    current_date = start_date_gregorian
-    while current_date <= end_date_gregorian:
-        # بررسی وجود رکورد برای این روز
-        report, created = MasterReport.objects.get_or_create(
-            day=current_date,
-            defaults={
-                'total_mojodi': 0,
-                'value_of_purchased_goods': 0,
-                'cost_of_sold_goods': 0,
-                'revenue_from_sales': 0,
-            }
-        )
+    # لیست برای به‌روزرسانی
+    reports_to_update = []
 
-        if created:
-            reports_to_create.append(report)
-            logger.info(f"رکورد برای تاریخ {current_date} ایجاد شد.")
-        else:
-            logger.info(f"رکورد برای تاریخ {current_date} از قبل وجود داشت.")
+    # جمع‌آوری اطلاعات از SanadDetail
+    for report in report_days:
 
-        # TODO: آپدیت سایر ستون‌ها (total_mojodi, value_of_purchased_goods, ...)
+        current_date =report.day
+        print(report.day)
+        baha_tamam_forosh = SanadDetail.objects.filter(
+            date=current_date,
+            kol=500
+        ).aggregate(Sum('curramount'))['curramount__sum'] or 0
 
-        # افزایش تاریخ به روز بعد
-        current_date += timedelta(days=1)
+        daramad_forosh = SanadDetail.objects.filter(
+            date=current_date,
+            kol=400
+        ).aggregate(Sum('curramount'))['curramount__sum'] or 0
+
+        # به‌روزرسانی مقادیر در MasterReport
+        report.baha_tamam_forosh = -1 * baha_tamam_forosh
+        report.daramad_forosh = daramad_forosh
+
+        reports_to_update.append(report)  # افزودن به لیست برای بروزرسانی در batch
+
+    # آپدیت تمامی رکوردها به صورت bulk
+    if reports_to_update:
+        MasterReport.objects.bulk_update(reports_to_update, ['baha_tamam_forosh', 'daramad_forosh'])
 
     # محاسبه زمان اجرای ویو
     end_time = time.time()
