@@ -2136,7 +2136,6 @@ def UpdateSanadDetail(request):
     counter2 = 1
 
     print('تعداد اسناد که آپدیت می‌شوند:', len(sanads_to_update))
-    # بارگذاری تمامی اسناد موجود
     # بارگذاری تمامی اسناد با تاریخ میلادی خالی
     empty_date_sanads = SanadDetail.objects.filter(date__isnull=True)
 
@@ -2169,9 +2168,7 @@ def UpdateSanadDetail(request):
                 # بروزرسانی تاریخ‌های میلادی در صورت نیاز
     if empty_date_sanads or sanads_to_create:
         print('شروع به آپدیت تاریخ‌های میلادی')
-        SanadDetail.objects.bulk_update(empty_date_sanads.tolist() + sanads_to_create, ['date'], batch_size=BATCH_SIZE)
-
-
+        SanadDetail.objects.bulk_update(list(empty_date_sanads) + sanads_to_create, ['date'], batch_size=BATCH_SIZE)
 
         # حذف رکوردهای اضافی
     sanads_to_delete = []
