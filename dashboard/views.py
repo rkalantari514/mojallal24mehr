@@ -14,6 +14,7 @@ from datetime import date, timedelta
 from django.db.models import Sum, Q
 
 from django.db.models import Q
+from datetime import datetime
 
 
 from collections import defaultdict
@@ -90,7 +91,7 @@ def Home1(request, *args, **kwargs):
     print(today_data)
     print(yesterday_data)
     context = {
-        'title': 'داشبورد مدیرریتی',
+        'title': 'داشبورد مدیریتی',
         'user': user,
         'last_update_time': last_update_time,
         'today_data': today_data,
@@ -207,7 +208,10 @@ def CreateReport(request):
 
     # شناسایی تمامی روزها بین تاریخ شروع و پایان گزارش
     report_days = MasterReport.objects.filter(day__range=(start_date_gregorian, end_date_gregorian))
-    if time.time() != 1:
+    current_time = datetime.now()
+
+    # بررسی اینکه آیا ساعت 1 بامداد است یا خیر
+    if current_time.hour != 1:
         report_days = MasterReport.objects.filter(day__range=(start_date_gregorian, end_date_gregorian)).order_by(
             '-day')[:10]
 
