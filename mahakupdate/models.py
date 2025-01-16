@@ -453,10 +453,10 @@ class WordCount(models.Model):
 
 
 class Sanad(models.Model):
-    code = models.IntegerField(verbose_name='کد')
-    tarikh = models.CharField(max_length=150, verbose_name='تاریخ  شمسی')
-    sharh = models.CharField(max_length=300, verbose_name='شرح سند')
-    SanadID = models.IntegerField(verbose_name='شناسه سند')
+    code = models.IntegerField(blank=True, null=True,verbose_name='کد')
+    tarikh = models.CharField(blank=True, null=True,max_length=150, verbose_name='تاریخ  شمسی')
+    sharh = models.CharField(blank=True, null=True,max_length=300, verbose_name='شرح سند')
+    sanadid = models.IntegerField(blank=True, null=True,verbose_name='شناسه سند')
 
     class Meta:
         verbose_name = 'سند'
@@ -464,3 +464,53 @@ class Sanad(models.Model):
 
     def __str__(self):
         return f"{self.code} - {self.tarikh}"
+
+
+
+
+class SanadDetail(models.Model):
+    code = models.IntegerField(blank=True, null=True,verbose_name='کد')
+    tarikh = models.CharField(blank=True, null=True,max_length=150, verbose_name='تاریخ  شمسی')
+    date=models.DateField(blank=True, null=True,verbose_name='تاریخ سند')
+    radif = models.IntegerField(blank=True, null=True,verbose_name='ردیف')
+    kol = models.IntegerField(blank=True, null=True,verbose_name='کل')
+    moin = models.IntegerField(blank=True, null=True,verbose_name='معین')
+    tafzili = models.IntegerField(blank=True, null=True,verbose_name='تفضیل')
+    sharh = models.CharField(max_length=255, null=True,verbose_name='شرح')
+    bed = models.DecimalField(max_digits=30, decimal_places=10, null=True,verbose_name='بدهکار')
+    bes = models.DecimalField(max_digits=30, decimal_places=10, null=True,verbose_name='بستانکار')
+    sanad_code = models.IntegerField(null=True,verbose_name='کد سند')
+    sanad_type = models.IntegerField(null=True,verbose_name='نوع سند')
+    meghdar = models.DecimalField(max_digits=30, decimal_places=10, null=True,verbose_name='مقدار')
+    syscomment = models.CharField(max_length=255, null=True,verbose_name='عنوان سند')
+    curramount = models.DecimalField(max_digits=30, decimal_places=10, null=True,verbose_name='مانده')
+    usercreated = models.CharField(max_length=255, null=True,verbose_name='ایجاد کننده')
+
+    class Meta:
+        unique_together = (('code', 'radif'),)  # تعریف کلید یگانه
+        verbose_name = 'جزئیات سند'
+        verbose_name_plural = 'جزئیات اسناد'
+
+    def __str__(self):
+        return f"{self.code}-{self.radif}"
+
+
+
+
+class AccCoding(models.Model):
+    LEVEL_CHOICES = (
+        (1, 'کل'),
+        (2, 'معین'),
+        (3, 'تفضیلی'),
+    )
+    code = models.IntegerField(verbose_name='کد')  # کد دسته‌بندی
+    name = models.CharField(max_length=150, verbose_name='نام دسته‌بندی')
+    level = models.PositiveSmallIntegerField(choices=LEVEL_CHOICES, verbose_name='سطح')
+
+    class Meta:
+        verbose_name = 'کدینگ حسابداری'
+        verbose_name_plural = 'کدینگ ای حسابداری'
+        unique_together = ('code', 'level')  # کد و سطح باید یکتا باشند
+
+    def __str__(self):
+        return f"{self.code} - {self.name} (سطح {self.level})"

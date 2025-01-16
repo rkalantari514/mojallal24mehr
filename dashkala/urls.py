@@ -7,7 +7,7 @@ urlpatterns = [
 
     # path('', lambda request: redirect('/dash/kala/total/all/all/all/all/total', permanent=True)),
 
-    path('', lambda request: redirect('dash/kala/category/212', permanent=True)),
+    # path('', lambda request: redirect('dash/kala/category/212', permanent=True)),
     path('dash/kala/total/<st>/<cat1>/<cat2>/<cat3>/<total>', TotalKala, name='total_kala'),
     path('dash/kala/detail/<int:code>/', DetailKala, name='detail_kala'),
 

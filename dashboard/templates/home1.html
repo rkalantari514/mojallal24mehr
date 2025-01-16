@@ -1,0 +1,227 @@
+{% extends 'shared/_MainLayout.html' %}
+{% load humanize %}
+{% load static %}
+{% block content %}
+    <style>
+    .datetime-small {
+    font-size: 1.2em; /* کوچک‌تر کردن فونت تاریخ و ساعت */
+    margin-right: 10px; /* فاصله بین عنوان و تاریخ/ساعت */
+    vertical-align: middle; /* تنظیم تراز عمودی */
+}
+
+.text-facebook {
+    display: inline; /* نمایش عنوان در یک خط */
+}
+    </style>
+
+    <div class="content-wrapper">
+
+            <!--ردیف تایتل-->
+        <div class="page-title">
+            <div class="row">
+                <div class="col-sm-9">
+                    <h3 class="mb-0 text-facebook d-inline">داشبورد مدیریتی فروشگاه یاس مجلل</h3>
+                    <span id="datetime" class="datetime-small">در حال بارگذاری...</span>
+                </div>
+                <div class="col-sm-3">
+                    <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
+                        <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
+                        <li class="breadcrumb-item active">داشبورد 1</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+             <div class="col-xl-6 mb-30">
+          <div class="card card-statistics h-100">
+            <div class="card-body text-left">
+               <h5 class="card-title">سود ناویژه</h5>
+                <h6 class="text-capitalize mt-0">میلیون تومان</h6>
+                <div class="row">
+                  <div class="col-4 col-sm-4 mb-15 text-center">
+                    <div class="counter counter-small">
+                      <h4 class="timer text-primary" data-to="{{ today_data.sood_navizhe }}" data-speed="5000">{{ today_data.sood_navizhe }}</h4>
+                      <label class="text-capitalize mt-0">امروز ({{ last_update_time|timesince }}) قبل</label>
+                    </div>
+                  </div>
+                  <div class="col-4 col-sm-4 mb-15 text-center">
+                    <div class="counter counter-small">
+                      <h4 class="timer text-success" data-to="{{ yesterday_data.sood_navizhe }}" data-speed="5000">{{ yesterday_data.sood_navizhe }}</h4>
+                      <label class="text-capitalize mt-0">دیروز </label>
+                    </div>
+                  </div>
+                  <div class="col-4 col-sm-4 mb-15 text-center">
+                    <div class="counter counter-small">
+                      <h4 class="timer text-danger" data-to="{{ allday_data.sood_navizhe|intcomma }}" data-speed="5000">{{ allday_data.sood_navizhe }}</h4>
+                      <label class="text-capitalize mt-0">ازابتدای سال مالی</label>
+                    </div>
+                  </div>
+                </div>
+                <div class="divider"></div>
+                <div class="row">
+                  <div class="col-6 col-sm-4 mt-15 text-center">
+                     <b>متوسط روز های فعال</b>
+                     <h4>{{ allday_data.ave_sood_navizhe|floatformat:0 }}</h4>
+                  </div>
+                  <div class="col-6 col-sm-4 mt-15 text-center">
+                    <b>کمترین روزانه</b>
+                     <h4>{{ allday_data.min_sood_navizhe|floatformat:0 }}</h4>
+                  </div>
+                  <div class="col-12 col-sm-4 mt-15 text-center">
+                    <b>بیشترین روزانه</b>
+                     <h4>{{ allday_data.max_sood_navizhe|floatformat:0 }}</h4>
+                  </div>
+                </div>
+             </div>
+          </div>
+        </div>
+
+
+      </div>
+
+
+
+
+
+                <!--ردیف گزارش فروش و سود ناخالص-->
+    <div class="row">
+<div class="col-xl-6 mb-30">
+        <div class="card card-statistics h-100">
+          <div class="card-body">
+           <h5 class="card-title"> گزارش سود ناخالص</h5>
+              <div class="tab round">
+             <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                  <a class="nav-link active show" id="home-07-tab" data-toggle="tab" href="#home-07" role="tab" aria-controls="home-07" aria-selected="true"> <i class="fa fa-calendar-check-o"></i> مقایسه روزانه</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="profile-07-tab" data-toggle="tab" href="#profile-07" role="tab" aria-controls="profile-07" aria-selected="false"><i class="fa fa-calendar"></i> مقایسه هفته ای </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="portfolio-07-tab" data-toggle="tab" href="#portfolio-07" role="tab" aria-controls="portfolio-07" aria-selected="false"><i class="fa  fa-calendar-o"></i> مقایسه ماهانه </a>
+                </li>
+{#                <li class="nav-item">#}
+{#                  <a class="nav-link active show" id="contact-07-tab" data-toggle="tab" href="#contact-07" role="tab" aria-controls="contact-07" aria-selected="true"><i class="fa fa-check-square-o"></i> تماس </a>#}
+{#                </li>#}
+              </ul>
+              <div class="tab-content">
+                <div class="tab-pane fade active show" id="home-07" role="tabpanel" aria-labelledby="home-07-tab">
+                <canvas id="Chart1"></canvas>
+
+                </div>
+                <div class="tab-pane fade" id="profile-07" role="tabpanel" aria-labelledby="profile-07-tab">
+                  <p>ما به لطف تربیت ما، همه چمدان ها را حمل می کنیم. اکثریت مردم با آنها همراه هستند، مجموعه ای از اعتقادات خود محدود کننده ای که کاملا متوقف می شود و از موفقیت آنها جلوگیری می کند. چیزهایی مانند "من به اندازه کافی خوب نیستم"، "من به اندازه کافی هوشمند نیستم"، "من به اندازه کافی خوش شانس نیستم"، و بدترین حالت "من شایسته نیستم"، اما بعضی از باورهای خود محدود کننده من مواجه هستم ما آنها را با یک کوله پشتی با سنگ هایمان حمل می کنیم، و سپس از آنها برای خراب کردن موفقیت هایمان استفاده کنیم. پس چطور پیچیده شده است؟</p>
+                </div>
+                <div class="tab-pane fade" id="portfolio-07" role="tabpanel" aria-labelledby="portfolio-07-tab">
+                  <p>بنجامین فرانکلین، مخترع، دولتمرد، نویسنده، ناشر و اقتصاددان در زندگینامه خود به این موضوع اشاره دارد که در اوایل زندگی او تصمیم گرفت تا بر کمال اخلاقی تمرکز کند. او یک لیست از 13 فضیلت را ایجاد کرد، و یک صفحه برای هر یک اختصاص داد. تحت هر فضیلتی، خلاصه ای را به کار می برد که به معنای کامل تر آن است. سپس هر یک را برای مدت زمان مشخصی تمرین کرد. فرانکلین برای اینکه این عادات را عادت بخشد، می تواند با یک روش برای ارزیابی خود در اقدامات روزانه اش، اقدام کند.</p>
+                </div>
+                <div class="tab-pane fade " id="contact-07" role="tabpanel" aria-labelledby="contact-07-tab">
+                  <p>فضیلتهای دیگری که فرانکلین در پی داشت، عبارت بودند از سکوت، نظم، قطعنامه، صرفه جویی، صنعت، صداقت، عدالت، اعتدال، پاکیزگی، آرامش، عفت و اندوه. برای دستورالعمل خلاصه، او یک طرح کوچک از کار کردن وقت خود را هر روز دنبال کرد. هر روز صبح پنج تا هفت صبح به مراقبت شخصی خود توجه کرد، گفت: یک نماز کوتاه، تفکر در مورد کسب و کار روز و قطعنامه.</p>
+                </div>
+              </div>
+          </div>
+          </div>
+        </div>
+      </div>
+      </div>
+
+
+    </div>
+
+
+
+
+{% endblock %}
+
+
+{% block jscal %}
+
+
+{% endblock %}
+
+
+
+{% block myjs %}
+    <!-- نمایش تاریخ و ساعت-->
+    <script>
+        function updateDateTime() {
+    const now = new Date();
+    const days = ["یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه"];
+    const dayName = days[now.getDay()];
+    const date = now.toLocaleDateString('fa-IR');
+    const time = now.toLocaleTimeString('fa-IR');
+
+    document.getElementById("datetime").innerHTML = `${dayName}، ${date}، ${time}`;
+}
+
+// به روز رسانی هر ثانیه
+setInterval(updateDateTime, 1000);
+
+// نمایش اولیه
+updateDateTime();
+    </script>
+    <!-- نمودار مقایسه فروش روزانه -->
+    <script>
+        var labels = [
+            {% for item in chart1_data %}
+                '{{ item.month_name }}',
+            {% endfor %}
+        ];
+        var labels= ["ژانویه", "فوریه", "مارس", "اوریل", "مه", "ژوئن", "ژولای"];
+
+        var dataValues = [
+            {% for item in chart1_data %}
+                {{ item.total_count }},
+            {% endfor %}
+        ];
+
+        var backgroundColors = [
+            'rgba(75, 192, 75, 0.2)',
+            'rgba(75, 192, 75, 0.2)',
+            'rgba(75, 192, 75, 0.2)',
+            'rgba(75, 75, 192, 0.2)',
+            'rgba(75, 75, 192, 0.2)',
+            'rgba(75, 75, 192, 0.2)',
+            'rgba(255, 165, 0, 0.2)',
+            'rgba(255, 165, 0, 0.2)',
+            'rgba(255, 165, 0, 0.2)',
+            'rgba(192, 75, 75, 0.2)',
+            'rgba(192, 75, 75, 0.2)',
+            'rgba(192, 75, 75, 0.2)'
+        ];
+
+        var borderColors = backgroundColors.map((color) => color.replace('0.2', '1'));
+
+        var data = {
+            labels: labels,
+            datasets: [{
+                label: 'فروش ماهانه',
+                data: dataValues,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 1
+            }]
+        };
+
+        var options = {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        };
+
+        drawChart('Chart1', 'line', data, options);
+    </script>
+
+{% endblock %}
+
+
+{% block date %}
+
+
+{% endblock %}
+
+
+

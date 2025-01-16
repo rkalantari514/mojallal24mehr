@@ -26,11 +26,12 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include('dashboard.urls')),
     path('', include('mahaktables.urls')),
     path('', include('mahakupdate.urls')),
-    path('', include('dashboard.urls')),
     path('', include('dashkala.urls')),
     path('', include('custom_login.urls')),
+    path('', include('accounting.urls')),
 
 
     path('header', header, name="header"),

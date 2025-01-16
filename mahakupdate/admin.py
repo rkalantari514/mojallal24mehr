@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo, \
-    Storagek, Mojodi, Sanad
+    Storagek, Mojodi, Sanad, SanadDetail, AccCoding
 
 
 # Register your models here.
@@ -117,6 +117,25 @@ class SanadAdmin(admin.ModelAdmin):
     class Meta:
         model = Sanad
 
+class SanadDetailAdmin(admin.ModelAdmin):
+    list_display = ['__str__', 'code','tarikh','date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount']
+    list_filter = ['kol', 'moin', 'tafzili']
+    # list_editable = ['name','parent','level']
+    # search_fields = ['name','lname','group']
+
+    class Meta:
+        model = SanadDetail
+
+class AccCodingAdmin(admin.ModelAdmin):
+    list_display = ['__str__', 'code', 'name', 'level']
+    list_filter = ['code', 'name', 'level']
+
+    # list_editable = ['name','parent','level']
+    # search_fields = ['name','lname','group']
+
+    class Meta:
+        model = AccCoding
+
 admin.site.register(Mtables, MtablesAdmin)
 admin.site.register(Kala, KalaAdmin)
 admin.site.register(Factor, FactorAdmin)
@@ -129,3 +148,5 @@ admin.site.register(Person, PersonAdmin)
 admin.site.register(KalaGroupinfo, KalaGroupinfoAdmin)
 admin.site.register(Storagek, StoragekAdmin)
 admin.site.register(Sanad, SanadAdmin)
+admin.site.register(SanadDetail, SanadDetailAdmin)
+admin.site.register(AccCoding, AccCodingAdmin)
