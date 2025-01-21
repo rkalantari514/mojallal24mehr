@@ -86,6 +86,7 @@ def Updatedb(request):
         'Sanad': 'update/sanad',
         'Sanad_detail': 'update/sanaddetail',
         'AccTotals': 'update/acccoding',
+        'Cheques_Recieve': 'update/chequesrecieve',
 
     }
 
@@ -135,6 +136,7 @@ def Updateall(request):
         'Sanad': UpdateSanad,
         'Sanad_detail': UpdateSanadDetail,
         'AccTotals': UpdateAccCoding,
+        'Cheques_Recieve': Cheques_Recieve,
     }
 
     responses = []
@@ -2188,6 +2190,10 @@ def UpdateSanadDetail(request):
     else:
         print("هیچ رکوردی برای حذف وجود ندارد.")
 
+
+
+    # آنالیز ردیف ها و استخراج تاریخ موثر و شماره چک
+
         # محاسبه زمان اجرای کل
     tend = time.time()
     total_time = tend - t0
@@ -2438,5 +2444,161 @@ def UpdateAccCoding(request):
         table.save()
     else:
         print("جدول Mtables برای AccCoding یافت نشد.")
+
+    return redirect('/updatedb')
+
+
+
+import time
+import jdatetime
+from decimal import Decimal
+from django.utils import timezone
+from django.shortcuts import redirect
+from .models import ChequesRecieve
+
+
+def Cheques_Recieve(request):
+    t0 = time.time()
+    print('شروع آپدیت چک‌ها---------------------------------------------------')
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    t1 = time.time()
+
+    # گرفتن داده‌ها از دیتابیس خارجی
+    cursor.execute(
+        "SELECT TOP 100000 [ID], [ChequeID], [ChequeRow], [IssuanceDate], [ChequeDate], "
+        "[Cost], [BankName], [BankBranch], [AccountID], [Description], [Status], [PerCode] "
+        "FROM [mahak].[dbo].[Cheques_Recieve]"
+    )
+    mahak_data = cursor.fetchall()
+
+    existing_in_mahak = {int(row[0]) for row in mahak_data}
+    print('تعداد رکوردهای موجود در Mahak:', len(existing_in_mahak))
+
+    cheques_to_create = []
+    cheques_to_update = []
+
+    current_cheques = {cheque.id_mahak: cheque for cheque in ChequesRecieve.objects.all()}
+    BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
+
+    counter = 1
+    for row in mahak_data:
+        print(counter)
+        counter += 1
+        id_mahak = int(row[0])
+
+        # بررسی و تبدیل cheque_id
+        cheque_id_str = row[1]  # به عنوان عدد در نظر گرفته می‌شود
+        try:
+            cheque_id = int(cheque_id_str)
+        except ValueError:
+            print(f"خطا: مقدار غیر معتبر برای cheque_id: {cheque_id_str}")
+            continue  # گذر از رکورد در صورت خطا
+
+        # تبدیل cheque_row
+        try:
+            cheque_row = int(row[2])
+        except ValueError:
+            print(f"مقدار غیر معتبر برای cheque_row: {row[2]}")
+            continue
+
+        issuance_tarik = row[3]
+        cheque_tarik = row[4]
+
+        # مدیریت هزینه
+        try:
+            cost_str = row[5] if row[5] not in (None, '') else '0.00'
+            cost = Decimal(cost_str)
+        except (ValueError, InvalidOperation):
+            print(f"مقدار غیر معتبر برای cost: {row[5]}")
+            continue
+
+            # فیلدهای بانکی
+        bank_name = row[6] if row[6] not in (None, '') else ''
+        bank_branch = row[7] if row[7] not in (None, '') else ''
+
+        # تبدیل account_id
+        account_id_str = row[8] if row[8] not in (None, '') else 0
+        try:
+            account_id = int(account_id_str)
+        except ValueError:
+            print(f"مقدار غیر معتبر برای account_id: {account_id_str}")
+
+        description = row[9] if row[9] not in (None, '') else ''
+        status = row[10] if row[10] not in (None, '') else 0  # در صورتی که None باشد، مقدار پیش‌فرض 0
+        per_code = row[11] if row[11] not in (None, '') else 0  # در صورتی که None باشد، مقدار پیش‌فرض 0
+
+        # تبدیل تاریخ
+        try:
+            issuance_date = jdatetime.date(
+                *map(int, issuance_tarik.split('/'))).togregorian() if issuance_tarik else None
+            cheque_date = jdatetime.date(*map(int, cheque_tarik.split('/'))).togregorian() if cheque_tarik else None
+        except Exception as e:
+            print(f"خطا در تعیین تاریخ: {e}")
+            continue
+
+        if id_mahak in current_cheques:
+            cheque = current_cheques[id_mahak]
+            if (cheque.cheque_id != cheque_id or cheque.cheque_row != cheque_row or
+                    cheque.issuance_tarik != issuance_tarik or cheque.issuance_date != issuance_date or
+                    cheque.cheque_tarik != cheque_tarik or cheque.cheque_date != cheque_date or
+                    cheque.cost != cost or cheque.bank_name != bank_name or
+                    cheque.bank_branch != bank_branch or cheque.account_id != account_id or
+                    cheque.description != description or cheque.status != status or
+                    cheque.per_code != per_code):
+                cheque.cheque_id = cheque_id
+                cheque.cheque_row = cheque_row
+                cheque.issuance_tarik = issuance_tarik
+                cheque.issuance_date = issuance_date
+                cheque.cheque_tarik = cheque_tarik
+                cheque.cheque_date = cheque_date
+                cheque.cost = cost
+                cheque.bank_name = bank_name
+                cheque.bank_branch = bank_branch
+                cheque.account_id = account_id
+                cheque.description = description
+                cheque.status = status
+                cheque.per_code = per_code
+                cheques_to_update.append(cheque)
+        else:
+            cheques_to_create.append(ChequesRecieve(
+                id_mahak=id_mahak, cheque_id=cheque_id, cheque_row=cheque_row,
+                issuance_tarik=issuance_tarik, issuance_date=issuance_date,
+                cheque_tarik=cheque_tarik, cheque_date=cheque_date, cost=cost,
+                bank_name=bank_name, bank_branch=bank_branch, account_id=account_id,
+                description=description, status=status, per_code=per_code
+            ))
+
+            # Bulk create new cheque details
+    if cheques_to_create:
+        print('شروع به ساخت')
+        ChequesRecieve.objects.bulk_create(cheques_to_create, batch_size=BATCH_SIZE)
+
+        # Bulk update existing cheque details
+    if cheques_to_update:
+        print('شروع به آپدیت')
+        ChequesRecieve.objects.bulk_update(
+            cheques_to_update,
+            ['cheque_id', 'cheque_row', 'issuance_tarik', 'issuance_date',
+             'cheque_tarik', 'cheque_date', 'cost', 'bank_name',
+             'bank_branch', 'account_id', 'description', 'status', 'per_code'],
+            batch_size=BATCH_SIZE
+        )
+
+        # محاسبه زمان اجرای کل
+    tend = time.time()
+    total_time = tend - t0
+    db_time = t1 - t0
+    update_time = tend - t1
+
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    print(f"زمان اتصال به دیتابیس: {db_time:.2f} ثانیه")
+    print(f"زمان آپدیت جدول: {update_time:.2f} ثانیه")
+
+    # به‌روزرسانی اطلاعات در جدول Mtables
+    table = Mtables.objects.filter(name='Cheques_Recieve').last()
+    table.last_update_time = timezone.now()
+    table.update_duration = update_time
+    table.save()
 
     return redirect('/updatedb')

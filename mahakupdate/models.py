@@ -485,6 +485,9 @@ class SanadDetail(models.Model):
     syscomment = models.CharField(max_length=255, null=True,verbose_name='عنوان سند')
     curramount = models.DecimalField(max_digits=30, decimal_places=10, null=True,verbose_name='مانده')
     usercreated = models.CharField(max_length=255, null=True,verbose_name='ایجاد کننده')
+    is_analiz = models.BooleanField(default=False, verbose_name='آنالیز شده است')
+
+
 
     class Meta:
         unique_together = (('code', 'radif'),)  # تعریف کلید یگانه
@@ -514,3 +517,27 @@ class AccCoding(models.Model):
 
     def __str__(self):
         return f"{self.code} - {self.name} (سطح {self.level})"
+
+
+
+from django.db import models
+
+class ChequesRecieve(models.Model):
+    id_mahak = models.AutoField(primary_key=True, verbose_name="شناسه")
+    cheque_id = models.IntegerField(verbose_name="شناسه چک")
+    cheque_row = models.IntegerField(verbose_name="ردیف چک")
+    issuance_tarik = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ صدور شمسی')
+    issuance_date = models.DateField(verbose_name="تاریخ صدور میلادی")
+    cheque_tarik = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ چک شمسی')
+    cheque_date = models.DateField(verbose_name="تاریخ چک میلادی")
+    cost = models.DecimalField(max_digits=14, decimal_places=2, verbose_name="مبلغ")
+    bank_name = models.CharField(max_length=255, verbose_name="نام بانک")
+    bank_branch = models.CharField(max_length=255, verbose_name="شعبه بانک")
+    account_id = models.IntegerField(verbose_name="شناسه حساب")
+    description = models.TextField(verbose_name="توضیحات")
+    status = models.CharField(max_length=50, verbose_name="وضعیت")
+    per_code = models.CharField(max_length=50, verbose_name="کد شخص")
+
+    class Meta:
+        verbose_name = 'دریافت چک'
+        verbose_name_plural = 'دریافت چک‌ها'
