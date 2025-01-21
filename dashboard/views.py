@@ -23,7 +23,180 @@ from collections import defaultdict
 from django.db.models import Sum, Q
 from datetime import timedelta
 
-def TarazCal(fday, lday):
+from collections import defaultdict
+from datetime import timedelta, date
+from django.db.models import Sum, Q
+from django.shortcuts import render
+import time
+import jdatetime
+
+def TarazCal(fday, lday, data):
+    # ایجاد لیستی از تمام روزهای بین fday و lday
+    day_range = [fday + timedelta(days=x) for x in range((lday - fday).days + 1)]
+
+    # فیلتر کردن داده‌ها برای تمام روزها در یک بار
+    current_data = defaultdict(int)
+    for item in data:
+        current_data[(item['date'], item['kol'])] = item['total_amount']
+
+    sood_navizhe = 0
+    active_day = 0
+    daily_sood_navizhe = []  # لیست برای ذخیره مقادیر روزانه
+    asnad_pardakhtani = []  # لیست برای ذخیره مقادیر asnad_pardakhtani
+
+    for current_date in day_range:
+        baha_tamam_forosh = current_data.get((current_date, 500), 0)
+        daramad_forosh = current_data.get((current_date, 400), 0)
+        asnad_pardakhtan = current_data.get((current_date, 101), 0)  # محاسبه asnad_pardakhtani
+
+        # محاسبه مجموع روزانه
+        daily_total = daramad_forosh + baha_tamam_forosh
+        daily_sood_navizhe.append(daily_total)  # ذخیره مقدار روزانه
+
+        if daramad_forosh != 0 or baha_tamam_forosh != 0:
+            active_day += 1
+
+        sood_navizhe += daily_total
+
+        # ذخیره مقدار asnad_pardakhtani با علامت منفی
+        asnad_pardakhtani.append(-asnad_pardakhtan)
+
+    # محاسبه حداقل و حداکثر
+    min_sood_navizhe = min(daily_sood_navizhe) / 10000000 if daily_sood_navizhe else 0
+    max_sood_navizhe = max(daily_sood_navizhe) / 10000000 if daily_sood_navizhe else 0
+
+    to_return = {
+        'sood_navizhe': sood_navizhe / 10000000,
+        'active_day': active_day,
+        'ave_sood_navizhe': sood_navizhe / active_day / 10000000 if active_day > 0 else 0,
+        'min_sood_navizhe': min_sood_navizhe,
+        'max_sood_navizhe': max_sood_navizhe,
+        'asnad_pardakhtani': sum(asnad_pardakhtani) / 10000000,  # جمع مقادیر asnad_pardakhtani
+    }
+
+    return to_return
+
+def Home1(request, *args, **kwargs):
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(
+            user=user,
+            page='داشبورد 1',
+        )
+    start_time = time.time()  # زمان شروع تابع
+
+    today = date.today()
+    yesterday = today - timedelta(days=1)
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    start_date_jalali = jdatetime.date(acc_year, 1, 1)  # ۱ فروردین سال مالی
+    start_date_gregorian = start_date_jalali.togregorian()  # تبدیل به میلادی
+    last_update_time = Mtables.objects.filter(name='Sanad_detail').last().last_update_time
+
+    # فیلتر کردن داده‌ها برای تمامی روزهای مورد نیاز
+    data = SanadDetail.objects.filter(
+        date__range=(start_date_gregorian, today)
+    ).filter(
+        Q(kol=500) | Q(kol=400) | Q(kol=101)  # اضافه کردن kol=101 به فیلتر
+    ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
+
+    # محاسبه داده‌ها برای روزهای مختلف
+    today_data = TarazCal(today, today, data)
+    yesterday_data = TarazCal(yesterday, yesterday, data)
+    allday_data = TarazCal(start_date_gregorian, today, data)
+
+    # محاسبه تاریخ 8 روز پیش
+    start_date = today - timedelta(days=7)  # 7 روز قبل امروز
+    end_date = today  # امروز
+    # لیست برای ذخیره داده‌های asnad_pardakhtani برای هر روز
+    chart4_data = []
+    # محاسبه داده‌ها برای هر روز از 8 روز قبل تا امروز
+    for i in range(8):  # 8 روز (از 7 روز قبل تا امروز)
+        current_day = start_date + timedelta(days=i)
+        daily_data = TarazCal(current_day, current_day, data)  # استفاده از TarazCal برای هر روز
+        chart4_data.append(daily_data['asnad_pardakhtani'])  # جمع‌آوری مقادیر asnad_pardakhtani
+
+    for i in chart4_data:
+        print(i)
+
+    context = {
+        'title': 'داشبورد مدیریتی',
+        'user': user,
+        'last_update_time': last_update_time,
+        'today_data': today_data,
+        'yesterday_data': yesterday_data,
+        'allday_data': allday_data,
+        'chart4_data': chart4_data,
+
+    }
+
+    total_time = time.time() - start_time  # محاسبه زمان اجرا
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+    return render(request, 'home1.html', context)
+
+
+def TarazCal11(fday, lday):
+    # ایجاد لیستی از تمام روزهای بین fday و lday
+    day_range = [fday + timedelta(days=x) for x in range((lday - fday).days + 1)]
+
+    # فیلتر کردن داده‌ها برای تمام روزها در یک بار
+    data = SanadDetail.objects.filter(
+        date__range=(fday, lday)
+    ).filter(
+        Q(kol=500) | Q(kol=400) | Q(kol=101)  # اضافه کردن kol=101 به فیلتر
+    ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
+
+    sood_navizhe = 0
+    active_day = 0
+    daily_sood_navizhe = []  # لیست برای ذخیره مقادیر روزانه
+    asnad_pardakhtani = []  # لیست برای ذخیره مقادیر asnad_pardakhtani
+
+    # استفاده از defaultdict برای ذخیره‌سازی داده‌ها
+    current_data = defaultdict(int)
+    for item in data:
+        current_data[(item['date'], item['kol'])] = item['total_amount']
+
+    for current_date in day_range:
+        baha_tamam_forosh = current_data.get((current_date, 500), 0)
+        daramad_forosh = current_data.get((current_date, 400), 0)
+        asnad_pardakhtan = current_data.get((current_date, 101), 0)  # محاسبه asnad_pardakhtani
+
+        # محاسبه مجموع روزانه
+        daily_total = daramad_forosh + baha_tamam_forosh
+        daily_sood_navizhe.append(daily_total)  # ذخیره مقدار روزانه
+
+        if daramad_forosh != 0 or baha_tamam_forosh != 0:
+            active_day += 1
+
+        sood_navizhe += daily_total
+
+        # ذخیره مقدار asnad_pardakhtani با علامت منفی
+        asnad_pardakhtani.append(-asnad_pardakhtan)
+
+    # محاسبه حداقل و حداکثر
+    min_sood_navizhe = min(daily_sood_navizhe) / 10000000 if daily_sood_navizhe else 0
+    max_sood_navizhe = max(daily_sood_navizhe) / 10000000 if daily_sood_navizhe else 0
+
+    to_return = {
+        'sood_navizhe': sood_navizhe / 10000000,
+        'active_day': active_day,
+        'ave_sood_navizhe': sood_navizhe / active_day / 10000000 if active_day > 0 else 0,
+        'min_sood_navizhe': min_sood_navizhe,
+        'max_sood_navizhe': max_sood_navizhe,
+        'asnad_pardakhtani': sum(asnad_pardakhtani)/ 10000000,  # جمع مقادیر asnad_pardakhtani
+    }
+
+    return to_return
+
+
+
+
+
+
+
+
+
+
+def TarazCal1(fday, lday):
     # ایجاد لیستی از تمام روزهای بین fday و lday
     day_range = [fday + timedelta(days=x) for x in range((lday - fday).days + 1)]
 
@@ -47,6 +220,7 @@ def TarazCal(fday, lday):
         baha_tamam_forosh = current_data.get((current_date, 500), 0)
         daramad_forosh = current_data.get((current_date, 400), 0)
 
+
         # محاسبه مجموع روزانه
         daily_total = daramad_forosh + baha_tamam_forosh
         daily_sood_navizhe.append(daily_total)  # ذخیره مقدار روزانه
@@ -66,11 +240,14 @@ def TarazCal(fday, lday):
         'ave_sood_navizhe': sood_navizhe / active_day / 10000000 if active_day > 0 else 0,
         'min_sood_navizhe': min_sood_navizhe,
         'max_sood_navizhe': max_sood_navizhe,
+
     }
 
     return to_return
+
+
 @login_required(login_url='/login')
-def Home1(request, *args, **kwargs):
+def Home11(request, *args, **kwargs):
     user=request.user
     if user.mobile_number != '09151006447':
         UserLog.objects.create(
@@ -88,8 +265,25 @@ def Home1(request, *args, **kwargs):
     today_data=TarazCal(today,today)
     yesterday_data=TarazCal(yesterday,yesterday)
     allday_data=TarazCal(start_date_gregorian,today)
-    print(today_data)
-    print(yesterday_data)
+
+
+
+    # محاسبه تاریخ 8 روز پیش
+    start_date = today - timedelta(days=7)  # 7 روز قبل امروز
+    end_date = today  # امروز
+    # لیست برای ذخیره داده‌های asnad_pardakhtani برای هر روز
+    chart4_data = []
+    # محاسبه داده‌ها برای هر روز از 8 روز قبل تا امروز
+    for i in range(8):  # 8 روز (از 7 روز قبل تا امروز)
+        current_day = start_date + timedelta(days=i)
+        daily_data = TarazCal(current_day, current_day)  # استفاده از TarazCal برای هر روز
+        chart4_data.append(daily_data['asnad_pardakhtani'])  # جمع‌آوری مقادیر asnad_pardakhtani
+
+    for  i in chart4_data:
+        print(i)
+
+    # print(today_data)
+    # print(yesterday_data)
     context = {
         'title': 'داشبورد مدیریتی',
         'user': user,
@@ -97,6 +291,7 @@ def Home1(request, *args, **kwargs):
         'today_data': today_data,
         'yesterday_data': yesterday_data,
         'allday_data': allday_data,
+        'chart4_data':chart4_data,
 
     }
 
