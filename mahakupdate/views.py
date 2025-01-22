@@ -33,6 +33,7 @@ from django.shortcuts import HttpResponse
 from .models import Kardex
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
+import re
 
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
@@ -2107,6 +2108,7 @@ def UpdateSanadDetail(request):
                 sanad.curramount = curramount
                 sanad.usercreated = usercreated
                 sanad.tarikh = voucher_date  # بروزرسانی تاریخ شمسی
+                sanad.is_analiz = False  # تنظیم is_analiz به False
                 sanads_to_update.append(sanad)
         else:
             sanads_to_create.append(SanadDetail(
@@ -2115,25 +2117,26 @@ def UpdateSanadDetail(request):
                 sanad_type=sanad_type, meghdar=meghdar, syscomment=syscomment,
                 curramount=curramount, usercreated=usercreated,
                 tarikh=voucher_date,  # ذخیره تاریخ شمسی
+                is_analiz=False  # تنظیم is_analiz به False
             ))
 
-            # Bulk create new sanad details
+    # Bulk create new sanad details
     if sanads_to_create:
         print('شروع به ساخت')
         SanadDetail.objects.bulk_create(sanads_to_create, batch_size=BATCH_SIZE)
 
-        # Bulk update existing sanad details
+    # Bulk update existing sanad details
     if sanads_to_update:
         print('شروع به آپدیت')
         SanadDetail.objects.bulk_update(
             sanads_to_update,
             ['kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
              'sanad_code', 'sanad_type', 'meghdar',
-             'syscomment', 'curramount', 'usercreated', 'tarikh'],
+             'syscomment', 'curramount', 'usercreated', 'tarikh', 'is_analiz'],
             batch_size=BATCH_SIZE
         )
 
-        # پس از بخش پردازش ثبت‌نام
+    # پس از بخش پردازش ثبت‌نام
     print('بررسی تاریخ')
     counter2 = 1
 
@@ -2156,7 +2159,7 @@ def UpdateSanadDetail(request):
             except Exception as e:
                 print(f"خطا در تبدیل تاریخ برای {sanad.code}, {sanad.radif}: {e}")
 
-                # پردازش اسناد جدید و پر کردن تاریخ میلادی
+    # پردازش اسناد جدید و پر کردن تاریخ میلادی
     for sanad in sanads_to_create:
         if sanad.tarikh:  # فرض بر این است که tarikh مقداری دارد
             try:
@@ -2167,12 +2170,12 @@ def UpdateSanadDetail(request):
             except Exception as e:
                 print(f"خطا در تبدیل تاریخ برای سند جدید {sanad.code}, {sanad.radif}: {e}")
 
-                # بروزرسانی تاریخ‌های میلادی در صورت نیاز
+    # بروزرسانی تاریخ‌های میلادی در صورت نیاز
     if empty_date_sanads or sanads_to_create:
         print('شروع به آپدیت تاریخ‌های میلادی')
         SanadDetail.objects.bulk_update(list(empty_date_sanads) + sanads_to_create, ['date'], batch_size=BATCH_SIZE)
 
-        # حذف رکوردهای اضافی
+    # حذف رکوردهای اضافی
     sanads_to_delete = []
     current_sanad_keys = {(sd.code, sd.radif) for sd in SanadDetail.objects.all()}
 
@@ -2180,7 +2183,7 @@ def UpdateSanadDetail(request):
         if key not in existing_in_mahak:
             sanads_to_delete.append(SanadDetail.objects.get(code=key[0], radif=key[1]).id)
 
-            # حذف به صورت دسته‌ای
+    # حذف به صورت دسته‌ای
     if sanads_to_delete:
         print('شروع به حذف')
         for i in range(0, len(sanads_to_delete), BATCH_SIZE):
@@ -2190,11 +2193,41 @@ def UpdateSanadDetail(request):
     else:
         print("هیچ رکوردی برای حذف وجود ندارد.")
 
+    import re
+
+    # پر کردن cheque_id و به‌روزرسانی is_analiz
+    to_analiz = SanadDetail.objects.filter(kol=101, is_analiz=False)
+    # to_analiz = SanadDetail.objects.filter(kol=101)
+
+    # الگوی یافتن شناسه چک
+    cheque_pattern = r'(چک\s*دريافتي\s*اول\s*دوره|چک\s*دريافتي|چک\s*خرج\s*شده|چک\s*درجريان\s*وصول|چک).*?\(([\d/]+)\)'
+
+    # ایجاد یک لیست برای ذخیره تغییرات
+    updates = []
+
+    for t in to_analiz:
+        syscomment = t.syscomment
+        cheque_id = None  # مقدار پیش‌فرض برای cheque_id
+
+        if syscomment:  # بررسی وجود مقدار در syscomment
+            match = re.search(cheque_pattern, syscomment)
+            if match:
+                cheque_id = match.group(2)  # ذخیره شناسه چک
+
+        # به‌روزرسانی ویژگی‌ها
+        t.cheque_id = cheque_id
+        t.is_analiz = cheque_id is not None  # اگر شناسه چک پیدا شده باشد، is_analiz را به True تغییر دهید
+
+        # افزودن به لیست تغییرات
+        updates.append(t)
+
+        # ذخیره تغییرات در دیتابیس
+    if updates:
+        SanadDetail.objects.bulk_update(updates, ['cheque_id', 'is_analiz'], batch_size=BATCH_SIZE)
 
 
-    # آنالیز ردیف ها و استخراج تاریخ موثر و شماره چک
 
-        # محاسبه زمان اجرای کل
+    # محاسبه زمان اجرای کل
     tend = time.time()
     total_time = tend - t0
     db_time = t1 - t0
@@ -2220,7 +2253,6 @@ def UpdateSanadDetail(request):
     table.save()
 
     return redirect('/updatedb')
-
 
 def UpdateSanadDetail1(request):
     t0 = time.time()
@@ -2457,6 +2489,13 @@ from django.shortcuts import redirect
 from .models import ChequesRecieve
 
 
+from django.shortcuts import redirect
+from django.utils import timezone
+from decimal import Decimal, InvalidOperation
+import time
+import jdatetime
+from .models import ChequesRecieve, Mtables
+
 def Cheques_Recieve(request):
     t0 = time.time()
     print('شروع آپدیت چک‌ها---------------------------------------------------')
@@ -2466,8 +2505,8 @@ def Cheques_Recieve(request):
 
     # گرفتن داده‌ها از دیتابیس خارجی
     cursor.execute(
-        "SELECT TOP 100000 [ID], [ChequeID], [ChequeRow], [IssuanceDate], [ChequeDate], "
-        "[Cost], [BankName], [BankBranch], [AccountID], [Description], [Status], [PerCode] "
+        "SELECT [ID], [ChequeID], [ChequeRow], [IssuanceDate], [ChequeDate], "  
+        "[Cost], [BankName], [BankBranch], [AccountID], [Description], [Status], [PerCode] "  
         "FROM [mahak].[dbo].[Cheques_Recieve]"
     )
     mahak_data = cursor.fetchall()
@@ -2488,12 +2527,7 @@ def Cheques_Recieve(request):
         id_mahak = int(row[0])
 
         # بررسی و تبدیل cheque_id
-        cheque_id_str = row[1]  # به عنوان عدد در نظر گرفته می‌شود
-        try:
-            cheque_id = int(cheque_id_str)
-        except ValueError:
-            print(f"خطا: مقدار غیر معتبر برای cheque_id: {cheque_id_str}")
-            continue  # گذر از رکورد در صورت خطا
+        cheque_id_str = row[1]  # به عنوان رشته در نظر گرفته می‌شود
 
         # تبدیل cheque_row
         try:
@@ -2513,7 +2547,7 @@ def Cheques_Recieve(request):
             print(f"مقدار غیر معتبر برای cost: {row[5]}")
             continue
 
-            # فیلدهای بانکی
+        # فیلدهای بانکی
         bank_name = row[6] if row[6] not in (None, '') else ''
         bank_branch = row[7] if row[7] not in (None, '') else ''
 
@@ -2523,6 +2557,7 @@ def Cheques_Recieve(request):
             account_id = int(account_id_str)
         except ValueError:
             print(f"مقدار غیر معتبر برای account_id: {account_id_str}")
+            continue
 
         description = row[9] if row[9] not in (None, '') else ''
         status = row[10] if row[10] not in (None, '') else 0  # در صورتی که None باشد، مقدار پیش‌فرض 0
@@ -2539,14 +2574,14 @@ def Cheques_Recieve(request):
 
         if id_mahak in current_cheques:
             cheque = current_cheques[id_mahak]
-            if (cheque.cheque_id != cheque_id or cheque.cheque_row != cheque_row or
+            if (cheque.cheque_id != cheque_id_str or cheque.cheque_row != cheque_row or
                     cheque.issuance_tarik != issuance_tarik or cheque.issuance_date != issuance_date or
                     cheque.cheque_tarik != cheque_tarik or cheque.cheque_date != cheque_date or
                     cheque.cost != cost or cheque.bank_name != bank_name or
                     cheque.bank_branch != bank_branch or cheque.account_id != account_id or
                     cheque.description != description or cheque.status != status or
                     cheque.per_code != per_code):
-                cheque.cheque_id = cheque_id
+                cheque.cheque_id = cheque_id_str
                 cheque.cheque_row = cheque_row
                 cheque.issuance_tarik = issuance_tarik
                 cheque.issuance_date = issuance_date
@@ -2562,19 +2597,19 @@ def Cheques_Recieve(request):
                 cheques_to_update.append(cheque)
         else:
             cheques_to_create.append(ChequesRecieve(
-                id_mahak=id_mahak, cheque_id=cheque_id, cheque_row=cheque_row,
+                id_mahak=id_mahak, cheque_id=cheque_id_str, cheque_row=cheque_row,
                 issuance_tarik=issuance_tarik, issuance_date=issuance_date,
                 cheque_tarik=cheque_tarik, cheque_date=cheque_date, cost=cost,
                 bank_name=bank_name, bank_branch=bank_branch, account_id=account_id,
                 description=description, status=status, per_code=per_code
             ))
 
-            # Bulk create new cheque details
+    # Bulk create new cheque details
     if cheques_to_create:
         print('شروع به ساخت')
         ChequesRecieve.objects.bulk_create(cheques_to_create, batch_size=BATCH_SIZE)
 
-        # Bulk update existing cheque details
+    # Bulk update existing cheque details
     if cheques_to_update:
         print('شروع به آپدیت')
         ChequesRecieve.objects.bulk_update(
@@ -2585,20 +2620,45 @@ def Cheques_Recieve(request):
             batch_size=BATCH_SIZE
         )
 
-        # محاسبه زمان اجرای کل
+    # شناسایی رکوردهای حذف‌شده
+    ids_in_external_db = {int(row[0]) for row in mahak_data}  # شناسه‌های موجود در دیتابیس خارجی
+    ids_in_django_db = {cheque.id_mahak for cheque in current_cheques.values()}  # شناسه‌های موجود در مدل جنگو
+
+    # یافتن شناسه‌هایی که در دیتابیس جنگو وجود دارند اما در دیتابیس خارجی نیستند
+    ids_to_delete = ids_in_django_db - ids_in_external_db
+
+    # حذف رکوردهای شناسایی‌شده
+    if ids_to_delete:
+        ChequesRecieve.objects.filter(id_mahak__in=ids_to_delete).delete()
+        print(f"رکوردهای حذف‌شده: {len(ids_to_delete)} رکورد حذف شد.")
+
+    # محاسبه زمان اجرای کل
     tend = time.time()
     total_time = tend - t0
     db_time = t1 - t0
     update_time = tend - t1
 
-    print(f"زمان کل: {total_time:.2f} ثانیه")
-    print(f"زمان اتصال به دیتابیس: {db_time:.2f} ثانیه")
-    print(f"زمان آپدیت جدول: {update_time:.2f} ثانیه")
+    cursor.execute("SELECT COUNT(*) FROM Cheques_Recieve")  # محاسبه تعداد کل رکوردها
+    row_count = cursor.fetchone()[0]
+
+    cursor.execute(
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Cheques_Recieve'")  # محاسبه تعداد ستون‌ها
+    column_count = cursor.fetchone()[0]
 
     # به‌روزرسانی اطلاعات در جدول Mtables
     table = Mtables.objects.filter(name='Cheques_Recieve').last()
     table.last_update_time = timezone.now()
     table.update_duration = update_time
+    table.row_count = row_count
+    table.column_count = column_count
     table.save()
+
+
+
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    print(f"زمان اتصال به دیتابیس: {db_time:.2f} ثانیه")
+    print(f"زمان آپدیت جدول: {update_time:.2f} ثانیه")
+
+
 
     return redirect('/updatedb')

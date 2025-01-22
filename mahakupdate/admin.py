@@ -118,10 +118,10 @@ class SanadAdmin(admin.ModelAdmin):
         model = Sanad
 
 class SanadDetailAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'code','tarikh','date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount','is_analiz']
+    list_display = ['__str__', 'code','tarikh','date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount','is_analiz','cheque_id','syscomment']
     list_filter = ['kol', 'moin', 'tafzili']
     list_editable = ['is_analiz']
-    search_fields = ['tarikh','date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount']
+    search_fields = ['tarikh','date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount','cheque_id']
 
     class Meta:
         model = SanadDetail
@@ -140,6 +140,7 @@ class AccCodingAdmin(admin.ModelAdmin):
 
 class ChequesRecieveAdmin(admin.ModelAdmin):
     list_display = ('id_mahak', 'cheque_id', 'cheque_row', 'issuance_tarik', 'issuance_date', 'cheque_tarik', 'cheque_date', 'cost', 'bank_name', 'bank_branch', 'account_id', 'description', 'status', 'per_code')
+    # list_display = ('id_mahak' , 'cheque_row', 'issuance_tarik', 'issuance_date', 'cheque_tarik', 'cheque_date', 'cost', 'bank_name', 'bank_branch', 'account_id', 'description', 'status', 'per_code')
     search_fields = ('cheque_id', 'bank_name', 'status')
 
 
