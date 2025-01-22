@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo, \
-    Storagek, Mojodi, Sanad, SanadDetail, AccCoding
+    Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve
 
 
 # Register your models here.
@@ -118,10 +118,10 @@ class SanadAdmin(admin.ModelAdmin):
         model = Sanad
 
 class SanadDetailAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'code','tarikh','date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount']
+    list_display = ['__str__', 'code','tarikh','date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount','is_analiz']
     list_filter = ['kol', 'moin', 'tafzili']
-    # list_editable = ['name','parent','level']
-    # search_fields = ['name','lname','group']
+    list_editable = ['is_analiz']
+    search_fields = ['tarikh','date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount']
 
     class Meta:
         model = SanadDetail
@@ -135,6 +135,20 @@ class AccCodingAdmin(admin.ModelAdmin):
 
     class Meta:
         model = AccCoding
+
+
+
+class ChequesRecieveAdmin(admin.ModelAdmin):
+    list_display = ('id_mahak', 'cheque_id', 'cheque_row', 'issuance_tarik', 'issuance_date', 'cheque_tarik', 'cheque_date', 'cost', 'bank_name', 'bank_branch', 'account_id', 'description', 'status', 'per_code')
+    search_fields = ('cheque_id', 'bank_name', 'status')
+
+
+    class Meta:
+        model = ChequesRecieve
+
+
+
+
 
 admin.site.register(Mtables, MtablesAdmin)
 admin.site.register(Kala, KalaAdmin)
@@ -150,3 +164,4 @@ admin.site.register(Storagek, StoragekAdmin)
 admin.site.register(Sanad, SanadAdmin)
 admin.site.register(SanadDetail, SanadDetailAdmin)
 admin.site.register(AccCoding, AccCodingAdmin)
+admin.site.register(ChequesRecieve, ChequesRecieveAdmin)
