@@ -486,6 +486,8 @@ class SanadDetail(models.Model):
     curramount = models.DecimalField(max_digits=30, decimal_places=10, null=True,verbose_name='مانده')
     usercreated = models.CharField(max_length=255, null=True,verbose_name='ایجاد کننده')
     is_analiz = models.BooleanField(default=False, verbose_name='آنالیز شده است')
+    cheque_id = models.CharField(blank=True, null=True,max_length=255, verbose_name="شناسه چک")  # یا مقدار max_length مناسب
+
 
 
 
@@ -520,11 +522,11 @@ class AccCoding(models.Model):
 
 
 
-from django.db import models
-
+#
 class ChequesRecieve(models.Model):
     id_mahak = models.AutoField(primary_key=True, verbose_name="شناسه")
-    cheque_id = models.IntegerField(verbose_name="شناسه چک")
+    # cheque_id = models.IntegerField(verbose_name="شناسه چک")
+    cheque_id = models.CharField(max_length=255, verbose_name="شناسه چک")  # یا مقدار max_length مناسب
     cheque_row = models.IntegerField(verbose_name="ردیف چک")
     issuance_tarik = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ صدور شمسی')
     issuance_date = models.DateField(verbose_name="تاریخ صدور میلادی")
@@ -539,5 +541,5 @@ class ChequesRecieve(models.Model):
     per_code = models.CharField(max_length=50, verbose_name="کد شخص")
 
     class Meta:
-        verbose_name = 'دریافت چک'
-        verbose_name_plural = 'دریافت چک‌ها'
+        verbose_name = 'چک دریافتی'
+        verbose_name_plural = 'چکهای دریافتی'
