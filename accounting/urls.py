@@ -1,7 +1,7 @@
 from django.urls import path
 from django.shortcuts import redirect
 
-from accounting.views import TarazKol
+from accounting.views import TarazKol, ChequesRecieveTotal
 
 urlpatterns = [
 
@@ -10,6 +10,7 @@ urlpatterns = [
 
 
     path('acc/<col>/<moin>/<tafzili>', TarazKol, name='taraz-kol'),
+    path('acc/cheques_recieve_total', ChequesRecieveTotal, name='cheques-recieve-total'),
 
 
 

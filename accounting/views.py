@@ -2,9 +2,10 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 import time
 from django.db.models import Sum
+from pandas.plotting import table
 
 from custom_login.models import UserLog
-from mahakupdate.models import SanadDetail, AccCoding
+from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve
 
 
 # Create your views here.
@@ -86,3 +87,117 @@ def TarazKol(request, *args, **kwargs):
     }
 
     return render(request, 'taraz_kol.html', context)
+
+
+from django.shortcuts import render
+from django.db.models import Prefetch
+import time
+
+from django.shortcuts import render
+
+
+
+import time
+
+from django.db.models import Prefetch
+
+from django.shortcuts import render
+from django.db.models import Sum
+import time
+
+from django.shortcuts import render
+from django.db.models import Sum
+import time
+
+from django.shortcuts import render
+import time
+
+
+from django.db.models import Sum, F, OuterRef, Subquery
+
+from django.db.models import Sum, OuterRef, Subquery
+
+from django.shortcuts import render
+import time
+
+from django.shortcuts import render
+from django.db.models import Prefetch
+import time
+
+from django.shortcuts import render
+import time
+from django.shortcuts import render
+import time
+
+def ChequesRecieveTotal(request, *args, **kwargs):
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='چک های دریافتی', code=0)
+
+    start_time = time.time()  # زمان شروع تابع
+
+    # بارگذاری چک‌ها با بهینه‌سازی
+    chequesrecieve = ChequesRecieve.objects.select_related('last_sanad_detaile').all()
+
+    table1 = []
+    # تغییر به cheque_id به جای id
+    last_sanad_comments = {chequ.cheque_id: chequ.last_sanad_detaile.syscomment for chequ in chequesrecieve if chequ.last_sanad_detaile}
+
+    for chequ in chequesrecieve:
+        com = last_sanad_comments.get(chequ.cheque_id, '')
+
+        table1.append(
+            {
+                'id': chequ.cheque_id,
+                'status': chequ.status,
+                'com': com,
+                'mandeh': chequ.total_mandeh
+            }
+        )
+
+    context = {
+        'title': 'چکهای دریافتی',
+        'user': user,
+        'table1': table1,
+    }
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+
+    return render(request, 'cheques-recieve-total.html', context)
+
+
+def ChequesRecieveTotal1(request, *args, **kwargs):
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='چک های دریافتی', code=0)
+
+    start_time = time.time()  # زمان شروع تابع
+
+    # بارگذاری همزمان اوبجکت‌های ChequesRecieve
+    chequesrecieve = ChequesRecieve.objects.filter(status=1)
+
+    table1 = []
+
+    for chequ in chequesrecieve:
+        last_sanad = chequ.sanad_detail()  # متد برای دستیابی به سند
+        com = last_sanad.syscomment if last_sanad else "بدون توضیحات"
+        man = chequ.mandeh()  # متد برای محاسبه مانده
+
+        table1.append(
+            {
+                'id': chequ.cheque_id,
+                'status': chequ.status,
+                'com': com,
+                'mandeh': man,
+            }
+        )
+
+    context = {
+        'title': 'چکهای دریافتی',
+        'user': user,
+        'table1': table1,
+    }
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+
+    return render(request, 'cheques-recieve-total.html', context)

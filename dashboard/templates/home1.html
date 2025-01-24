@@ -57,7 +57,7 @@
                             </div>
                             <div class="col-4 col-sm-4 mb-15 text-center">
                                 <div class="counter counter-small">
-                                    <h4 class="timer text-danger" data-to="{{ allday_data.sood_navizhe|intcomma }}"
+                                    <h4 class="timer text-danger" data-to="{{ allday_data.sood_navizhe }}"
                                         data-speed="5000">{{ allday_data.sood_navizhe }}</h4>
                                     <label class="text-capitalize mt-0">ازابتدای سال مالی</label>
                                 </div>
@@ -125,27 +125,27 @@
                             </div>
                             <div class="col-4 col-sm-4 mb-15 text-center">
                                 <div class="counter counter-small">
-                                    <h4 class="timer text-danger" data-to="{{ allday_data.asnad_pardakhtani|intcomma }}"
+                                    <h4 class="timer text-danger" data-to="{{ allday_data.asnad_pardakhtani }}"
                                         data-speed="5000">{{ allday_data.asnad_pardakhtani }}</h4>
-                                    <label class="text-capitalize mt-0">مانده از ابتدای سال مالی</label>
+                                    <label class="text-capitalize mt-0"> مانده از ابتدای سال مالی</label>
                                 </div>
                             </div>
                         </div>
                         <div class="divider"></div>
-{#                        <div class="row">#}
-{#                            <div class="col-6 col-sm-4 mt-15 text-center">#}
-{#                                <b>متوسط روز های فعال</b>#}
-{#                                <h4>{{ allday_data.ave_sood_navizhe|floatformat:0 }}</h4>#}
-{#                            </div>#}
-{#                            <div class="col-6 col-sm-4 mt-15 text-center">#}
-{#                                <b>کمترین روزانه</b>#}
-{#                                <h4>{{ allday_data.min_sood_navizhe|floatformat:0 }}</h4>#}
-{#                            </div>#}
-{#                            <div class="col-12 col-sm-4 mt-15 text-center">#}
-{#                                <b>بیشترین روزانه</b>#}
-{#                                <h4>{{ allday_data.asnad_pardakhtani|floatformat:0 }}</h4>#}
-{#                            </div>#}
-{#                        </div>#}
+                        <div class="row">
+                            <div class="col-6 col-sm-4 mt-15 text-center">
+                                <b>کل چک های دارای مانده</b>
+                                <h4>{{ chequ_data.tmandeh|floatformat:0|intcomma:False }}</h4>
+                            </div>
+                            <div class="col-6 col-sm-4 mt-15 text-center">
+                                <b>چک های تاریخ گذشته تا امروز</b>
+                                <h4>{{ chequ_data.pastmandeh|floatformat:0|intcomma:False }}</h4>
+                            </div>
+                            <div class="col-12 col-sm-4 mt-15 text-center">
+                                <b>چکهای فردا به بعد</b>
+                                <h4>{{ chequ_data.postmandeh|floatformat:0|intcomma:False }}</h4>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
