@@ -3,26 +3,10 @@ logger = logging.getLogger(__name__)
 from custom_login.models import UserLog
 from mahakupdate.models import Factor, FactorDetaile, SanadDetail, Mtables, ChequesRecieve
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from .models import MasterInfo, MasterReport
 from django.utils import timezone
-import jdatetime
-import time
-from django.db.models import Sum
-from datetime import date, timedelta
-
-from django.db.models import Sum, Q
-
-from django.db.models import Q
 from datetime import datetime
-
-
-from collections import defaultdict
-
-from collections import defaultdict
-from django.db.models import Sum, Q
-from datetime import timedelta
-
 from collections import defaultdict
 from datetime import timedelta, date
 from django.db.models import Sum, Q

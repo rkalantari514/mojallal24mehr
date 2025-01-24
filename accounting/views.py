@@ -128,6 +128,16 @@ from django.shortcuts import render
 import time
 from django.shortcuts import render
 import time
+import re
+
+def extract_first_words(text):
+    # الگوی جستجو برای پیدا کردن اولین کلمات قبل از اولین پرانتز
+    match = re.match(r'([^()]+)', text)
+    if match:
+        return match.group(1).strip()
+    return None
+
+
 
 def ChequesRecieveTotal(request, *args, **kwargs):
     user = request.user
@@ -137,7 +147,7 @@ def ChequesRecieveTotal(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
 
     # بارگذاری چک‌ها با بهینه‌سازی
-    chequesrecieve = ChequesRecieve.objects.select_related('last_sanad_detaile').all()
+    chequesrecieve = ChequesRecieve.objects.filter(total_mandeh__lt=0).select_related('last_sanad_detaile').all()
 
     table1 = []
     # تغییر به cheque_id به جای id
@@ -150,8 +160,9 @@ def ChequesRecieveTotal(request, *args, **kwargs):
             {
                 'id': chequ.cheque_id,
                 'status': chequ.status,
-                'com': com,
-                'mandeh': chequ.total_mandeh
+                'com': extract_first_words(com),
+                'mandeh': -1*chequ.total_mandeh,
+                'date':chequ.cheque_date,
             }
         )
 

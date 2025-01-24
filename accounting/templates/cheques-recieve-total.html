@@ -2,6 +2,7 @@
 {% load humanize %}
 {% load static %}
 {% block content %}
+
     <style>
         .circle-progress .in .text {
             position: absolute;
@@ -412,7 +413,7 @@
                         <div class="card card-statistics h-100">
                             <div class="card-body">
                                 <div class="table-responsive mt-15 ">
-                                    <h6 class="card-title pb-0 border-0"> ------------ {{ cat.name }}</h6>
+                                    <h6 class="card-title pb-0 border-0"> چک های دریافتی دارای مانده</h6>
 
                                     <div class="table-responsive">
                                         <table
@@ -438,8 +439,9 @@
                                                 data-remember-order="true"
                                                 data-sortable="true"
                                                 data-show-search-clear-button="true"
-                                                data-sort-name="smratio"
-                                                data-sort-order="desc"
+                                                data-sort-name="date"
+{#                                                data-sort-order="desc"#}
+                                                data-sort-order="asc"
                                                 data-filter-control="true"
                                                 data-show-print="true"
                                                 data-export-data-type="all"
@@ -451,20 +453,24 @@
                                                     data-sorter="numericOnly"
                                                     data-field="name">شناسه چک
                                                 </th>
+                                               <th class="card-text text-center" data-sortable="true"
+                                                    data-sorter="numericOnly"
+                                                    data-field="date">تاریخ چک
+                                                </th>
 
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-sorter="numericOnly"
-                                                    data-field="cat_kala" data-filter-control="select">دسته بندی
+                                                    data-field="cat_kala" data-filter-control="select" >نوع
                                                 </th>
 
 
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-sorter="numericOnly"
-                                                    data-field="sales">تعداد فروش
+                                                    data-field="sales" data-filter-control="select">وضعیت
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-sorter="numericOnly"
-                                                    data-field="smratio">بازده فروش
+                                                    data-field="smratio">مانده
                                                 </th>
 
 
@@ -477,6 +483,8 @@
                                                    <tr>
                                                    <td class="card-text text-center">
                                                         {{ t.id }}</td>
+                                                       <td class="card-text text-center">
+                                                        {{ t.date }}</td>
                                                     <td class="card-text text-center">
                                                         {{ t.com }}
 
@@ -486,7 +494,7 @@
 
 
                                                     </td>
-                                                   <td class="card-text text-center">{{ t.mandeh|floatformat:2 }}
+                                                   <td class="card-text text-center">{{ t.mandeh|floatformat:0|intcomma:False }}
                                                 </td>
 
 

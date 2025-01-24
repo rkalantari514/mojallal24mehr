@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'django_render_partial',
     'django_jalali',
-
+    # 'jalali',
     'mahaktables',
     'mahakupdate',
     'dashboard',

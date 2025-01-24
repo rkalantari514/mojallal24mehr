@@ -14,6 +14,7 @@ python -m pip install --upgrade pip setuptools
 pip install celery
 pip install Pillow
 pip install JalaliDate
+pip install django-jalali
 
 
 INSTALLED_APPS = [
