@@ -157,31 +157,14 @@
                     <div class="card card-statistics h-100">
                         <div class="card-body">
                             <div class="clearfix">
-                                <div class="float-left icon-box bg-danger rounded-circle">
-    <span class="text-white">
-    <i class="fa fa-bar-chart-o highlight-icon" aria-hidden="true"></i>
-    </span>
-                                </div>
-                                <div class="float-right text-right">
-                                    <p class="card-text text-dark">--</p>
-                                    <h4>{{ master_data.totl_mojodi }}</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <div class="clearfix">
                                 <div class="float-left icon-box bg-primary rounded-circle">
     <span class="text-white">
     <i class="fa fa-dollar highlight-icon" aria-hidden="true"></i>
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark"> --- </p>
-                                    <h4>{{ master_data.total_arzesh|intword }} ریال</h4>
+                                    <p class="card-text text-dark">کل چک های دارای مانده</p>
+                                    <h4>{{ total_data.tmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>
                                 </div>
                             </div>
                         </div>
@@ -191,14 +174,31 @@
                     <div class="card card-statistics h-100">
                         <div class="card-body">
                             <div class="clearfix">
-                                <div class="float-left icon-box bg-warning rounded-circle">
+                                <div class="float-left icon-box bg-danger rounded-circle">
     <span class="text-white">
-    <i class="fa fa-shopping-cart highlight-icon" aria-hidden="true"></i>
+    <i class="fa fa-hourglass-end highlight-icon" aria-hidden="true"></i>
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark">----</p>
-                                    <h4>{{ master_data.total_sale }}</h4>
+                                    <p class="card-text text-dark"> چک های تاریخ گذسته و امروز </p>
+                                    <h4>{{ total_data.pastmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-success rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-hourglass-start highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark"> چک های فردا به بعد </p>
+                                    <h4>{{ total_data.postmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>
                                 </div>
                             </div>
                         </div>
@@ -214,8 +214,8 @@
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark"> --- </p>
-                                    <h4>{{ master_data.s_m_ratio|floatformat:2 }}%</h4>
+                                    <p class="card-text text-dark"> نسبت مجموع چکها به در آمد از فروش </p>
+                                    <h4>{{ total_data.ceque_ratio|floatformat:2 }}%</h4>
                                 </div>
                             </div>
                         </div>
@@ -223,41 +223,41 @@
                 </div>
             </div>
             <!-- ردیف دوم خلاصه ها -->
-            <div class="row">
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <div class="clearfix">
-                                <div class="float-left icon-box bg-dribbble rounded-circle">
-    <span class="text-white">
-    <i class="fa fa-calendar-check-o highlight-icon" aria-hidden="true"></i>
-    </span>
-                                </div>
-                                <div class="float-right text-right">
-                                    <p class="card-text text-dark">----</p>
-                                    <h4>{{ master_data.mojodi_roz|intword }}</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <div class="clearfix">
-                                <div class="float-left icon-box bg-facebook rounded-circle">
-    <span class="text-white">
-    <i class="fa fa-bed highlight-icon" aria-hidden="true"></i>
-    </span>
-                                </div>
-                                <div class="float-right text-right">
-                                    <p class="card-text text-dark">----</p>
-                                    <h4>{{ master_data.mojodi_roz_arzesh|intword }} ریال روز</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+{#            <div class="row">#}
+{#                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">#}
+{#                    <div class="card card-statistics h-100">#}
+{#                        <div class="card-body">#}
+{#                            <div class="clearfix">#}
+{#                                <div class="float-left icon-box bg-dribbble rounded-circle">#}
+{#    <span class="text-white">#}
+{#    <i class="fa fa-calendar-check-o highlight-icon" aria-hidden="true"></i>#}
+{#    </span>#}
+{#                                </div>#}
+{#                                <div class="float-right text-right">#}
+{#                                    <p class="card-text text-dark">----</p>#}
+{#                                    <h4>{{ master_data.mojodi_roz|intword }}</h4>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">#}
+{#                    <div class="card card-statistics h-100">#}
+{#                        <div class="card-body">#}
+{#                            <div class="clearfix">#}
+{#                                <div class="float-left icon-box bg-facebook rounded-circle">#}
+{#    <span class="text-white">#}
+{#    <i class="fa fa-bed highlight-icon" aria-hidden="true"></i>#}
+{#    </span>#}
+{#                                </div>#}
+{#                                <div class="float-right text-right">#}
+{#                                    <p class="card-text text-dark">----</p>#}
+{#                                    <h4>{{ master_data.mojodi_roz_arzesh|intword }} ریال روز</h4>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
                 {#            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">#}
                 {#                <div class="card card-statistics h-100">#}
                 {#                    <div class="card-body">#}
@@ -297,7 +297,7 @@
                 {#                    </div>#}
                 {#                </div>#}
                 {#            </div>#}
-            </div>
+{#            </div>#}
 
 
             <!-- ردیف رتبه ها -->

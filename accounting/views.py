@@ -2,11 +2,13 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 import time
 from django.db.models import Sum
+from openpyxl.styles.builtins import total
 from pandas.plotting import table
 
 from custom_login.models import UserLog
 from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve
 
+from datetime import timedelta, date
 
 # Create your views here.
 
@@ -145,9 +147,35 @@ def ChequesRecieveTotal(request, *args, **kwargs):
         UserLog.objects.create(user=user, page='چک های دریافتی', code=0)
 
     start_time = time.time()  # زمان شروع تابع
+    today = date.today()
 
     # بارگذاری چک‌ها با بهینه‌سازی
     chequesrecieve = ChequesRecieve.objects.filter(total_mandeh__lt=0).select_related('last_sanad_detaile').all()
+
+    chequesr = ChequesRecieve.objects.aggregate(total_mandeh_sum=Sum('total_mandeh'))
+    postchequesr = ChequesRecieve.objects.filter(cheque_date__gt=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
+    pastchequesr = ChequesRecieve.objects.filter(cheque_date__lte=today).aggregate(
+        total_mandeh_sum=Sum('total_mandeh'))
+
+    tmandeh = (chequesr['total_mandeh_sum'] / 10000000) * -1
+    pastmandeh = (pastchequesr['total_mandeh_sum'] / 10000000) * -1
+    postmandeh = (postchequesr['total_mandeh_sum'] / 10000000) * -1
+
+
+    a=SanadDetail.objects.filter(kol=400).aggregate(curramount_sum=Sum('curramount'))['curramount_sum']
+    print(a)
+    ceque_ratio=tmandeh/a*10000000*100
+    print(ceque_ratio)
+    total_data = {
+        'tmandeh': tmandeh,
+        'pastmandeh': pastmandeh,
+        'postmandeh': postmandeh,
+        'ceque_ratio': ceque_ratio,
+
+    }
+
+
+
 
     table1 = []
     # تغییر به cheque_id به جای id
@@ -169,6 +197,7 @@ def ChequesRecieveTotal(request, *args, **kwargs):
     context = {
         'title': 'چکهای دریافتی',
         'user': user,
+        'total_data': total_data,
         'table1': table1,
     }
 

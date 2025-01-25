@@ -99,7 +99,7 @@
                                                                                 aria-hidden="true"></i>
                                             برآیند امروز ({{ last_update_time|timesince }})قبل
                                         </label>
-                                        {% else %}
+                                    {% else %}
                                         <h4 class="timer text-success" data-to="{{ today_data.asnad_pardakhtani }}"
                                             data-speed="5000">
                                             {{ today_data.asnad_pardakhtani }}
@@ -114,11 +114,11 @@
                             <div class="col-4 col-sm-4 mb-15 text-center">
                                 <div class="counter counter-small">
                                     {% if today_data.asnad_pardakhtani > yesterday_data.asnad_pardakhtani %}
-                                    <h4 class="timer text-success" data-to="{{ yesterday_data.asnad_pardakhtani }}"
-                                        data-speed="5000">{{ yesterday_data.asnad_pardakhtani|floatformat:0 }}</h4>
+                                        <h4 class="timer text-success" data-to="{{ yesterday_data.asnad_pardakhtani }}"
+                                            data-speed="5000">{{ yesterday_data.asnad_pardakhtani|floatformat:0 }}</h4>
                                     {% else %}
                                         <h4 class="timer text-danger" data-to="{{ yesterday_data.asnad_pardakhtani }}"
-                                        data-speed="5000">{{ yesterday_data.asnad_pardakhtani }}</h4>
+                                            data-speed="5000">{{ yesterday_data.asnad_pardakhtani }}</h4>
                                     {% endif %}
                                     <label class="text-capitalize mt-0">برآیند دیروز </label>
                                 </div>
@@ -133,10 +133,14 @@
                         </div>
                         <div class="divider"></div>
                         <div class="row">
-                            <div class="col-6 col-sm-4 mt-15 text-center">
-                                <b>کل چک های دارای مانده</b>
-                                <h4>{{ chequ_data.tmandeh|floatformat:0|intcomma:False }}</h4>
-                            </div>
+                            
+                                <div class="col-6 col-sm-4 mt-15 text-center">
+                                    <a href="/acc/cheques_recieve_total">
+                                    <b>کل چک های دارای مانده</b>
+                                    <h4>{{ chequ_data.tmandeh|floatformat:0|intcomma:False }}</h4>
+                            </a>
+                                </div>
+                            
                             <div class="col-6 col-sm-4 mt-15 text-center">
                                 <b>چک های تاریخ گذشته تا امروز</b>
                                 <h4>{{ chequ_data.pastmandeh|floatformat:0|intcomma:False }}</h4>
@@ -203,7 +207,7 @@
                     </div>
                 </div>
             </div>
-              <!--نمودار سود اسناد دریافتنی-->
+            <!--نمودار سود اسناد دریافتنی-->
             <div class="col-xl-6 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body">
@@ -345,51 +349,51 @@
 
 
 
-        <!-- چارت 4 میله ای برآیند روز های هفته -->
-<script>
-    const today = new Date();
-    const dates = [];
-    for (let i = 0; i <= 7; i++) {
-        const day = new Date(today);
-        day.setDate(today.getDate() - i);
-        dates.push(day.toLocaleDateString('fa-IR', { weekday: 'long' }));
-    }
-
-    var dataValues = [
-        {% for value in chart4_data %}
-            {{ value }},
-        {% endfor %}
-    ];
-
-    dates.reverse();
-    {#dataValues.reverse(); // نیز باید برعکس شوند#}
-
-    console.log(dataValues); // چاپ داده‌ها برای بررسی
-
-    var backgroundColors = Array(dates.length).fill('rgba(75, 192, 192, 1)');
-    var borderColors = Array(dates.length).fill('rgba(75, 192, 192, 1)');
-
-    var data = {
-        labels: dates,
-        datasets: [{
-            label: 'عملکرد روزانه',
-            data: dataValues,
-            backgroundColor: backgroundColors,
-            borderColor: borderColors,
-            borderWidth: 1
-        }]
-    };
-
-    var options = {
-        scales: {
-            y: {
-                beginAtZero: false // به منظور نمایش مقادیر منفی
-            }
+    <!-- چارت 4 میله ای برآیند روز های هفته -->
+    <script>
+        const today = new Date();
+        const dates = [];
+        for (let i = 0; i <= 7; i++) {
+            const day = new Date(today);
+            day.setDate(today.getDate() - i);
+            dates.push(day.toLocaleDateString('fa-IR', {weekday: 'long'}));
         }
-    };
 
-    drawChart('Chart4', 'bar', data, options);
-</script>
+        var dataValues = [
+            {% for value in chart4_data %}
+                {{ value }},
+            {% endfor %}
+        ];
+
+        dates.reverse();
+        {#dataValues.reverse(); // نیز باید برعکس شوند#}
+
+        console.log(dataValues); // چاپ داده‌ها برای بررسی
+
+        var backgroundColors = Array(dates.length).fill('rgba(75, 192, 192, 1)');
+        var borderColors = Array(dates.length).fill('rgba(75, 192, 192, 1)');
+
+        var data = {
+            labels: dates,
+            datasets: [{
+                label: 'عملکرد روزانه',
+                data: dataValues,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 1
+            }]
+        };
+
+        var options = {
+            scales: {
+                y: {
+                    beginAtZero: false // به منظور نمایش مقادیر منفی
+                }
+            }
+        };
+
+        drawChart('Chart4', 'bar', data, options);
+    </script>
 
 {% endblock %}
 
