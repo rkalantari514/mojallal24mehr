@@ -657,58 +657,91 @@
 {% block myjs %}
 
     <!-- نمودار میله ای چکهای ماهانه -->
-    <script>
-        var labels = [
-            {% for item in chartmahanedata %}
-                '{{ item.month_name }}',
-            {% endfor %}
-        ];
-        var dataValues = [
-            {% for item in chartmahanedata %}
-                {{ item.total_count }},
-            {% endfor %}
-        ];
+<!-- نمودار میله‌ای چک‌های ماهانه -->
 
-        var backgroundColors = [
-            'rgba(128, 128, 128, 0.2)', // رنگ اولین میله (سال‌های قبل)
-            'rgba(75, 192, 75, 0.2)',
-            'rgba(75, 192, 75, 0.2)',
-            'rgba(75, 192, 75, 0.2)',
-            'rgba(75, 75, 192, 0.2)',
-            'rgba(75, 75, 192, 0.2)',
-            'rgba(75, 75, 192, 0.2)',
-            'rgba(255, 165, 0, 0.2)',
-            'rgba(255, 165, 0, 0.2)',
-            'rgba(255, 165, 0, 0.2)',
-            'rgba(192, 75, 75, 0.2)',
-            'rgba(192, 75, 75, 0.2)',
-            'rgba(192, 75, 75, 0.2)',
-            'rgba(128, 0, 128, 0.2)' // رنگ آخرین میله (سال‌های بعد)
-        ];
+<script>
+    var labels = [
+        {% for item in chartmahanedata %}
+            '{{ item.month_name }}',
+        {% endfor %}
+    ];
 
-        var borderColors = backgroundColors.map((color) => color.replace('0.2', '1'));
+    // مقداردهی اولیه به تعداد اصلی
+    var originalDataValues = [
+        {% for item in chartmahanedata %}
+            {{ item.total_count }},
+        {% endfor %}
+    ];
 
-        var data = {
-            labels: labels,
-            datasets: [{
-                label: 'چکهای ماهانه',
-                data: dataValues,
-                backgroundColor: backgroundColors,
-                borderColor: borderColors,
-                borderWidth: 1
-            }]
-        };
+    // کاپی گرفتن از داده‌های اصلی برای استفاده در نمودار
+    var dataValues = originalDataValues.slice();
 
-        var options = {
-            scales: {
-                y: {
-                    beginAtZero: false
-                }
+    var backgroundColors = [
+        'rgba(128, 128, 128, 0.2)', // رنگ اولین میله (سال‌های قبل)
+        'rgba(75, 192, 75, 0.2)',
+        'rgba(75, 192, 75, 0.2)',
+        'rgba(75, 192, 75, 0.2)',
+        'rgba(75, 75, 192, 0.2)',
+        'rgba(75, 75, 192, 0.2)',
+        'rgba(75, 75, 192, 0.2)',
+        'rgba(255, 165, 0, 0.2)',
+        'rgba(255, 165, 0, 0.2)',
+        'rgba(255, 165, 0, 0.2)',
+        'rgba(192, 75, 75, 0.2)',
+        'rgba(192, 75, 75, 0.2)',
+        'rgba(192, 75, 75, 0.2)',
+        'rgba(128, 0, 128, 0.2)' // رنگ آخرین میله (سال‌های بعد)
+    ];
+
+    var borderColors = backgroundColors.map((color) => color.replace('0.2', '1'));
+
+    var data = {
+        labels: labels,
+        datasets: [{
+            label: 'چک‌های ماهانه',
+            data: dataValues,
+            backgroundColor: backgroundColors,
+            borderColor: borderColors,
+            borderWidth: 1
+        }]
+    };
+
+    var options = {
+        scales: {
+            y: {
+                beginAtZero: false
             }
-        };
+        },
+        onClick: function(event) {
+            var chart = Chart.getChart('ChartMahaneh');
+            var activePoints = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
+            if (activePoints.length) {
+                var index = activePoints[0].index;
+                // حذف میله موقت
+                chart.data.datasets[0].data[index] = null;  // حذف موقتی داده
+                chart.update();
+            }
+        }
+    };
 
-        drawChart('ChartMahaneh', 'bar', data, options);
-    </script>
+    var myChart = new Chart(document.getElementById("ChartMahaneh"), {
+        type: 'bar',
+        data: data,
+        options: options
+    });
+
+    // اضافه کردن کلیک روی عنوان برای بازگرداندن همه میله‌ها
+    document.querySelector('canvas').addEventListener('click', function(event) {
+        var activePoints = myChart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
+        if (!activePoints.length) {
+            myChart.data.datasets[0].data = originalDataValues.slice(); // بازگرداندن داده‌ها به مقدار اصلی
+            myChart.update();
+        }
+    });
+</script>
+
+
+
 
     <!-- نمودار دونات فروش دسته ها -->
     <script>
