@@ -12,8 +12,6 @@ from datetime import date, timedelta
 from jdatetime import date as jdate
 from datetime import timedelta, date
 
-# Create your views here.
-
 
 
 @login_required(login_url='/login')
@@ -222,6 +220,25 @@ def ChequesRecieveTotal(request, *args, **kwargs):
     ).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
 
     # محاسبه مجموع مانده چک‌ها برای هر ماه سال جاری
+    month_names = {
+        1: 'فروردین',
+        2: 'اردیبهشت',
+        3: 'خرداد',
+        4: 'تیر',
+        5: 'مرداد',
+        6: 'شهریور',
+        7: 'مهر',
+        8: 'آبان',
+        9: 'آذر',
+        10: 'دی',
+        11: 'بهمن',
+        12: 'اسفند',
+    }
+
+
+
+
+
     monthly_data = []
     for month in range(1, 13):  # از فروردین (ماه ۱) تا اسفند (ماه ۱۲)
         first_day_of_month_jalali = jdate(current_jalali_year, month, 1).togregorian()
@@ -233,9 +250,14 @@ def ChequesRecieveTotal(request, *args, **kwargs):
             cheque_date__lte=last_day_of_month_jalali
         ).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
 
+        # monthly_data.append({
+        #     'month_name': jdate(current_jalali_year, month, 1).strftime('%B'),  # نام ماه به فارسی
+        #     'total_count': float(total_mandeh_month) * -1/10000000  # ضرب در منفی ۱
+        # })
+        # در حلقه ماه‌ها
         monthly_data.append({
-            'month_name': jdate(current_jalali_year, month, 1).strftime('%B'),  # نام ماه به فارسی
-            'total_count': float(total_mandeh_month) * -1/10000000  # ضرب در منفی ۱
+            'month_name': month_names[month],  # استفاده از دیکشنری
+            'total_count': float(total_mandeh_month) * -1 / 10000000
         })
 
     # آماده‌سازی داده‌ها برای نمودار
