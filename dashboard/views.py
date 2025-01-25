@@ -1,28 +1,12 @@
 import logging
 logger = logging.getLogger(__name__)
 from custom_login.models import UserLog
-from mahakupdate.models import Factor, FactorDetaile, SanadDetail, Mtables
+from mahakupdate.models import Factor, FactorDetaile, SanadDetail, Mtables, ChequesRecieve
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from .models import MasterInfo, MasterReport
 from django.utils import timezone
-import jdatetime
-import time
-from django.db.models import Sum
-from datetime import date, timedelta
-
-from django.db.models import Sum, Q
-
-from django.db.models import Q
 from datetime import datetime
-
-
-from collections import defaultdict
-
-from collections import defaultdict
-from django.db.models import Sum, Q
-from datetime import timedelta
-
 from collections import defaultdict
 from datetime import timedelta, date
 from django.db.models import Sum, Q
@@ -118,6 +102,25 @@ def Home1(request, *args, **kwargs):
     for i in chart4_data:
         print(i)
 
+    chequesr = ChequesRecieve.objects.aggregate(total_mandeh_sum=Sum('total_mandeh'))
+    postchequesr = ChequesRecieve.objects.filter(cheque_date__gt=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
+    pastchequesr = ChequesRecieve.objects.filter(cheque_date__lte=today).aggregate(
+        total_mandeh_sum=Sum('total_mandeh'))
+
+
+    tmandeh = (chequesr['total_mandeh_sum'] / 10000000) * -1
+    pastmandeh = (pastchequesr['total_mandeh_sum'] / 10000000) * -1
+    postmandeh = (postchequesr['total_mandeh_sum'] / 10000000) * -1
+
+    chequ_data={
+        'tmandeh':tmandeh,
+        'pastmandeh': pastmandeh,
+        'postmandeh':postmandeh,
+
+    }
+
+
+
     context = {
         'title': 'داشبورد مدیریتی',
         'user': user,
@@ -125,6 +128,7 @@ def Home1(request, *args, **kwargs):
         'today_data': today_data,
         'yesterday_data': yesterday_data,
         'allday_data': allday_data,
+        'chequ_data': chequ_data,
         'chart4_data': chart4_data,
 
     }
