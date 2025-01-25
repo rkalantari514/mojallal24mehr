@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'django_render_partial',
     'django_jalali',
-    # 'jalali',
+    'jalali_date',
     'mahaktables',
     'mahakupdate',
     'dashboard',
@@ -200,3 +200,35 @@ APSCHEDULER_RUN_NOW_TIMEOUT = 2500  # Seconds to wait for an explicitly requeste
 
 AUTH_USER_MODEL = 'custom_login.CustomUser'
 #
+
+
+# defaults
+JALALI_DATE_DEFAULTS = {
+   'Strftime': {
+        'date': '%y/%m/%d',
+        'datetime': '%H:%M:%S _ %y/%m/%d',
+    },
+    'Static': {
+        'js': [
+            # loading datepicker
+            'admin/js/django_jalali.min.js',
+            # OR
+            # 'admin/jquery.ui.datepicker.jalali/scripts/jquery.ui.core.js',
+            # 'admin/jquery.ui.datepicker.jalali/scripts/calendar.js',
+            # 'admin/jquery.ui.datepicker.jalali/scripts/jquery.ui.datepicker-cc.js',
+            # 'admin/jquery.ui.datepicker.jalali/scripts/jquery.ui.datepicker-cc-fa.js',
+            # 'admin/js/main.js',
+        ],
+        'css': {
+            'all': [
+                'admin/jquery.ui.datepicker.jalali/themes/base/jquery-ui.min.css',
+            ]
+        }
+    },
+}
+
+
+
+
+
+USE_THOUSAND_SEPARATOR = True

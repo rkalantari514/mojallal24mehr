@@ -2,6 +2,7 @@
 {% load humanize %}
 {% load static %}
 {% block content %}
+    {% load jalali_tags %}
 
     <style>
         .circle-progress .in .text {
@@ -484,7 +485,7 @@
                                                    <td class="card-text text-center">
                                                         {{ t.id }}</td>
                                                        <td class="card-text text-center">
-                                                        {{ t.date }}</td>
+                                                        {{ t.date|to_jalali:'%Y/%m/%d' }}</td>
                                                     <td class="card-text text-center">
                                                         {{ t.com }}
 
