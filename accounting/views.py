@@ -7,7 +7,9 @@ from pandas.plotting import table
 
 from custom_login.models import UserLog
 from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve
-
+from django.db.models import Sum
+from datetime import date, timedelta
+from jdatetime import date as jdate
 from datetime import timedelta, date
 
 # Create your views here.
@@ -174,6 +176,101 @@ def ChequesRecieveTotal(request, *args, **kwargs):
 
     }
 
+    # chartmahanedata=[
+    #     {
+    #         'month_name':'سال های قبل',
+    #         'total_count':25656,
+    #     }
+    #     ,
+    #     {
+    #         'month_name':'فروردین',
+    #         'total_count':16546,
+    #     }
+    #     ,
+    #     {
+    #         'month_name':'اردیبهشت',
+    #         'total_count':6520,
+    #     }
+    #     ,
+    #     {
+    #         'month_name':'سالهای بعد',
+    #         'total_count':2154666,
+    #     }
+    #
+    # ]
+
+    # تبدیل تاریخ امروز به شمسی
+    today_jalali = jdate.fromgregorian(date=today)
+
+    # سال شمسی جاری
+    current_jalali_year = today_jalali.year
+
+    # اولین روز سال جاری شمسی
+    first_day_of_current_year_jalali = jdate(current_jalali_year, 1, 1).togregorian()
+
+    # آخرین روز سال جاری شمسی
+    last_day_of_current_year_jalali = jdate(current_jalali_year, 12, 29).togregorian()  # اسفند ۲۹ روز دارد
+
+    # محاسبه مجموع مانده چک‌های سال‌های قبل
+    cheques_before_current_year = ChequesRecieve.objects.filter(
+        cheque_date__lt=first_day_of_current_year_jalali
+    ).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+
+    # محاسبه مجموع مانده چک‌های سال‌های بعد
+    cheques_after_current_year = ChequesRecieve.objects.filter(
+        cheque_date__gt=last_day_of_current_year_jalali
+    ).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+
+    # محاسبه مجموع مانده چک‌ها برای هر ماه سال جاری
+    monthly_data = []
+    for month in range(1, 13):  # از فروردین (ماه ۱) تا اسفند (ماه ۱۲)
+        first_day_of_month_jalali = jdate(current_jalali_year, month, 1).togregorian()
+        last_day_of_month_jalali = (jdate(current_jalali_year, month + 1, 1) if month < 12 else jdate(
+            current_jalali_year + 1, 1, 1)).togregorian() - timedelta(days=1)
+
+        total_mandeh_month = ChequesRecieve.objects.filter(
+            cheque_date__gte=first_day_of_month_jalali,
+            cheque_date__lte=last_day_of_month_jalali
+        ).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+
+        monthly_data.append({
+            'month_name': jdate(current_jalali_year, month, 1).strftime('%B'),  # نام ماه به فارسی
+            'total_count': float(total_mandeh_month) * -1/10000000  # ضرب در منفی ۱
+        })
+
+    # آماده‌سازی داده‌ها برای نمودار
+    chartmahanedata = [
+        {
+            'month_name': 'سال های قبل',
+            'total_count': float(cheques_before_current_year) * -1/10000000  # ضرب در منفی ۱
+        }
+    ]
+
+    # اضافه کردن داده‌های ماه‌های سال جاری
+    chartmahanedata.extend(monthly_data)
+
+    # اضافه کردن داده‌های سال‌های بعد
+    chartmahanedata.append({
+        'month_name': 'سالهای بعد',
+        'total_count': float(cheques_after_current_year) * -1 /10000000 # ضرب در منفی ۱
+    })
+
+    for c in chartmahanedata:
+        print(c)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -198,6 +295,7 @@ def ChequesRecieveTotal(request, *args, **kwargs):
         'title': 'چکهای دریافتی',
         'user': user,
         'total_data': total_data,
+        'chartmahanedata': chartmahanedata,
         'table1': table1,
     }
 
