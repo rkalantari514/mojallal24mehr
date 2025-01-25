@@ -99,7 +99,7 @@
                                                                                 aria-hidden="true"></i>
                                             برآیند امروز ({{ last_update_time|timesince }})قبل
                                         </label>
-                                        {% elif today_data.asnad_pardakhtani < yesterday_data.asnad_pardakhtani %}
+                                        {% else %}
                                         <h4 class="timer text-success" data-to="{{ today_data.asnad_pardakhtani }}"
                                             data-speed="5000">
                                             {{ today_data.asnad_pardakhtani }}
@@ -115,7 +115,7 @@
                                 <div class="counter counter-small">
                                     {% if today_data.asnad_pardakhtani > yesterday_data.asnad_pardakhtani %}
                                     <h4 class="timer text-success" data-to="{{ yesterday_data.asnad_pardakhtani }}"
-                                        data-speed="5000">{{ yesterday_data.asnad_pardakhtani }}</h4>
+                                        data-speed="5000">{{ yesterday_data.asnad_pardakhtani|floatformat:0 }}</h4>
                                     {% else %}
                                         <h4 class="timer text-danger" data-to="{{ yesterday_data.asnad_pardakhtani }}"
                                         data-speed="5000">{{ yesterday_data.asnad_pardakhtani }}</h4>
