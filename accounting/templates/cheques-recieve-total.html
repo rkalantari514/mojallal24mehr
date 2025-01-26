@@ -402,6 +402,9 @@
                             <h5 class="card-title pb-0 border-0 ">گزارش ماهانه چک های دارای مانده</h5>
                             <canvas id="ChartMahaneh"></canvas>
 
+                            <button class="button" id="resetButton">همه ماه ها</button>
+
+
                         </div>
                     </div>
 
@@ -659,6 +662,9 @@
     <!-- نمودار میله ای چکهای ماهانه -->
 <!-- نمودار میله‌ای چک‌های ماهانه -->
 
+
+<!--  اضافه کردن دکمه زیر نمودار -->
+
 <script>
     var labels = [
         {% for item in chartmahanedata %}
@@ -666,18 +672,16 @@
         {% endfor %}
     ];
 
-    // مقداردهی اولیه به تعداد اصلی
     var originalDataValues = [
         {% for item in chartmahanedata %}
             {{ item.total_count }},
         {% endfor %}
     ];
 
-    // کاپی گرفتن از داده‌های اصلی برای استفاده در نمودار
     var dataValues = originalDataValues.slice();
 
     var backgroundColors = [
-        'rgba(128, 128, 128, 0.2)', // رنگ اولین میله (سال‌های قبل)
+        'rgba(128, 128, 128, 0.2)',
         'rgba(75, 192, 75, 0.2)',
         'rgba(75, 192, 75, 0.2)',
         'rgba(75, 192, 75, 0.2)',
@@ -690,7 +694,7 @@
         'rgba(192, 75, 75, 0.2)',
         'rgba(192, 75, 75, 0.2)',
         'rgba(192, 75, 75, 0.2)',
-        'rgba(128, 0, 128, 0.2)' // رنگ آخرین میله (سال‌های بعد)
+        'rgba(128, 0, 128, 0.2)'
     ];
 
     var borderColors = backgroundColors.map((color) => color.replace('0.2', '1'));
@@ -718,7 +722,7 @@
             if (activePoints.length) {
                 var index = activePoints[0].index;
                 // حذف میله موقت
-                chart.data.datasets[0].data[index] = null;  // حذف موقتی داده
+                chart.data.datasets[0].data[index] = null;
                 chart.update();
             }
         }
@@ -730,17 +734,21 @@
         options: options
     });
 
+    // اضافه کردن رویداد کلیک به دکمه
+    document.getElementById('resetButton').addEventListener('click', function() {
+        myChart.data.datasets[0].data = originalDataValues.slice(); // بازگرداندن داده‌ها به مقدار اصلی
+        myChart.update();
+    });
+
     // اضافه کردن کلیک روی عنوان برای بازگرداندن همه میله‌ها
     document.querySelector('canvas').addEventListener('click', function(event) {
         var activePoints = myChart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
         if (!activePoints.length) {
-            myChart.data.datasets[0].data = originalDataValues.slice(); // بازگرداندن داده‌ها به مقدار اصلی
+            myChart.data.datasets[0].data = originalDataValues.slice();
             myChart.update();
         }
     });
 </script>
-
-
 
 
     <!-- نمودار دونات فروش دسته ها -->
