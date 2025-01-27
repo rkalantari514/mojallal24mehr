@@ -83,7 +83,7 @@ class PersonAdmin(admin.ModelAdmin):
     list_display = ['__str__','code','name','lname','group']
     # list_filter = ['level','parent',]
     # list_editable = ['name','parent','level']
-    search_fields = ['name','code','lname','group']
+    search_fields = ['name','code']
 
     class Meta:
         model = Person
