@@ -2,7 +2,6 @@ from django.urls import path
 
 from dashkala.views import DsshKala
 from .views import CreateReport, Home1
-from mahaktables.views import MTables
 
 
 

@@ -15,7 +15,7 @@ pip install celery
 pip install Pillow
 pip install JalaliDate
 pip install django-jalali
-    pip install django-jalali-date
+pip install django-jalali-date
 
 pip install setuptools
 
