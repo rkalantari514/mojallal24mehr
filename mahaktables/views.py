@@ -47,7 +47,7 @@ def get_all_table_data(cursor):
 
 
 @login_required(login_url='/login')
-def MTables(request):
+def MTable(request):
     conn = connect_to_mahak()
     cursor = conn.cursor()
     table_data = get_all_table_data(cursor)
