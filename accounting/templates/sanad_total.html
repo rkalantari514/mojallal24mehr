@@ -5,7 +5,6 @@
     <div class="content-wrapper">
         <div class="container">
             <h1>{{ myheader }}</h1>
-            <h1>جدول تراز در سطح {{ level_name }}</h1>
             {% if level == 2 %}
                 <a href="/balance-sheet-kol">
                     <h2> معین های کل {{ parent_code }}-{{ parent_name }}</h2>
@@ -18,7 +17,7 @@
                 <h2> از کد کل {{ kol_code }}</h2>
 
             {% endif %}
-
+<a href="/balance-sheet-tafsili/{{kol_code  }}/{{ moin_code }}/"><H2>رفتن به تفضیل ها</H2></a>
 
             <div class="table-responsive">
                 <table
@@ -53,41 +52,20 @@
                 >
                     <thead>
                     <tr>
-                        {% if level == 1 %}
-                            <th data-field="kol_code" data-sortable="true">کد کل</th>
-                            <th data-field="kol_name" data-sortable="true">نام سطح کل</th>
-                        {% elif level == 2 %}
-                            <th data-field="moin_code" data-sortable="true">کد معین</th>
-                            <th data-field="moin_name" data-sortable="true">نام سطح معین</th>
-                        {% else %}
-                            <th data-field="tafzili_code" data-sortable="true">کد تفضیل</th>
-                        {% endif %}
+
+                        <th data-field="sharh" data-sortable="true">شرح</th>
                         <th data-field="bed_sum" data-sortable="true">بدهکار</th>
                         <th data-field="bes_sum" data-sortable="true">بستانکار</th>
                         <th data-field="curramount_sum" data-sortable="true">مانده</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {% for item in balance_data %}
+                    {% for item in sanads %}
                         <tr>
-                            <td>
-                                {% if level == 1 %}
-                                    <a href="{% url 'balance_sheet_moin' item.kol_code %}"><h4>{{ item.kol_code }}</h4></a>
-                                {% elif level == 2 %}
-                                    <a href="{% url 'balance_sheet_tafsili' parent_code item.moin_code %}"><h4>{{ item.moin_code }}</h4></a>
-                                {% else %}
-                                    <a href="/sanad_total/{{ kol_code }}/{{ moin_code }}/{{ item.tafzili_code }}">
-                                    <h4>{{ item.tafzili_code }}</h4></a>
-                                {% endif %}
-                            </td>
-                            {% if level == 1 %}
-                                <td><h4>{{ item.kol_name }}</h4></td>
-                            {% elif level == 2 %}
-                                <td><h4>{{ item.moin_name }}</h4></td>
-                            {% endif %}
-                            <td><h4>{{ item.bed_sum|intcomma:False }}</h4></td>
-                            <td><h4>{{ item.bes_sum|intcomma:False }}</h4></td>
-                            <td> <h4 style="direction: ltr">{{ item.curramount_sum|intcomma:False }}</h4></td>
+                            <td><h4>{{ item.syscomment }}</h4></td>
+                            <td><h4>{{ item.bed|floatformat:0|intcomma:False }}</h4></td>
+                            <td><h4>{{ item.bes|floatformat:0|intcomma:False }}</h4></td>
+                            <td> <h4 style="direction: ltr">{{ item.curramount|floatformat:0|intcomma:False }}</h4></td>
                         </tr>
                     {% endfor %}
                     </tbody>

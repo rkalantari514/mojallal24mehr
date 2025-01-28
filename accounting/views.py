@@ -1,3 +1,5 @@
+from lib2to3.fixes.fix_input import context
+
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 import time
@@ -474,3 +476,27 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
         'parent_name': AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code).first().name,
     }
     return render(request, 'balance_sheet.html', context)
+
+
+def SanadTotal(request, *args, **kwargs):
+    kol_code = kwargs['kol_code']
+    moin_code = kwargs['moin_code']
+    tafzili_code = kwargs['tafzili_code']
+
+    sanads=SanadDetail.objects.filter(kol=kol_code,moin=moin_code,tafzili=tafzili_code)
+
+
+    context={
+        'sanads':sanads,
+        'kol_code':kol_code,
+        'kol_name':AccCoding.objects.filter(level=1,code=kol_code).last().name,
+        'moin_code':moin_code,
+        'moin_name':AccCoding.objects.filter(level=2,code=moin_code).last().name,
+        'tafzili_code':tafzili_code,
+
+    }
+
+
+
+    return render(request, 'sanad_total.html', context)
+

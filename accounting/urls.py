@@ -1,7 +1,8 @@
 from django.urls import path
 from django.shortcuts import redirect
 
-from accounting.views import TarazKol, ChequesRecieveTotal, balance_sheet_kol, balance_sheet_moin, balance_sheet_tafsili
+from accounting.views import TarazKol, ChequesRecieveTotal, balance_sheet_kol, balance_sheet_moin, \
+    balance_sheet_tafsili, SanadTotal
 
 urlpatterns = [
 
@@ -15,4 +16,6 @@ urlpatterns = [
     path('balance-sheet-moin/<int:kol_code>/', balance_sheet_moin, name='balance_sheet_moin'),
     path('balance-sheet-tafsili/<int:kol_code>/<int:moin_code>/', balance_sheet_tafsili,
          name='balance_sheet_tafsili'),
+    path('sanad_total/<kol_code>/<moin_code>/<tafzili_code>/', SanadTotal,
+         name='sanad_total'),
 ]
