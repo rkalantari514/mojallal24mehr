@@ -56,7 +56,7 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ['__str__','name','parent','level']
     list_filter = ['level','parent',]
     list_editable = ['name','parent','level']
-    search_fields = ['name','parent','level']
+    search_fields = ['name','level']
 
     class Meta:
         model = Category
@@ -65,7 +65,7 @@ class KardexAdmin(admin.ModelAdmin):
     list_display = ['__str__','date','stock','code_kala','kala','count','ktype','percode','storage','warehousecode','averageprice','sync_mojodi']
     list_filter = ['warehousecode','sync_mojodi']
     list_editable = ['sync_mojodi']
-    search_fields = ['pdate','count','code_kala','stock']
+    search_fields = ['count','code_kala','stock']
 
     class Meta:
         model = Kardex

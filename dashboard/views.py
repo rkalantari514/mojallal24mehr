@@ -14,6 +14,7 @@ from django.shortcuts import render
 import time
 import jdatetime
 
+
 def TarazCal(fday, lday, data):
     # ایجاد لیستی از تمام روزهای بین fday و lday
     day_range = [fday + timedelta(days=x) for x in range((lday - fday).days + 1)]
@@ -60,6 +61,9 @@ def TarazCal(fday, lday, data):
 
     return to_return
 
+
+
+@login_required(login_url='/login')
 def Home1(request, *args, **kwargs):
     user = request.user
     if user.mobile_number != '09151006447':
