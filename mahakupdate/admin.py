@@ -127,8 +127,8 @@ class SanadDetailAdmin(admin.ModelAdmin):
         model = SanadDetail
 
 class AccCodingAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'code', 'name', 'level']
-    list_filter = ['code', 'name', 'level']
+    list_display = ['__str__', 'code', 'name', 'level','parent']
+    list_filter = ['level']
 
     # list_editable = ['name','parent','level']
     # search_fields = ['name','lname','group']

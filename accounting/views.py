@@ -361,3 +361,116 @@ def ChequesRecieveTotal1(request, *args, **kwargs):
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
     return render(request, 'cheques-recieve-total.html', context)
+
+
+# views.py
+from django.shortcuts import render
+
+# views.py
+from django.shortcuts import render
+
+
+# views.py
+from django.shortcuts import render
+from django.db.models import Sum
+
+def balance_sheet_kol(request):
+    kol_codes = SanadDetail.objects.values('kol').distinct()
+    balance_data = []
+
+    for kol in kol_codes:
+        kol_code = kol['kol']
+        kol_name = AccCoding.objects.filter(code=kol_code, level=1).first().name
+        bed_sum = SanadDetail.objects.filter(kol=kol_code).aggregate(Sum('bed'))['bed__sum']
+        bes_sum = SanadDetail.objects.filter(kol=kol_code).aggregate(Sum('bes'))['bes__sum']
+        curramount_sum = SanadDetail.objects.filter(kol=kol_code).aggregate(Sum('curramount'))['curramount__sum']
+
+        balance_data.append({
+            'kol_code': kol_code,
+            'kol_name': kol_name,
+            'bed_sum': bed_sum,
+            'bes_sum': bes_sum,
+            'curramount_sum': curramount_sum,
+        })
+
+    context = {
+        'balance_data': balance_data,
+        'level': 1,
+        'level_name': 'کل',
+        'myheader':'جدول تراز در سطح کل',
+        'myheaderlink':'/#',
+    }
+    return render(request, 'balance_sheet.html', context)
+
+
+# views.py
+from django.shortcuts import render
+
+
+# views.py
+
+# views.py
+def balance_sheet_moin(request, kol_code):
+    moin_codes = SanadDetail.objects.filter(kol=kol_code).values('moin').distinct()
+    balance_data = []
+
+    for moin in moin_codes:
+        moin_code = moin['moin']
+        moin_name = AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code).first().name
+        bed_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).aggregate(Sum('bed'))['bed__sum']
+        bes_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).aggregate(Sum('bes'))['bes__sum']
+        curramount_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).aggregate(Sum('curramount'))['curramount__sum']
+
+        balance_data.append({
+            'moin_code': moin_code,
+            'moin_name': moin_name,
+            'bed_sum': bed_sum,
+            'bes_sum': bes_sum,
+            'curramount_sum': curramount_sum,
+        })
+    kol_name=AccCoding.objects.filter(level=1,code=kol_code).last().name
+    context = {
+        'balance_data': balance_data,
+        'level': 2,
+        'level_name': 'معین',
+        'parent_code': kol_code,
+        'parent_name': AccCoding.objects.filter(code=kol_code, level=1).first().name,
+        'myheader': f'جدول تراز در سطح معین از کل {kol_code}-{kol_name}',
+        'myheaderlink': '/balance-sheet-kol',
+    }
+    return render(request, 'balance_sheet.html', context)
+# views.py
+
+
+def balance_sheet_tafsili(request, kol_code, moin_code):
+    tafsili_codes = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).values('tafzili').distinct()
+    balance_data = []
+
+    for tafsili in tafsili_codes:
+        tafsili_code = tafsili['tafzili']
+        bed_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafsili_code).aggregate(Sum('bed'))['bed__sum']
+        bes_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafsili_code).aggregate(Sum('bes'))['bes__sum']
+        curramount_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafsili_code).aggregate(Sum('curramount'))['curramount__sum']
+
+        balance_data.append({
+            'tafzili_code': tafsili_code,
+            'bed_sum': bed_sum,
+            'bes_sum': bes_sum,
+            'curramount_sum': curramount_sum,
+        })
+
+    for t in balance_data:
+        print('t.tafzili_code')
+        print(t)
+
+
+    context = {
+        'balance_data': balance_data,
+        'level': 3,
+        'moin_code':moin_code,
+        'kol_code':kol_code,
+        'level_name': 'تفضیلی',
+        'parent_code': moin_code,
+        'parent_name': AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code).first().name,
+    }
+    return render(request, 'balance_sheet.html', context)

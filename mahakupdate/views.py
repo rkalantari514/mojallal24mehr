@@ -2398,10 +2398,129 @@ def UpdateSanadDetail1(request):
 
 
 
+
+import time
+import pandas as pd
+from django.shortcuts import redirect
+from django.conf import settings
+
+from django.utils import timezone
+
+
+import pandas as pd
+import os
+from django.utils import timezone
+from django.db import transaction
+
 def UpdateAccCoding(request):
     t0 = time.time()
-    print('شروع آپدیت کدینگ حسابداری (سطح 1) --------------------------------')
+    print('شروع آپدیت کدینگ حسابداری (سطح کل) -----------------------')
 
+    # اتصال به دیتابیس خارجی و خواندن داده‌های سطح 1 (کل)
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    t1 = time.time()
+
+    cursor.execute("SELECT Code, Title FROM AccTotals WHERE Code IS NOT NULL AND Title IS NOT NULL")
+    mahak_data = cursor.fetchall()
+    existing_in_mahak = {int(row[0]) for row in mahak_data}
+    print(f"تعداد رکوردهای موجود در دیتابیس خارجی: {len(existing_in_mahak)}")
+
+    current_acc_codings = {acc.code: acc for acc in AccCoding.objects.filter(level=1)}
+
+    acc_codings_to_create = []
+    acc_codings_to_update = []
+    acc_codings_to_delete = []
+
+    BATCH_SIZE = 1000
+
+    for row in mahak_data:
+        code = int(row[0])
+        name = row[1] if row[1] is not None else ''
+
+        if code in current_acc_codings:
+            acc_coding = current_acc_codings[code]
+            if acc_coding.name != name:
+                acc_coding.name = name
+                acc_codings_to_update.append(acc_coding)
+        else:
+            acc_codings_to_create.append(AccCoding(code=code, name=name, level=1))
+
+    AccCoding.objects.bulk_create(acc_codings_to_create, batch_size=BATCH_SIZE)
+    AccCoding.objects.bulk_update(acc_codings_to_update, ['name'], batch_size=BATCH_SIZE)
+
+    current_acc_coding_codes = set(AccCoding.objects.filter(level=1).values_list('code', flat=True))
+    for code in current_acc_coding_codes:
+        if code not in existing_in_mahak:
+            acc_codings_to_delete.append(AccCoding.objects.get(code=code, level=1).id)
+
+    if acc_codings_to_delete:
+        for i in range(0, len(acc_codings_to_delete), BATCH_SIZE):
+            batch = acc_codings_to_delete[i:i + BATCH_SIZE]
+            print(f"حذف شناسه‌ها: {batch}")
+            AccCoding.objects.filter(id__in=batch).delete()
+    else:
+        print("هیچ رکوردی برای حذف وجود ندارد.")
+
+    print('شروع آپدیت کدینگ حسابداری (سطح معین) -----------------------')
+
+    file_path = os.path.join(settings.BASE_DIR, 'temp', 'moin.xlsx')
+    df = pd.read_excel(file_path)
+
+    with transaction.atomic():
+        for index, row in df.iterrows():
+            kol = int(row['kol'])
+            moin_code = int(row['moin_code'])
+            moin_name = row['moin_name']
+            # moin_name = 'ohgd'
+
+            try:
+                parent_acc = AccCoding.objects.get(code=kol, level=1)
+                acc_coding, created = AccCoding.objects.update_or_create(
+                    code=moin_code,
+                    level=2,
+                    parent=parent_acc,
+                    defaults={'name': moin_name}
+                )
+                if created:
+                    print(f"رکورد جدید {moin_name} با کد {moin_code} برای والد {kol} ایجاد شد.")
+                else:
+                    print(f"رکورد {moin_code} از قبل وجود دارد و به‌روزرسانی نمی‌شود.")
+            except AccCoding.DoesNotExist:
+                print(f"رکورد والد با کد {kol} یافت نشد.")
+            except Exception as e:
+                print(f"خطا در وارد کردن کد {moin_code}: {e}")
+
+    tend = time.time()
+    total_time = tend - t0
+    db_time = t1 - t0
+    update_time = tend - t1
+
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    print(f"اتصال به دیتابیس: {db_time:.2f} ثانیه")
+    print(f"زمان آپدیت جدول: {update_time:.2f} ثانیه")
+
+    table = Mtables.objects.filter(name='AccTotals').last()
+    if table:
+        table.last_update_time = timezone.now()
+        table.update_duration = update_time
+        table.row_count = AccCoding.objects.count()
+        table.column_count = 4
+        table.save()
+    else:
+        print("جدول Mtables برای AccCoding یافت نشد.")
+
+    return redirect('/updatedb')
+
+
+
+
+
+
+
+def UpdateAccCoding1(request):
+    t0 = time.time()
+    print('شروع آپدیت کدینگ حسابداری (سطح کل) -----------------------')
     # اتصال به دیتابیس خارجی
     conn = connect_to_mahak()
     cursor = conn.cursor()
@@ -2458,6 +2577,16 @@ def UpdateAccCoding(request):
             AccCoding.objects.filter(id__in=batch).delete()
     else:
         print("هیچ رکوردی برای حذف وجود ندارد.")
+
+    print('شروع آپدیت کدینگ حسابداری (سطح معین) -----------------------')
+
+
+    #اینجا باید به اکسل متصل بشه و سطح معین رو بخونه
+
+
+
+
+
 
     # محاسبه زمان اجرای کل
     tend = time.time()
