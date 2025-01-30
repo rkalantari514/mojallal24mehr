@@ -1,18 +1,17 @@
-from lib2to3.fixes.fix_input import context
-
-from django.shortcuts import render
+import re
 from django.contrib.auth.decorators import login_required
 import time
-from django.db.models import Sum
+
 from openpyxl.styles.builtins import total
-from pandas.plotting import table
 
 from custom_login.models import UserLog
 from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve
-from django.db.models import Sum
-from datetime import date, timedelta
 from jdatetime import date as jdate
 from datetime import timedelta, date
+from django.shortcuts import render
+from django.db.models import Sum
+
+
 
 
 
@@ -92,48 +91,6 @@ def TarazKol(request, *args, **kwargs):
 
     return render(request, 'taraz_kol.html', context)
 
-
-from django.shortcuts import render
-from django.db.models import Prefetch
-import time
-
-from django.shortcuts import render
-
-
-
-import time
-
-from django.db.models import Prefetch
-
-from django.shortcuts import render
-from django.db.models import Sum
-import time
-
-from django.shortcuts import render
-from django.db.models import Sum
-import time
-
-from django.shortcuts import render
-import time
-
-
-from django.db.models import Sum, F, OuterRef, Subquery
-
-from django.db.models import Sum, OuterRef, Subquery
-
-from django.shortcuts import render
-import time
-
-from django.shortcuts import render
-from django.db.models import Prefetch
-import time
-
-from django.shortcuts import render
-import time
-from django.shortcuts import render
-import time
-import re
-
 def extract_first_words(text):
     # الگوی جستجو برای پیدا کردن اولین کلمات قبل از اولین پرانتز
     match = re.match(r'([^()]+)', text)
@@ -142,7 +99,7 @@ def extract_first_words(text):
     return None
 
 
-
+@login_required(login_url='/login')
 def ChequesRecieveTotal(request, *args, **kwargs):
     user = request.user
     if user.mobile_number != '09151006447':
@@ -365,20 +322,13 @@ def ChequesRecieveTotal1(request, *args, **kwargs):
     return render(request, 'cheques-recieve-total.html', context)
 
 
-# views.py
-from django.shortcuts import render
-
-# views.py
-from django.shortcuts import render
-
-
-# views.py
-from django.shortcuts import render
-from django.db.models import Sum
 
 def balance_sheet_kol(request):
     kol_codes = SanadDetail.objects.values('kol').distinct()
     balance_data = []
+    total_bed = 0
+    total_bes = 0
+    total_curramount = 0
 
     for kol in kol_codes:
         kol_code = kol['kol']
@@ -386,7 +336,9 @@ def balance_sheet_kol(request):
         bed_sum = SanadDetail.objects.filter(kol=kol_code).aggregate(Sum('bed'))['bed__sum']
         bes_sum = SanadDetail.objects.filter(kol=kol_code).aggregate(Sum('bes'))['bes__sum']
         curramount_sum = SanadDetail.objects.filter(kol=kol_code).aggregate(Sum('curramount'))['curramount__sum']
-
+        total_bed += bed_sum
+        total_bes += bes_sum
+        total_curramount += curramount_sum
         balance_data.append({
             'kol_code': kol_code,
             'kol_name': kol_name,
@@ -395,26 +347,42 @@ def balance_sheet_kol(request):
             'curramount_sum': curramount_sum,
         })
 
+    level1=[]
+    level2=[]
+    level3=[]
+    for l in AccCoding.objects.filter(level=1):
+        print(l.code,l.name)
+        level1.append(
+            {
+               'code':l.code,
+               'name':l.name,
+
+            }
+        )
+
+
+
     context = {
         'balance_data': balance_data,
         'level': 1,
-        'level_name': 'کل',
-        'myheader':'جدول تراز در سطح کل',
-        'myheaderlink':'/#',
+        'level1':level1,
+        'level2':level2,
+        'level3':level3,
+        'total_bed': total_bed,
+        'total_bes': total_bes,
+        'total_curramount': total_curramount,
     }
     return render(request, 'balance_sheet.html', context)
 
 
-# views.py
-from django.shortcuts import render
 
 
-# views.py
-
-# views.py
 def balance_sheet_moin(request, kol_code):
     moin_codes = SanadDetail.objects.filter(kol=kol_code).values('moin').distinct()
     balance_data = []
+    total_bed=0
+    total_bes=0
+    total_curramount=0
 
     for moin in moin_codes:
         moin_code = moin['moin']
@@ -422,6 +390,9 @@ def balance_sheet_moin(request, kol_code):
         bed_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).aggregate(Sum('bed'))['bed__sum']
         bes_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).aggregate(Sum('bes'))['bes__sum']
         curramount_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).aggregate(Sum('curramount'))['curramount__sum']
+        total_bed += bed_sum
+        total_bes += bes_sum
+        total_curramount += curramount_sum
 
         balance_data.append({
             'moin_code': moin_code,
@@ -431,6 +402,33 @@ def balance_sheet_moin(request, kol_code):
             'curramount_sum': curramount_sum,
         })
     kol_name=AccCoding.objects.filter(level=1,code=kol_code).last().name
+    # kol_code=AccCoding.objects.filter(level=1,code=kol_code).last().code
+    level1 = []
+    level2 = []
+    level3 = []
+    for l in AccCoding.objects.filter(level=1):
+        print(l.code, l.name)
+        level1.append(
+            {
+                'code': l.code,
+                'name': l.name,
+
+            }
+        )
+
+    for l in AccCoding.objects.filter(level=2,parent__code=kol_code):
+        print(l.code, l.name)
+        level2.append(
+            {
+                'code': l.code,
+                'name': l.name,
+
+            }
+        )
+
+
+
+
     context = {
         'balance_data': balance_data,
         'level': 2,
@@ -439,21 +437,35 @@ def balance_sheet_moin(request, kol_code):
         'parent_name': AccCoding.objects.filter(code=kol_code, level=1).first().name,
         'myheader': f'جدول تراز در سطح معین از کل {kol_code}-{kol_name}',
         'myheaderlink': '/balance-sheet-kol',
+        'kol_code': kol_code,
+        # 'moin_code': kol_code,
+
+        'level1': level1,
+        'level2': level2,
+        'level3': level3,
+        'total_bed':total_bed,
+        'total_bes':total_bes,
+        'total_curramount':total_curramount,
+
+
     }
     return render(request, 'balance_sheet.html', context)
-# views.py
 
 
 def balance_sheet_tafsili(request, kol_code, moin_code):
     tafsili_codes = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).values('tafzili').distinct()
     balance_data = []
-
+    total_bed = 0
+    total_bes = 0
+    total_curramount = 0
     for tafsili in tafsili_codes:
         tafsili_code = tafsili['tafzili']
         bed_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafsili_code).aggregate(Sum('bed'))['bed__sum']
         bes_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafsili_code).aggregate(Sum('bes'))['bes__sum']
         curramount_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafsili_code).aggregate(Sum('curramount'))['curramount__sum']
-
+        total_bed += bed_sum
+        total_bes += bes_sum
+        total_curramount += curramount_sum
         balance_data.append({
             'tafzili_code': tafsili_code,
             'bed_sum': bed_sum,
@@ -461,10 +473,58 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
             'curramount_sum': curramount_sum,
         })
 
-    for t in balance_data:
-        print('t.tafzili_code')
-        print(t)
 
+    kol_name = AccCoding.objects.filter(level=1, code=kol_code).last().name
+    # kol_code=AccCoding.objects.filter(level=1,code=kol_code).last().code
+    level1 = []
+    level2 = []
+    level3 = []
+    for l in AccCoding.objects.filter(level=1):
+        level1.append(
+            {
+                'code': l.code,
+                'name': l.name,
+
+            }
+        )
+
+    for l in AccCoding.objects.filter(level=2, parent__code=kol_code):
+        level2.append(
+            {
+                'code': l.code,
+                'name': l.name,
+
+            }
+        )
+
+
+    # فعلا خالی است
+    for l in AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code):
+        print(l.code, l.name)
+        level3.append(
+            {
+                'code': l.code,
+                'name': l.name,
+
+            }
+        )
+    level3 = []
+
+    # فیلتر کردن داده‌ها
+    sanads = SanadDetail.objects.filter(kol=kol_code, moin=moin_code)
+
+    # استفاده از مجموعه برای حذف تکراری‌ها و سپس تبدیل به لیست مرتب‌شده
+    tafzili_set = sorted({s.tafzili for s in sanads})
+
+    # ایجاد لیست level3
+    for tafzili_code in tafzili_set:
+        print(tafzili_code)
+        level3.append(
+            {
+                'code': tafzili_code,
+                'name': '',
+            }
+        )
 
     context = {
         'balance_data': balance_data,
@@ -474,6 +534,15 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
         'level_name': 'تفضیلی',
         'parent_code': moin_code,
         'parent_name': AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code).first().name,
+        'kol_code': kol_code,
+        'moin_code': moin_code,
+
+        'level1': level1,
+        'level2': level2,
+        'level3': level3,
+        'total_bed': total_bed,
+        'total_bes': total_bes,
+        'total_curramount': total_curramount,
     }
     return render(request, 'balance_sheet.html', context)
 
@@ -485,18 +554,82 @@ def SanadTotal(request, *args, **kwargs):
 
     sanads=SanadDetail.objects.filter(kol=kol_code,moin=moin_code,tafzili=tafzili_code)
 
+    level1 = []
+    level2 = []
+    level3 = []
+    for l in AccCoding.objects.filter(level=1):
+        level1.append(
+            {
+                'code': l.code,
+                'name': l.name,
+
+            }
+        )
+
+    for l in AccCoding.objects.filter(level=2, parent__code=kol_code):
+        level2.append(
+            {
+                'code': l.code,
+                'name': l.name,
+
+            }
+        )
+
+    # فعلا خالی است
+    for l in AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code):
+        print(l.code, l.name)
+        level3.append(
+            {
+                'code': l.code,
+                'name': l.name,
+
+            }
+        )
+    level3 = []
+
+    # فیلتر کردن داده‌ها
+    sanads2 = SanadDetail.objects.filter(kol=kol_code, moin=moin_code)
+
+    # استفاده از مجموعه برای حذف تکراری‌ها و سپس تبدیل به لیست مرتب‌شده
+    tafzili_set = sorted({s.tafzili for s in sanads2})
+
+    # ایجاد لیست level3
+    for tafzili_code1 in tafzili_set:
+        level3.append(
+            {
+                'code': tafzili_code1,
+                'name': '',
+            }
+        )
+
+    level=4
+
+    print(level,kol_code,moin_code,tafzili_code)
+    bed_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafzili_code).aggregate(Sum('bed'))[
+        'bed__sum']
+    bes_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafzili_code).aggregate(Sum('bes'))[
+        'bes__sum']
+    curramount_sum = \
+    SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafzili_code).aggregate(Sum('curramount'))[
+        'curramount__sum']
+
+
 
     context={
+        'level':level,
         'sanads':sanads,
-        'kol_code':kol_code,
-        'kol_name':AccCoding.objects.filter(level=1,code=kol_code).last().name,
-        'moin_code':moin_code,
-        'moin_name':AccCoding.objects.filter(level=2,code=moin_code).last().name,
-        'tafzili_code':tafzili_code,
+        'kol_code':int(kol_code),
+        'moin_code':int(moin_code),
+        'tafzili_code':int(tafzili_code),
+        'level1': level1,
+        'level2': level2,
+        'level3': level3,
+        'total_bed': bed_sum,
+        'total_bes': bes_sum,
+        'total_curramount': curramount_sum,
 
     }
 
 
 
     return render(request, 'sanad_total.html', context)
-

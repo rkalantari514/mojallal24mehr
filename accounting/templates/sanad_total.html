@@ -2,75 +2,195 @@
 {% load static %}
 {% load humanize %}
 {% block content %}
+    <style>
+        .category-btn {
+            width: 200px; /* عرض دکمه‌ها را تنظیم می‌کند */
+            margin-bottom: 10px; /* فاصله بین خطوط را تنظیم می‌کند */
+        }
+    </style>
+
+
+
     <div class="content-wrapper">
-        <div class="container">
-            <h1>{{ myheader }}</h1>
-            {% if level == 2 %}
-                <a href="/balance-sheet-kol">
-                    <h2> معین های کل {{ parent_code }}-{{ parent_name }}</h2>
-                </a>
-            {% endif %}
-            {% if level == 3 %}
-                <a href="/balance-sheet-moin/{{ kol_code }}">
-                    <h2> تفضیل های های معین {{ moin_code }}-{{ parent_name }}</h2>
-                </a>
-                <h2> از کد کل {{ kol_code }}</h2>
 
-            {% endif %}
-<a href="/balance-sheet-tafsili/{{kol_code  }}/{{ moin_code }}/"><H2>رفتن به تفضیل ها</H2></a>
-
-            <div class="table-responsive">
-                <table
-                        id="table"
-                        class="table-striped"
-                        data-toggle="table"
-                        data-locale="fa-IR"
-                        data-search="true"
-                        data-show-columns="true"
-                        data-show-export="true"
-                        data-show-refresh="true"
-                        data-show-columns-toggle-all="true"
-                        data-show-pagination-switch="true"
-                        data-show-toggle="true"
-                        data-show-fullscreen="true"
-                        data-buttons="buttons"
-                        data-search-align="left"
-                        data-buttons-class="primary"
-                        data-pagination="true"
-                        data-show-columns-search="true"
-                        data-show-footer="true"
-                        data-page-size="100"
-                        data-remember-order="true"
-                        data-sortable="true"
-                        data-show-search-clear-button="true"
-                        data-sort-name="count"
-                        data-sort-order="desc"
-                        data-filter-control="true"
-                        data-show-print="true"
-                        data-export-data-type="all"
-                        data-export-types=['excel']
-                >
-                    <thead>
-                    <tr>
-
-                        <th data-field="sharh" data-sortable="true">شرح</th>
-                        <th data-field="bed_sum" data-sortable="true">بدهکار</th>
-                        <th data-field="bes_sum" data-sortable="true">بستانکار</th>
-                        <th data-field="curramount_sum" data-sortable="true">مانده</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for item in sanads %}
-                        <tr>
-                            <td><h4>{{ item.syscomment }}</h4></td>
-                            <td><h4>{{ item.bed|floatformat:0|intcomma:False }}</h4></td>
-                            <td><h4>{{ item.bes|floatformat:0|intcomma:False }}</h4></td>
-                            <td> <h4 style="direction: ltr">{{ item.curramount|floatformat:0|intcomma:False }}</h4></td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+        <!-- دکمه سطوح -->
+        <div class="card-body">
+            <div class="text-center">
+                {% if level == 1 %}
+                    <button type="button" class="btn btn-primary category-btn">تراز کل</button>
+                {% else %}
+                    <a href="/balance-sheet-kol">
+                        <button type="button" class="btn btn-success category-btn">تراز کل</button>
+                    </a>
+                {% endif %}
             </div>
+        </div>
+        <div class="col-xl-12 mb-30">
+            <div class="card card-statistics h-100">
+                <div class="card-body">
+                    <h5 class="card-title">سطح کل</h5>
+                    <div class="text-center">
+                        {% for l in level1 %}
+                            {% if l.code == kol_code %}
+                                <a href="/balance-sheet-moin/{{ l.code }}">
+                                    <button type="button"
+                                            class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
+                                </a>
+                            {% else %}
+                                <a href="/balance-sheet-moin/{{ l.code }}">
+                                    <button type="button"
+                                            class="btn btn-secondary category-btn">{{ l.code }}-{{ l.name }}</button>
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        {% if level > 1 %}
+            <div class="col-xl-12 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">سطح معین</h5>
+                        <div class="text-center">
+                            {% for l in level2 %}
+                                {% if l.code == moin_code %}
+                                    <a href="/balance-sheet-tafsili/{{ kol_code }}/{{ l.code }}">
+                                        <button type="button"
+                                                class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
+                                    </a>
+                                {% else %}
+                                    <a href="/balance-sheet-tafsili/{{ kol_code }}/{{ l.code }}">
+                                        <button type="button"
+                                                class="btn btn-secondary category-btn">{{ l.code }}-{{ l.name }}</button>
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        {% endif %}
+        {% if level > 2 %}
+            <div class="col-xl-12 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">سطح تفضیلی</h5>
+                        <div class="text-center">
+                            {% for l in level3 %}
+                                {% if l.code == tafzili_code %}
+                                    <a href="/sanad_total/{{ kol_code }}/{{ moin_code }}/{{ l.code }}">
+                                        <button type="button"
+                                                class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
+                                    </a>
+                                {% else %}
+                                    <a href="/sanad_total/{{ kol_code }}/{{ moin_code }}/{{ l.code }}">
+                                        <button type="button"
+                                                class="btn btn-secondary category-btn">{{ l.code }}-{{ l.name }}</button>
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        {% endif %}
+
+
+    <div class="card-body">
+             <h5 class="mb-15 pb-0 border-0 card-title">خلاصه </h5>
+             <!-- action group -->
+              <div class="table-responsive">
+              <table class="table center-aligned-table mb-10 text-center">
+                <thead>
+                  <tr class="text-dark">
+                    <th>بدهکار</th>
+                    <th>بستانکار</th>
+                    <th>مانده</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><h4>{{ total_bed|floatformat:0|intcomma:False }}</h4></td>
+                    <td><h4>{{ total_bes|floatformat:0|intcomma:False }}</h4></td>
+                    <td style="direction: ltr"><h4>{{ total_curramount|floatformat:0|intcomma:False }}</h4></td>
+
+                  </tr>
+
+                </tbody>
+              </table>
+            </div>
+           </div>
+
+
+
+
+        <div class="table-responsive">
+            <table
+                    id="table"
+                    class="table-striped"
+                    data-toggle="table"
+                    data-locale="fa-IR"
+                    data-search="true"
+                    data-show-columns="true"
+                    data-show-export="true"
+                    data-show-refresh="true"
+                    data-show-columns-toggle-all="true"
+                    data-show-pagination-switch="true"
+                    data-show-toggle="true"
+                    data-show-fullscreen="true"
+                    data-buttons="buttons"
+                    data-search-align="left"
+                    data-buttons-class="primary"
+                    data-pagination="true"
+                    data-show-columns-search="true"
+                    data-show-footer="true"
+                    data-page-size="100"
+                    data-remember-order="true"
+                    data-sortable="true"
+                    data-show-search-clear-button="true"
+                    data-sort-name="code"
+                    data-sort-order="desc"
+                    data-filter-control="true"
+                    data-show-print="true"
+                    data-export-data-type="all"
+                    data-export-types=['excel']
+            >
+                <thead>
+                <tr>
+
+                    <th data-field="tarikh" data-sortable="true" data-sorter="numericOnly">تاریخ</th>
+                    <th data-field="code" data-sortable="true" data-sorter="numericOnly">کد</th>
+                    <th data-field="radif" data-sortable="true" data-sorter="numericOnly">ردیف</th>
+                    <th data-field="sharh" data-sortable="true" data-sorter="numericOnly">شرح</th>
+                    <th data-field="bed" data-sortable="true" data-sorter="numericOnly">بدهکار</th>
+                    <th data-field="bes" data-sortable="true" data-sorter="numericOnly">بستانکار</th>
+                    <th data-field="curramount" data-sortable="true" data-sorter="numericOnly">مانده</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in sanads %}
+                    <tr>
+                        <td><h4>{{ item.tarikh }}</h4></td>
+                        <td><h4>{{ item.code }}</h4></td>
+                        <td><h4>{{ item.radif }}</h4></td>
+                        <td><h4>{{ item.syscomment }}</h4></td>
+                        <td><h4>{{ item.bed|floatformat:0|intcomma:False }}</h4></td>
+                        <td><h4>{{ item.bes|floatformat:0|intcomma:False }}</h4></td>
+                        <td><h4 style="direction: ltr">{{ item.curramount|floatformat:0|intcomma:False }}</h4></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
 
 
