@@ -155,6 +155,7 @@ def Updateall(request):
         '/update/updatekalagroup',
         '/update/mojodi',
         '/update/updatsmratio',
+        '/update/updatesanadconditions',
         '/createreport',
     ]
     # نگاشت آدرس‌های استاتیک به توابع
@@ -164,6 +165,7 @@ def Updateall(request):
         '/update/updatekalagroup': UpdateKalaGroup,
         '/update/mojodi': UpdateMojodi,
         '/update/updatsmratio': Update_Sales_Mojodi_Ratio,
+        '/update/updatesanadconditions': UpdateSanadConditions,
         '/createreport': CreateReport,
     }
     # چاپ تزئینی برای عیب یابی
@@ -2794,170 +2796,58 @@ def Cheques_Recieve(request):
     return redirect('/updatedb')
 
 
-def Cheques_Recieve1(request):
+
+from django.shortcuts import redirect
+from django.db import transaction
+from django.db.models import Q
+from .models import MyCondition, SanadDetail
+import time
+
+
+def UpdateSanadConditions(request):
     t0 = time.time()
-    print('شروع آپدیت چک‌ها---------------------------------------------------')
-    conn = connect_to_mahak()
-    cursor = conn.cursor()
-    t1 = time.time()
+    print('شروع آپدیت شرایط اسناد---------------------------------------')
 
-    # گرفتن داده‌ها از دیتابیس خارجی
-    cursor.execute(
-        "SELECT [ID], [ChequeID], [ChequeRow], [IssuanceDate], [ChequeDate], "  
-        "[Cost], [BankName], [BankBranch], [AccountID], [Description], [Status], [PerCode] "  
-        "FROM [mahak].[dbo].[Cheques_Recieve]"
-    )
-    mahak_data = cursor.fetchall()
+    # فعال کردن همه اسناد
+    SanadDetail.objects.all().update(is_active=True)
 
-    existing_in_mahak = {int(row[0]) for row in mahak_data}
-    print('تعداد رکوردهای موجود در Mahak:', len(existing_in_mahak))
+    # گرفتن تمامی شرایط فعال
+    conditions = MyCondition.objects.filter(is_active=True)
+    to_update = []
 
-    cheques_to_create = []
-    cheques_to_update = []
+    for condition in conditions:
+        # بررسی مقادیر
+        print(f"kol: {condition.kol}, moin: {condition.moin}, tafzili: {condition.tafzili}")
 
-    current_cheques = {cheque.id_mahak: cheque for cheque in ChequesRecieve.objects.all()}
-    BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
+        # فیلتر کردن اسناد بر اساس kol، moin و tafzili
+        sanad_details = SanadDetail.objects.all()
 
-    counter = 1
-    for row in mahak_data:
-        print(counter)
-        counter += 1
-        id_mahak = int(row[0])
+        if condition.kol is not None and condition.kol !=0 :
+            sanad_details = sanad_details.filter(kol=condition.kol)
+        if condition.moin is not None and condition.moin !=0:
+            sanad_details = sanad_details.filter(moin=condition.moin)
+        if condition.tafzili is not None and condition.tafzili !=0:
+            sanad_details = sanad_details.filter(tafzili=condition.tafzili)
 
-        # بررسی و تبدیل cheque_id
-        cheque_id_str = row[1]  # به عنوان رشته در نظر گرفته می‌شود
-
-        # تبدیل cheque_row
-        try:
-            cheque_row = int(row[2])
-        except ValueError:
-            print(f"مقدار غیر معتبر برای cheque_row: {row[2]}")
-            continue
-
-        issuance_tarik = row[3]
-        cheque_tarik = row[4]
-
-        # مدیریت هزینه
-        try:
-            cost_str = row[5] if row[5] not in (None, '') else '0.00'
-            cost = Decimal(cost_str)
-        except (ValueError, InvalidOperation):
-            print(f"مقدار غیر معتبر برای cost: {row[5]}")
-            continue
-
-        # فیلدهای بانکی
-        bank_name = row[6] if row[6] not in (None, '') else ''
-        bank_branch = row[7] if row[7] not in (None, '') else ''
-
-        # تبدیل account_id
-        account_id_str = row[8] if row[8] not in (None, '') else 0
-        try:
-            account_id = int(account_id_str)
-        except ValueError:
-            print(f"مقدار غیر معتبر برای account_id: {account_id_str}")
-            continue
-
-        description = row[9] if row[9] not in (None, '') else ''
-        status = row[10] if row[10] not in (None, '') else 0  # در صورتی که None باشد، مقدار پیش‌فرض 0
-        per_code = row[11] if row[11] not in (None, '') else 0  # در صورتی که None باشد، مقدار پیش‌فرض 0
-
-        # تبدیل تاریخ
-        try:
-            issuance_date = jdatetime.date(
-                *map(int, issuance_tarik.split('/'))).togregorian() if issuance_tarik else None
-            cheque_date = jdatetime.date(*map(int, cheque_tarik.split('/'))).togregorian() if cheque_tarik else None
-        except Exception as e:
-            print(f"خطا در تعیین تاریخ: {e}")
-            continue
-
-        if id_mahak in current_cheques:
-            cheque = current_cheques[id_mahak]
-            if (cheque.cheque_id != cheque_id_str or cheque.cheque_row != cheque_row or
-                    cheque.issuance_tarik != issuance_tarik or cheque.issuance_date != issuance_date or
-                    cheque.cheque_tarik != cheque_tarik or cheque.cheque_date != cheque_date or
-                    cheque.cost != cost or cheque.bank_name != bank_name or
-                    cheque.bank_branch != bank_branch or cheque.account_id != account_id or
-                    cheque.description != description or cheque.status != status or
-                    cheque.per_code != per_code):
-                cheque.cheque_id = cheque_id_str
-                cheque.cheque_row = cheque_row
-                cheque.issuance_tarik = issuance_tarik
-                cheque.issuance_date = issuance_date
-                cheque.cheque_tarik = cheque_tarik
-                cheque.cheque_date = cheque_date
-                cheque.cost = cost
-                cheque.bank_name = bank_name
-                cheque.bank_branch = bank_branch
-                cheque.account_id = account_id
-                cheque.description = description
-                cheque.status = status
-                cheque.per_code = per_code
-                cheques_to_update.append(cheque)
+        if not condition.contain and not condition.equal_to:
+            to_update.extend(sanad_details)
+            for sanad in sanad_details:
+                sanad.is_active = False  # غیرفعال کردن فقط در صورت نیاز
         else:
-            cheques_to_create.append(ChequesRecieve(
-                id_mahak=id_mahak, cheque_id=cheque_id_str, cheque_row=cheque_row,
-                issuance_tarik=issuance_tarik, issuance_date=issuance_date,
-                cheque_tarik=cheque_tarik, cheque_date=cheque_date, cost=cost,
-                bank_name=bank_name, bank_branch=bank_branch, account_id=account_id,
-                description=description, status=status, per_code=per_code
-            ))
+            for sanad in sanad_details:
+                if (condition.contain and condition.contain in sanad.sharh) or \
+                        (sanad.sharh == condition.equal_to):
+                    sanad.is_active = False
+                    to_update.append(sanad)
 
-    # Bulk create new cheque details
-    if cheques_to_create:
-        print('شروع به ساخت')
-        ChequesRecieve.objects.bulk_create(cheques_to_create, batch_size=BATCH_SIZE)
+                # به‌روزرسانی دسته‌ای اسناد
+    if to_update:
+        with transaction.atomic():
+            SanadDetail.objects.bulk_update(to_update, ['is_active'])
 
-    # Bulk update existing cheque details
-    if cheques_to_update:
-        print('شروع به آپدیت')
-        ChequesRecieve.objects.bulk_update(
-            cheques_to_update,
-            ['cheque_id', 'cheque_row', 'issuance_tarik', 'issuance_date',
-             'cheque_tarik', 'cheque_date', 'cost', 'bank_name',
-             'bank_branch', 'account_id', 'description', 'status', 'per_code'],
-            batch_size=BATCH_SIZE
-        )
-
-    # شناسایی رکوردهای حذف‌شده
-    ids_in_external_db = {int(row[0]) for row in mahak_data}  # شناسه‌های موجود در دیتابیس خارجی
-    ids_in_django_db = {cheque.id_mahak for cheque in current_cheques.values()}  # شناسه‌های موجود در مدل جنگو
-
-    # یافتن شناسه‌هایی که در دیتابیس جنگو وجود دارند اما در دیتابیس خارجی نیستند
-    ids_to_delete = ids_in_django_db - ids_in_external_db
-
-    # حذف رکوردهای شناسایی‌شده
-    if ids_to_delete:
-        ChequesRecieve.objects.filter(id_mahak__in=ids_to_delete).delete()
-        print(f"رکوردهای حذف‌شده: {len(ids_to_delete)} رکورد حذف شد.")
-
-
-    # محاسبه زمان اجرای کل
+            # محاسبه زمان اجرای کل
     tend = time.time()
     total_time = tend - t0
-    db_time = t1 - t0
-    update_time = tend - t1
-
-    cursor.execute("SELECT COUNT(*) FROM Cheques_Recieve")  # محاسبه تعداد کل رکوردها
-    row_count = cursor.fetchone()[0]
-
-    cursor.execute(
-        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Cheques_Recieve'")  # محاسبه تعداد ستون‌ها
-    column_count = cursor.fetchone()[0]
-
-    # به‌روزرسانی اطلاعات در جدول Mtables
-    table = Mtables.objects.filter(name='Cheques_Recieve').last()
-    table.last_update_time = timezone.now()
-    table.update_duration = update_time
-    table.row_count = row_count
-    table.column_count = column_count
-    table.save()
-
-
-
     print(f"زمان کل: {total_time:.2f} ثانیه")
-    print(f"زمان اتصال به دیتابیس: {db_time:.2f} ثانیه")
-    print(f"زمان آپدیت جدول: {update_time:.2f} ثانیه")
-
-
 
     return redirect('/updatedb')

@@ -166,13 +166,13 @@
                     <thead>
                     <tr>
                         {% if level == 1 %}
-                            <th data-field="kol_code" data-sortable="true" data-sorter="numericOnly">کد کل</th>
-                            <th data-field="kol_name" data-sortable="true">نام سطح کل</th>
+                            <th data-field="kol_code" data-sortable="true" data-sorter="numericOnly" data-filter-control="select">کد کل</th>
+                            <th data-field="kol_name" data-sortable="true" data-filter-control="select">نام سطح کل</th>
                         {% elif level == 2 %}
-                            <th data-field="moin_code" data-sortable="true" data-sorter="numericOnly">کد معین</th>
-                            <th data-field="moin_name" data-sortable="true">نام سطح معین</th>
+                            <th data-field="moin_code" data-sortable="true" data-sorter="numericOnly" data-filter-control="select">کد معین</th>
+                            <th data-field="moin_name" data-sortable="true" data-filter-control="select">نام سطح معین</th>
                         {% else %}
-                            <th data-field="tafzili_code" data-sortable="true" data-sorter="numericOnly">کد تفضیل</th>
+                            <th data-field="tafzili_code" data-sortable="true" data-sorter="numericOnly" >کد تفضیل</th>
                         {% endif %}
                         <th data-field="bed_sum" data-sortable="true" data-sorter="numericOnly">بدهکار</th>
                         <th data-field="bes_sum" data-sortable="true" data-sorter="numericOnly">بستانکار</th>

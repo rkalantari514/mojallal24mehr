@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo, \
-    Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve
+    Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve, MyCondition
 
 
 # Register your models here.
@@ -118,8 +118,8 @@ class SanadAdmin(admin.ModelAdmin):
         model = Sanad
 
 class SanadDetailAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'code','tarikh','date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount','is_analiz','cheque_id','syscomment']
-    list_filter = ['kol', 'moin', 'tafzili']
+    list_display = ['__str__', 'code','tarikh','date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount','is_active','is_analiz','cheque_id','syscomment']
+    list_filter = ['is_active','kol', 'moin', 'tafzili']
     list_editable = ['is_analiz']
     search_fields = ['tarikh','date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount','cheque_id']
 
@@ -148,7 +148,12 @@ class ChequesRecieveAdmin(admin.ModelAdmin):
         model = ChequesRecieve
 
 
-
+@admin.register(MyCondition)
+class ConditionAdmin(admin.ModelAdmin):
+    list_display = ('__str__','kol', 'moin', 'tafzili', 'contain', 'equal_to', 'is_active')
+    list_filter = ('is_active',)  # امکان فیلتر کردن بر اساس وضعیت فعال بودن
+    search_fields = ('kol', 'moin', 'tafzili')
+    list_editable = ['kol', 'moin', 'tafzili', 'contain', 'equal_to', 'is_active']
 
 
 admin.site.register(Mtables, MtablesAdmin)

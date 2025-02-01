@@ -106,32 +106,30 @@
         {% endif %}
 
 
-    <div class="card-body">
-             <h5 class="mb-15 pb-0 border-0 card-title">خلاصه </h5>
-             <!-- action group -->
-              <div class="table-responsive">
-              <table class="table center-aligned-table mb-10 text-center">
-                <thead>
-                  <tr class="text-dark">
-                    <th>بدهکار</th>
-                    <th>بستانکار</th>
-                    <th>مانده</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><h4>{{ total_bed|floatformat:0|intcomma:False }}</h4></td>
-                    <td><h4>{{ total_bes|floatformat:0|intcomma:False }}</h4></td>
-                    <td style="direction: ltr"><h4>{{ total_curramount|floatformat:0|intcomma:False }}</h4></td>
+        <div class="card-body">
+            <h5 class="mb-15 pb-0 border-0 card-title">خلاصه </h5>
+            <!-- action group -->
+            <div class="table-responsive">
+                <table class="table center-aligned-table mb-10 text-center">
+                    <thead>
+                    <tr class="text-dark">
+                        <th>بدهکار</th>
+                        <th>بستانکار</th>
+                        <th>مانده</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><h4>{{ total_bed|floatformat:0|intcomma:False }}</h4></td>
+                        <td><h4>{{ total_bes|floatformat:0|intcomma:False }}</h4></td>
+                        <td style="direction: ltr"><h4>{{ total_curramount|floatformat:0|intcomma:False }}</h4></td>
 
-                  </tr>
+                    </tr>
 
-                </tbody>
-              </table>
+                    </tbody>
+                </table>
             </div>
-           </div>
-
-
+        </div>
 
 
         <div class="table-responsive">
@@ -168,6 +166,7 @@
                 <thead>
                 <tr>
 
+                    <th data-field="vaziat" data-sortable="true" data-filter-control="select">وضعیت</th>
                     <th data-field="tarikh" data-sortable="true" data-sorter="numericOnly">تاریخ</th>
                     <th data-field="code" data-sortable="true" data-sorter="numericOnly">کد</th>
                     <th data-field="radif" data-sortable="true" data-sorter="numericOnly">ردیف</th>
@@ -179,15 +178,32 @@
                 </thead>
                 <tbody>
                 {% for item in sanads %}
-                    <tr>
-                        <td><h4>{{ item.tarikh }}</h4></td>
-                        <td><h4>{{ item.code }}</h4></td>
-                        <td><h4>{{ item.radif }}</h4></td>
-                        <td><h4>{{ item.syscomment }}</h4></td>
-                        <td><h4>{{ item.bed|floatformat:0|intcomma:False }}</h4></td>
-                        <td><h4>{{ item.bes|floatformat:0|intcomma:False }}</h4></td>
-                        <td><h4 style="direction: ltr">{{ item.curramount|floatformat:0|intcomma:False }}</h4></td>
-                    </tr>
+                    {% if not item.is_active %}
+                        <tr>
+                            <td><h4 >غیر فعال</h4></td>
+                            <td><h4>{{ item.tarikh }}</h4></td>
+                            <td><h4>{{ item.code }}</h4></td>
+                            <td><h4>{{ item.radif }}</h4></td>
+                            <td><h4 class="text-danger">{{ item.syscomment }}</h4></td>
+                            <td><h4><s>{{ item.bed|floatformat:0|intcomma:False }}</s></h4></td>
+                            <td><h4><s>{{ item.bes|floatformat:0|intcomma:False }}</s></h4></td>
+                            <td><h4 style="direction: ltr"><s>{{ item.curramount|floatformat:0|intcomma:False }}</s></h4></td>
+                        </tr>
+
+                    {% else %}
+                        <tr>
+                                                    <td><h4> فعال</h4></td>
+
+                            <td><h4>{{ item.tarikh }}</h4></td>
+                            <td><h4>{{ item.code }}</h4></td>
+                            <td><h4>{{ item.radif }}</h4></td>
+                            <td><h4>{{ item.syscomment }}</h4></td>
+                            <td><h4>{{ item.bed|floatformat:0|intcomma:False }}</h4></td>
+                            <td><h4>{{ item.bes|floatformat:0|intcomma:False }}</h4></td>
+                            <td><h4 style="direction: ltr">{{ item.curramount|floatformat:0|intcomma:False }}</h4></td>
+                        </tr>
+                    {% endif %}
+
                 {% endfor %}
                 </tbody>
             </table>

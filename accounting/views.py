@@ -335,9 +335,9 @@ def balance_sheet_kol(request):
     for kol in kol_codes:
         kol_code = kol['kol']
         kol_name = AccCoding.objects.filter(code=kol_code, level=1).first().name
-        bed_sum = SanadDetail.objects.filter(kol=kol_code).aggregate(Sum('bed'))['bed__sum']
-        bes_sum = SanadDetail.objects.filter(kol=kol_code).aggregate(Sum('bes'))['bes__sum']
-        curramount_sum = SanadDetail.objects.filter(kol=kol_code).aggregate(Sum('curramount'))['curramount__sum']
+        bed_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code).aggregate(Sum('bed'))['bed__sum'] or 0
+        bes_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code).aggregate(Sum('bes'))['bes__sum'] or 0
+        curramount_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code).aggregate(Sum('curramount'))['curramount__sum'] or 0
         total_bed += bed_sum
         total_bes += bes_sum
         total_curramount += curramount_sum
@@ -347,17 +347,20 @@ def balance_sheet_kol(request):
             'bed_sum': bed_sum,
             'bes_sum': bes_sum,
             'curramount_sum': curramount_sum,
+
         })
 
     level1=[]
     level2=[]
     level3=[]
-    for l in AccCoding.objects.filter(level=1):
+    for l in AccCoding.objects.filter(level=1).order_by('code'):
+        # filtercount=SanadDetail.objects.filter(is_active=False,kol=l.code).count()
         print(l.code,l.name)
         level1.append(
             {
                'code':l.code,
                'name':l.name,
+               # 'filtercount':filtercount,
 
             }
         )
@@ -376,9 +379,6 @@ def balance_sheet_kol(request):
     }
     return render(request, 'balance_sheet.html', context)
 
-
-
-
 def balance_sheet_moin(request, kol_code):
     moin_codes = SanadDetail.objects.filter(kol=kol_code).values('moin').distinct()
     balance_data = []
@@ -389,9 +389,13 @@ def balance_sheet_moin(request, kol_code):
     for moin in moin_codes:
         moin_code = moin['moin']
         moin_name = AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code).first().name
-        bed_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).aggregate(Sum('bed'))['bed__sum']
-        bes_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).aggregate(Sum('bes'))['bes__sum']
-        curramount_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).aggregate(Sum('curramount'))['curramount__sum']
+        bed_sum = SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code).aggregate(Sum('bed'))[
+                      'bed__sum'] or 0
+        bes_sum = SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code).aggregate(Sum('bes'))[
+                      'bes__sum'] or 0
+        curramount_sum = \
+        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code).aggregate(Sum('curramount'))[
+            'curramount__sum'] or 0
         total_bed += bed_sum
         total_bes += bes_sum
         total_curramount += curramount_sum
@@ -408,7 +412,7 @@ def balance_sheet_moin(request, kol_code):
     level1 = []
     level2 = []
     level3 = []
-    for l in AccCoding.objects.filter(level=1):
+    for l in AccCoding.objects.filter(level=1).order_by('code'):
         print(l.code, l.name)
         level1.append(
             {
@@ -418,7 +422,7 @@ def balance_sheet_moin(request, kol_code):
             }
         )
 
-    for l in AccCoding.objects.filter(level=2,parent__code=kol_code):
+    for l in AccCoding.objects.filter(level=2,parent__code=kol_code).order_by('code'):
         print(l.code, l.name)
         level2.append(
             {
@@ -453,7 +457,6 @@ def balance_sheet_moin(request, kol_code):
     }
     return render(request, 'balance_sheet.html', context)
 
-
 def balance_sheet_tafsili(request, kol_code, moin_code):
     tafsili_codes = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).values('tafzili').distinct()
     balance_data = []
@@ -462,9 +465,19 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
     total_curramount = 0
     for tafsili in tafsili_codes:
         tafsili_code = tafsili['tafzili']
-        bed_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafsili_code).aggregate(Sum('bed'))['bed__sum']
-        bes_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafsili_code).aggregate(Sum('bes'))['bes__sum']
-        curramount_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafsili_code).aggregate(Sum('curramount'))['curramount__sum']
+
+        bed_sum = \
+        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafsili_code).aggregate(
+            Sum('bed'))['bed__sum'] or 0
+        bes_sum = \
+        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafsili_code).aggregate(
+            Sum('bes'))['bes__sum'] or 0
+        curramount_sum = \
+        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafsili_code).aggregate(
+            Sum('curramount'))['curramount__sum'] or 0
+
+
+
         total_bed += bed_sum
         total_bes += bes_sum
         total_curramount += curramount_sum
@@ -481,7 +494,7 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
     level1 = []
     level2 = []
     level3 = []
-    for l in AccCoding.objects.filter(level=1):
+    for l in AccCoding.objects.filter(level=1).order_by('code'):
         level1.append(
             {
                 'code': l.code,
@@ -490,7 +503,7 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
             }
         )
 
-    for l in AccCoding.objects.filter(level=2, parent__code=kol_code):
+    for l in AccCoding.objects.filter(level=2, parent__code=kol_code).order_by('code'):
         level2.append(
             {
                 'code': l.code,
@@ -501,7 +514,7 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
 
 
     # فعلا خالی است
-    for l in AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code):
+    for l in AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code).order_by('code'):
         print(l.code, l.name)
         level3.append(
             {
@@ -548,7 +561,6 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
     }
     return render(request, 'balance_sheet.html', context)
 
-
 def SanadTotal(request, *args, **kwargs):
     kol_code = kwargs['kol_code']
     moin_code = kwargs['moin_code']
@@ -559,7 +571,7 @@ def SanadTotal(request, *args, **kwargs):
     level1 = []
     level2 = []
     level3 = []
-    for l in AccCoding.objects.filter(level=1):
+    for l in AccCoding.objects.filter(level=1).order_by('code'):
         level1.append(
             {
                 'code': l.code,
@@ -568,7 +580,7 @@ def SanadTotal(request, *args, **kwargs):
             }
         )
 
-    for l in AccCoding.objects.filter(level=2, parent__code=kol_code):
+    for l in AccCoding.objects.filter(level=2, parent__code=kol_code).order_by('code'):
         level2.append(
             {
                 'code': l.code,
@@ -578,7 +590,7 @@ def SanadTotal(request, *args, **kwargs):
         )
 
     # فعلا خالی است
-    for l in AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code):
+    for l in AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code).order_by('code'):
         print(l.code, l.name)
         level3.append(
             {
@@ -607,12 +619,12 @@ def SanadTotal(request, *args, **kwargs):
     level=4
 
     print(level,kol_code,moin_code,tafzili_code)
-    bed_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafzili_code).aggregate(Sum('bed'))[
+    bed_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code, moin=moin_code, tafzili=tafzili_code).aggregate(Sum('bed'))[
         'bed__sum']
-    bes_sum = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafzili_code).aggregate(Sum('bes'))[
+    bes_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code, moin=moin_code, tafzili=tafzili_code).aggregate(Sum('bes'))[
         'bes__sum']
     curramount_sum = \
-    SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafzili_code).aggregate(Sum('curramount'))[
+    SanadDetail.objects.filter(is_active=True,kol=kol_code, moin=moin_code, tafzili=tafzili_code).aggregate(Sum('curramount'))[
         'curramount__sum']
 
 
