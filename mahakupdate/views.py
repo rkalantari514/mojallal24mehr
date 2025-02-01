@@ -2812,7 +2812,8 @@ def UpdateSanadConditions(request):
     SanadDetail.objects.all().update(is_active=True)
 
     # گرفتن تمامی شرایط فعال
-    conditions = MyCondition.objects.filter(is_active=True,is_new=True)
+    # conditions = MyCondition.objects.filter(is_active=True,is_new=True)
+    conditions = MyCondition.objects.filter(is_active=True)
     to_update = []
 
     for condition in conditions:
@@ -2843,8 +2844,8 @@ def UpdateSanadConditions(request):
 
                 # به‌روزرسانی دسته‌ای اسناد
 
-        condition.is_new = False
-        condition.save()
+        # condition.is_new = False
+        # condition.save()
 
 
     if to_update:
