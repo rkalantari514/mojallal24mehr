@@ -2812,10 +2812,11 @@ def UpdateSanadConditions(request):
     SanadDetail.objects.all().update(is_active=True)
 
     # گرفتن تمامی شرایط فعال
-    conditions = MyCondition.objects.filter(is_active=True)
+    conditions = MyCondition.objects.filter(is_active=True,is_new=True)
     to_update = []
 
     for condition in conditions:
+
         # بررسی مقادیر
         print(f"kol: {condition.kol}, moin: {condition.moin}, tafzili: {condition.tafzili}")
 
@@ -2841,6 +2842,11 @@ def UpdateSanadConditions(request):
                     to_update.append(sanad)
 
                 # به‌روزرسانی دسته‌ای اسناد
+
+        condition.is_new = False
+        condition.save()
+
+
     if to_update:
         with transaction.atomic():
             SanadDetail.objects.bulk_update(to_update, ['is_active'])

@@ -489,6 +489,8 @@ class SanadDetail(models.Model):
         return f"{self.code}-{self.radif}"
 
 
+from django.db import models
+
 class MyCondition(models.Model):
     kol = models.IntegerField(default=0, blank=True, null=True, verbose_name='کل')
     moin = models.IntegerField(default=0, blank=True, null=True, verbose_name='معین')
@@ -496,18 +498,42 @@ class MyCondition(models.Model):
 
     contain = models.CharField(max_length=255, blank=True, null=True, verbose_name='شامل')
     equal_to = models.CharField(max_length=255, blank=True, null=True, verbose_name='برابر با')
-
-
     is_active = models.BooleanField(default=True, verbose_name='فعال است')
+    is_new = models.BooleanField(default=True, verbose_name='جدید است')
 
+    def __init__(self, *args, **kwargs):
+        super(MyCondition, self).__init__(*args, **kwargs)
+        # ذخیره مقادیر اولیه فیلدها
+        self._original_values = {
+            'kol': self.kol,
+            'moin': self.moin,
+            'tafzili': self.tafzili,
+            'contain': self.contain,
+            'equal_to': self.equal_to,
+            'is_active': self.is_active,
+            'is_new': self.is_new,
+        }
+
+    def save(self, *args, **kwargs):
+        # بررسی تغییرات در فیلدهای غیر از is_new
+        if any(
+            getattr(self, field) != self._original_values[field]
+            for field in ['kol', 'moin', 'tafzili', 'contain', 'equal_to', 'is_active']
+        ):
+            self.is_new = True  # اگر فیلدهای دیگر تغییر کردند، is_new را True کنید
+        elif self.is_new != self._original_values['is_new'] and not self.is_new:
+            # اگر فقط is_new تغییر کرد و به False تنظیم شد، آن را False نگه دارید
+            self.is_new = False
+
+        # ذخیره شیء
+        super(MyCondition, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'شرط استثنا'
         verbose_name_plural = 'شرایط استثنا'
 
-
-def __str__(self):
-    return f"شرط: kol={self.kol}, moin={self.moin}, tafzili={self.tafzili}"
+    def __str__(self):
+        return f"شرط: kol={self.kol}, moin={self.moin}, tafzili={self.tafzili}"
 
 
 from django.db import models
