@@ -388,7 +388,9 @@ def balance_sheet_moin(request, kol_code):
 
     for moin in moin_codes:
         moin_code = moin['moin']
-        moin_name = AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code).first().name or None
+        moin_name=None
+        if AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code):
+            moin_name = AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code).first().name or None
         if not moin_name:
             AccCoding.objects.create(code=moin_code, level=2, parent__code=kol_code,name='تعیین نشده')
         moin_name = AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code).first().name
