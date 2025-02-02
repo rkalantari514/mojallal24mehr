@@ -26,28 +26,38 @@ def TarazCal(fday, lday, data):
     khales_forosh=0
     baha_tamam_forosh=0
     sood_navizhe = 0
+    sood_vizhe = 0
     active_day = 0
+    sayer_hazine=0
+    sayer_daramad=0
     daily_sood_navizhe = []  # لیست برای ذخیره مقادیر روزانه
+    daily_sood_vizhe = []  # لیست برای ذخیره مقادیر روزانه
     asnad_pardakhtani = []  # لیست برای ذخیره مقادیر asnad_pardakhtani
 
     for current_date in day_range:
         baha_tamam_forosh_d = current_data.get((current_date, 500), 0)
+        sayer_hazine_d = current_data.get((current_date, 501), 0)
         daramad_forosh = current_data.get((current_date, 400), 0)
+        sayer_daramad_d = current_data.get((current_date, 401), 0)
         barghasht_az_forosh = current_data.get((current_date, 403), 0) #منفی است
         khales_forosh_d=daramad_forosh+barghasht_az_forosh
         asnad_pardakhtan = current_data.get((current_date, 101), 0)  # محاسبه asnad_pardakhtani
 
         # محاسبه مجموع روزانه
         daily_total = daramad_forosh +barghasht_az_forosh+ baha_tamam_forosh_d
+        daily_total_vizhe = daramad_forosh +barghasht_az_forosh+ baha_tamam_forosh_d+sayer_daramad_d+sayer_hazine_d
         daily_sood_navizhe.append(daily_total)  # ذخیره مقدار روزانه
+        daily_sood_vizhe.append(daily_total_vizhe)  # ذخیره مقدار روزانه
 
         if daramad_forosh != 0 or baha_tamam_forosh_d != 0:
             active_day += 1
 
         sood_navizhe += daily_total
+        sood_vizhe += daily_total_vizhe
         khales_forosh += khales_forosh_d
         baha_tamam_forosh += baha_tamam_forosh_d
-
+        sayer_hazine+=sayer_hazine_d
+        sayer_daramad+=sayer_daramad_d
         # ذخیره مقدار asnad_pardakhtani با علامت منفی
         asnad_pardakhtani.append(-asnad_pardakhtan)
 
@@ -55,14 +65,23 @@ def TarazCal(fday, lday, data):
     min_sood_navizhe = min(daily_sood_navizhe) / 10000000 if daily_sood_navizhe else 0
     max_sood_navizhe = max(daily_sood_navizhe) / 10000000 if daily_sood_navizhe else 0
 
+    min_sood_vizhe = min(daily_sood_vizhe) / 10000000 if daily_sood_vizhe else 0
+    max_sood_vizhe = max(daily_sood_vizhe) / 10000000 if daily_sood_vizhe else 0
+
     to_return = {
         'khales_forosh':khales_forosh/10000000,
         'baha_tamam_forosh':baha_tamam_forosh/-10000000,
+        'sayer_hazine':sayer_hazine/-10000000,
+        'sayer_daramad':sayer_daramad/10000000,
         'sood_navizhe': sood_navizhe / 10000000,
+        'sood_vizhe': sood_vizhe / 10000000,
         'active_day': active_day,
         'ave_sood_navizhe': sood_navizhe / active_day / 10000000 if active_day > 0 else 0,
         'min_sood_navizhe': min_sood_navizhe,
         'max_sood_navizhe': max_sood_navizhe,
+        'ave_sood_vizhe': sood_vizhe / active_day / 10000000 if active_day > 0 else 0,
+        'min_sood_vizhe': min_sood_vizhe,
+        'max_sood_vizhe': max_sood_vizhe,
         'asnad_pardakhtani': sum(asnad_pardakhtani) / 10000000,  # جمع مقادیر asnad_pardakhtani
     }
 
@@ -92,7 +111,7 @@ def Home1(request, *args, **kwargs):
         is_active=True,
         date__range=(start_date_gregorian, today)
     ).filter(
-        Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101)
+        Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101)| Q(kol=401)| Q(kol=501)
     ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
 
     # محاسبه داده‌ها برای روزهای مختلف
