@@ -38,14 +38,64 @@
                 <div class="card card-statistics h-100">
                     <div class="card-body text-left">
                         <h5 class="card-title">سود ناویژه</h5>
-                        <h6 class="text-capitalize mt-0">میلیون تومان</h6>
+                        <h6 class="text-capitalize mt-0">خالص در آمد فروش</h6>
+                        <div class="row">
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-primary" data-to="{{ today_data.khales_forosh }}"
+                                        data-speed="5000">{{ today_data.khales_forosh }}</h4>
+                                    <label class="text-capitalize mt-0">امروز ({{ last_update_time|timesince }})
+                                        قبل</label>
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-success" data-to="{{ yesterday_data.khales_forosh }}"
+                                        data-speed="5000">{{ yesterday_data.khales_forosh }}</h4>
+                                    <label class="text-capitalize mt-0">دیروز </label>
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-danger" data-to="{{ allday_data.khales_forosh }}"
+                                        data-speed="5000">{{ allday_data.khales_forosh }}</h4>
+                                    <label class="text-capitalize mt-0">ازابتدای سال مالی</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                   <h6 class="text-capitalize mt-0">بهای تمام شده کالای فروش رفته</h6>
+                        <div class="row">
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-primary" data-to="{{ today_data.baha_tamam_forosh }}"
+                                        data-speed="5000">{{ today_data.baha_tamam_forosh }}</h4>
+                                    <label class="text-capitalize mt-0">امروز </label>
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-success" data-to="{{ yesterday_data.baha_tamam_forosh }}"
+                                        data-speed="5000">{{ yesterday_data.baha_tamam_forosh }}</h4>
+                                    <label class="text-capitalize mt-0">دیروز </label>
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-danger" data-to="{{ allday_data.baha_tamam_forosh }}"
+                                        data-speed="5000">{{ allday_data.baha_tamam_forosh }}</h4>
+                                    <label class="text-capitalize mt-0">ازابتدای سال مالی</label>
+                                </div>
+                            </div>
+                        </div>
+<div class="divider"></div>
+                         <h6 class="text-capitalize mt-0">سود ناویژه</h6>
                         <div class="row">
                             <div class="col-4 col-sm-4 mb-15 text-center">
                                 <div class="counter counter-small">
                                     <h4 class="timer text-primary" data-to="{{ today_data.sood_navizhe }}"
                                         data-speed="5000">{{ today_data.sood_navizhe }}</h4>
-                                    <label class="text-capitalize mt-0">امروز ({{ last_update_time|timesince }})
-                                        قبل</label>
+                                    <label class="text-capitalize mt-0">امروز </label>
                                 </div>
                             </div>
                             <div class="col-4 col-sm-4 mb-15 text-center">
@@ -63,6 +113,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="divider"></div>
                         <div class="row">
                             <div class="col-6 col-sm-4 mt-15 text-center">

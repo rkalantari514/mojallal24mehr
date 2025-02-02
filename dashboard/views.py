@@ -23,25 +23,30 @@ def TarazCal(fday, lday, data):
     current_data = defaultdict(int)
     for item in data:
         current_data[(item['date'], item['kol'])] = item['total_amount']
-
+    khales_forosh=0
+    baha_tamam_forosh=0
     sood_navizhe = 0
     active_day = 0
     daily_sood_navizhe = []  # لیست برای ذخیره مقادیر روزانه
     asnad_pardakhtani = []  # لیست برای ذخیره مقادیر asnad_pardakhtani
 
     for current_date in day_range:
-        baha_tamam_forosh = current_data.get((current_date, 500), 0)
+        baha_tamam_forosh_d = current_data.get((current_date, 500), 0)
         daramad_forosh = current_data.get((current_date, 400), 0)
+        barghasht_az_forosh = current_data.get((current_date, 403), 0) #منفی است
+        khales_forosh_d=daramad_forosh+barghasht_az_forosh
         asnad_pardakhtan = current_data.get((current_date, 101), 0)  # محاسبه asnad_pardakhtani
 
         # محاسبه مجموع روزانه
-        daily_total = daramad_forosh + baha_tamam_forosh
+        daily_total = daramad_forosh +barghasht_az_forosh+ baha_tamam_forosh_d
         daily_sood_navizhe.append(daily_total)  # ذخیره مقدار روزانه
 
-        if daramad_forosh != 0 or baha_tamam_forosh != 0:
+        if daramad_forosh != 0 or baha_tamam_forosh_d != 0:
             active_day += 1
 
         sood_navizhe += daily_total
+        khales_forosh += khales_forosh_d
+        baha_tamam_forosh += baha_tamam_forosh_d
 
         # ذخیره مقدار asnad_pardakhtani با علامت منفی
         asnad_pardakhtani.append(-asnad_pardakhtan)
@@ -51,6 +56,8 @@ def TarazCal(fday, lday, data):
     max_sood_navizhe = max(daily_sood_navizhe) / 10000000 if daily_sood_navizhe else 0
 
     to_return = {
+        'khales_forosh':khales_forosh/10000000,
+        'baha_tamam_forosh':baha_tamam_forosh/-10000000,
         'sood_navizhe': sood_navizhe / 10000000,
         'active_day': active_day,
         'ave_sood_navizhe': sood_navizhe / active_day / 10000000 if active_day > 0 else 0,
@@ -82,9 +89,10 @@ def Home1(request, *args, **kwargs):
 
     # فیلتر کردن داده‌ها برای تمامی روزهای مورد نیاز
     data = SanadDetail.objects.filter(
+        is_active=True,
         date__range=(start_date_gregorian, today)
     ).filter(
-        Q(kol=500) | Q(kol=400) | Q(kol=101)  # اضافه کردن kol=101 به فیلتر
+        Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101)
     ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
 
     # محاسبه داده‌ها برای روزهای مختلف
@@ -140,6 +148,11 @@ def Home1(request, *args, **kwargs):
     total_time = time.time() - start_time  # محاسبه زمان اجرا
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
     return render(request, 'home1.html', context)
+
+
+
+
+
 
 
 def TarazCal11(fday, lday):
