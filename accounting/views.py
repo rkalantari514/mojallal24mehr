@@ -392,7 +392,7 @@ def balance_sheet_moin(request, kol_code):
         if AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code):
             moin_name = AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code).first().name
         if not moin_name:
-            par=AccCoding.objects.filter(code=kol_code, level=1)
+            par=AccCoding.objects.filter(code=kol_code, level=1).last()
             AccCoding.objects.create(code=moin_code, level=2, parent=par,name='تعیین نشده')
         moin_name = AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code).first().name
         bed_sum = SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code).aggregate(Sum('bed'))[
