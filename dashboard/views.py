@@ -418,6 +418,8 @@ def Home5(request):
 
 
 
+from datetime import timedelta
+
 def CreateReport(request):
     start_time = time.time()  # زمان شروع ویو
 
@@ -438,45 +440,90 @@ def CreateReport(request):
         print("خطا در تبدیل تاریخ.")
         return
 
-    # تاریخ جاری
+    # تاریخ کنونی
     end_date_gregorian = timezone.now().date()
 
-    # شناسایی تمامی روزها بین تاریخ شروع و پایان گزارش
+    # لیست روزها بین تاریخ شروع و پایان
+    all_days = []
+    current_date = start_date_gregorian
+    while current_date <= end_date_gregorian:
+        all_days.append(current_date)
+        current_date += timedelta(days=1)
+
+    # گرفتن رکوردهای موجود در مدل MasterReport
+    existing_reports = MasterReport.objects.filter(day__in=all_days).values_list('day', flat=True)
+    existing_reports = set(existing_reports)  # تبدیل به مجموعه برای جستجوی سریع‌تر
+
+    # ایجاد رکوردهای پیش‌فرض برای روزهای موجود در all_days که در existing_reports نیستند
+    reports_to_create = []
+
+    for day in all_days:
+        if day not in existing_reports:
+            reports_to_create.append(MasterReport(
+                day=day,
+                total_mojodi=0,
+                value_of_purchased_goods=0,
+                khales_forosh=0,
+                baha_tamam_forosh=0,
+                sayer_hazine=0,
+                sayer_daramad=0,
+                sood_navizhe=0,
+                sood_vizhe=0,
+                asnad_pardakhtani=0,
+            ))
+
+    # اگر رکوردهای جدیدی برای ایجاد وجود داشت، آنها را ذخیره کنید
+    if reports_to_create:
+        MasterReport.objects.bulk_create(reports_to_create)
+
+    # قبل از ادامه به روزرسانی، بارگذاری گزارش‌ها
     report_days = MasterReport.objects.filter(day__range=(start_date_gregorian, end_date_gregorian))
+
     current_time = datetime.now()
 
     # بررسی اینکه آیا ساعت 1 بامداد است یا خیر
     if current_time.hour != 1:
-        report_days = MasterReport.objects.filter(day__range=(start_date_gregorian, end_date_gregorian)).order_by(
-            '-day')[:10]
+        report_days = report_days.order_by('-day')[:10]
 
     # لیست برای به‌روزرسانی
     reports_to_update = []
 
     # جمع‌آوری اطلاعات از SanadDetail
     for report in report_days:
-
-        current_date =report.day
+        current_date = report.day
         print(report.day)
-        baha_tamam_forosh = SanadDetail.objects.filter(
-            date=current_date,
-            kol=500
-        ).aggregate(Sum('curramount'))['curramount__sum'] or 0
 
-        daramad_forosh = SanadDetail.objects.filter(
-            date=current_date,
-            kol=400
-        ).aggregate(Sum('curramount'))['curramount__sum'] or 0
+        data = SanadDetail.objects.filter(
+            is_active=True,
+            date__range=(current_date, current_date)
+        ).filter(
+            Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101) | Q(kol=401) | Q(kol=501)
+        ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
 
-        # به‌روزرسانی مقادیر در MasterReport
-        report.baha_tamam_forosh = -1 * baha_tamam_forosh
-        report.daramad_forosh = daramad_forosh
+        # محاسبه داده‌ها برای روزهای مختلف
+        today_data = TarazCal(current_date, current_date, data)
+
+        report.khales_forosh = today_data['khales_forosh']
+        report.baha_tamam_forosh = today_data['baha_tamam_forosh']
+        report.sayer_hazine = today_data['sayer_hazine']
+        report.sayer_daramad = today_data['sayer_daramad']
+        report.sood_navizhe = today_data['sood_navizhe']
+        report.sood_vizhe = today_data['sood_vizhe']
+        report.asnad_pardakhtani = today_data['asnad_pardakhtani']
 
         reports_to_update.append(report)  # افزودن به لیست برای بروزرسانی در batch
 
     # آپدیت تمامی رکوردها به صورت bulk
     if reports_to_update:
-        MasterReport.objects.bulk_update(reports_to_update, ['baha_tamam_forosh', 'daramad_forosh'])
+        MasterReport.objects.bulk_update(reports_to_update, [
+            'khales_forosh',
+            'baha_tamam_forosh',
+            'sayer_hazine',
+            'sayer_daramad',
+            'sood_navizhe',
+            'sood_vizhe',
+            'asnad_pardakhtani'
+        ])
 
     # محاسبه زمان اجرای ویو
     end_time = time.time()

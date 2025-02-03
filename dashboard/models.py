@@ -40,8 +40,14 @@ class MasterReport(models.Model):
     day = models.DateField(verbose_name='روز')
     total_mojodi = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='کل موجودی')
     value_of_purchased_goods = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='ارزش کالای خریداری شده')
+    khales_forosh = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='خالص فروش')
     baha_tamam_forosh = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='بهای تمام شده کالای فروخته شده')
-    daramad_forosh = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='درآمد از فروش')
+    sayer_hazine = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='سایر هزینه ها')
+    sayer_daramad = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='سایر درآمد ها')
+    sood_navizhe = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='سود ناویژه')
+    sood_vizhe = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='سود ویژه')
+    asnad_pardakhtani = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='اسناد پرداختنی')
+    # daramad_forosh = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='درآمد از فروش')
 
     class Meta:
         verbose_name = 'گزارش کلی'
