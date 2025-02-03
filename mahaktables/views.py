@@ -47,7 +47,7 @@ def get_all_table_data(cursor):
 
 
 @login_required(login_url='/login')
-def MTables(request):
+def MTable(request):
     conn = connect_to_mahak()
     cursor = conn.cursor()
     table_data = get_all_table_data(cursor)
@@ -91,5 +91,78 @@ def search_in_tables(request, search_text):
     return JsonResponse(table_data)
 
 
+# views.py
 
+from django.shortcuts import render
+from django.db import connection
+from django.urls import path
+
+# views.py
+
+from django.shortcuts import render
+from django.db import connection
+from django.urls import path
+
+# views.py
+
+from django.shortcuts import render
+from django.db import connection
+
+
+def list_tables(request):
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    cursor.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE'")
+    tables = cursor.fetchall()
+
+    table_data = []
+    for table in tables:
+        table_name = table[0]
+        try:
+            cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+            row_count = cursor.fetchone()[0]
+            cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{table_name}'")
+            column_count = cursor.fetchone()[0]
+            table_data.append({'name': table_name, 'rows': row_count, 'columns': column_count})
+        except Exception as e:
+            print(f"خطا در دسترسی به جدول {table_name}: {e}")
+
+    context = {
+        'tables': table_data
+    }
+
+    cursor.close()
+    return render(request, 'list_tables.html', context)
+
+
+def table_detail(request, table_name):
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    search_query = request.GET.get('search', '')
+
+    if search_query:
+        query = f"SELECT * FROM {table_name} WHERE "
+        columns = get_table_columns(cursor, table_name)
+        query += " OR ".join([f"{col} LIKE '%{search_query}%'" for col in columns])
+    else:
+        query = f"SELECT * FROM {table_name}"
+
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    columns = [col[0] for col in cursor.description]
+
+    context = {
+        'table_name': table_name,
+        'columns': columns,
+        'rows': rows,
+        'search_query': search_query
+    }
+
+    cursor.close()
+    return render(request, 'table_detail.html', context)
+
+
+def get_table_columns(cursor, table_name):
+    cursor.execute(f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{table_name}'")
+    return [col[0] for col in cursor.fetchall()]
 

@@ -38,14 +38,69 @@
                 <div class="card card-statistics h-100">
                     <div class="card-body text-left">
                         <h5 class="card-title">سود ناویژه</h5>
-                        <h6 class="text-capitalize mt-0">میلیون تومان</h6>
+                        <h6 class="text-capitalize mt-0 text-center text-primary">خالص در آمد فروش</h6>
+                        <div class="row">
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-primary" data-to="{{ today_data.khales_forosh }}"
+                                        data-speed="5000">{{ today_data.khales_forosh }}</h4>
+                                    <label class="text-capitalize mt-0">امروز ({{ last_update_time|timesince }})
+                                        قبل</label>
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-success" data-to="{{ yesterday_data.khales_forosh }}"
+                                        data-speed="5000">{{ yesterday_data.khales_forosh }}</h4>
+                                    <label class="text-capitalize mt-0">دیروز </label>
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <a href="/balance-sheet-moin/400" target="_blank">
+                                    <div class="counter counter-small">
+                                        <h4 class="timer text-danger" data-to="{{ allday_data.khales_forosh }}"
+                                            data-speed="5000">{{ allday_data.khales_forosh }}</h4>
+                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <h6 class="text-capitalize mt-0 text-center text-danger">بهای تمام شده کالای فروش رفته</h6>
+                        <div class="row">
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-primary" data-to="{{ today_data.baha_tamam_forosh }}"
+                                        data-speed="5000">{{ today_data.baha_tamam_forosh }}</h4>
+                                    <label class="text-capitalize mt-0">امروز </label>
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-success" data-to="{{ yesterday_data.baha_tamam_forosh }}"
+                                        data-speed="5000">{{ yesterday_data.baha_tamam_forosh }}</h4>
+                                    <label class="text-capitalize mt-0">دیروز </label>
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <a href="/balance-sheet-moin/500" target="_blank">
+
+                                    <div class="counter counter-small">
+                                        <h4 class="timer text-danger" data-to="{{ allday_data.baha_tamam_forosh }}"
+                                            data-speed="5000">{{ allday_data.baha_tamam_forosh }}</h4>
+                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <h6 class="text-capitalize mt-0 text-center text-success">سود ناویژه</h6>
                         <div class="row">
                             <div class="col-4 col-sm-4 mb-15 text-center">
                                 <div class="counter counter-small">
                                     <h4 class="timer text-primary" data-to="{{ today_data.sood_navizhe }}"
                                         data-speed="5000">{{ today_data.sood_navizhe }}</h4>
-                                    <label class="text-capitalize mt-0">امروز ({{ last_update_time|timesince }})
-                                        قبل</label>
+                                    <label class="text-capitalize mt-0">امروز </label>
                                 </div>
                             </div>
                             <div class="col-4 col-sm-4 mb-15 text-center">
@@ -63,6 +118,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="divider"></div>
                         <div class="row">
                             <div class="col-6 col-sm-4 mt-15 text-center">
@@ -81,73 +137,106 @@
                     </div>
                 </div>
             </div>
-            <!--اسناد دریافتنی-->
+            <!--سود ویژه-->
             <div class="col-xl-6 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body text-left">
-                        <h5 class="card-title">اسناد در یافتنی</h5>
-                        <h6 class="text-capitalize mt-0">میلیون تومان</h6>
+                        <h5 class="card-title">سود ویژه</h5>
+                        <h6 class="text-capitalize mt-0 text-center text-primary">سایر درآمدها</h6>
                         <div class="row">
                             <div class="col-4 col-sm-4 mb-15 text-center">
+
                                 <div class="counter counter-small">
-                                    {% if today_data.asnad_pardakhtani > yesterday_data.asnad_pardakhtani %}
-                                        <h4 class="timer text-danger" data-to="{{ today_data.asnad_pardakhtani }}"
-                                            data-speed="5000">
-                                            {{ today_data.asnad_pardakhtani }}
-                                        </h4>
-                                        <label class="text-capitalize mt-0"> <i class="fa fa-long-arrow-up text-danger"
-                                                                                aria-hidden="true"></i>
-                                            برآیند امروز ({{ last_update_time|timesince }})قبل
-                                        </label>
-                                    {% else %}
-                                        <h4 class="timer text-success" data-to="{{ today_data.asnad_pardakhtani }}"
-                                            data-speed="5000">
-                                            {{ today_data.asnad_pardakhtani }}
-                                        </h4>
-                                        <label class="text-capitalize mt-0"> <i class="fa fa-arrow-down text-success"
-                                                                                aria-hidden="true"></i>
-                                            برآیند امروز ({{ last_update_time|timesince }})قبل
-                                        </label>
-                                    {% endif %}
+                                    <h4 class="timer text-primary" data-to="{{ today_data.sayer_daramad }}"
+                                        data-speed="5000">{{ today_data.sayer_daramad }}</h4>
+                                    <label class="text-capitalize mt-0">امروز ({{ last_update_time|timesince }})
+                                        قبل</label>
                                 </div>
                             </div>
                             <div class="col-4 col-sm-4 mb-15 text-center">
                                 <div class="counter counter-small">
-                                    {% if today_data.asnad_pardakhtani > yesterday_data.asnad_pardakhtani %}
-                                        <h4 class="timer text-success" data-to="{{ yesterday_data.asnad_pardakhtani }}"
-                                            data-speed="5000">{{ yesterday_data.asnad_pardakhtani|floatformat:0 }}</h4>
-                                    {% else %}
-                                        <h4 class="timer text-danger" data-to="{{ yesterday_data.asnad_pardakhtani }}"
-                                            data-speed="5000">{{ yesterday_data.asnad_pardakhtani }}</h4>
-                                    {% endif %}
-                                    <label class="text-capitalize mt-0">برآیند دیروز </label>
+                                    <h4 class="timer text-success" data-to="{{ yesterday_data.sayer_daramad }}"
+                                        data-speed="5000">{{ yesterday_data.sayer_daramad }}</h4>
+                                    <label class="text-capitalize mt-0">دیروز </label>
                                 </div>
                             </div>
                             <div class="col-4 col-sm-4 mb-15 text-center">
-                                <div class="counter counter-small">
-                                    <h4 class="timer text-danger" data-to="{{ allday_data.asnad_pardakhtani }}"
-                                        data-speed="5000">{{ allday_data.asnad_pardakhtani }}</h4>
-                                    <label class="text-capitalize mt-0"> مانده </label>
-                                </div>
+                                <a href="/balance-sheet-moin/401" target="_blank">
+
+                                    <div class="counter counter-small">
+                                        <h4 class="timer text-danger" data-to="{{ allday_data.sayer_daramad }}"
+                                            data-speed="5000">{{ allday_data.sayer_daramad }}</h4>
+                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>
+                                    </div>
+                                </a>
                             </div>
                         </div>
                         <div class="divider"></div>
+                        <h6 class="text-capitalize mt-0 text-center text-danger">سایر هزینه ها</h6>
                         <div class="row">
-                            
-                                <div class="col-6 col-sm-4 mt-15 text-center">
-                                    <a href="/acc/cheques_recieve_total">
-                                    <b>کل چک های دارای مانده</b>
-                                    <h4>{{ chequ_data.tmandeh|floatformat:0|intcomma:False }}</h4>
-                            </a>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-primary" data-to="{{ today_data.sayer_hazine }}"
+                                        data-speed="5000">{{ today_data.sayer_hazine }}</h4>
+                                    <label class="text-capitalize mt-0">امروز </label>
                                 </div>
-                            
+                            </div>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-success" data-to="{{ yesterday_data.sayer_hazine }}"
+                                        data-speed="5000">{{ yesterday_data.sayer_hazine }}</h4>
+                                    <label class="text-capitalize mt-0">دیروز </label>
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <a href="/balance-sheet-moin/501" target="_blank">
+                                    <div class="counter counter-small">
+                                        <h4 class="timer text-danger" data-to="{{ allday_data.sayer_hazine }}"
+                                            data-speed="5000">{{ allday_data.sayer_hazine }}</h4>
+                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <h6 class="text-capitalize mt-0 text-center text-success">سود ویژه</h6>
+                        <div class="row">
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-primary" data-to="{{ today_data.sood_vizhe }}"
+                                        data-speed="5000">{{ today_data.sood_vizhe }}</h4>
+                                    <label class="text-capitalize mt-0">امروز </label>
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-success" data-to="{{ yesterday_data.sood_vizhe }}"
+                                        data-speed="5000">{{ yesterday_data.sood_vizhe }}</h4>
+                                    <label class="text-capitalize mt-0">دیروز </label>
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-danger" data-to="{{ allday_data.sood_vizhe }}"
+                                        data-speed="5000">{{ allday_data.sood_vizhe }}</h4>
+                                    <label class="text-capitalize mt-0">ازابتدای سال مالی</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="divider"></div>
+                        <div class="row">
                             <div class="col-6 col-sm-4 mt-15 text-center">
-                                <b>چک های تاریخ گذشته تا امروز</b>
-                                <h4>{{ chequ_data.pastmandeh|floatformat:0|intcomma:False }}</h4>
+                                <b>متوسط روز های فعال</b>
+                                <h4>{{ allday_data.ave_sood_vizhe|floatformat:0 }}</h4>
+                            </div>
+                            <div class="col-6 col-sm-4 mt-15 text-center">
+                                <b>کمترین روزانه</b>
+                                <h4>{{ allday_data.min_sood_vizhe|floatformat:0 }}</h4>
                             </div>
                             <div class="col-12 col-sm-4 mt-15 text-center">
-                                <b>چکهای فردا به بعد</b>
-                                <h4>{{ chequ_data.postmandeh|floatformat:0|intcomma:False }}</h4>
+                                <b>بیشترین روزانه</b>
+                                <h4>{{ allday_data.max_sood_vizhe|floatformat:0 }}</h4>
                             </div>
                         </div>
                     </div>
@@ -207,7 +296,7 @@
                     </div>
                 </div>
             </div>
-            <!--نمودار سود اسناد دریافتنی-->
+            <!--نمودار سود ویژه-->
             <div class="col-xl-6 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body">
@@ -251,6 +340,86 @@
                                      aria-labelledby="contact-08-tab">
                                     <p>...</p>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <!--خالی-->
+            <div class="col-xl-6 mb-30">
+
+            </div>
+            <!--اسناد دریافتنی-->
+            <div class="col-xl-6 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body text-left">
+                        <h5 class="card-title">اسناد در یافتنی</h5>
+                        <h6 class="text-capitalize mt-0">میلیون تومان</h6>
+                        <div class="row">
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    {% if today_data.asnad_pardakhtani > yesterday_data.asnad_pardakhtani %}
+                                        <h4 class="timer text-danger" data-to="{{ today_data.asnad_pardakhtani }}"
+                                            data-speed="5000">
+                                            {{ today_data.asnad_pardakhtani }}
+                                        </h4>
+                                        <label class="text-capitalize mt-0"> <i class="fa fa-long-arrow-up text-danger"
+                                                                                aria-hidden="true"></i>
+                                            برآیند امروز ({{ last_update_time|timesince }})قبل
+                                        </label>
+                                    {% else %}
+                                        <h4 class="timer text-success" data-to="{{ today_data.asnad_pardakhtani }}"
+                                            data-speed="5000">
+                                            {{ today_data.asnad_pardakhtani }}
+                                        </h4>
+                                        <label class="text-capitalize mt-0"> <i class="fa fa-arrow-down text-success"
+                                                                                aria-hidden="true"></i>
+                                            برآیند امروز ({{ last_update_time|timesince }})قبل
+                                        </label>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    {% if today_data.asnad_pardakhtani > yesterday_data.asnad_pardakhtani %}
+                                        <h4 class="timer text-success" data-to="{{ yesterday_data.asnad_pardakhtani }}"
+                                            data-speed="5000">{{ yesterday_data.asnad_pardakhtani|floatformat:0 }}</h4>
+                                    {% else %}
+                                        <h4 class="timer text-danger" data-to="{{ yesterday_data.asnad_pardakhtani }}"
+                                            data-speed="5000">{{ yesterday_data.asnad_pardakhtani }}</h4>
+                                    {% endif %}
+                                    <label class="text-capitalize mt-0">برآیند دیروز </label>
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-danger" data-to="{{ allday_data.asnad_pardakhtani }}"
+                                        data-speed="5000">{{ allday_data.asnad_pardakhtani }}</h4>
+                                    <label class="text-capitalize mt-0"> مانده </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="row">
+
+                            <div class="col-6 col-sm-4 mt-15 text-center">
+                                <a href="/acc/cheques_recieve_total">
+                                    <b>کل چک های دارای مانده</b>
+                                    <h4>{{ chequ_data.tmandeh|floatformat:0|intcomma:False }}</h4>
+                                </a>
+                            </div>
+
+                            <div class="col-6 col-sm-4 mt-15 text-center">
+                                <b>چک های تاریخ گذشته تا امروز</b>
+                                <h4>{{ chequ_data.pastmandeh|floatformat:0|intcomma:False }}</h4>
+                            </div>
+                            <div class="col-12 col-sm-4 mt-15 text-center">
+                                <b>چکهای فردا به بعد</b>
+                                <h4>{{ chequ_data.postmandeh|floatformat:0|intcomma:False }}</h4>
                             </div>
                         </div>
                     </div>

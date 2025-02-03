@@ -7,36 +7,39 @@ import jdatetime
 from django.utils import timezone
 from datetime import datetime, timedelta
 from django.db.models import Sum, Min
+
+
 # Create your models here.
 
 
 class Mtables(models.Model):
     in_use = models.BooleanField(default=False, verbose_name='در حال استفاده است')
     none_use = models.BooleanField(default=False, verbose_name=' بدون استفاده')
-    name = models.CharField(blank = True,null = True,max_length=150, verbose_name='نام جدول')
-    description = models.CharField(blank = True,null = True,max_length=150, verbose_name='توضیح')
-    row_count = models.IntegerField(blank = True,null = True,default=0, verbose_name='تعداد ردیف ها')
-    cloumn_count = models.IntegerField(blank = True,null = True,default=0, verbose_name='تعداد ستون ها')
+    name = models.CharField(blank=True, null=True, max_length=150, verbose_name='نام جدول')
+    description = models.CharField(blank=True, null=True, max_length=150, verbose_name='توضیح')
+    row_count = models.IntegerField(blank=True, null=True, default=0, verbose_name='تعداد ردیف ها')
+    cloumn_count = models.IntegerField(blank=True, null=True, default=0, verbose_name='تعداد ستون ها')
     last_update_time = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='آخرین آپدیت')
     update_period = models.IntegerField(default=60, blank=True, null=True, verbose_name='بازه به‌روزرسانی (دقیقه)')
     update_duration = models.FloatField(blank=True, null=True, verbose_name='مدت زمان به‌روزرسانی (ثانیه)')
     update_priority = models.IntegerField(default=0, blank=True, null=True, verbose_name='اولویت آپدیت')
 
-
     class Meta:
         verbose_name = 'جدول محک'
         verbose_name_plural = 'جداول محک'
         ordering = ['update_priority']
+
     def __str__(self):
         return self.name
 
+
 class KalaGroupinfo(models.Model):
-    code= models.IntegerField(default=0, verbose_name='کد اطلاعات گروه بندی')
-    cat1=models.CharField(max_length=150,blank=True, null=True, default="", verbose_name='دسته بندی 1')
-    cat2=models.CharField(max_length=150,blank=True, null=True, default="", verbose_name='دسته بندی 2')
-    cat3=models.CharField(max_length=150,blank=True, null=True, default="", verbose_name='دسته بندی 3')
-    contain=models.CharField(max_length=300,blank=True, verbose_name='شامل باشد')
-    not_contain=models.CharField(max_length=300,blank=True,  verbose_name='شامل نباشد')
+    code = models.IntegerField(default=0, verbose_name='کد اطلاعات گروه بندی')
+    cat1 = models.CharField(max_length=150, blank=True, null=True, default="", verbose_name='دسته بندی 1')
+    cat2 = models.CharField(max_length=150, blank=True, null=True, default="", verbose_name='دسته بندی 2')
+    cat3 = models.CharField(max_length=150, blank=True, null=True, default="", verbose_name='دسته بندی 3')
+    contain = models.CharField(max_length=300, blank=True, verbose_name='شامل باشد')
+    not_contain = models.CharField(max_length=300, blank=True, verbose_name='شامل نباشد')
 
     class Meta:
         verbose_name = 'شرط گروه بندی کالا'
@@ -53,7 +56,8 @@ class Category(models.Model):
         (3, 'سطح 3'),
     )
     name = models.CharField(max_length=150, verbose_name='نام دسته‌بندی')
-    parent = models.ForeignKey('self', on_delete=models.SET_NULL, related_name='children', null=True, blank=True, verbose_name='دسته‌بندی والد')
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, related_name='children', null=True, blank=True,
+                               verbose_name='دسته‌بندی والد')
     level = models.PositiveSmallIntegerField(choices=LEVEL_CHOICES, verbose_name='سطح')
 
     class Meta:
@@ -64,18 +68,17 @@ class Category(models.Model):
         return self.name
 
 
-
 class Kala(models.Model):
-    code= models.IntegerField(default=0, verbose_name='کد کالا')
+    code = models.IntegerField(default=0, verbose_name='کد کالا')
     name = models.CharField(max_length=150, verbose_name='نام کالا')
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name='kalas', verbose_name='دسته‌بندی',blank = True,null = True)
-    s_m_ratio=models.FloatField(default=0, verbose_name='نسبت فروش به میانگین موجودی')
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name='kalas', verbose_name='دسته‌بندی',
+                                 blank=True, null=True)
+    s_m_ratio = models.FloatField(default=0, verbose_name='نسبت فروش به میانگین موجودی')
     last_updated_ratio = models.DateField(blank=True, null=True, verbose_name='آخرین تاریخ به‌روزرسانی')
-    total_sale=models.FloatField(default=0, verbose_name='کل فروش')
+    total_sale = models.FloatField(default=0, verbose_name='کل فروش')
+
     # l_mojodi=models.FloatField(default=0, verbose_name='آخرین موجودی')
     # t_sales=models.FloatField(default=0, verbose_name='کل فروش')
-
-
 
     class Meta:
         verbose_name = 'کالا'
@@ -83,9 +86,6 @@ class Kala(models.Model):
 
     def __str__(self):
         return self.name
-
-
-
 
     def latest_mojodi(self):
         latest_mojodi = Mojodi.objects.filter(code_kala=self.code).last()
@@ -99,7 +99,6 @@ class Kala(models.Model):
             ta = latest_mojodi.total_stock * latest_mojodi.averageprice
             return ta if ta is not None else 0
         return 0
-
 
     def total_sales(self):
         end_day = datetime.today()
@@ -126,8 +125,7 @@ class Kala(models.Model):
             ktype=1,
             date__range=(start_day, end_day)
         ).aggregate(total=Sum('count'))['total']
-        return -1*total_sales if total_sales is not None else 0
-
+        return -1 * total_sales if total_sales is not None else 0
 
     def last_week_sales(self):
         end_day = datetime.today()
@@ -138,7 +136,7 @@ class Kala(models.Model):
             ktype=1,
             date__range=(start_day, end_day)
         ).aggregate(total=Sum('count'))['total']
-        return -1*total_sales if total_sales is not None else 0
+        return -1 * total_sales if total_sales is not None else 0
 
     def m_sales_mojodi_ratio(self):
         # دریافت فروش ماه گذشته
@@ -182,7 +180,6 @@ class Kala(models.Model):
 
         mr = ms / ave_mojodi
         return mr
-
 
     def sales_mojodi_ratio(self):
         # دریافت مجموع فروش از ابتدای دوره تا حال
@@ -261,12 +258,12 @@ class Kala(models.Model):
 
 
 class Factor(models.Model):
-    code= models.IntegerField(blank = True,null = True,default=0, verbose_name='شماره فاکتور')
-    pdate = models.CharField(blank = True,null = True,max_length=150, verbose_name='تاریخ شمسی')
-    mablagh_factor= models.FloatField(blank = True,null = True,default=0, verbose_name='مبلغ فاکتور')
-    takhfif= models.FloatField(blank = True,null = True,default=0, verbose_name='تخفیف')
-    create_time=models.CharField(blank = True,null = True,max_length=150,verbose_name='ساعت ایجاد')
-    darsad_takhfif= models.FloatField(blank = True,null = True,default=0, verbose_name='درصد تخفیف')
+    code = models.IntegerField(blank=True, null=True, default=0, verbose_name='شماره فاکتور')
+    pdate = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ شمسی')
+    mablagh_factor = models.FloatField(blank=True, null=True, default=0, verbose_name='مبلغ فاکتور')
+    takhfif = models.FloatField(blank=True, null=True, default=0, verbose_name='تخفیف')
+    create_time = models.CharField(blank=True, null=True, max_length=150, verbose_name='ساعت ایجاد')
+    darsad_takhfif = models.FloatField(blank=True, null=True, default=0, verbose_name='درصد تخفیف')
     date = models.DateField(blank=True, null=True, verbose_name='تاریخ میلادی')
 
     class Meta:
@@ -279,8 +276,8 @@ class Factor(models.Model):
 
 class FactorDetaile(models.Model):
     code_factor = models.IntegerField(blank=True, null=True, default=0, verbose_name='شماره فاکتور')
-    radif= models.IntegerField(blank = True,null = True,default=0, verbose_name='ردیف')
-    factor = models.ForeignKey(Factor, on_delete=models.SET_NULL, related_name='details', null=True, blank = True)
+    radif = models.IntegerField(blank=True, null=True, default=0, verbose_name='ردیف')
+    factor = models.ForeignKey(Factor, on_delete=models.SET_NULL, related_name='details', null=True, blank=True)
     code_kala = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد کالا')
     kala = models.ForeignKey(Kala, on_delete=models.SET_NULL, null=True)
     count = models.FloatField(blank=True, null=True, default=0, verbose_name='تعداد')
@@ -294,9 +291,10 @@ class FactorDetaile(models.Model):
     def __str__(self):
         return str(self.code_factor)  # تصحیح به str
 
+
 class Storagek(models.Model):
-    code=models.IntegerField(blank = True,null = True,default=0, verbose_name='کد انبار')
-    name = models.CharField(max_length=150,blank = True,null = True,default="-", verbose_name='نام انبار')
+    code = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد انبار')
+    name = models.CharField(max_length=150, blank=True, null=True, default="-", verbose_name='نام انبار')
 
     class Meta:
         verbose_name = 'انبار'
@@ -304,8 +302,6 @@ class Storagek(models.Model):
 
     def __str__(self):
         return self.name
-
-
 
 
 class Kardex(models.Model):
@@ -317,7 +313,8 @@ class Kardex(models.Model):
     storage = models.ForeignKey(Storagek, on_delete=models.SET_NULL, blank=True, null=True)
     mablaghsanad = models.FloatField(blank=True, null=True, default=0, verbose_name='مبلغ سند')
     code_kala = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد کالا')
-    radif = models.IntegerField(blank=True, null=True, default=0, verbose_name='ردیف در فاکتور')  # برای سورت کردن لازم است
+    radif = models.IntegerField(blank=True, null=True, default=0,
+                                verbose_name='ردیف در فاکتور')  # برای سورت کردن لازم است
     kala = models.ForeignKey(Kala, on_delete=models.SET_NULL, blank=True, null=True)
     code_factor = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد فاکتور')
     factor = models.ForeignKey(Factor, on_delete=models.SET_NULL, blank=True, null=True)
@@ -347,25 +344,25 @@ class Kardex(models.Model):
 
     def gardesh_type(self):
         types = {
-            1: ('فروش','text-success','fa fa-shopping-cart text-success'),
-            2: ('خرید','text-primary','fa fa-truck text-primary'),
-            3: ('موجودی اول دوره','text-facebook','fa fa-archive text-facebook'),
-            6: ('خروج داخلی','text-danger','fa fa-retweet text-danger'),
-            7: ('ورود داخلی','text-facebook','fa fa-retweet text-facebook')
+            1: ('فروش', 'text-success', 'fa fa-shopping-cart text-success'),
+            2: ('خرید', 'text-primary', 'fa fa-truck text-primary'),
+            3: ('موجودی اول دوره', 'text-facebook', 'fa fa-archive text-facebook'),
+            6: ('خروج داخلی', 'text-danger', 'fa fa-retweet text-danger'),
+            7: ('ورود داخلی', 'text-facebook', 'fa fa-retweet text-facebook')
         }
-        return types.get(self.ktype, ('نامعلوم','text-success','fa fa-question-o'))
+        return types.get(self.ktype, ('نامعلوم', 'text-success', 'fa fa-question-o'))
 
 
 class Mojodi(models.Model):
-    warehousecode=models.IntegerField(blank = True,null = True,default=0, verbose_name='کد انبار')
-    storage = models.ForeignKey(Storagek, on_delete=models.SET_NULL,blank=True, null=True)
+    warehousecode = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد انبار')
+    storage = models.ForeignKey(Storagek, on_delete=models.SET_NULL, blank=True, null=True)
     code_kala = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد کالا')
     kala = models.ForeignKey(Kala, on_delete=models.SET_NULL, null=True, blank=True)
-    stock=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی')
-    total_stock=models.FloatField(blank=True, null=True, default=0, verbose_name='کل موجودی ')
-    mojodi_roz=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی روز ')
-    mojodi_roz_arzesh=models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی روز ارزش')
-    averageprice=models.FloatField(blank=True, null=True, default=0, verbose_name='قیمت میانگین')
+    stock = models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی')
+    total_stock = models.FloatField(blank=True, null=True, default=0, verbose_name='کل موجودی ')
+    mojodi_roz = models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی روز ')
+    mojodi_roz_arzesh = models.FloatField(blank=True, null=True, default=0, verbose_name='موجودی روز ارزش')
+    averageprice = models.FloatField(blank=True, null=True, default=0, verbose_name='قیمت میانگین')
     arzesh = models.FloatField(blank=True, null=True, default=0, verbose_name='ارزش')
 
     class Meta:
@@ -375,9 +372,7 @@ class Mojodi(models.Model):
     def __str__(self):
         return self.kala.name if self.kala else "کالا نامشخص"
 
-
         # @receiver(pre_save, sender=Kardex)
-
 
 
 @receiver(pre_save, sender=Factor)
@@ -403,45 +398,43 @@ def convert_pdate_to_date(sender, instance, **kwargs):
 
 
 class PersonGroup(models.Model):
-    code= models.IntegerField(default=0, verbose_name='کد گروه')
+    code = models.IntegerField(default=0, verbose_name='کد گروه')
     name = models.CharField(max_length=150, verbose_name='نام گروه')
 
     class Meta:
         verbose_name = 'گروه'
         verbose_name_plural = 'گروه ها'
+
     def __str__(self):
         return self.name
 
 
 class Person(models.Model):
-    code= models.IntegerField(default=0, verbose_name='کد فرد')
-    grpcode=models.IntegerField(default=0, verbose_name='کد گروه')
-    group=models.ForeignKey(PersonGroup, on_delete=models.SET_NULL,blank=True, null=True)
+    code = models.IntegerField(default=0, verbose_name='کد فرد')
+    grpcode = models.IntegerField(default=0, verbose_name='کد گروه')
+    group = models.ForeignKey(PersonGroup, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=150, verbose_name='نام')
     lname = models.CharField(max_length=150, verbose_name='نام خانوادگی')
     tel1 = models.CharField(max_length=150, verbose_name='تلفن1')
     tel2 = models.CharField(max_length=150, verbose_name='تلفن2')
     fax = models.CharField(max_length=150, verbose_name='فکس')
     mobile = models.CharField(max_length=150, verbose_name='موبایل')
-    address=models.CharField(max_length=550, verbose_name='آدرس')
-    comment=models.CharField(max_length=550, verbose_name='توضیحات')
+    address = models.CharField(max_length=550, verbose_name='آدرس')
+    comment = models.CharField(max_length=550, verbose_name='توضیحات')
+
     # reminbg
 
     class Meta:
         verbose_name = 'فرد'
         verbose_name_plural = 'افراد'
+
     def __str__(self):
         return f'{self.name}  {self.lname}'
 
 
-
-
-
-
-
 class WordCount(models.Model):
     word = models.CharField(max_length=100, unique=True, verbose_name='کلمه')  # کلید واژه
-    count = models.IntegerField( verbose_name='تعداد')  # تعداد تکرار
+    count = models.IntegerField(verbose_name='تعداد')  # تعداد تکرار
 
     def __str__(self):
         return f"{self.word}: {self.count}"
@@ -451,12 +444,11 @@ class WordCount(models.Model):
         verbose_name_plural = 'کلمه'
 
 
-
 class Sanad(models.Model):
-    code = models.IntegerField(blank=True, null=True,verbose_name='کد')
-    tarikh = models.CharField(blank=True, null=True,max_length=150, verbose_name='تاریخ  شمسی')
-    sharh = models.CharField(blank=True, null=True,max_length=300, verbose_name='شرح سند')
-    sanadid = models.IntegerField(blank=True, null=True,verbose_name='شناسه سند')
+    code = models.IntegerField(blank=True, null=True, verbose_name='کد')
+    tarikh = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ  شمسی')
+    sharh = models.CharField(blank=True, null=True, max_length=300, verbose_name='شرح سند')
+    sanadid = models.IntegerField(blank=True, null=True, verbose_name='شناسه سند')
 
     class Meta:
         verbose_name = 'سند'
@@ -466,30 +458,27 @@ class Sanad(models.Model):
         return f"{self.code} - {self.tarikh}"
 
 
-
-
 class SanadDetail(models.Model):
-    code = models.IntegerField(blank=True, null=True,verbose_name='کد')
-    tarikh = models.CharField(blank=True, null=True,max_length=150, verbose_name='تاریخ  شمسی')
-    date=models.DateField(blank=True, null=True,verbose_name='تاریخ سند')
-    radif = models.IntegerField(blank=True, null=True,verbose_name='ردیف')
-    kol = models.IntegerField(blank=True, null=True,verbose_name='کل')
-    moin = models.IntegerField(blank=True, null=True,verbose_name='معین')
-    tafzili = models.IntegerField(blank=True, null=True,verbose_name='تفضیل')
-    sharh = models.CharField(max_length=255, null=True,verbose_name='شرح')
-    bed = models.DecimalField(max_digits=30, decimal_places=10, null=True,verbose_name='بدهکار')
-    bes = models.DecimalField(max_digits=30, decimal_places=10, null=True,verbose_name='بستانکار')
-    sanad_code = models.IntegerField(null=True,verbose_name='کد سند')
-    sanad_type = models.IntegerField(null=True,verbose_name='نوع سند')
-    meghdar = models.DecimalField(max_digits=30, decimal_places=10, null=True,verbose_name='مقدار')
-    syscomment = models.CharField(max_length=255, null=True,verbose_name='عنوان سند')
-    curramount = models.DecimalField(max_digits=30, decimal_places=10, null=True,verbose_name='مانده')
-    usercreated = models.CharField(max_length=255, null=True,verbose_name='ایجاد کننده')
+    code = models.IntegerField(blank=True, null=True, verbose_name='کد')
+    tarikh = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ  شمسی')
+    date = models.DateField(blank=True, null=True, verbose_name='تاریخ سند')
+    radif = models.IntegerField(blank=True, null=True, verbose_name='ردیف')
+    kol = models.IntegerField(blank=True, null=True, verbose_name='کل')
+    moin = models.IntegerField(blank=True, null=True, verbose_name='معین')
+    tafzili = models.IntegerField(blank=True, null=True, verbose_name='تفضیل')
+    sharh = models.CharField(max_length=255, null=True, verbose_name='شرح')
+    bed = models.DecimalField(max_digits=30, decimal_places=10, null=True, verbose_name='بدهکار')
+    bes = models.DecimalField(max_digits=30, decimal_places=10, null=True, verbose_name='بستانکار')
+    sanad_code = models.IntegerField(null=True, verbose_name='کد سند')
+    sanad_type = models.IntegerField(null=True, verbose_name='نوع سند')
+    meghdar = models.DecimalField(max_digits=30, decimal_places=10, null=True, verbose_name='مقدار')
+    syscomment = models.CharField(max_length=255, null=True, verbose_name='عنوان سند')
+    curramount = models.DecimalField(max_digits=30, decimal_places=10, null=True, verbose_name='مانده')
+    usercreated = models.CharField(max_length=255, null=True, verbose_name='ایجاد کننده')
     is_analiz = models.BooleanField(default=False, verbose_name='آنالیز شده است')
-    cheque_id = models.CharField(blank=True, null=True,max_length=255, verbose_name="شناسه چک")  # یا مقدار max_length مناسب
-
-
-
+    cheque_id = models.CharField(blank=True, null=True, max_length=255,
+                                 verbose_name="شناسه چک")  # یا مقدار max_length مناسب
+    is_active = models.BooleanField(default=True, verbose_name='فعال است')
 
     class Meta:
         unique_together = (('code', 'radif'),)  # تعریف کلید یگانه
@@ -500,26 +489,77 @@ class SanadDetail(models.Model):
         return f"{self.code}-{self.radif}"
 
 
+from django.db import models
+
+class MyCondition(models.Model):
+    kol = models.IntegerField(default=0, blank=True, null=True, verbose_name='کل')
+    moin = models.IntegerField(default=0, blank=True, null=True, verbose_name='معین')
+    tafzili = models.IntegerField(default=0, blank=True, null=True, verbose_name='تفضیل')
+
+    contain = models.CharField(max_length=255, blank=True, null=True, verbose_name='شامل')
+    equal_to = models.CharField(max_length=255, blank=True, null=True, verbose_name='برابر با')
+    is_active = models.BooleanField(default=True, verbose_name='فعال است')
+    is_new = models.BooleanField(default=True, verbose_name='جدید است')
+
+    def __init__(self, *args, **kwargs):
+        super(MyCondition, self).__init__(*args, **kwargs)
+        # ذخیره مقادیر اولیه فیلدها
+        self._original_values = {
+            'kol': self.kol,
+            'moin': self.moin,
+            'tafzili': self.tafzili,
+            'contain': self.contain,
+            'equal_to': self.equal_to,
+            'is_active': self.is_active,
+            'is_new': self.is_new,
+        }
+
+    def save(self, *args, **kwargs):
+        # بررسی تغییرات در فیلدهای غیر از is_new
+        if any(
+            getattr(self, field) != self._original_values[field]
+            for field in ['kol', 'moin', 'tafzili', 'contain', 'equal_to', 'is_active']
+        ):
+            self.is_new = True  # اگر فیلدهای دیگر تغییر کردند، is_new را True کنید
+        elif self.is_new != self._original_values['is_new'] and not self.is_new:
+            # اگر فقط is_new تغییر کرد و به False تنظیم شد، آن را False نگه دارید
+            self.is_new = False
+
+        # ذخیره شیء
+        super(MyCondition, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'شرط استثنا'
+        verbose_name_plural = 'شرایط استثنا'
+
+    def __str__(self):
+        return f"شرط: kol={self.kol}, moin={self.moin}, tafzili={self.tafzili}"
+
+
+from django.db import models
+
+from django.db import models
 
 
 class AccCoding(models.Model):
     LEVEL_CHOICES = (
-        (1, 'کل'),
-        (2, 'معین'),
-        (3, 'تفضیلی'),
+        (1, 'کل'),  # Klo
+        (2, 'معین'),  # Moin
+        (3, 'تفضیلی'),  # Tafsili
     )
     code = models.IntegerField(verbose_name='کد')  # کد دسته‌بندی
     name = models.CharField(max_length=150, verbose_name='نام دسته‌بندی')
     level = models.PositiveSmallIntegerField(choices=LEVEL_CHOICES, verbose_name='سطح')
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='children',
+                               verbose_name='پدر')
 
     class Meta:
         verbose_name = 'کدینگ حسابداری'
-        verbose_name_plural = 'کدینگ ای حسابداری'
-        unique_together = ('code', 'level')  # کد و سطح باید یکتا باشند
+        verbose_name_plural = 'کدینگ های حسابداری'
+        # unique_together = ('code', 'level', 'parent')  # کد، سطح و والد باید یکتا باشند
 
     def __str__(self):
         return f"{self.code} - {self.name} (سطح {self.level})"
-
 
 
 #
@@ -539,17 +579,15 @@ class ChequesRecieve(models.Model):
     description = models.TextField(verbose_name="توضیحات")
     status = models.CharField(max_length=50, verbose_name="وضعیت")
     per_code = models.CharField(max_length=50, verbose_name="کد شخص")
-    total_mandeh = models.DecimalField(max_digits=30, decimal_places=10, null=True,verbose_name='مانده کل چک')
-    last_sanad_detaile=models.ForeignKey(SanadDetail, on_delete=models.SET_NULL,blank=True, null=True)
-
-
+    total_mandeh = models.DecimalField(max_digits=30, decimal_places=10, null=True, verbose_name='مانده کل چک')
+    last_sanad_detaile = models.ForeignKey(SanadDetail, on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         verbose_name = 'چک دریافتی'
         verbose_name_plural = 'چکهای دریافتی'
 
     def sanad_detail(self):
-        sd=SanadDetail.objects.filter(cheque_id=self.cheque_id).order_by('date','code','radif').last()
+        sd = SanadDetail.objects.filter(cheque_id=self.cheque_id).order_by('date', 'code', 'radif').last()
         return sd
 
     from django.db.models import Sum, F

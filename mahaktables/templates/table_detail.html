@@ -1,0 +1,41 @@
+<!-- templates/table_detail.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Table Detail - {{ table_name }}</title>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+</head>
+<body>
+    <h1>Table Detail - {{ table_name }}</h1>
+    <form method="GET">
+        <input type="text" name="search" value="{{ search_query }}" placeholder="Search...">
+        <button type="submit">Search</button>
+    </form>
+    <table id="table_detail" class="display">
+        <thead>
+            <tr>
+                {% for col in columns %}
+                    <th>{{ col }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr>
+                    {% for cell in row %}
+                        <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        $(document).ready(function() {
+            $('#table_detail').DataTable();
+        });
+    </script>
+</body>
+</html>

@@ -1,6 +1,5 @@
 from django.urls import path
 from .views import DsshKala, TotalKala, load_categories_level2, load_categories_level3,DetailKala,CategoryDetail
-from mahaktables.views import MTables
 from django.shortcuts import redirect
 urlpatterns = [
     path('dash/kala', DsshKala, name='dssh_kala'),

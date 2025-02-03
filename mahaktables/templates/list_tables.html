@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>List of Tables</title>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+</head>
+<body>
+    <h1>List of Tables</h1>
+    <table id="tables" class="display">
+        <thead>
+            <tr>
+                <th>Table Name</th>
+                <th>Row Count</th>
+                <th>Column Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for table in tables %}
+                <tr>
+                    <td><a href="{% url 'table_detail' table.name %}" target="_blank">{{ table.name }}</a></td>
+                    <td>{{ table.rows }}</td>
+                    <td>{{ table.columns }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        $(document).ready(function() {
+            $('#tables').DataTable({
+                "paging": true,
+                "ordering": true,
+                "info": true
+            });
+        });
+    </script>
+</body>
+</html>
