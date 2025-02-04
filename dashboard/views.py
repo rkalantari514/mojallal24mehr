@@ -154,73 +154,15 @@ def Home1(request, *args, **kwargs):
     }
 
     # Query last 30 days data
-
     today = timezone.now().date()
-
     # محاسبه تاریخ‌ها
-    start_date = today - timedelta(days=14)  # 14 روز قبل
-    end_date = today - timedelta(days=7)  # 7 روز قبل
-
+    start_date = today - timedelta(days=114)  # 14 روز قبل
+    end_date = today - timedelta(days=107)  # 7 روز قبل
     # دریافت گزارش‌ها
     reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
-    # reports = MasterReport.objects.order_by('-day')[:14]
-    #
-    #
-    #
-    #
-    # data = {
-    #     'day': [report.day for report in reports],
-    #     'khales_forosh': [report.khales_forosh for report in reports],
-    #     'baha_tamam_forosh': [-1*report.baha_tamam_forosh for report in reports],
-    #     # 'sayer_hazine': [report.sayer_hazine for report in reports],
-    #     # 'sayer_daramad': [report.sayer_daramad for report in reports],
-    #     'sood_navizhe': [report.sood_navizhe for report in reports],
-    #     # 'sood_vizhe': [report.sood_vizhe for report in reports],
-    #     # 'asnad_pardakhtani': [report.asnad_pardakhtani for report in reports],
-    # }
-    #
-    # # Create a DataFrame
-    # df = pd.DataFrame(data)
-    # persian_names = {
-    #     'khales_forosh': 'خالص فروش',
-    #     'baha_tamam_forosh': 'بهای تمام شده فروش',
-    #     # 'sayer_hazine': 'سایر هزینه‌ها',
-    #     # 'sayer_daramad': 'سایر درآمدها',
-    #     'sood_navizhe': 'سود ناویژه',
-    #     # 'sood_vizhe': 'سود ویژه',
-    #     # 'asnad_pardakhtani': 'اسناد پرداختنی'
-    # }
-    #
-    # df_melted = pd.melt(df, id_vars=['day'],
-    #                     value_vars=list(persian_names.keys()),
-    #                     var_name='Type',
-    #                     value_name='Value')
-    #
-    # # Map English names to Persian names
-    # df_melted['Type'] = df_melted['Type'].map(persian_names)
-    #
-    # # Define colors for each category
-    # color_map = {
-    #     'خالص فروش': '#0000FF',
-    #     'بهای تمام شده فروش': '#FF0000',
-    #     # 'سایر هزینه‌ها': '#00CC96',
-    #     # 'سایر درآمدها': '#AB63FA',
-    #     'سود ناویژه': '#00FF00',
-    #     # 'سود ویژه': '#19D3F3',
-    #     # 'اسناد پرداختنی': '#FF6692'
-    # }
-    #
-    # # Create a bar chart
-    # fig = px.bar(df_melted, x='day', y='Value', color='Type', barmode='group',
-    #              title='نمودار مقادیر مختلف', color_discrete_map=color_map)
-    #
-    # # Save the figure to HTML
-    # fig_html = fig.to_html(full_html=False)
-
-
 
     # دریافت داده‌ها
-    reports = MasterReport.objects.order_by('-day')[:7]
+    # reports = MasterReport.objects.order_by('-day')[:7]
 
     data = {
         'day': [report.day for report in reports],
@@ -229,7 +171,6 @@ def Home1(request, *args, **kwargs):
         'sood_navizhe': [report.sood_navizhe for report in reports],
     }
 
-    # ایجاد DataFrame
     df = pd.DataFrame(data)
     persian_names = {
         'khales_forosh': 'خالص فروش',
@@ -237,74 +178,36 @@ def Home1(request, *args, **kwargs):
         'sood_navizhe': 'سود ناویژه',
     }
 
-    df_melted = pd.melt(df, id_vars=['day'],
-                        value_vars=list(persian_names.keys()),
-                        var_name='Type',
-                        value_name='Value')
-
-    # نقشه‌برداری نام‌های انگلیسی به فارسی
+    df_melted = pd.melt(df, id_vars=['day'], value_vars=list(persian_names.keys()), var_name='Type', value_name='Value')
     df_melted['Type'] = df_melted['Type'].map(persian_names)
 
-    # تعریف رنگ‌ها برای هر دسته
     color_map = {
-        'خالص فروش': '#0000FF',
+        'خالص فروش': '#007bff',
+        # 'خالص فروش': '#0000FF',
         'بهای تمام شده فروش': '#FF0000',
         'سود ناویژه': '#00FF00',
     }
 
-    # ایجاد نمودار میله‌ای با Plotly
-    fig = px.bar(df_melted, x='day', y='Value', color='Type', barmode='group',
-                 # title='نمودار مقادیر مختلف',
-                 color_discrete_map=color_map)
+    fig = px.bar(df_melted, x='day', y='Value', color='Type', barmode='group', color_discrete_map=color_map)
 
-    # تغییر فونت‌ها و دیگر تنظیمات گرافیکی
+    # اضافه کردن نام روزها در محور x
+    fig.update_xaxes(tickvals=df['day'], ticktext=[day.strftime('%A') for day in df['day']])
+
+    # اضافه کردن خط‌های عمودی بین روزها
+    # for i in range(len(df['day']) - 1):
+    #     fig.add_shape(type="line", x0=df['day'][i], y0=0, x1=df['day'][i], y1=df['Value'].max(),
+    #                   line=dict(color='gray', width=1, dash='dash'))
+
     fig.update_layout(
-        font=dict(
-            family="B Nazanin, Arial, sans-serif",
-            size=14,
-            color="#333333"
-        ),
-        title_font=dict(
-            family="B Nazanin, Arial, sans-serif",
-            size=20,
-            color="#333333"
-        ),
-        legend=dict(
-            title_font_family="B Nazanin",
-            font=dict(
-                family="B Nazanin, Arial, sans-serif",
-                size=20,
-                color="#333333"
-            ),
-            orientation="h",
-            yanchor="bottom",
-            y=-0.2,
-            xanchor="center",
-            x=0.5
-        ),
-        xaxis=dict(
-            title="روز هفته",
-            showgrid=True,
-            gridcolor='#e0e0e0',
-            tickmode='array',
-            tickvals=list(range(7)),
-            ticktext=['دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه', 'شنبه', 'یک‌شنبه']
-        ),
-        yaxis=dict(
-            # title="مقدار",
-            showgrid=True,
-            gridcolor='#e0e0e0'
-        ),
-        plot_bgcolor='#FFFFFF',  # رنگ پس‌زمینه نمودار
-        paper_bgcolor='#FFFFFF'  # رنگ پس‌زمینه صفحه
+        font=dict(family="B Nazanin, Arial, sans-serif", size=14, color="#333333"),
+        title_font=dict(family="B Nazanin, Arial, sans-serif", size=20, color="#333333"),
+        legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
+        xaxis=dict(showgrid=True, gridcolor='#e0e0e0'),
+        yaxis=dict(showgrid=True, gridcolor='#e0e0e0'),
+        plot_bgcolor='#FFFFFF',
+        paper_bgcolor='#FFFFFF'
     )
 
-    # ترجمه متن تولتیپ
-    fig.update_traces(
-        hovertemplate='<b>روز:</b> %{x}<br><b>مقدار:</b> %{y}<br><b>نوع:</b> %{marker.color}<extra></extra>'
-    )
-
-    # ذخیره نمودار به عنوان HTML
     fig_html = fig.to_html(full_html=False)
 
 
@@ -639,7 +542,7 @@ def CreateReport(request):
     current_time = datetime.now()
 
     # بررسی اینکه آیا ساعت 1 بامداد است یا خیر
-    if current_time.hour != 13:
+    if current_time.hour != 1:
         report_days = report_days.order_by('-day')[:10]
 
     # لیست برای به‌روزرسانی
