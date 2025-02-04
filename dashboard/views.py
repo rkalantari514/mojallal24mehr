@@ -116,6 +116,7 @@ def TarazCalFromReport(day):
 
 
 
+    # reports = MasterReport.objects.order_by('-day')[:8]
 
 
 
@@ -148,8 +149,7 @@ def Home1(request, *args, **kwargs):
     allday_data = TarazCal(start_date_gregorian, today, data)
 
     # محاسبه داده‌ها برای 8 روز اخیر
-    chart4_data = [TarazCal(today - timedelta(days=i), today - timedelta(days=i), data)['asnad_pardakhtani'] for i in
-                   range(8)]
+    chart4_data = [TarazCal(today - timedelta(days=i), today - timedelta(days=i), data)['asnad_pardakhtani'] for i in range(8)]
 
     # دریافت اطلاعات چک‌ها
     chequesr = ChequesRecieve.objects.aggregate(total_mandeh_sum=Sum('total_mandeh'))
@@ -167,7 +167,6 @@ def Home1(request, *args, **kwargs):
     end_date = today - timedelta(days=107)
     reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
     reports = MasterReport.objects.order_by('-day')[:8]
-
     # آماده‌سازی داده‌ها برای نمودار
     data = {
         'day': [report.day for report in reports],
@@ -192,8 +191,20 @@ def Home1(request, *args, **kwargs):
         'سود ناویژه': '#00FF00',
     }
 
-    fig = px.bar(df_melted, x='day', y='Value', color='Type', barmode='group', color_discrete_map=color_map,
-                 labels={'Type': '', 'day': '', 'Value': ''})
+    # تنظیمات نمودار با عرض میله‌های کمتر و فاصله بیشتر
+    fig = px.bar(
+        df_melted,
+        x='day',
+        y='Value',
+        color='Type',
+        barmode='group',
+        color_discrete_map=color_map,
+        labels={'Type': '', 'day': '', 'Value': ''},
+    )
+
+    # تنظیم عرض میله‌ها و فاصله بین گروه‌ها
+    fig.update_traces(width=0.3)  # عرض میله‌ها
+    fig.update_layout(bargap=0.4)  # فاصله بین گروه‌های میله‌ها
 
     # روزهای هفته به زبان فارسی
     day_names_persian = {
@@ -217,7 +228,6 @@ def Home1(request, *args, **kwargs):
         yaxis=dict(showgrid=True, gridcolor='#e0e0e0'),
         plot_bgcolor='#FFFFFF',
         paper_bgcolor='#FFFFFF',
-        # showlegend=False  # حذف دکمه‌های تبلیغاتی
     )
 
     # تولید نمودار به فرمت HTML
@@ -243,7 +253,15 @@ def Home1(request, *args, **kwargs):
 
 
 
-@login_required(login_url='/login')
+
+
+
+
+
+
+
+
+
 def Home5(request):
     user=request.user
 
