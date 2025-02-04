@@ -117,7 +117,10 @@ def TarazCalFromReport(day):
 
 
     # reports = MasterReport.objects.order_by('-day')[:8]
-
+    # دریافت گزارش‌ها
+    # start_date = today - timedelta(days=114)
+    # end_date = today - timedelta(days=107)
+    # reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
 
 
 @login_required(login_url='/login')
@@ -191,7 +194,7 @@ def Home1(request, *args, **kwargs):
         'سود ناویژه': '#00FF00',
     }
 
-    # تنظیمات نمودار با عرض میله‌های کمتر و فاصله بیشتر
+    # تنظیمات نمودار با فاصله بیشتر بین گروه‌ها
     fig = px.bar(
         df_melted,
         x='day',
@@ -202,9 +205,8 @@ def Home1(request, *args, **kwargs):
         labels={'Type': '', 'day': '', 'Value': ''},
     )
 
-    # تنظیم عرض میله‌ها و فاصله بین گروه‌ها
-    fig.update_traces(width=0.3)  # عرض میله‌ها
-    fig.update_layout(bargap=0.4)  # فاصله بین گروه‌های میله‌ها
+    # افزایش فاصله بین گروه‌ها
+    fig.update_layout(bargap=0.5)  # فاصله بین گروه‌های میله‌ها
 
     # روزهای هفته به زبان فارسی
     day_names_persian = {
@@ -248,11 +250,6 @@ def Home1(request, *args, **kwargs):
     total_time = time.time() - start_time  # محاسبه زمان اجرا
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
     return render(request, 'home1.html', context)
-
-
-
-
-
 
 
 
