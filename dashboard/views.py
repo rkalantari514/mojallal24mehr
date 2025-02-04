@@ -124,7 +124,7 @@ def Home1(request, *args, **kwargs):
     user = request.user
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page='داشبورد 1')
-    print('1')
+
     start_time = time.time()  # زمان شروع تابع
 
     today = date.today()
@@ -141,25 +141,20 @@ def Home1(request, *args, **kwargs):
     ).filter(
         Q(kol__in=[500, 400, 403, 101, 401, 501])
     ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
-    print('2')
 
     # محاسبه داده‌ها
-    today_data = TarazCalFromReport(today)
-    yesterday_data = TarazCalFromReport(yesterday)
+    today_data = TarazCal(today, today, data)
+    yesterday_data = TarazCal(yesterday, yesterday, data)
     allday_data = TarazCal(start_date_gregorian, today, data)
-
-    print('2.1')
 
     # محاسبه داده‌ها برای 8 روز اخیر
     chart4_data = [TarazCal(today - timedelta(days=i), today - timedelta(days=i), data)['asnad_pardakhtani'] for i in
                    range(8)]
-    print('2.2')
 
     # دریافت اطلاعات چک‌ها
     chequesr = ChequesRecieve.objects.aggregate(total_mandeh_sum=Sum('total_mandeh'))
     postchequesr = ChequesRecieve.objects.filter(cheque_date__gt=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
     pastchequesr = ChequesRecieve.objects.filter(cheque_date__lte=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
-    print('3')
 
     chequ_data = {
         'tmandeh': (chequesr['total_mandeh_sum'] / 10000000) * -1,
@@ -180,7 +175,6 @@ def Home1(request, *args, **kwargs):
         'baha_tamam_forosh': [-1 * report.baha_tamam_forosh for report in reports],
         'sood_navizhe': [report.sood_navizhe for report in reports],
     }
-    print('4')
 
     df = pd.DataFrame(data)
     persian_names = {
@@ -194,13 +188,12 @@ def Home1(request, *args, **kwargs):
 
     color_map = {
         'خالص فروش': '#007bff',
-        'بهای تمام شده فروش': '#dc3545',
-        'سود ناویژه': '#1e7e34',
+        'بهای تمام شده فروش': '#FF0000',
+        'سود ناویژه': '#00FF00',
     }
-    print('5')
 
-    fig = px.bar(df_melted, x='day', y='Value', color='Type', barmode='group', color_discrete_map=color_map)
-    print('5.5')
+    fig = px.bar(df_melted, x='day', y='Value', color='Type', barmode='group', color_discrete_map=color_map,
+                 labels={'Type': '', 'day': '', 'Value': ''})
 
     # روزهای هفته به زبان فارسی
     day_names_persian = {
@@ -215,7 +208,6 @@ def Home1(request, *args, **kwargs):
 
     # اضافه کردن نام روزها در محور x
     fig.update_xaxes(tickvals=df['day'], ticktext=[day_names_persian[day.weekday()] for day in df['day']])
-    print('6')
 
     fig.update_layout(
         font=dict(family="B Nazanin, Arial, sans-serif", size=14, color="#333333"),
@@ -224,13 +216,12 @@ def Home1(request, *args, **kwargs):
         xaxis=dict(showgrid=True, gridcolor='#e0e0e0'),
         yaxis=dict(showgrid=True, gridcolor='#e0e0e0'),
         plot_bgcolor='#FFFFFF',
-        paper_bgcolor='#FFFFFF'
+        paper_bgcolor='#FFFFFF',
+        showlegend=False  # حذف دکمه‌های تبلیغاتی
     )
-    print('7')
 
     # تولید نمودار به فرمت HTML
-    fig_html = fig.to_html(full_html=False)
-    print('8')
+    fig_html = fig.to_html(full_html=False, include_plotlyjs='cdn')  # Include Plotly via CDN
 
     context = {
         'title': 'داشبورد مدیریتی',
@@ -243,65 +234,11 @@ def Home1(request, *args, **kwargs):
         'chart4_data': chart4_data,
         'fig_html': fig_html,
     }
-    print('9')
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
     return render(request, 'home1.html', context)
 
-
-
-
-
-
-def TarazCal1(fday, lday):
-    # ایجاد لیستی از تمام روزهای بین fday و lday
-    day_range = [fday + timedelta(days=x) for x in range((lday - fday).days + 1)]
-
-    # فیلتر کردن داده‌ها برای تمام روزها در یک بار
-    data = SanadDetail.objects.filter(
-        date__range=(fday, lday)
-    ).filter(
-        Q(kol=500) | Q(kol=400)
-    ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
-
-    sood_navizhe = 0
-    active_day = 0
-    daily_sood_navizhe = []  # لیست برای ذخیره مقادیر روزانه
-
-    # استفاده از defaultdict برای ذخیره‌سازی داده‌ها
-    current_data = defaultdict(int)
-    for item in data:
-        current_data[(item['date'], item['kol'])] = item['total_amount']
-
-    for current_date in day_range:
-        baha_tamam_forosh = current_data.get((current_date, 500), 0)
-        daramad_forosh = current_data.get((current_date, 400), 0)
-
-
-        # محاسبه مجموع روزانه
-        daily_total = daramad_forosh + baha_tamam_forosh
-        daily_sood_navizhe.append(daily_total)  # ذخیره مقدار روزانه
-
-        if daramad_forosh != 0 or baha_tamam_forosh != 0:
-            active_day += 1
-
-        sood_navizhe += daily_total
-
-    # محاسبه حداقل و حداکثر
-    min_sood_navizhe = min(daily_sood_navizhe) / 10000000 if daily_sood_navizhe else 0
-    max_sood_navizhe = max(daily_sood_navizhe) / 10000000 if daily_sood_navizhe else 0
-
-    to_return = {
-        'sood_navizhe': sood_navizhe / 10000000,
-        'active_day': active_day,
-        'ave_sood_navizhe': sood_navizhe / active_day / 10000000 if active_day > 0 else 0,
-        'min_sood_navizhe': min_sood_navizhe,
-        'max_sood_navizhe': max_sood_navizhe,
-
-    }
-
-    return to_return
 
 
 
