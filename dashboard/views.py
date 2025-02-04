@@ -171,6 +171,7 @@ def Home1(request, *args, **kwargs):
     reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
     reports = MasterReport.objects.order_by('-day')[:8]
     # آماده‌سازی داده‌ها برای نمودار
+
     data = {
         'day': [report.day for report in reports],
         'khales_forosh': [report.khales_forosh for report in reports],
@@ -233,7 +234,32 @@ def Home1(request, *args, **kwargs):
     )
 
     # تولید نمودار به فرمت HTML
-    fig_html = fig.to_html(full_html=False, include_plotlyjs='cdn')  # Include Plotly via CDN
+    fig_html1 = fig.to_html(full_html=False, include_plotlyjs='cdn')  # Include Plotly via CDN
+
+
+
+    # months_list = []
+    # for i in range(12, -1, -1):
+    #     # تاریخ شروع ماه
+    #     start_date_jalali = (today - jdatetime.relativedelta(months=i)).replace(day=1)
+    #     start_date_gregorian = start_date_jalali.togregorian()
+    #
+    #     # تاریخ پایان ماه
+    #     end_date_jalali = start_date_jalali.replace(day=start_date_jalali.daysinmonth)
+    #     end_date_gregorian = end_date_jalali.togregorian()
+    #
+    #     # نام شمسی فارسی ماه
+    #     month_name_farsi = start_date_jalali.strftime("%B")
+    #     # لیست ماه‌ها
+    #
+    #     months_list.append({
+    #         'month_name_farsi': month_name_farsi,
+    #         'start_date_gregorian': start_date_gregorian.strftime("%Y-%m-%d"),
+    #         'end_date_gregorian': end_date_gregorian.strftime("%Y-%m-%d")
+    #     })
+
+
+
 
     context = {
         'title': 'داشبورد مدیریتی',
@@ -244,7 +270,7 @@ def Home1(request, *args, **kwargs):
         'allday_data': allday_data,
         'chequ_data': chequ_data,
         'chart4_data': chart4_data,
-        'fig_html': fig_html,
+        'fig_html1': fig_html1,
     }
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
