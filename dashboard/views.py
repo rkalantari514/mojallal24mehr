@@ -15,7 +15,7 @@ import time
 import jdatetime
 import pandas as pd
 import plotly.express as px
-
+from dateutil.relativedelta import relativedelta
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
@@ -122,7 +122,27 @@ def TarazCalFromReport(day):
     # end_date = today - timedelta(days=107)
     # reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
 
-
+month_names_persian = {
+    1: 'فروردین',
+    2: 'اردیبهشت',
+    3: 'خرداد',
+    4: 'تیر',
+    5: 'مرداد',
+    6: 'شهریور',
+    7: 'مهر',
+    8: 'آبان',
+    9: 'آذر',
+    10: 'دی',
+    11: 'بهمن',
+    12: 'اسفند'
+}
+import time
+import jdatetime
+from dateutil.relativedelta import relativedelta
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+import pandas as pd
+import plotly.express as px
 @login_required(login_url='/login')
 def Home1(request, *args, **kwargs):
     user = request.user
@@ -169,9 +189,9 @@ def Home1(request, *args, **kwargs):
     start_date = today - timedelta(days=114)
     end_date = today - timedelta(days=107)
     reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
-    reports = MasterReport.objects.order_by('-day')[:8]
-    # آماده‌سازی داده‌ها برای نمودار
+    reports = MasterReport.objects.order_by('-day')[:7]
 
+    # آماده‌سازی داده‌ها برای نمودار
     data = {
         'day': [report.day for report in reports],
         'khales_forosh': [report.khales_forosh for report in reports],
@@ -237,52 +257,89 @@ def Home1(request, *args, **kwargs):
     fig_html1 = fig.to_html(full_html=False, include_plotlyjs='cdn')  # Include Plotly via CDN
 
 
-
-    # months_list = []
-    # for i in range(12, -1, -1):
-    #     # تاریخ شروع ماه
-    #     start_date_jalali = (today - jdatetime.relativedelta(months=i)).replace(day=1)
-    #     start_date_gregorian = start_date_jalali.togregorian()
     #
-    #     # تاریخ پایان ماه
+    # # لیست ماه‌ها از 12 ماه قبل تا امروز
+    # months_list = []
+    # data_monthly = {
+    #     'month_name_farsi': [],
+    #     'khales_forosh': [],
+    #     'baha_tamam_forosh': [],
+    #     'sood_navizhe': [],
+    # }
+    #
+    # for i in range(12, -1, -1):
+    #     # تاریخ شروع و پایان ماه
+    #     start_date_jalali = (jdatetime.datetime.today() - relativedelta(months=i)).replace(day=1)
     #     end_date_jalali = start_date_jalali.replace(day=start_date_jalali.daysinmonth)
-    #     end_date_gregorian = end_date_jalali.togregorian()
     #
     #     # نام شمسی فارسی ماه
-    #     month_name_farsi = start_date_jalali.strftime("%B")
-    #     # لیست ماه‌ها
+    #     month_name_farsi = month_names_persian[start_date_jalali.month]
     #
-    #     months_list.append({
-    #         'month_name_farsi': month_name_farsi,
-    #         'start_date_gregorian': start_date_gregorian.strftime("%Y-%m-%d"),
-    #         'end_date_gregorian': end_date_gregorian.strftime("%Y-%m-%d")
-    #     })
-
-
+    #     # تبدیل تاریخ‌ها به میلادی
+    #     start_date_gregorian = start_date_jalali.togregorian()
+    #     end_date_gregorian = end_date_jalali.togregorian()
+    #
+    #     # فیلتر داده‌ها بر اساس ماه
+    #     reports = MasterReport.objects.filter(day__range=[start_date_gregorian, end_date_gregorian])
+    #
+    #     # محاسبه مجموع داده‌های ماهانه
+    #     khales_forosh_sum = sum(report.khales_forosh for report in reports)
+    #     baha_tamam_forosh_sum = sum(report.baha_tamam_forosh for report in reports) * -1
+    #     sood_navizhe_sum = sum(report.sood_navizhe for report in reports)
+    #
+    #     # افزودن داده‌ها به لیست
+    #     months_list.append(month_name_farsi)
+    #     data_monthly['month_name_farsi'].append(month_name_farsi)
+    #     data_monthly['khales_forosh'].append(khales_forosh_sum)
+    #     data_monthly['baha_tamam_forosh'].append(baha_tamam_forosh_sum)
+    #     data_monthly['sood_navizhe'].append(sood_navizhe_sum)
+    #
+    # # تبدیل داده‌ها به DataFrame
+    # df_monthly = pd.DataFrame(data_monthly)
+    # df_melted_monthly = pd.melt(df_monthly, id_vars=['month_name_farsi'], value_vars=['khales_forosh', 'baha_tamam_forosh', 'sood_navizhe'], var_name='Type', value_name='Value')
+    #
+    # # ایجاد نمودار
+    # fig2 = px.bar(
+    #     df_melted_monthly,
+    #     x='month_name_farsi',
+    #     y='Value',
+    #     color='Type',
+    #     barmode='group',
+    #     labels={'Type': '', 'month_name_farsi': 'ماه', 'Value': 'مقدار'}
+    # )
+    #
+    # # تنظیمات نمودار
+    # fig2.update_layout(
+    #     font=dict(family="B Nazanin, Arial, sans-serif", size=14, color="#333333"),
+    #     title_font=dict(family="B Nazanin, Arial, sans-serif", size=20, color="#333333"),
+    #     legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
+    #     xaxis=dict(showgrid=True, gridcolor='#e0e0e0'),
+    #     yaxis=dict(showgrid=True, gridcolor='#e0e0e0'),
+    #     plot_bgcolor='#FFFFFF',
+    #     paper_bgcolor='#FFFFFF',
+    # )
+    #
+    # # تولید نمودار به فرمت HTML
+    # fig_html2 = fig2.to_html(full_html=False, include_plotlyjs='cdn')  # Include Plotly via CDN
+    #
 
 
     context = {
-        'title': 'داشبورد مدیریتی',
-        'user': user,
-        'last_update_time': last_update_time,
-        'today_data': today_data,
-        'yesterday_data': yesterday_data,
-        'allday_data': allday_data,
-        'chequ_data': chequ_data,
-        'chart4_data': chart4_data,
-        'fig_html1': fig_html1,
-    }
+            'title': 'داشبورد مدیریتی',
+            'user': user,
+            'last_update_time': last_update_time,
+            'today_data': today_data,
+            'yesterday_data': yesterday_data,
+            'allday_data': allday_data,
+            'chequ_data': chequ_data,
+            'chart4_data': chart4_data,
+            'fig_html1': fig_html1,
+            # 'fig_html2': fig_html2,
+        }
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
     return render(request, 'home1.html', context)
-
-
-
-
-
-
-
 
 
 def Home5(request):
