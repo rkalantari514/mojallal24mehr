@@ -217,7 +217,7 @@ def Home1(request, *args, **kwargs):
         yaxis=dict(showgrid=True, gridcolor='#e0e0e0'),
         plot_bgcolor='#FFFFFF',
         paper_bgcolor='#FFFFFF',
-        showlegend=False  # حذف دکمه‌های تبلیغاتی
+        # showlegend=False  # حذف دکمه‌های تبلیغاتی
     )
 
     # تولید نمودار به فرمت HTML

@@ -2,7 +2,7 @@
 {% load humanize %}
 {% load static %}
 {% block content %}
-    
+
     <style>
         .datetime-small {
             font-size: 1.2em; /* کوچک‌تر کردن فونت تاریخ و ساعت */
@@ -277,12 +277,12 @@
                             <div class="tab-content">
                                 <div class="tab-pane fade active show" id="home-07" role="tabpanel"
                                      aria-labelledby="home-07-tab">
-<div id="bar-chart">{{ fig_html|safe }}</div>
+                                    <div id="bar-chart">{{ fig_html|safe }}</div>
 
                                 </div>
                                 <div class="tab-pane fade" id="profile-07" role="tabpanel"
                                      aria-labelledby="profile-07-tab">
-..
+                                    ..
                                 </div>
                                 <div class="tab-pane fade" id="portfolio-07" role="tabpanel"
                                      aria-labelledby="portfolio-07-tab">
@@ -565,10 +565,10 @@
         drawChart('Chart4', 'bar', data, options);
     </script>
 
-    
+
     // نمودار های dash
-{#            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>#}
-            <script src="{% static 'js/plotly/plotly-latest.min.js' %}"></script>
+    {#            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>#}
+    <script src="{% static 'js/plotly/plotly-latest.min.js' %}"></script>
 
 {% endblock %}
 
