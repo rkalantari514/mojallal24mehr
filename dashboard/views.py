@@ -163,32 +163,78 @@ def Home1(request, *args, **kwargs):
 
     # دریافت گزارش‌ها
     reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
+    # reports = MasterReport.objects.order_by('-day')[:14]
+    #
+    #
+    #
+    #
+    # data = {
+    #     'day': [report.day for report in reports],
+    #     'khales_forosh': [report.khales_forosh for report in reports],
+    #     'baha_tamam_forosh': [-1*report.baha_tamam_forosh for report in reports],
+    #     # 'sayer_hazine': [report.sayer_hazine for report in reports],
+    #     # 'sayer_daramad': [report.sayer_daramad for report in reports],
+    #     'sood_navizhe': [report.sood_navizhe for report in reports],
+    #     # 'sood_vizhe': [report.sood_vizhe for report in reports],
+    #     # 'asnad_pardakhtani': [report.asnad_pardakhtani for report in reports],
+    # }
+    #
+    # # Create a DataFrame
+    # df = pd.DataFrame(data)
+    # persian_names = {
+    #     'khales_forosh': 'خالص فروش',
+    #     'baha_tamam_forosh': 'بهای تمام شده فروش',
+    #     # 'sayer_hazine': 'سایر هزینه‌ها',
+    #     # 'sayer_daramad': 'سایر درآمدها',
+    #     'sood_navizhe': 'سود ناویژه',
+    #     # 'sood_vizhe': 'سود ویژه',
+    #     # 'asnad_pardakhtani': 'اسناد پرداختنی'
+    # }
+    #
+    # df_melted = pd.melt(df, id_vars=['day'],
+    #                     value_vars=list(persian_names.keys()),
+    #                     var_name='Type',
+    #                     value_name='Value')
+    #
+    # # Map English names to Persian names
+    # df_melted['Type'] = df_melted['Type'].map(persian_names)
+    #
+    # # Define colors for each category
+    # color_map = {
+    #     'خالص فروش': '#0000FF',
+    #     'بهای تمام شده فروش': '#FF0000',
+    #     # 'سایر هزینه‌ها': '#00CC96',
+    #     # 'سایر درآمدها': '#AB63FA',
+    #     'سود ناویژه': '#00FF00',
+    #     # 'سود ویژه': '#19D3F3',
+    #     # 'اسناد پرداختنی': '#FF6692'
+    # }
+    #
+    # # Create a bar chart
+    # fig = px.bar(df_melted, x='day', y='Value', color='Type', barmode='group',
+    #              title='نمودار مقادیر مختلف', color_discrete_map=color_map)
+    #
+    # # Save the figure to HTML
+    # fig_html = fig.to_html(full_html=False)
+
+
+
+    # دریافت داده‌ها
     reports = MasterReport.objects.order_by('-day')[:7]
-
-
-
 
     data = {
         'day': [report.day for report in reports],
         'khales_forosh': [report.khales_forosh for report in reports],
-        'baha_tamam_forosh': [report.baha_tamam_forosh for report in reports],
-        'sayer_hazine': [report.sayer_hazine for report in reports],
-        'sayer_daramad': [report.sayer_daramad for report in reports],
+        'baha_tamam_forosh': [-1 * report.baha_tamam_forosh for report in reports],
         'sood_navizhe': [report.sood_navizhe for report in reports],
-        'sood_vizhe': [report.sood_vizhe for report in reports],
-        'asnad_pardakhtani': [report.asnad_pardakhtani for report in reports],
     }
 
-    # Create a DataFrame
+    # ایجاد DataFrame
     df = pd.DataFrame(data)
     persian_names = {
         'khales_forosh': 'خالص فروش',
         'baha_tamam_forosh': 'بهای تمام شده فروش',
-        'sayer_hazine': 'سایر هزینه‌ها',
-        'sayer_daramad': 'سایر درآمدها',
         'sood_navizhe': 'سود ناویژه',
-        'sood_vizhe': 'سود ویژه',
-        'asnad_pardakhtani': 'اسناد پرداختنی'
     }
 
     df_melted = pd.melt(df, id_vars=['day'],
@@ -196,26 +242,73 @@ def Home1(request, *args, **kwargs):
                         var_name='Type',
                         value_name='Value')
 
-    # Map English names to Persian names
+    # نقشه‌برداری نام‌های انگلیسی به فارسی
     df_melted['Type'] = df_melted['Type'].map(persian_names)
 
-    # Define colors for each category
+    # تعریف رنگ‌ها برای هر دسته
     color_map = {
-        'خالص فروش': '#636EFA',
-        'بهای تمام شده فروش': '#EF553B',
-        'سایر هزینه‌ها': '#00CC96',
-        'سایر درآمدها': '#AB63FA',
-        'سود ناویژه': '#FFA15A',
-        'سود ویژه': '#19D3F3',
-        'اسناد پرداختنی': '#FF6692'
+        'خالص فروش': '#0000FF',
+        'بهای تمام شده فروش': '#FF0000',
+        'سود ناویژه': '#00FF00',
     }
 
-    # Create a bar chart
+    # ایجاد نمودار میله‌ای با Plotly
     fig = px.bar(df_melted, x='day', y='Value', color='Type', barmode='group',
-                 title='نمودار مقادیر مختلف', color_discrete_map=color_map)
+                 # title='نمودار مقادیر مختلف',
+                 color_discrete_map=color_map)
 
-    # Save the figure to HTML
+    # تغییر فونت‌ها و دیگر تنظیمات گرافیکی
+    fig.update_layout(
+        font=dict(
+            family="B Nazanin, Arial, sans-serif",
+            size=14,
+            color="#333333"
+        ),
+        title_font=dict(
+            family="B Nazanin, Arial, sans-serif",
+            size=20,
+            color="#333333"
+        ),
+        legend=dict(
+            title_font_family="B Nazanin",
+            font=dict(
+                family="B Nazanin, Arial, sans-serif",
+                size=20,
+                color="#333333"
+            ),
+            orientation="h",
+            yanchor="bottom",
+            y=-0.2,
+            xanchor="center",
+            x=0.5
+        ),
+        xaxis=dict(
+            title="روز هفته",
+            showgrid=True,
+            gridcolor='#e0e0e0',
+            tickmode='array',
+            tickvals=list(range(7)),
+            ticktext=['دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه', 'شنبه', 'یک‌شنبه']
+        ),
+        yaxis=dict(
+            # title="مقدار",
+            showgrid=True,
+            gridcolor='#e0e0e0'
+        ),
+        plot_bgcolor='#FFFFFF',  # رنگ پس‌زمینه نمودار
+        paper_bgcolor='#FFFFFF'  # رنگ پس‌زمینه صفحه
+    )
+
+    # ترجمه متن تولتیپ
+    fig.update_traces(
+        hovertemplate='<b>روز:</b> %{x}<br><b>مقدار:</b> %{y}<br><b>نوع:</b> %{marker.color}<extra></extra>'
+    )
+
+    # ذخیره نمودار به عنوان HTML
     fig_html = fig.to_html(full_html=False)
+
+
+
     context = {
         'title': 'داشبورد مدیریتی',
         'user': user,
