@@ -13,6 +13,15 @@ from django.db.models import Sum, Q
 from django.shortcuts import render
 import time
 import jdatetime
+import pandas as pd
+import plotly.express as px
+
+import dash
+from dash import dcc, html
+from dash.dependencies import Input, Output
+import plotly.express as px
+import pandas as pd
+from django.shortcuts import render
 
 
 def TarazCal(fday, lday, data):
@@ -130,28 +139,83 @@ def Home1(request, *args, **kwargs):
         daily_data = TarazCal(current_day, current_day, data)  # استفاده از TarazCal برای هر روز
         chart4_data.append(daily_data['asnad_pardakhtani'])  # جمع‌آوری مقادیر asnad_pardakhtani
 
-    for i in chart4_data:
-        print(i)
-
     chequesr = ChequesRecieve.objects.aggregate(total_mandeh_sum=Sum('total_mandeh'))
     postchequesr = ChequesRecieve.objects.filter(cheque_date__gt=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
-    pastchequesr = ChequesRecieve.objects.filter(cheque_date__lte=today).aggregate(
-        total_mandeh_sum=Sum('total_mandeh'))
-
+    pastchequesr = ChequesRecieve.objects.filter(cheque_date__lte=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
 
     tmandeh = (chequesr['total_mandeh_sum'] / 10000000) * -1
     pastmandeh = (pastchequesr['total_mandeh_sum'] / 10000000) * -1
     postmandeh = (postchequesr['total_mandeh_sum'] / 10000000) * -1
 
-    chequ_data={
-        'tmandeh':tmandeh,
+    chequ_data = {
+        'tmandeh': tmandeh,
         'pastmandeh': pastmandeh,
-        'postmandeh':postmandeh,
-
+        'postmandeh': postmandeh,
     }
 
+    # Query last 30 days data
+
+    today = timezone.now().date()
+
+    # محاسبه تاریخ‌ها
+    start_date = today - timedelta(days=14)  # 14 روز قبل
+    end_date = today - timedelta(days=7)  # 7 روز قبل
+
+    # دریافت گزارش‌ها
+    reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
+    reports = MasterReport.objects.order_by('-day')[:7]
 
 
+
+
+    data = {
+        'day': [report.day for report in reports],
+        'khales_forosh': [report.khales_forosh for report in reports],
+        'baha_tamam_forosh': [report.baha_tamam_forosh for report in reports],
+        'sayer_hazine': [report.sayer_hazine for report in reports],
+        'sayer_daramad': [report.sayer_daramad for report in reports],
+        'sood_navizhe': [report.sood_navizhe for report in reports],
+        'sood_vizhe': [report.sood_vizhe for report in reports],
+        'asnad_pardakhtani': [report.asnad_pardakhtani for report in reports],
+    }
+
+    # Create a DataFrame
+    df = pd.DataFrame(data)
+    persian_names = {
+        'khales_forosh': 'خالص فروش',
+        'baha_tamam_forosh': 'بهای تمام شده فروش',
+        'sayer_hazine': 'سایر هزینه‌ها',
+        'sayer_daramad': 'سایر درآمدها',
+        'sood_navizhe': 'سود ناویژه',
+        'sood_vizhe': 'سود ویژه',
+        'asnad_pardakhtani': 'اسناد پرداختنی'
+    }
+
+    df_melted = pd.melt(df, id_vars=['day'],
+                        value_vars=list(persian_names.keys()),
+                        var_name='Type',
+                        value_name='Value')
+
+    # Map English names to Persian names
+    df_melted['Type'] = df_melted['Type'].map(persian_names)
+
+    # Define colors for each category
+    color_map = {
+        'خالص فروش': '#636EFA',
+        'بهای تمام شده فروش': '#EF553B',
+        'سایر هزینه‌ها': '#00CC96',
+        'سایر درآمدها': '#AB63FA',
+        'سود ناویژه': '#FFA15A',
+        'سود ویژه': '#19D3F3',
+        'اسناد پرداختنی': '#FF6692'
+    }
+
+    # Create a bar chart
+    fig = px.bar(df_melted, x='day', y='Value', color='Type', barmode='group',
+                 title='نمودار مقادیر مختلف', color_discrete_map=color_map)
+
+    # Save the figure to HTML
+    fig_html = fig.to_html(full_html=False)
     context = {
         'title': 'داشبورد مدیریتی',
         'user': user,
@@ -161,7 +225,7 @@ def Home1(request, *args, **kwargs):
         'allday_data': allday_data,
         'chequ_data': chequ_data,
         'chart4_data': chart4_data,
-
+        'fig_html': fig_html,  # نمودار میله‌ای به قالب HTML اضافه شد
     }
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
@@ -482,7 +546,7 @@ def CreateReport(request):
     current_time = datetime.now()
 
     # بررسی اینکه آیا ساعت 1 بامداد است یا خیر
-    if current_time.hour != 1:
+    if current_time.hour != 13:
         report_days = report_days.order_by('-day')[:10]
 
     # لیست برای به‌روزرسانی
