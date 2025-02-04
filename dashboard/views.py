@@ -171,7 +171,7 @@ def Home1(request, *args, **kwargs):
     start_date = today - timedelta(days=114)
     end_date = today - timedelta(days=107)
     reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
-    reports = MasterReport.objects.order_by('-day')[:7]
+    reports = MasterReport.objects.order_by('-day')[:8]
 
     # آماده‌سازی داده‌ها برای نمودار
     data = {
