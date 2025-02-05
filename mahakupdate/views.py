@@ -3,7 +3,7 @@ import pyodbc
 from django.db.models import Min
 from datetime import datetime
 from custom_login.models import UserLog
-from dashboard.views import CreateReport
+from dashboard.views import CreateReport, CreateMonthlyReport
 from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category, Sanad, SanadDetail, AccCoding
 from django.shortcuts import render
 from .forms import CategoryForm, KalaForm
@@ -157,6 +157,7 @@ def Updateall(request):
         '/update/updatsmratio',
         '/update/updatesanadconditions',
         '/createreport',
+        '/create_monthly_report',
     ]
     # نگاشت آدرس‌های استاتیک به توابع
     static_view_map = {
@@ -167,6 +168,7 @@ def Updateall(request):
         '/update/updatsmratio': Update_Sales_Mojodi_Ratio,
         '/update/updatesanadconditions': UpdateSanadConditions,
         '/createreport': CreateReport,
+        '/create_monthly_report': CreateMonthlyReport,
     }
     # چاپ تزئینی برای عیب یابی
     print(f"Request path: {request.path}")

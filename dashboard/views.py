@@ -4,7 +4,7 @@ from custom_login.models import UserLog
 from mahakupdate.models import Factor, FactorDetaile, SanadDetail, Mtables, ChequesRecieve
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
-from .models import MasterInfo, MasterReport
+from .models import MasterInfo, MasterReport, MonthlyReport
 from django.utils import timezone
 from datetime import datetime
 from collections import defaultdict
@@ -509,6 +509,178 @@ def CreateReport(request):
     # آپدیت تمامی رکوردها به صورت bulk
     if reports_to_update:
         MasterReport.objects.bulk_update(reports_to_update, [
+            'khales_forosh',
+            'baha_tamam_forosh',
+            'sayer_hazine',
+            'sayer_daramad',
+            'sood_navizhe',
+            'sood_vizhe',
+            'asnad_pardakhtani'
+        ])
+
+    # محاسبه زمان اجرای ویو
+    end_time = time.time()
+    execution_time = end_time - start_time
+
+    # ذخیره زمان آخرین گزارش در مدل MasterInfo
+    master_info.last_report_time = timezone.now()
+    master_info.save()
+
+    # چاپ نتیجه در کنسول
+    print(f"message: گزارش‌ها با موفقیت ایجاد شدند")
+    print(f"execution_time: {execution_time:.2f} ثانیه")
+    print(f"start_date: {start_date_gregorian}")
+    print(f"end_date: {end_date_gregorian}")
+
+    return redirect('/updatedb')
+
+
+import time
+from datetime import datetime, timedelta
+import jdatetime
+from django.utils import timezone
+from django.shortcuts import render, redirect
+from django.db.models import Q, Sum
+
+import time
+from datetime import timedelta
+import jdatetime
+from django.utils import timezone
+from django.shortcuts import render, redirect
+from django.db.models import Q, Sum
+
+import time
+from datetime import timedelta
+import jdatetime
+from django.utils import timezone
+from django.shortcuts import render, redirect
+from django.db.models import Q, Sum
+
+import time
+from datetime import timedelta
+from django.db.models import Sum, Q
+from django.utils import timezone
+from django.shortcuts import redirect
+import jdatetime
+
+def get_last_day_of_jalali_month(year, month):
+    if month == 12:
+        return jdatetime.date(year + 1, 1, 1) - timedelta(days=1)  # آخرین روز اسفند
+    else:
+        return jdatetime.date(year, month + 1, 1) - timedelta(days=1)  # آخرین روز ماه
+
+def CreateMonthlyReport(request):
+    start_time = time.time()  # زمان شروع ویو
+
+    # بررسی وجود MasterInfo فعال
+    master_info = MasterInfo.objects.filter(is_active=True).last()
+    if not master_info:
+        print("هیچ شرکت فعالی یافت نشد.")
+        return
+
+    acc_year = master_info.acc_year
+
+    try:
+        # تبدیل ۱/۱/سال مالی به تاریخ میلادی
+        start_date_jalali = jdatetime.date(acc_year, 1, 1)  # ۱ فروردین سال مالی
+        start_date_gregorian = start_date_jalali.togregorian()  # تبدیل به میلادی
+    except Exception as e:
+        print("خطا در تبدیل تاریخ:", e)
+        return
+
+    # تاریخ کنونی
+    end_date_gregorian = timezone.now().date()
+
+    # لیست ماه‌های بین تاریخ شروع و پایان
+    all_months = []
+    current_date = start_date_gregorian
+    while current_date <= end_date_gregorian:
+        jalali_date = jdatetime.date.fromgregorian(date=current_date)
+        year = jalali_date.year
+        month = jalali_date.month
+        month_name = jalali_date.strftime('%B')  # نام ماه به فارسی
+
+        # محاسبه روز اول و آخر ماه
+        month_first_day_jalali = jdatetime.date(year, month, 1)
+        month_last_day_jalali = get_last_day_of_jalali_month(year, month)
+
+        # تبدیل به میلادی
+        month_first_day = month_first_day_jalali.togregorian()
+        month_last_day = month_last_day_jalali.togregorian()
+
+        all_months.append({
+            'year': year,
+            'month': month,
+            'month_name': month_name,
+            'month_first_day': month_first_day,
+            'month_last_day': month_last_day,
+        })
+
+        # به ماه بعد بروید
+        if month == 12:
+            current_date = jdatetime.date(year + 1, 1, 1).togregorian()
+        else:
+            current_date = (jdatetime.date(year, month + 1, 1)).togregorian()
+
+    # گرفتن رکوردهای موجود در مدل MonthlyReport
+    existing_reports = MonthlyReport.objects.filter(
+        year__in=[m['year'] for m in all_months],
+        month__in=[m['month'] for m in all_months]
+    ).values_list('year', 'month')
+    existing_reports = set(existing_reports)  # تبدیل به مجموعه برای جستجوی سریع‌تر
+
+    # ایجاد رکوردهای پیش‌فرض برای ماه‌های موجود در all_months که در existing_reports نیستند
+    reports_to_create = []
+
+    for month_data in all_months:
+        if (month_data['year'], month_data['month']) not in existing_reports:
+            reports_to_create.append(MonthlyReport(
+                year=month_data['year'],
+                month=month_data['month'],
+                month_name=month_data['month_name'],
+                month_first_day=month_data['month_first_day'],
+                month_last_day=month_data['month_last_day'],
+            ))
+
+    # اگر رکوردهای جدیدی برای ایجاد وجود داشت، آنها را ذخیره کنید
+    if reports_to_create:
+        MonthlyReport.objects.bulk_create(reports_to_create)
+
+    # آپدیت رکوردها
+    report_months = MonthlyReport.objects.filter(
+        year__in=[m['year'] for m in all_months],
+        month__in=[m['month'] for m in all_months]
+    )
+
+    reports_to_update = []
+    # جمع‌آوری اطلاعات از SanadDetail
+    for report in report_months:
+        current_date_start = report.month_first_day
+        current_date_end = report.month_last_day
+
+        data = SanadDetail.objects.filter(
+            is_active=True,
+            date__range=(current_date_start, current_date_end)
+        ).filter(
+            Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101) | Q(kol=401) | Q(kol=501)
+        ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
+
+        # محاسبه داده‌ها برای ماه‌های مختلف
+        month_data = TarazCal(current_date_start, current_date_end, data)
+
+        report.khales_forosh = month_data['khales_forosh']
+        report.baha_tamam_forosh = month_data['baha_tamam_forosh']
+        report.sayer_hazine = month_data['sayer_hazine']
+        report.sayer_daramad = month_data['sayer_daramad']
+        report.sood_navizhe = month_data['sood_navizhe']
+        report.sood_vizhe = month_data['sood_vizhe']
+        report.asnad_pardakhtani = month_data['asnad_pardakhtani']
+
+        reports_to_update.append(report)  # افزودن به لیست برای بروزرسانی در batch
+
+    # آپدیت تمامی رکوردها به صورت bulk
+    if reports_to_update:
+        MonthlyReport.objects.bulk_update(reports_to_update, [
             'khales_forosh',
             'baha_tamam_forosh',
             'sayer_hazine',
