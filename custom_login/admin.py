@@ -4,7 +4,7 @@ from .models import CustomUser, UserLog
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ('mobile_number', 'first_name', 'last_name', 'is_active', 'is_admin','password_expiry_date')  # اضافه کردن فیلدهای جدید
+    list_display = ('mobile_number', 'first_name', 'last_name', 'is_active', 'is_admin','password_expiry_date','is_dark_mode')  # اضافه کردن فیلدهای جدید
     list_filter = ('is_admin', 'is_active')
     search_fields = ('mobile_number', 'first_name', 'last_name')  # جستجو در فیلدهای جدید
 

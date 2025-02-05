@@ -48,6 +48,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_admin = models.BooleanField(default=False)
     password_expiry_date = models.DateTimeField(null=True, blank=True)
     avatar = models.ImageField(upload_to=upload_image_path, default='unnamed.png', null=True, blank=True, verbose_name='تصویر پروفایل')
+    is_dark_mode = models.BooleanField(default=False)  # فیلد جدید برای ذخیره حالت شب
 
     objects = CustomUserManager()
 

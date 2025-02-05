@@ -2,81 +2,80 @@
 <!-- Left Sidebar start-->
 <div class="side-menu-fixed">
     <div class="scrollbar side-menu-bg">
-    
-<ul class="nav navbar-nav side-menu" id="sidebarnav">
+
+        <ul class="nav navbar-nav side-menu" id="sidebarnav">
 
 
             <!-- menu item Dashboard-->
-                    <li>
-                      <a href="javascript:void(0);" data-toggle="collapse" data-target="#dashboard">
-                        <div class="pull-left"><i class="ti-home"></i><span class="right-nav-text">داشبورد</span></div>
-                        <div class="pull-right"><i class="ti-plus"></i></div><div class="clearfix"></div>
-                      </a>
-                      <ul id="dashboard" class="collapse" data-parent="#sidebarnav">
-                        <li> <a href="/">داشبورد 1</a> </li>
-                        <li> <a href="/dash/kala/total/all/all/all/all/total">موجودی کالاها</a> </li>
-
-
-                      </ul>
-                    </li>
-
-
-
-
-
-
-
-    <li>
-        <a href="javascript:void(0);" data-toggle="collapse" data-target="#multi-level">
-            <div class="pull-left"><i class="ti-layers"></i><span class="right-nav-text">دسته بندی ها</span></div>
-            <div class="clearfix"></div>
-        </a>
-    </li>
-{% for category in category_tree %}
-    <ul id="multi-level" class="collapse" data-parent="#sidebarnav">
-        <li>
-            <div class="category-container">
-                <!-- دکمه + برای گسترش زیرمجموعه -->
-                <a href="javascript:void(0);" data-toggle="collapse" data-target="#category-{{ category.id }}" class="expand-icon">
-                    <i class="ti-plus"></i>
+            <li>
+                <a href="javascript:void(0);" data-toggle="collapse" data-target="#dashboard">
+                    <div class="pull-left"><i class="ti-home"></i><span class="right-nav-text">داشبورد</span></div>
+                    <div class="pull-right"><i class="ti-plus"></i></div>
+                    <div class="clearfix"></div>
                 </a>
-                <!-- اسم دسته بندی -->
-                <a href="/dash/kala/category/{{ category.id }}" class="category-name">
-                    {{ category.name }}
-                </a>
-            </div>
-            {% if category.children %}
-                <ul id="category-{{ category.id }}" class="collapse">
-                    {% for child in category.children %}
-                        <li>
-                            <div class="category-container">
-                                <!-- دکمه + برای گسترش زیرمجموعه‌های کودک -->
-                                <a href="javascript:void(0);" data-toggle="collapse" data-target="#child-{{ child.id }}" class="expand-icon">
-                                    <i class="ti-plus"></i>
-                                </a>
-                                <!-- اسم زیرمجموعه -->
-                                <a href="/dash/kala/category/{{ child.id }}" class="category-name">
-                                    {{ child.name }}
-                                </a>
-                            </div>
-                            {% if child.children %}
-                                <ul id="child-{{ child.id }}" class="collapse">
-                                    {% for grandchild in child.children %}
-                                        <li>
-                                            <a href="/dash/kala/category/{{ grandchild.id }}">
-                                                {{ grandchild.name }}
-                                            </a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
-                        </li>
-                    {% endfor %}
+                <ul id="dashboard" class="collapse" data-parent="#sidebarnav">
+                    <li><a href="/">داشبورد 1</a></li>
+                    <li><a href="/dash/kala/total/all/all/all/all/total">موجودی کالاها</a></li>
+
+
                 </ul>
-            {% endif %}
-        </li>
-    </ul>
-{% endfor %}
+            </li>
+
+
+            <li>
+                <a href="javascript:void(0);" data-toggle="collapse" data-target="#multi-level">
+                    <div class="pull-left"><i class="ti-layers"></i><span class="right-nav-text">دسته بندی ها</span>
+                    </div>
+                    <div class="clearfix"></div>
+                </a>
+            </li>
+            {% for category in category_tree %}
+                <ul id="multi-level" class="collapse" data-parent="#sidebarnav">
+                    <li>
+                        <div class="category-container">
+                            <!-- دکمه + برای گسترش زیرمجموعه -->
+                            <a href="javascript:void(0);" data-toggle="collapse"
+                               data-target="#category-{{ category.id }}" class="expand-icon">
+                                <i class="ti-plus"></i>
+                            </a>
+                            <!-- اسم دسته بندی -->
+                            <a href="/dash/kala/category/{{ category.id }}" class="category-name">
+                                {{ category.name }}
+                            </a>
+                        </div>
+                        {% if category.children %}
+                            <ul id="category-{{ category.id }}" class="collapse">
+                                {% for child in category.children %}
+                                    <li>
+                                        <div class="category-container">
+                                            <!-- دکمه + برای گسترش زیرمجموعه‌های کودک -->
+                                            <a href="javascript:void(0);" data-toggle="collapse"
+                                               data-target="#child-{{ child.id }}" class="expand-icon">
+                                                <i class="ti-plus"></i>
+                                            </a>
+                                            <!-- اسم زیرمجموعه -->
+                                            <a href="/dash/kala/category/{{ child.id }}" class="category-name">
+                                                {{ child.name }}
+                                            </a>
+                                        </div>
+                                        {% if child.children %}
+                                            <ul id="child-{{ child.id }}" class="collapse">
+                                                {% for grandchild in child.children %}
+                                                    <li>
+                                                        <a href="/dash/kala/category/{{ grandchild.id }}">
+                                                            {{ grandchild.name }}
+                                                        </a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </li>
+                </ul>
+            {% endfor %}
 
 
 
@@ -111,18 +110,19 @@
                 </ul>
             </li>
             <!-- منو حسابداری-->
-                    <li>
-                      <a href="javascript:void(0);" data-toggle="collapse" data-target="#calendar-menu">
-                        <div class="pull-left"><i class="ti-calendar"></i><span class="right-nav-text">حسابداری</span></div>
-                        <div class="pull-right"><i class="ti-plus"></i></div><div class="clearfix"></div>
-                      </a>
-                      <ul id="calendar-menu" class="collapse" data-parent="#sidebarnav">
-                        <li> <a href="/balance-sheet-kol">تراز آزمایشی جدید</a> </li>
-                        <li> <a href="/acc/1/1/1">تراز آزمایشی </a> </li>
-                        <li> <a href="/acc/cheques_recieve_total">چک های دریافتی</a> </li>
-{#                        <li> <a href="calendar-list.html">تقویم لیست</a> </li>#}
-                      </ul>
-                    </li>
+            <li>
+                <a href="javascript:void(0);" data-toggle="collapse" data-target="#calendar-menu">
+                    <div class="pull-left"><i class="ti-calendar"></i><span class="right-nav-text">حسابداری</span></div>
+                    <div class="pull-right"><i class="ti-plus"></i></div>
+                    <div class="clearfix"></div>
+                </a>
+                <ul id="calendar-menu" class="collapse" data-parent="#sidebarnav">
+                    <li><a href="/balance-sheet-kol">تراز آزمایشی جدید</a></li>
+                    <li><a href="/acc/1/1/1">تراز آزمایشی </a></li>
+                    <li><a href="/acc/cheques_recieve_total">چک های دریافتی</a></li>
+                    {#                        <li> <a href="calendar-list.html">تقویم لیست</a> </li>#}
+                </ul>
+            </li>
             {#        <!-- menu item todo-->#}
             {#        <li>#}
             {#          <a href="todo-list.html"><i class="ti-menu-alt"></i><span class="right-nav-text">لیست برای انجام کار</span> </a>#}
@@ -230,19 +230,61 @@
                     {#            <li> <a href="lockscreen.html">صفحه قفل</a> </li>#}
                 </ul>
             </li>
-            {#        <!-- menu item maps-->#}
-            {#        <li>#}
-            {#          <a href="maps.html"><i class="ti-location-pin"></i><span class="right-nav-text">نقشه ها</span> <span class="badge badge-pill badge-success float-right mt-1">06</span></a>#}
-            {#        </li>#}
-            {#        <!-- menu item timeline-->#}
-            {#        <li>#}
-            {#          <a href="timeline.html"><i class="ti-panel"></i><span class="right-nav-text">خط زمانی</span> </a>#}
-            {#        </li>#}
-
-
+{#                    <!-- menu item maps-->#}
+{#                    <li>#}
+{#                      <a href="maps.html"><i class="ti-location-pin"></i><span class="right-nav-text">نقشه ها</span> <span class="badge badge-pill badge-success float-right mt-1">06</span></a>#}
+{#                    </li>#}
+                    <!-- menu item timeline-->
+        
+        
+{#                    <li>#}
+{#                      <a href="timeline.html"><i class="ti-panel"></i><span class="right-nav-text">خط زمانی</span> </a>#}
+{#                    </li>#}
+        
+       
+        <li>  
+            <a href="#">  
+                <i class="ti-moon"></i>  
+                <span class="right-nav-text">حالت تیره</span>  
+                <div class="form-group" style="display: inline-block; margin-left: 10px;">  
+                    <div class="checkbox checbox-switch switch-success">  
+                        <label>  
+                            <input type="checkbox" name="switch8" id="darkModeToggle" {% if is_dark_mode %}checked{% endif %}>  
+                            <span></span>  
+                        </label>  
+                    </div>  
+                </div>  
+            </a>  
+        </li>  
+        
+        
+        
+        
+        
         </ul>
 
     </div>
 </div>
 
 
+       <script>  
+        const toggle = document.getElementById('darkModeToggle');  
+
+        toggle.addEventListener('change', () => {  
+            if (toggle.checked) {  
+                document.body.classList.add('dark-mode-active');  
+            } else {  
+                document.body.classList.remove('dark-mode-active');  
+            }  
+
+            // ارسال درخواست به سرور برای ذخیره وضعیت  
+            fetch('/update-dark-mode/', {  
+                method: 'POST',  
+                headers: {  
+                    'Content-Type': 'application/json',  
+                    'X-CSRFToken': '{{ csrf_token }}',  // اضافه کردن توکن CSRF  
+                },  
+                body: JSON.stringify({ is_dark_mode: toggle.checked })  
+            });  
+        });  
+    </script>  

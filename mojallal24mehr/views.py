@@ -1,6 +1,7 @@
 from django.shortcuts import render
 
 from mahakupdate.models import Category
+from django.contrib.auth.decorators import login_required
 
 
 def get_category_tree(parent=None):
@@ -25,7 +26,32 @@ def header(request, *args, **kwargs):
 
 def sidebar(request, *args, **kwargs):
     category_tree = get_category_tree()
-    return render(request, 'shared/Sidebar.html', {'category_tree': category_tree})
+    user = request.user
+    context = {
+        'is_dark_mode': user.is_dark_mode,
+        'category_tree': category_tree,
+    }
+    return render(request, 'shared/Sidebar.html', context)
+
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+
+@csrf_exempt
+@login_required
+def update_dark_mode(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        request.user.is_dark_mode = data.get('is_dark_mode', False)
+        request.user.save()
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'fail'}, status=400)
+
+
+
+
+
 
 def footer(request, *args, **kwargs):
     context = {

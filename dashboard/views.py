@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 from custom_login.models import UserLog
 from mahakupdate.models import Factor, FactorDetaile, SanadDetail, Mtables, ChequesRecieve
@@ -32,13 +33,13 @@ def TarazCal(fday, lday, data):
     current_data = defaultdict(int)
     for item in data:
         current_data[(item['date'], item['kol'])] = item['total_amount']
-    khales_forosh=0
-    baha_tamam_forosh=0
+    khales_forosh = 0
+    baha_tamam_forosh = 0
     sood_navizhe = 0
     sood_vizhe = 0
     active_day = 0
-    sayer_hazine=0
-    sayer_daramad=0
+    sayer_hazine = 0
+    sayer_daramad = 0
     daily_sood_navizhe = []  # لیست برای ذخیره مقادیر روزانه
     daily_sood_vizhe = []  # لیست برای ذخیره مقادیر روزانه
     asnad_pardakhtani = []  # لیست برای ذخیره مقادیر asnad_pardakhtani
@@ -48,13 +49,13 @@ def TarazCal(fday, lday, data):
         sayer_hazine_d = current_data.get((current_date, 501), 0)
         daramad_forosh = current_data.get((current_date, 400), 0)
         sayer_daramad_d = current_data.get((current_date, 401), 0)
-        barghasht_az_forosh = current_data.get((current_date, 403), 0) #منفی است
-        khales_forosh_d=daramad_forosh+barghasht_az_forosh
+        barghasht_az_forosh = current_data.get((current_date, 403), 0)  # منفی است
+        khales_forosh_d = daramad_forosh + barghasht_az_forosh
         asnad_pardakhtan = current_data.get((current_date, 101), 0)  # محاسبه asnad_pardakhtani
 
         # محاسبه مجموع روزانه
-        daily_total = daramad_forosh +barghasht_az_forosh+ baha_tamam_forosh_d
-        daily_total_vizhe = daramad_forosh +barghasht_az_forosh+ baha_tamam_forosh_d+sayer_daramad_d+sayer_hazine_d
+        daily_total = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh_d
+        daily_total_vizhe = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh_d + sayer_daramad_d + sayer_hazine_d
         daily_sood_navizhe.append(daily_total)  # ذخیره مقدار روزانه
         daily_sood_vizhe.append(daily_total_vizhe)  # ذخیره مقدار روزانه
 
@@ -65,8 +66,8 @@ def TarazCal(fday, lday, data):
         sood_vizhe += daily_total_vizhe
         khales_forosh += khales_forosh_d
         baha_tamam_forosh += baha_tamam_forosh_d
-        sayer_hazine+=sayer_hazine_d
-        sayer_daramad+=sayer_daramad_d
+        sayer_hazine += sayer_hazine_d
+        sayer_daramad += sayer_daramad_d
         # ذخیره مقدار asnad_pardakhtani با علامت منفی
         asnad_pardakhtani.append(-asnad_pardakhtan)
 
@@ -78,10 +79,10 @@ def TarazCal(fday, lday, data):
     max_sood_vizhe = max(daily_sood_vizhe) / 10000000 if daily_sood_vizhe else 0
 
     to_return = {
-        'khales_forosh':khales_forosh/10000000,
-        'baha_tamam_forosh':baha_tamam_forosh/-10000000,
-        'sayer_hazine':sayer_hazine/-10000000,
-        'sayer_daramad':sayer_daramad/10000000,
+        'khales_forosh': khales_forosh / 10000000,
+        'baha_tamam_forosh': baha_tamam_forosh / -10000000,
+        'sayer_hazine': sayer_hazine / -10000000,
+        'sayer_daramad': sayer_daramad / 10000000,
         'sood_navizhe': sood_navizhe / 10000000,
         'sood_vizhe': sood_vizhe / 10000000,
         'active_day': active_day,
@@ -97,30 +98,25 @@ def TarazCal(fday, lday, data):
 
 
 def TarazCalFromReport(day):
-
-    repo=MasterReport.objects.filter(day=day).last()
+    repo = MasterReport.objects.filter(day=day).last()
 
     to_return = {
-        'khales_forosh':repo.khales_forosh,
-        'baha_tamam_forosh':repo.baha_tamam_forosh,
-        'sayer_hazine':repo.sayer_hazine,
-        'sayer_daramad':repo.sayer_daramad,
+        'khales_forosh': repo.khales_forosh,
+        'baha_tamam_forosh': repo.baha_tamam_forosh,
+        'sayer_hazine': repo.sayer_hazine,
+        'sayer_daramad': repo.sayer_daramad,
         'sood_navizhe': repo.sood_navizhe,
         'sood_vizhe': repo.sood_vizhe,
         'asnad_pardakhtani': repo.asnad_pardakhtani,  # جمع مقادیر asnad_pardakhtani
     }
     return to_return
 
-
-
-
-
-
     # reports = MasterReport.objects.order_by('-day')[:8]
     # دریافت گزارش‌ها
     # start_date = today - timedelta(days=114)
     # end_date = today - timedelta(days=107)
     # reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
+
 
 month_names_persian = {
     1: 'فروردین',
@@ -143,6 +139,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 import pandas as pd
 import plotly.express as px
+
+
 @login_required(login_url='/login')
 def Home1(request, *args, **kwargs):
     user = request.user
@@ -172,7 +170,8 @@ def Home1(request, *args, **kwargs):
     allday_data = TarazCal(start_date_gregorian, today, data)
 
     # محاسبه داده‌ها برای 8 روز اخیر
-    chart4_data = [TarazCal(today - timedelta(days=i), today - timedelta(days=i), data)['asnad_pardakhtani'] for i in range(8)]
+    chart4_data = [TarazCal(today - timedelta(days=i), today - timedelta(days=i), data)['asnad_pardakhtani'] for i in
+                   range(8)]
 
     # دریافت اطلاعات چک‌ها
     chequesr = ChequesRecieve.objects.aggregate(total_mandeh_sum=Sum('total_mandeh'))
@@ -256,7 +255,6 @@ def Home1(request, *args, **kwargs):
     # تولید نمودار به فرمت HTML
     fig_html1 = fig.to_html(full_html=False, include_plotlyjs='cdn')  # Include Plotly via CDN
 
-
     #
     # # لیست ماه‌ها از 12 ماه قبل تا امروز
     # months_list = []
@@ -323,19 +321,21 @@ def Home1(request, *args, **kwargs):
     # fig_html2 = fig2.to_html(full_html=False, include_plotlyjs='cdn')  # Include Plotly via CDN
     #
 
-
     context = {
-            'title': 'داشبورد مدیریتی',
-            'user': user,
-            'last_update_time': last_update_time,
-            'today_data': today_data,
-            'yesterday_data': yesterday_data,
-            'allday_data': allday_data,
-            'chequ_data': chequ_data,
-            'chart4_data': chart4_data,
-            'fig_html1': fig_html1,
-            # 'fig_html2': fig_html2,
-        }
+        'title': 'داشبورد مدیریتی',
+        'user': user,
+        # 'is_dark_mode': user.is_dark_mode,
+
+        'last_update_time': last_update_time,
+        'today_data': today_data,
+        'yesterday_data': yesterday_data,
+        'allday_data': allday_data,
+        'chequ_data': chequ_data,
+        # 'chart1_data': chart1_data,
+        'chart4_data': chart4_data,
+        'fig_html1': fig_html1,
+        # 'fig_html2': fig_html2,
+    }
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
@@ -343,48 +343,30 @@ def Home1(request, *args, **kwargs):
 
 
 def Home5(request):
-    user=request.user
+    user = request.user
 
-    factor=Factor.objects.all()
+    factor = Factor.objects.all()
     mablagh_factor_total = factor.aggregate(Sum('mablagh_factor'))['mablagh_factor__sum']
     count_factor_total = factor.count()
 
-
-
-
-
-    factor_detile=FactorDetaile.objects.all()
+    factor_detile = FactorDetaile.objects.all()
     count_factor_detile = factor_detile.count()
-
-
-
-
-
-
 
     for i in factor_detile:
         print(i.kala.name)
     print('i.kala=====================================================================.name')
 
-
-
-
     yakhfa = FactorDetaile.objects.filter(kala__name__contains='يخچال')
-    mablagh_yakh=yakhfa.aggregate(Sum('mablagh_nahaee'))['mablagh_nahaee__sum']
-    yakhdarsad = mablagh_yakh /mablagh_factor_total*100
+    mablagh_yakh = yakhfa.aggregate(Sum('mablagh_nahaee'))['mablagh_nahaee__sum']
+    yakhdarsad = mablagh_yakh / mablagh_factor_total * 100
 
     lebafa = FactorDetaile.objects.filter(kala__name__contains='لباسشويي')
     mablagh_leba = lebafa.aggregate(Sum('mablagh_nahaee'))['mablagh_nahaee__sum']
     lebadarsad = mablagh_leba / mablagh_factor_total * 100
 
-
     colfa = FactorDetaile.objects.filter(kala__name__contains='کولر')
     mablagh_col = colfa.aggregate(Sum('mablagh_nahaee'))['mablagh_nahaee__sum']
     coldarsad = mablagh_col / mablagh_factor_total * 100
-
-
-
-
 
     print(mablagh_factor_total)
 
@@ -392,26 +374,24 @@ def Home5(request):
 
         'factor': factor,
         'user': user,
-        'mablagh_factor_total':mablagh_factor_total,
-        'count_factor_total':count_factor_total,
-        'factor_detile':factor_detile,
-        'mablagh_yakh':mablagh_yakh,
-        'yakhdarsad':yakhdarsad,
+        'mablagh_factor_total': mablagh_factor_total,
+        'count_factor_total': count_factor_total,
+        'factor_detile': factor_detile,
+        'mablagh_yakh': mablagh_yakh,
+        'yakhdarsad': yakhdarsad,
 
+        'mablagh_leba': mablagh_leba,
+        'lebadarsad': lebadarsad,
 
-        'mablagh_leba':mablagh_leba,
-        'lebadarsad':lebadarsad,
-
-
-        'mablagh_col':mablagh_col,
-        'coldarsad':coldarsad,
+        'mablagh_col': mablagh_col,
+        'coldarsad': coldarsad,
     }
 
+    return render(request, 'homepage.html', context)
 
-
-    return render(request, 'homepage.html',context)
 
 from datetime import timedelta
+
 
 def CreateReport(request):
     start_time = time.time()  # زمان شروع ویو
@@ -563,11 +543,13 @@ from django.utils import timezone
 from django.shortcuts import redirect
 import jdatetime
 
+
 def get_last_day_of_jalali_month(year, month):
     if month == 12:
         return jdatetime.date(year + 1, 1, 1) - timedelta(days=1)  # آخرین روز اسفند
     else:
         return jdatetime.date(year, month + 1, 1) - timedelta(days=1)  # آخرین روز ماه
+
 
 def CreateMonthlyReport(request):
     start_time = time.time()  # زمان شروع ویو
