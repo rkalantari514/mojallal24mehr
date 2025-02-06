@@ -72,8 +72,39 @@ def connect_to_mahak():
     else:
         raise EnvironmentError("The computer name does not match.")
 
+import pyodbc
+from django.http import JsonResponse
+from django.shortcuts import render
+import os
 
-# صفحه عملیات آپدیت
+
+def get_databases(request):
+    try:
+        conn = connect_to_mahak()
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sys.databases WHERE state_desc = 'ONLINE'")
+
+        databases = [row[0] for row in cursor.fetchall()]
+
+        # برای حذف پایگاه داده 'mahak' از لیست
+        databases = [db for db in databases if db != 'mahak']
+
+        cursor.close()
+        conn.close()
+
+        return JsonResponse({'databases': databases})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+
+
+
+
+
+
+
+    # صفحه عملیات آپدیت
 @login_required(login_url='/login')
 def Updatedb(request):
     tables = Mtables.objects.filter(in_use=True)
