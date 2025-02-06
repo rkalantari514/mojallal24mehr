@@ -84,3 +84,6 @@ class MonthlyReport(models.Model):
 
     def __str__(self):
         return f"گزارش ماه {self.month_name} سال {self.year}"
+
+
+

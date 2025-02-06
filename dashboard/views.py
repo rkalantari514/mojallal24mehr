@@ -170,7 +170,7 @@ def Home1(request, *args, **kwargs):
     allday_data = TarazCal(start_date_gregorian, today, data)
 
     # محاسبه داده‌ها برای 8 روز اخیر
-    chart4_data = [TarazCal(today - timedelta(days=i), today - timedelta(days=i), data)['asnad_pardakhtani'] for i in
+    chart7_data = [TarazCal(today - timedelta(days=i), today - timedelta(days=i), data)['asnad_pardakhtani'] for i in
                    range(8)]
 
     # دریافت اطلاعات چک‌ها
@@ -187,46 +187,8 @@ def Home1(request, *args, **kwargs):
     # دریافت گزارش‌ها
     start_date = today - timedelta(days=114)
     end_date = today - timedelta(days=107)
-    reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
-    reports = MasterReport.objects.order_by('-day')[:7]
-
-    # آماده‌سازی داده‌ها برای نمودار
-    data = {
-        'day': [report.day for report in reports],
-        'khales_forosh': [report.khales_forosh for report in reports],
-        'baha_tamam_forosh': [-1 * report.baha_tamam_forosh for report in reports],
-        'sood_navizhe': [report.sood_navizhe for report in reports],
-    }
-
-    df = pd.DataFrame(data)
-    persian_names = {
-        'khales_forosh': 'خالص فروش',
-        'baha_tamam_forosh': 'بهای تمام شده فروش',
-        'sood_navizhe': 'سود ناویژه',
-    }
-
-    df_melted = pd.melt(df, id_vars=['day'], value_vars=list(persian_names.keys()), var_name='Type', value_name='Value')
-    df_melted['Type'] = df_melted['Type'].map(persian_names)
-
-    color_map = {
-        'خالص فروش': '#007bff',
-        'بهای تمام شده فروش': '#FF0000',
-        'سود ناویژه': '#00FF00',
-    }
-
-    # تنظیمات نمودار با فاصله بیشتر بین گروه‌ها
-    fig = px.bar(
-        df_melted,
-        x='day',
-        y='Value',
-        color='Type',
-        barmode='group',
-        color_discrete_map=color_map,
-        labels={'Type': '', 'day': '', 'Value': ''},
-    )
-
-    # افزایش فاصله بین گروه‌ها
-    fig.update_layout(bargap=0.5)  # فاصله بین گروه‌های میله‌ها
+    dayly_reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
+    dayly_reports = MasterReport.objects.order_by('-day')[:7]
 
     # روزهای هفته به زبان فارسی
     day_names_persian = {
@@ -239,87 +201,39 @@ def Home1(request, *args, **kwargs):
         6: 'جمعه',
     }
 
-    # اضافه کردن نام روزها در محور x
-    fig.update_xaxes(tickvals=df['day'], ticktext=[day_names_persian[day.weekday()] for day in df['day']])
 
-    fig.update_layout(
-        font=dict(family="B Nazanin, Arial, sans-serif", size=14, color="#333333"),
-        title_font=dict(family="B Nazanin, Arial, sans-serif", size=20, color="#333333"),
-        legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
-        xaxis=dict(showgrid=True, gridcolor='#e0e0e0'),
-        yaxis=dict(showgrid=True, gridcolor='#e0e0e0'),
-        plot_bgcolor='#FFFFFF',
-        paper_bgcolor='#FFFFFF',
-    )
+    chart1_data = {
+        'labels': [day_names_persian[report.day.weekday()] for report in dayly_reports],  # تبدیل شماره روز به نام روز
+        'khales_forosh': [report.khales_forosh for report in dayly_reports],
+        'baha_tamam_forosh': [report.baha_tamam_forosh for report in dayly_reports],
+        'sood_navizhe': [report.sood_navizhe for report in dayly_reports],
+    }
 
-    # تولید نمودار به فرمت HTML
-    fig_html1 = fig.to_html(full_html=False, include_plotlyjs='cdn')  # Include Plotly via CDN
+    monthly_reports = MonthlyReport.objects.order_by('-year', '-month_name')[:12]
+    chart2_data = {
+        'labels': [f"{report.month_name} {report.year}" for report in monthly_reports],
+        'khales_forosh': [report.khales_forosh for report in monthly_reports],
+        'baha_tamam_forosh': [report.baha_tamam_forosh for report in monthly_reports],
+        'sood_navizhe': [report.sood_navizhe for report in monthly_reports],
+    }
 
-    #
-    # # لیست ماه‌ها از 12 ماه قبل تا امروز
-    # months_list = []
-    # data_monthly = {
-    #     'month_name_farsi': [],
-    #     'khales_forosh': [],
-    #     'baha_tamam_forosh': [],
-    #     'sood_navizhe': [],
-    # }
-    #
-    # for i in range(12, -1, -1):
-    #     # تاریخ شروع و پایان ماه
-    #     start_date_jalali = (jdatetime.datetime.today() - relativedelta(months=i)).replace(day=1)
-    #     end_date_jalali = start_date_jalali.replace(day=start_date_jalali.daysinmonth)
-    #
-    #     # نام شمسی فارسی ماه
-    #     month_name_farsi = month_names_persian[start_date_jalali.month]
-    #
-    #     # تبدیل تاریخ‌ها به میلادی
-    #     start_date_gregorian = start_date_jalali.togregorian()
-    #     end_date_gregorian = end_date_jalali.togregorian()
-    #
-    #     # فیلتر داده‌ها بر اساس ماه
-    #     reports = MasterReport.objects.filter(day__range=[start_date_gregorian, end_date_gregorian])
-    #
-    #     # محاسبه مجموع داده‌های ماهانه
-    #     khales_forosh_sum = sum(report.khales_forosh for report in reports)
-    #     baha_tamam_forosh_sum = sum(report.baha_tamam_forosh for report in reports) * -1
-    #     sood_navizhe_sum = sum(report.sood_navizhe for report in reports)
-    #
-    #     # افزودن داده‌ها به لیست
-    #     months_list.append(month_name_farsi)
-    #     data_monthly['month_name_farsi'].append(month_name_farsi)
-    #     data_monthly['khales_forosh'].append(khales_forosh_sum)
-    #     data_monthly['baha_tamam_forosh'].append(baha_tamam_forosh_sum)
-    #     data_monthly['sood_navizhe'].append(sood_navizhe_sum)
-    #
-    # # تبدیل داده‌ها به DataFrame
-    # df_monthly = pd.DataFrame(data_monthly)
-    # df_melted_monthly = pd.melt(df_monthly, id_vars=['month_name_farsi'], value_vars=['khales_forosh', 'baha_tamam_forosh', 'sood_navizhe'], var_name='Type', value_name='Value')
-    #
-    # # ایجاد نمودار
-    # fig2 = px.bar(
-    #     df_melted_monthly,
-    #     x='month_name_farsi',
-    #     y='Value',
-    #     color='Type',
-    #     barmode='group',
-    #     labels={'Type': '', 'month_name_farsi': 'ماه', 'Value': 'مقدار'}
-    # )
-    #
-    # # تنظیمات نمودار
-    # fig2.update_layout(
-    #     font=dict(family="B Nazanin, Arial, sans-serif", size=14, color="#333333"),
-    #     title_font=dict(family="B Nazanin, Arial, sans-serif", size=20, color="#333333"),
-    #     legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
-    #     xaxis=dict(showgrid=True, gridcolor='#e0e0e0'),
-    #     yaxis=dict(showgrid=True, gridcolor='#e0e0e0'),
-    #     plot_bgcolor='#FFFFFF',
-    #     paper_bgcolor='#FFFFFF',
-    # )
-    #
-    # # تولید نمودار به فرمت HTML
-    # fig_html2 = fig2.to_html(full_html=False, include_plotlyjs='cdn')  # Include Plotly via CDN
-    #
+    chart4_data = {
+        'labels': [day_names_persian[report.day.weekday()] for report in dayly_reports],  # تبدیل شماره روز به نام روز
+        'total_daramad': [report.khales_forosh+report.sayer_daramad for report in dayly_reports],
+        'total_hazineh': [report.baha_tamam_forosh+report.sayer_hazine for report in dayly_reports],
+        'sood_vizhe': [report.sood_vizhe for report in dayly_reports],
+    }
+
+    chart5_data = {
+        'labels': [f"{report.month_name} {report.year}" for report in monthly_reports],
+        'total_daramad': [report.khales_forosh + report.sayer_daramad for report in monthly_reports],
+        'total_hazineh': [report.baha_tamam_forosh + report.sayer_hazine for report in monthly_reports],
+        'sood_vizhe': [report.sood_vizhe for report in monthly_reports],
+    }
+
+
+
+
 
     context = {
         'title': 'داشبورد مدیریتی',
@@ -331,10 +245,11 @@ def Home1(request, *args, **kwargs):
         'yesterday_data': yesterday_data,
         'allday_data': allday_data,
         'chequ_data': chequ_data,
-        # 'chart1_data': chart1_data,
+        'chart1_data': chart1_data,
+        'chart2_data': chart2_data,
         'chart4_data': chart4_data,
-        'fig_html1': fig_html1,
-        # 'fig_html2': fig_html2,
+        'chart5_data': chart5_data,
+        'chart7_data': chart7_data,
     }
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
