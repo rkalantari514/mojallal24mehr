@@ -376,7 +376,7 @@ def CreateReport(request):
     print('current_time.hour')
     print(current_time.hour)
     # بررسی اینکه آیا ساعت 1 بامداد است یا خیر
-    if current_time.hour != 22:
+    if current_time.hour != 1:
         report_days = report_days.order_by('-day')[:10]
 
     # لیست برای به‌روزرسانی
