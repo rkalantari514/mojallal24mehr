@@ -16,7 +16,6 @@ from django.db.models import Sum
 
 
 
-
 @login_required(login_url='/login')
 def TarazKol(request, *args, **kwargs):
     user = request.user
@@ -103,6 +102,7 @@ def extract_first_words(text):
 
 @login_required(login_url='/login')
 def ChequesRecieveTotal(request, *args, **kwargs):
+    from django.db.models import Sum  # این خط را به ابتدای تابع منتقل کنید
     user = request.user
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page='چک های دریافتی', code=0)
