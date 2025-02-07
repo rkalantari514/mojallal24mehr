@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo, \
-    Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve, MyCondition
+    Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve, MyCondition, ChequesPay
 
 
 # Register your models here.
@@ -154,6 +154,30 @@ class ConditionAdmin(admin.ModelAdmin):
     list_filter = ('is_active',)  # امکان فیلتر کردن بر اساس وضعیت فعال بودن
     search_fields = ('kol', 'moin', 'tafzili')
     list_editable = ['kol', 'moin', 'tafzili', 'contain', 'equal_to', 'is_active']
+
+
+
+
+
+
+from django.contrib import admin
+from .models import ChequesRecieve
+
+@admin.register(ChequesPay)
+class ChequesPayAdmin(admin.ModelAdmin):
+    list_display = (
+        'id_mahak', 'cheque_id', 'cheque_row', 'issuance_tarik', 'issuance_date',
+        'cheque_tarik', 'cheque_date', 'cost', 'bank_code', 'description',
+        'status', 'firstperiod', 'cheque_id_counter', 'per_code',
+        'recieve_status', 'total_mandeh', 'last_sanad_detaile'
+    )
+    list_filter = ('status', 'firstperiod', 'recieve_status', 'cheque_date')
+    search_fields = ('cheque_id', 'per_code', 'description')
+    list_per_page = 20
+
+
+
+
 
 
 admin.site.register(Mtables, MtablesAdmin)

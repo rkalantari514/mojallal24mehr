@@ -4,7 +4,7 @@ from django.db.models import Min
 from datetime import datetime
 from custom_login.models import UserLog
 from dashboard.views import CreateReport, CreateMonthlyReport
-from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category, Sanad, SanadDetail, AccCoding
+from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category, Sanad, SanadDetail, AccCoding, ChequesPay
 from django.shortcuts import render
 from .forms import CategoryForm, KalaForm
 from .models import FactorDetaile
@@ -119,6 +119,7 @@ def Updatedb(request):
         'Sanad_detail': 'update/sanaddetail',
         'AccTotals': 'update/acccoding',
         'Cheques_Recieve': 'update/chequesrecieve',
+        'Cheque_Pay': 'update/chequepay',
 
     }
 
@@ -169,6 +170,7 @@ def Updateall(request):
         'Sanad_detail': UpdateSanadDetail,
         'AccTotals': UpdateAccCoding,
         'Cheques_Recieve': Cheques_Recieve,
+        'Cheque_Pay': Cheque_Pay,
     }
 
     responses = []
@@ -3002,6 +3004,176 @@ def Cheques_Recieve(request):
     print(f"زمان آپدیت جدول: {update_time:.2f} ثانیه")
 
     return redirect('/updatedb')
+
+
+import jdatetime
+from decimal import Decimal
+import time
+from django.shortcuts import redirect
+
+import jdatetime
+from decimal import Decimal
+import time
+from django.shortcuts import redirect
+
+
+def Cheque_Pay(request):
+    t0 = time.time()
+    print('شروع آپدیت چک‌های پرداختی---------------------------------------------------')
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    t1 = time.time()
+
+    # گرفتن تمامی داده‌ها از دیتابیس خارجی
+    cursor.execute(
+        "SELECT [ID], [ChequeID], [ChequeRow], [IssuanceDate], [ChequeDate], "
+        "[Cost], [BankCode], [Description], [status], [FirstPeriod], "
+        "[ChequeIDCounter], [PerCode], [RecieveStatus] "
+        "FROM [mahak].[dbo].[Cheque_Pay]"
+    )
+    mahak_data = cursor.fetchall()
+
+    existing_in_mahak = {int(row[0]) for row in mahak_data}
+    print('تعداد رکوردهای موجود در Mahak:', len(existing_in_mahak))
+
+    cheques_to_create = []
+    cheques_to_update = []
+    current_cheques = {cheque.id_mahak: cheque for cheque in ChequesPay.objects.all()}
+    BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
+
+    for counter, row in enumerate(mahak_data, start=1):
+        print(counter)
+
+        # بررسی خروجی row[9]
+        print(row[9])  # برای دیباگ
+        # fp = False
+        # if row[9] == True:
+        #     fp == True
+
+        id_mahak = int(row[0])
+        cheque_id_str = row[1]
+        cheque_row = int(row[2])
+
+        # گرفتن تاریخ شمسی از دیتای خارجی
+        issuance_date_str = row[3]
+        cheque_date_str = row[4]
+
+        # تبدیل تاریخ شمسی به میلادی
+        issuance_date = (
+            jdatetime.datetime.strptime(issuance_date_str, "%Y/%m/%d").togregorian() if issuance_date_str else None
+        )
+        cheque_date = (
+            jdatetime.datetime.strptime(cheque_date_str, "%Y/%m/%d").togregorian() if cheque_date_str else None
+        )
+
+        # تاریخ شمسی برای ذخیره در fields
+        issuance_tarik = issuance_date_str  # ذخیره تاریخ شمسی
+        cheque_tarik = cheque_date_str  # ذخیره تاریخ شمسی
+
+        cost = Decimal(row[5] or '0.00')
+        bank_code = int(row[6])  # فرض بر این است که این مقدار عددی است
+        description = row[7] or ''
+        status = row[8] or '0'
+
+        # first_period = fp  # استفاده از مقدار واقعی
+        first_period = row[9]  # استفاده از مقدار واقعی
+        print(first_period,'===============')
+        cheque_id_counter = int(row[10])  # فرض بر این است که این مقدار عددی است
+        per_code = row[11] or '0'
+        recieve_status = int(row[12])  # فرض بر این است که این مقدار عددی است
+
+        # بررسی وجود چک در پایگاه داده Django
+        if id_mahak in current_cheques:
+            cheque = current_cheques[id_mahak]
+            # بررسی تغییرات
+            if (cheque.cheque_id != cheque_id_str or cheque.cheque_row != cheque_row or
+                    cheque.issuance_tarik != issuance_tarik or cheque.cheque_tarik != cheque_tarik or
+                    cheque.cost != cost or cheque.bank_code != bank_code or
+                    cheque.description != description or cheque.status != status or
+                    cheque.firstperiod != first_period or cheque.cheque_id_counter != cheque_id_counter or
+                    cheque.per_code != per_code or cheque.recieve_status != recieve_status):
+                cheque.cheque_id = cheque_id_str
+                cheque.cheque_row = cheque_row
+                cheque.issuance_tarik = issuance_tarik  # نگهداری تاریخ شمسی
+                cheque.cheque_tarik = cheque_tarik  # نگهداری تاریخ شمسی
+                cheque.cost = cost
+                cheque.bank_code = bank_code
+                cheque.description = description
+                cheque.status = status
+                cheque.firstperiod = first_period
+                cheque.cheque_id_counter = cheque_id_counter
+                cheque.per_code = per_code
+                cheque.recieve_status = recieve_status
+                cheques_to_update.append(cheque)
+        else:
+            # ایجاد چک جدید
+            cheques_to_create.append(ChequesPay(
+                id_mahak=id_mahak, cheque_id=cheque_id_str, cheque_row=cheque_row,
+                issuance_tarik=issuance_tarik, cheque_tarik=cheque_tarik,
+                issuance_date=issuance_date, cheque_date=cheque_date,
+                cost=cost, bank_code=bank_code, description=description,
+                status=status, firstperiod=first_period,
+                cheque_id_counter=cheque_id_counter,
+                per_code=per_code, recieve_status=recieve_status
+            ))
+
+            # Bulk create new cheque details
+    if cheques_to_create:
+        print('شروع به ساخت چک‌های جدید')
+        ChequesPay.objects.bulk_create(cheques_to_create, batch_size=BATCH_SIZE)
+
+        # Bulk update existing cheque details
+    if cheques_to_update:
+        print('شروع به آپدیت چک‌های موجود')
+        ChequesPay.objects.bulk_update(
+            cheques_to_update,
+            ['cheque_id', 'cheque_row', 'issuance_tarik', 'cheque_tarik',
+             'cost', 'bank_code', 'description', 'status', 'firstperiod',
+             'cheque_id_counter', 'per_code', 'recieve_status'],
+            batch_size=BATCH_SIZE
+        )
+
+        # شناسایی رکوردهای حذف‌شده
+    ids_in_external_db = {int(row[0]) for row in mahak_data}
+    ids_in_django_db = {cheque.id_mahak for cheque in current_cheques.values()}
+    ids_to_delete = ids_in_django_db - ids_in_external_db
+
+    # حذف رکوردهای شناسایی‌شده
+    if ids_to_delete:
+        ChequesPay.objects.filter(id_mahak__in=ids_to_delete).delete()
+        print(f"رکوردهای حذف‌شده: {len(ids_to_delete)} رکورد حذف شد.")
+
+        # محاسبه زمان اجرای کل
+    tend = time.time()
+    total_time = tend - t0
+    db_time = t1 - t0
+    update_time = tend - t1
+
+    # به‌روزرسانی اطلاعات در جدول Mtables
+    table = Mtables.objects.filter(name='Cheque_Pay').last()
+    table.last_update_time = timezone.now()
+    table.update_duration = update_time
+    cursor.execute("SELECT COUNT(*) FROM Cheque_Pay")
+    row_count = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Cheque_Pay'")
+    column_count = cursor.fetchone()[0]
+    table.row_count = row_count
+    table.column_count = column_count
+    table.save()
+
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    print(f"زمان اتصال به دیتابیس: {db_time:.2f} ثانیه")
+    print(f"زمان آپدیت جدول: {update_time:.2f} ثانیه")
+
+    return redirect('/updatedb')
+
+
+
+
+
+
+
+
 
 
 

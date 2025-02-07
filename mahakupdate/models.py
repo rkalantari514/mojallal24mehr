@@ -587,14 +587,53 @@ class ChequesRecieve(models.Model):
         verbose_name_plural = 'چکهای دریافتی'
 
     def sanad_detail(self):
-        sd = SanadDetail.objects.filter(cheque_id=self.cheque_id).order_by('date', 'code', 'radif').last()
+        sd = SanadDetail.objects.filter(cheque_id=self.cheque_id,kol=101).order_by('date', 'code', 'radif').last()
         return sd
 
     from django.db.models import Sum, F
 
     def mandeh(self):
         # اگر می خواهید از cache استفاده کنید، می توانید از cache استفاده کنید.
-        totals = SanadDetail.objects.filter(cheque_id=self.cheque_id).aggregate(
+        totals = SanadDetail.objects.filter(cheque_id=self.cheque_id,kol=101).aggregate(
+            total_bes=Sum('bes'),
+            total_bed=Sum('bed')
+        )
+        return (totals['total_bes'] or 0) - (totals['total_bed'] or 0)
+
+
+
+class ChequesPay(models.Model):
+    id_mahak = models.AutoField(primary_key=True, verbose_name="شناسه")
+    cheque_id = models.CharField(max_length=255, verbose_name="شناسه چک")  # یا مقدار max_length مناسب
+    cheque_row = models.IntegerField(verbose_name="ردیف چک")
+    issuance_tarik = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ صدور شمسی')
+    issuance_date = models.DateField(verbose_name="تاریخ صدور میلادی")
+    cheque_tarik = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ چک شمسی')
+    cheque_date = models.DateField(verbose_name="تاریخ چک میلادی")
+    cost = models.DecimalField(max_digits=14, decimal_places=2, verbose_name="مبلغ")
+    bank_code = models.IntegerField(verbose_name="کد بانک")
+    description = models.TextField(verbose_name="توضیحات")
+    status = models.CharField(max_length=50, verbose_name="وضعیت")
+    firstperiod=models.BooleanField(verbose_name='چک اول دوره')
+    cheque_id_counter=models.IntegerField(verbose_name="تعداد آی دی چک")
+    per_code = models.CharField(max_length=50, verbose_name="کد شخص")
+    recieve_status=models.IntegerField(verbose_name="وضعیت دریافت")
+    total_mandeh = models.DecimalField(max_digits=30, decimal_places=10, null=True, verbose_name='مانده کل چک')
+    last_sanad_detaile = models.ForeignKey(SanadDetail, on_delete=models.SET_NULL, blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'چک پرداختی'
+        verbose_name_plural = 'چکهای پرداختی'
+
+    def sanad_detail(self):
+        sd = SanadDetail.objects.filter(cheque_id=self.cheque_id,kol=200).order_by('date', 'code', 'radif').last()
+        return sd
+
+    from django.db.models import Sum, F
+
+    def mandeh(self):
+        # اگر می خواهید از cache استفاده کنید، می توانید از cache استفاده کنید.
+        totals = SanadDetail.objects.filter(cheque_id=self.cheque_id,kol=200).aggregate(
             total_bes=Sum('bes'),
             total_bed=Sum('bed')
         )
