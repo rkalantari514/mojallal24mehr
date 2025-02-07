@@ -127,7 +127,6 @@ def ChequesRecieveTotal(request, *args, **kwargs):
     # جمع مقادیر curramount برای kol های 400 و 404
     total_a = SanadDetail.objects.filter(kol=400).aggregate(total=Sum('curramount'))['total'] or 0
     total_b = SanadDetail.objects.filter(kol=404).aggregate(total=Sum('curramount'))['total'] or 0
-
     # محاسبه مجموع
     total_sum = total_a + total_b
 
