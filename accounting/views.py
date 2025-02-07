@@ -122,11 +122,21 @@ def ChequesRecieveTotal(request, *args, **kwargs):
     pastmandeh = (pastchequesr['total_mandeh_sum'] / 10000000) * -1
     postmandeh = (postchequesr['total_mandeh_sum'] / 10000000) * -1
 
+    from django.db.models import Sum
 
-    a=SanadDetail.objects.filter(kol=400).aggregate(curramount_sum=Sum('curramount'))['curramount_sum']
-    print(a)
-    ceque_ratio=tmandeh/a*10000000*100
-    print(ceque_ratio)
+    # جمع مقادیر curramount برای kol های 400 و 404
+    total_a = SanadDetail.objects.filter(kol=400).aggregate(total=Sum('curramount'))['total'] or 0
+    total_b = SanadDetail.objects.filter(kol=404).aggregate(total=Sum('curramount'))['total'] or 0
+
+    # محاسبه مجموع
+    total_sum = total_a + total_b
+
+    # محاسبه نسبت ceque_ratio
+    if total_sum != 0:
+        ceque_ratio = (tmandeh / total_sum) * 10000000 * 100
+    else:
+        ceque_ratio = 0
+
     total_data = {
         'tmandeh': tmandeh,
         'pastmandeh': pastmandeh,

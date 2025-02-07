@@ -24964,3 +24964,42 @@ body.dark-mode-active footer a {
 body.dark-mode-active footer a:hover {
     color: #f39c12 !important; /* رنگ لینک‌ها هنگام هاور برای جلب توجه */
 }
+
+
+
+body.dark-mode-active card {
+		background: #0c60d8;
+		.card-title {
+			color: #FFFFFF;
+		}
+		.card-subtitle {
+			color: #FFFFFF;
+		}
+		.card-header {
+			border-bottom-color: rgba(255, 255, 255, 0.1);
+			color: #FFFFFF;
+		}
+		.card-footer {
+			border-top-color: rgba(255, 255, 255, 0.1);
+			color: #8195a6;
+		}
+		.text-muted {
+			color: #586d7f !important;
+		}
+	}
+
+
+
+body.dark-mode-active card.bg-light {
+		color: #0c1624;
+		.card-title {
+			color: #141515;
+		}
+		.card-subtitle {
+			color: #141515;
+		}
+		.card-header {
+			color: #000;
+			border-bottom-color: #E1E1E1;
+		}
+	}
