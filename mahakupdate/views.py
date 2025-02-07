@@ -2267,6 +2267,8 @@ def UpdateSanadDetail(request):
 
     existing_in_mahak = {(int(row[0]), int(row[1])) for row in mahakt_data}
     print('تعداد رکوردهای موجود در Mahak:', len(existing_in_mahak))
+    send_to_admin(f'sanad detile {len(existing_in_mahak)}')
+
 
     sanads_to_create = []
     sanads_to_update = []
@@ -2410,6 +2412,8 @@ def UpdateSanadDetail(request):
 
     import re
 
+
+    # بررسی اسناد دریافتنی
     # پر کردن cheque_id و به‌روزرسانی is_analiz
     to_analiz = SanadDetail.objects.filter(kol=101, is_analiz=False)
     # to_analiz = SanadDetail.objects.filter(kol=101)
@@ -2440,7 +2444,35 @@ def UpdateSanadDetail(request):
     if updates:
         SanadDetail.objects.bulk_update(updates, ['cheque_id', 'is_analiz'], batch_size=BATCH_SIZE)
 
+    # بررسی اسناد پرداختنی
+    # پر کردن cheque_id و به‌روزرسانی is_analiz
+    to_analiz = SanadDetail.objects.filter(kol=200, is_analiz=False)
+    # to_analiz = SanadDetail.objects.filter(kol=101)
 
+    # الگوی یافتن شناسه چک
+    cheque_pattern = r'(چک\s*|چک\s*پرداختي\s*اول\s*دوره|چک\s*پرداختي|عودت\s*چک\s*پرداختي).*?\((\d+)\)'
+    # ایجاد یک لیست برای ذخیره تغییرات
+    updates = []
+
+    for t in to_analiz:
+        syscomment = t.syscomment
+        cheque_id = None  # مقدار پیش‌فرض برای cheque_id
+
+        if syscomment:  # بررسی وجود مقدار در syscomment
+            match = re.search(cheque_pattern, syscomment)
+            if match:
+                cheque_id = match.group(2)  # ذخیره شناسه چک
+
+        # به‌روزرسانی ویژگی‌ها
+        t.cheque_id = cheque_id
+        t.is_analiz = cheque_id is not None  # اگر شناسه چک پیدا شده باشد، is_analiz را به True تغییر دهید
+
+        # افزودن به لیست تغییرات
+        updates.append(t)
+
+        # ذخیره تغییرات در دیتابیس
+    if updates:
+        SanadDetail.objects.bulk_update(updates, ['cheque_id', 'is_analiz'], batch_size=BATCH_SIZE)
 
     # محاسبه زمان اجرای کل
     tend = time.time()
@@ -3040,7 +3072,13 @@ def Cheque_Pay(request):
     cheques_to_update = []
     current_cheques = {cheque.id_mahak: cheque for cheque in ChequesPay.objects.all()}
     BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
-
+    sanad_details = SanadDetail.objects.filter(cheque_id__in=[row[1] for row in mahak_data]).order_by('date', 'code',
+                                                                                                      'radif')
+    sanad_dict = {}
+    for sd in sanad_details:
+        if sd.cheque_id not in sanad_dict:
+            sanad_dict[sd.cheque_id] = []
+        sanad_dict[sd.cheque_id].append(sd)
     for counter, row in enumerate(mahak_data, start=1):
         print(counter)
 
@@ -3082,6 +3120,18 @@ def Cheque_Pay(request):
         per_code = row[11] or '0'
         recieve_status = int(row[12])  # فرض بر این است که این مقدار عددی است
 
+            # محاسبه مانده کل چک
+        total_bes = sum(sd.bes for sd in sanad_dict.get(cheque_id_str, []))
+        total_bed = sum(sd.bed for sd in sanad_dict.get(cheque_id_str, []))
+        total_mandeh = total_bes - total_bed
+
+        # دریافت آخرین جزئیات سند
+        last_sanad = sanad_dict.get(cheque_id_str, [])[-1] if sanad_dict.get(cheque_id_str) else None
+
+
+
+
+
         # بررسی وجود چک در پایگاه داده Django
         if id_mahak in current_cheques:
             cheque = current_cheques[id_mahak]
@@ -3091,7 +3141,7 @@ def Cheque_Pay(request):
                     cheque.cost != cost or cheque.bank_code != bank_code or
                     cheque.description != description or cheque.status != status or
                     cheque.firstperiod != first_period or cheque.cheque_id_counter != cheque_id_counter or
-                    cheque.per_code != per_code or cheque.recieve_status != recieve_status):
+                    cheque.total_mandeh != total_mandeh or cheque.last_sanad_detaile != last_sanad or cheque.per_code != per_code or cheque.recieve_status != recieve_status):
                 cheque.cheque_id = cheque_id_str
                 cheque.cheque_row = cheque_row
                 cheque.issuance_tarik = issuance_tarik  # نگهداری تاریخ شمسی
@@ -3102,6 +3152,8 @@ def Cheque_Pay(request):
                 cheque.status = status
                 cheque.firstperiod = first_period
                 cheque.cheque_id_counter = cheque_id_counter
+                cheque.total_mandeh = total_mandeh
+                cheque.last_sanad_detaile = last_sanad
                 cheque.per_code = per_code
                 cheque.recieve_status = recieve_status
                 cheques_to_update.append(cheque)
@@ -3114,7 +3166,8 @@ def Cheque_Pay(request):
                 cost=cost, bank_code=bank_code, description=description,
                 status=status, firstperiod=first_period,
                 cheque_id_counter=cheque_id_counter,
-                per_code=per_code, recieve_status=recieve_status
+                per_code=per_code, recieve_status=recieve_status,
+                total_mandeh=total_mandeh, last_sanad_detaile=last_sanad
             ))
 
             # Bulk create new cheque details
@@ -3129,7 +3182,8 @@ def Cheque_Pay(request):
             cheques_to_update,
             ['cheque_id', 'cheque_row', 'issuance_tarik', 'cheque_tarik',
              'cost', 'bank_code', 'description', 'status', 'firstperiod',
-             'cheque_id_counter', 'per_code', 'recieve_status'],
+             'cheque_id_counter', 'per_code', 'recieve_status',
+             'total_mandeh', 'last_sanad_detaile'],
             batch_size=BATCH_SIZE
         )
 

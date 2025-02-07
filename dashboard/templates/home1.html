@@ -363,19 +363,19 @@
                         <div class="row">
                             <div class="col-4 col-sm-4 mb-15 text-center">
                                 <div class="counter counter-small">
-                                    {% if today_data.asnad_pardakhtani > yesterday_data.asnad_pardakhtani %}
-                                        <h4 class="timer text-danger" data-to="{{ today_data.asnad_pardakhtani }}"
+                                    {% if today_data.asnad_daryaftani > yesterday_data.asnad_daryaftani %}
+                                        <h4 class="timer text-danger" data-to="{{ today_data.asnad_daryaftani }}"
                                             data-speed="5000">
-                                            {{ today_data.asnad_pardakhtani }}
+                                            {{ today_data.asnad_daryaftani }}
                                         </h4>
                                         <label class="text-capitalize mt-0"> <i class="fa fa-long-arrow-up text-danger"
                                                                                 aria-hidden="true"></i>
                                             برآیند امروز ({{ last_update_time|timesince }})قبل
                                         </label>
                                     {% else %}
-                                        <h4 class="timer text-success" data-to="{{ today_data.asnad_pardakhtani }}"
+                                        <h4 class="timer text-success" data-to="{{ today_data.asnad_daryaftani }}"
                                             data-speed="5000">
-                                            {{ today_data.asnad_pardakhtani }}
+                                            {{ today_data.asnad_daryaftani }}
                                         </h4>
                                         <label class="text-capitalize mt-0"> <i class="fa fa-arrow-down text-success"
                                                                                 aria-hidden="true"></i>
@@ -386,20 +386,20 @@
                             </div>
                             <div class="col-4 col-sm-4 mb-15 text-center">
                                 <div class="counter counter-small">
-                                    {% if today_data.asnad_pardakhtani > yesterday_data.asnad_pardakhtani %}
-                                        <h4 class="timer text-success" data-to="{{ yesterday_data.asnad_pardakhtani }}"
-                                            data-speed="5000">{{ yesterday_data.asnad_pardakhtani|floatformat:0 }}</h4>
+                                    {% if today_data.asnad_daryaftani > yesterday_data.asnad_daryaftani %}
+                                        <h4 class="timer text-success" data-to="{{ yesterday_data.asnad_daryaftani }}"
+                                            data-speed="5000">{{ yesterday_data.asnad_daryaftani|floatformat:0 }}</h4>
                                     {% else %}
-                                        <h4 class="timer text-danger" data-to="{{ yesterday_data.asnad_pardakhtani }}"
-                                            data-speed="5000">{{ yesterday_data.asnad_pardakhtani }}</h4>
+                                        <h4 class="timer text-danger" data-to="{{ yesterday_data.asnad_daryaftani }}"
+                                            data-speed="5000">{{ yesterday_data.asnad_daryaftani }}</h4>
                                     {% endif %}
                                     <label class="text-capitalize mt-0">برآیند دیروز </label>
                                 </div>
                             </div>
                             <div class="col-4 col-sm-4 mb-15 text-center">
                                 <div class="counter counter-small">
-                                    <h4 class="timer text-danger" data-to="{{ allday_data.asnad_pardakhtani }}"
-                                        data-speed="5000">{{ allday_data.asnad_pardakhtani }}</h4>
+                                    <h4 class="timer text-danger" data-to="{{ allday_data.asnad_daryaftani }}"
+                                        data-speed="5000">{{ allday_data.asnad_daryaftani }}</h4>
                                     <label class="text-capitalize mt-0"> مانده </label>
                                 </div>
                             </div>

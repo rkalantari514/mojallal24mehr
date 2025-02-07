@@ -173,7 +173,7 @@ class ChequesPayAdmin(admin.ModelAdmin):
     )
     list_filter = ('status', 'firstperiod', 'recieve_status', 'cheque_date')
     search_fields = ('cheque_id', 'per_code', 'description')
-    list_per_page = 20
+    list_per_page = 100
 
 
 

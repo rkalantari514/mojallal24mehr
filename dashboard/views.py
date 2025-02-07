@@ -42,7 +42,8 @@ def TarazCal(fday, lday, data):
     sayer_daramad = 0
     daily_sood_navizhe = []  # لیست برای ذخیره مقادیر روزانه
     daily_sood_vizhe = []  # لیست برای ذخیره مقادیر روزانه
-    asnad_pardakhtani = []  # لیست برای ذخیره مقادیر asnad_pardakhtani
+    asnad_daryaftan = []  # لیست برای ذخیره مقادیر asnad_daryaftan
+    asnad_pardakhtan = []  # لیست برای ذخیره مقادیر asnad_pardakhtan
 
     for current_date in day_range:
         baha_tamam_forosh_d = current_data.get((current_date, 500), 0)
@@ -51,7 +52,8 @@ def TarazCal(fday, lday, data):
         sayer_daramad_d = current_data.get((current_date, 401), 0)
         barghasht_az_forosh = current_data.get((current_date, 403), 0)  # منفی است
         khales_forosh_d = daramad_forosh + barghasht_az_forosh
-        asnad_pardakhtan = current_data.get((current_date, 101), 0)  # محاسبه asnad_pardakhtani
+        asnad_daryaftani = current_data.get((current_date, 101), 0)  # محاسبه asnad_daryaftani
+        asnad_pardakhtani = current_data.get((current_date, 200), 0)  # محاسبه asnad_pardakhtani
 
         # محاسبه مجموع روزانه
         daily_total = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh_d
@@ -61,15 +63,15 @@ def TarazCal(fday, lday, data):
 
         if daramad_forosh != 0 or baha_tamam_forosh_d != 0:
             active_day += 1
-
         sood_navizhe += daily_total
         sood_vizhe += daily_total_vizhe
         khales_forosh += khales_forosh_d
         baha_tamam_forosh += baha_tamam_forosh_d
         sayer_hazine += sayer_hazine_d
         sayer_daramad += sayer_daramad_d
-        # ذخیره مقدار asnad_pardakhtani با علامت منفی
-        asnad_pardakhtani.append(-asnad_pardakhtan)
+        # ذخیره مقدار asnad_daryaftani با علامت منفی
+        asnad_daryaftan.append(-asnad_daryaftani)
+        asnad_pardakhtan.append(-asnad_pardakhtani)
 
     # محاسبه حداقل و حداکثر
     min_sood_navizhe = min(daily_sood_navizhe) / 10000000 if daily_sood_navizhe else 0
@@ -92,7 +94,8 @@ def TarazCal(fday, lday, data):
         'ave_sood_vizhe': sood_vizhe / active_day / 10000000 if active_day > 0 else 0,
         'min_sood_vizhe': min_sood_vizhe,
         'max_sood_vizhe': max_sood_vizhe,
-        'asnad_pardakhtani': sum(asnad_pardakhtani) / 10000000,  # جمع مقادیر asnad_pardakhtani
+        'asnad_daryaftani': sum(asnad_daryaftan) / 10000000,  # جمع مقادیر asnad_daryaftani
+        'asnad_pardakhtani': sum(asnad_pardakhtan) / 10000000,  # جمع مقادیر asnad_pardakhtani
     }
     return to_return
 
@@ -107,6 +110,7 @@ def TarazCalFromReport(day):
         'sayer_daramad': repo.sayer_daramad,
         'sood_navizhe': repo.sood_navizhe,
         'sood_vizhe': repo.sood_vizhe,
+        'asnad_daryaftani': repo.daryaftani,
         'asnad_pardakhtani': repo.asnad_pardakhtani,  # جمع مقادیر asnad_pardakhtani
     }
     return to_return
@@ -161,7 +165,7 @@ def Home1(request, *args, **kwargs):
         is_active=True,
         date__range=(start_date_gregorian, today)
     ).filter(
-        Q(kol__in=[500, 400, 403, 101, 401, 501])
+        Q(kol__in=[500, 400, 403, 101, 401, 501,200])
     ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
 
     # محاسبه داده‌ها
@@ -170,7 +174,7 @@ def Home1(request, *args, **kwargs):
     allday_data = TarazCal(start_date_gregorian, today, data)
 
     # محاسبه داده‌ها برای 8 روز اخیر
-    chart7_data = [TarazCal(today - timedelta(days=i), today - timedelta(days=i), data)['asnad_pardakhtani'] for i in
+    chart7_data = [TarazCal(today - timedelta(days=i), today - timedelta(days=i), data)['asnad_daryaftani'] for i in
                    range(8)]
 
     # دریافت اطلاعات چک‌ها
@@ -357,6 +361,7 @@ def CreateReport(request):
                 sayer_daramad=0,
                 sood_navizhe=0,
                 sood_vizhe=0,
+                asnad_daryaftani=0,
                 asnad_pardakhtani=0,
             ))
 
@@ -368,9 +373,10 @@ def CreateReport(request):
     report_days = MasterReport.objects.filter(day__range=(start_date_gregorian, end_date_gregorian))
 
     current_time = datetime.now()
-
+    print('current_time.hour')
+    print(current_time.hour)
     # بررسی اینکه آیا ساعت 1 بامداد است یا خیر
-    if current_time.hour != 1:
+    if current_time.hour != 22:
         report_days = report_days.order_by('-day')[:10]
 
     # لیست برای به‌روزرسانی
@@ -385,7 +391,7 @@ def CreateReport(request):
             is_active=True,
             date__range=(current_date, current_date)
         ).filter(
-            Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101) | Q(kol=401) | Q(kol=501)
+            Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101) | Q(kol=401) | Q(kol=501)| Q(kol=200)
         ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
 
         # محاسبه داده‌ها برای روزهای مختلف
@@ -397,6 +403,7 @@ def CreateReport(request):
         report.sayer_daramad = today_data['sayer_daramad']
         report.sood_navizhe = today_data['sood_navizhe']
         report.sood_vizhe = today_data['sood_vizhe']
+        report.asnad_daryaftani = today_data['asnad_daryaftani']
         report.asnad_pardakhtani = today_data['asnad_pardakhtani']
 
         reports_to_update.append(report)  # افزودن به لیست برای بروزرسانی در batch
@@ -410,6 +417,7 @@ def CreateReport(request):
             'sayer_daramad',
             'sood_navizhe',
             'sood_vizhe',
+            'asnad_daryaftani',
             'asnad_pardakhtani'
         ])
 
@@ -559,7 +567,7 @@ def CreateMonthlyReport(request):
             is_active=True,
             date__range=(current_date_start, current_date_end)
         ).filter(
-            Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101) | Q(kol=401) | Q(kol=501)
+            Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101) | Q(kol=401) | Q(kol=501)| Q(kol=200)
         ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
 
         # محاسبه داده‌ها برای ماه‌های مختلف
@@ -571,6 +579,7 @@ def CreateMonthlyReport(request):
         report.sayer_daramad = month_data['sayer_daramad']
         report.sood_navizhe = month_data['sood_navizhe']
         report.sood_vizhe = month_data['sood_vizhe']
+        report.asnad_daryaftani = month_data['asnad_daryaftani']
         report.asnad_pardakhtani = month_data['asnad_pardakhtani']
 
         reports_to_update.append(report)  # افزودن به لیست برای بروزرسانی در batch
@@ -584,6 +593,7 @@ def CreateMonthlyReport(request):
             'sayer_daramad',
             'sood_navizhe',
             'sood_vizhe',
+            'asnad_daryaftani',
             'asnad_pardakhtani'
         ])
 

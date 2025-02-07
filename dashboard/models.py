@@ -46,6 +46,7 @@ class MasterReport(models.Model):
     sayer_daramad = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='سایر درآمد ها')
     sood_navizhe = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='سود ناویژه')
     sood_vizhe = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='سود ویژه')
+    asnad_daryaftani = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='اسناد دریافتنی')
     asnad_pardakhtani = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='اسناد پرداختنی')
     # daramad_forosh = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='درآمد از فروش')
 
@@ -75,6 +76,7 @@ class MonthlyReport(models.Model):
     sayer_daramad = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='سایر درآمد ها')
     sood_navizhe = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='سود ناویژه')
     sood_vizhe = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='سود ویژه')
+    asnad_daryaftani = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='اسناد دریافتنی')
     asnad_pardakhtani = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='اسناد پرداختنی')
     # daramad_forosh = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='درآمد از فروش')
 
