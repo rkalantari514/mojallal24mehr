@@ -71,7 +71,7 @@ def TarazCal(fday, lday, data):
         sayer_daramad += sayer_daramad_d
         # ذخیره مقدار asnad_daryaftani با علامت منفی
         asnad_daryaftan.append(-asnad_daryaftani)
-        asnad_pardakhtan.append(-asnad_pardakhtani)
+        asnad_pardakhtan.append(asnad_pardakhtani)
 
     # محاسبه حداقل و حداکثر
     min_sood_navizhe = min(daily_sood_navizhe) / 10000000 if daily_sood_navizhe else 0
@@ -203,7 +203,7 @@ def Home1(request, *args, **kwargs):
     start_date = today - timedelta(days=114)
     end_date = today - timedelta(days=107)
     dayly_reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
-    dayly_reports = MasterReport.objects.order_by('-day')[:7]
+    dayly_reports = MasterReport.objects.order_by('-day')[:7][::-1]
 
     # روزهای هفته به زبان فارسی
     day_names_persian = {
@@ -224,7 +224,7 @@ def Home1(request, *args, **kwargs):
         'sood_navizhe': [report.sood_navizhe for report in dayly_reports],
     }
 
-    monthly_reports = MonthlyReport.objects.order_by('-year', '-month_name')[:12]
+    monthly_reports = MonthlyReport.objects.order_by('-year', '-month')[:12][::-1]
     chart2_data = {
         # 'labels': [f"{report.month_name} {report.year}" for report in monthly_reports],
         'labels': [f"{report.month_name}" for report in monthly_reports],
