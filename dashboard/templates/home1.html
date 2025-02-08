@@ -15,6 +15,42 @@
         }
 
     </style>
+    <style>
+        .calendar-table .fc-day-top {
+            position: relative; /* برای قرار دادن فرزندان */
+            padding: 5px; /* کمی فاصله برای زیبایی */
+        }
+
+        .calendar-table .fc-day-number {
+            font-weight: bold;
+            display: block;
+            margin: 0;
+            padding: 0; /* لغو حاشیه */
+            text-align: left; /* تراز چپ */
+        }
+
+        .calendar-table .fc-recive-number,
+        .calendar-table .fc-pay-number {
+            font-size: 1.2rem; /* اندازه متن */
+            display: block; /* تقسیم نمایش به سطرهای جدید */
+        }
+
+        .calendar-table .fc-recive-number {
+            color: #007bff; /* رنگ سبد خرید */
+            text-align: right; /* تراز راست برای شماره دریافتی */
+        }
+
+        .calendar-table .fc-pay-number {
+            color: #df0808; /* رنگ  */
+            text-align: right; /* تراز راست برای شماره پرداختی */
+        }
+
+        .calendar-table th {
+            border: 1px solid #fdd49a;
+            background-color: transparent !important; /* حذف رنگ پس‌زمینه */
+        }
+    </style>
+
 
     <div class="content-wrapper">
 
@@ -63,63 +99,63 @@
                                 </div>
                             </div>
                         </div>
-{#                        <div class="divider"></div>#}
-{#                        <h6 class="text-capitalize mt-0 text-center text-primary">خالص در آمد فروش</h6>#}
-{#                        <div class="row">#}
-{#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
-{#                                <div class="counter counter-small">#}
-{#                                    <h4 class="timer text-primary" data-to="{{ today_data.khales_forosh }}"#}
-{#                                        data-speed="5000">{{ today_data.khales_forosh }}</h4>#}
-{#                                    <label class="text-capitalize mt-0">امروز ({{ last_update_time|timesince }})#}
-{#                                        قبل</label>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
-{#                                <div class="counter counter-small">#}
-{#                                    <h4 class="timer text-success" data-to="{{ yesterday_data.khales_forosh }}"#}
-{#                                        data-speed="5000">{{ yesterday_data.khales_forosh }}</h4>#}
-{#                                    <label class="text-capitalize mt-0">دیروز </label>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
-{#                                <a href="/balance-sheet-moin/400" target="_blank">#}
-{#                                    <div class="counter counter-small">#}
-{#                                        <h4 class="timer text-danger" data-to="{{ allday_data.khales_forosh }}"#}
-{#                                            data-speed="5000">{{ allday_data.khales_forosh }}</h4>#}
-{#                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>#}
-{#                                    </div>#}
-{#                                </a>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                        <div class="divider"></div>#}
-{#                        <h6 class="text-capitalize mt-0 text-center text-danger">بهای تمام شده کالای فروش رفته</h6>#}
-{#                        <div class="row">#}
-{#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
-{#                                <div class="counter counter-small">#}
-{#                                    <h4 class="timer text-primary" data-to="{{ today_data.baha_tamam_forosh }}"#}
-{#                                        data-speed="5000">{{ today_data.baha_tamam_forosh }}</h4>#}
-{#                                    <label class="text-capitalize mt-0">امروز </label>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
-{#                                <div class="counter counter-small">#}
-{#                                    <h4 class="timer text-success" data-to="{{ yesterday_data.baha_tamam_forosh }}"#}
-{#                                        data-speed="5000">{{ yesterday_data.baha_tamam_forosh }}</h4>#}
-{#                                    <label class="text-capitalize mt-0">دیروز </label>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
-{#                                <a href="/balance-sheet-moin/500" target="_blank">#}
-{##}
-{#                                    <div class="counter counter-small">#}
-{#                                        <h4 class="timer text-danger" data-to="{{ allday_data.baha_tamam_forosh }}"#}
-{#                                            data-speed="5000">{{ allday_data.baha_tamam_forosh }}</h4>#}
-{#                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>#}
-{#                                    </div>#}
-{#                                </a>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                        <div class="divider"></div>#}
+                        {#                        <div class="divider"></div>#}
+                        {#                        <h6 class="text-capitalize mt-0 text-center text-primary">خالص در آمد فروش</h6>#}
+                        {#                        <div class="row">#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <div class="counter counter-small">#}
+                        {#                                    <h4 class="timer text-primary" data-to="{{ today_data.khales_forosh }}"#}
+                        {#                                        data-speed="5000">{{ today_data.khales_forosh }}</h4>#}
+                        {#                                    <label class="text-capitalize mt-0">امروز ({{ last_update_time|timesince }})#}
+                        {#                                        قبل</label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <div class="counter counter-small">#}
+                        {#                                    <h4 class="timer text-success" data-to="{{ yesterday_data.khales_forosh }}"#}
+                        {#                                        data-speed="5000">{{ yesterday_data.khales_forosh }}</h4>#}
+                        {#                                    <label class="text-capitalize mt-0">دیروز </label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <a href="/balance-sheet-moin/400" target="_blank">#}
+                        {#                                    <div class="counter counter-small">#}
+                        {#                                        <h4 class="timer text-danger" data-to="{{ allday_data.khales_forosh }}"#}
+                        {#                                            data-speed="5000">{{ allday_data.khales_forosh }}</h4>#}
+                        {#                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>#}
+                        {#                                    </div>#}
+                        {#                                </a>#}
+                        {#                            </div>#}
+                        {#                        </div>#}
+                        {#                        <div class="divider"></div>#}
+                        {#                        <h6 class="text-capitalize mt-0 text-center text-danger">بهای تمام شده کالای فروش رفته</h6>#}
+                        {#                        <div class="row">#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <div class="counter counter-small">#}
+                        {#                                    <h4 class="timer text-primary" data-to="{{ today_data.baha_tamam_forosh }}"#}
+                        {#                                        data-speed="5000">{{ today_data.baha_tamam_forosh }}</h4>#}
+                        {#                                    <label class="text-capitalize mt-0">امروز </label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <div class="counter counter-small">#}
+                        {#                                    <h4 class="timer text-success" data-to="{{ yesterday_data.baha_tamam_forosh }}"#}
+                        {#                                        data-speed="5000">{{ yesterday_data.baha_tamam_forosh }}</h4>#}
+                        {#                                    <label class="text-capitalize mt-0">دیروز </label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <a href="/balance-sheet-moin/500" target="_blank">#}
+                        {##}
+                        {#                                    <div class="counter counter-small">#}
+                        {#                                        <h4 class="timer text-danger" data-to="{{ allday_data.baha_tamam_forosh }}"#}
+                        {#                                            data-speed="5000">{{ allday_data.baha_tamam_forosh }}</h4>#}
+                        {#                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>#}
+                        {#                                    </div>#}
+                        {#                                </a>#}
+                        {#                            </div>#}
+                        {#                        </div>#}
+                        {#                        <div class="divider"></div>#}
                         <div class="divider"></div>
                         <div class="row">
                             <div class="col-6 col-sm-4 mt-15 text-center">
@@ -166,63 +202,63 @@
                                 </div>
                             </div>
                         </div>
-{#                        <h6 class="text-capitalize mt-0 text-center text-primary">سایر درآمدها</h6>#}
-{#                        <div class="row">#}
-{#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
-{##}
-{#                                <div class="counter counter-small">#}
-{#                                    <h4 class="timer text-primary" data-to="{{ today_data.sayer_daramad }}"#}
-{#                                        data-speed="5000">{{ today_data.sayer_daramad }}</h4>#}
-{#                                    <label class="text-capitalize mt-0">امروز ({{ last_update_time|timesince }})#}
-{#                                        قبل</label>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
-{#                                <div class="counter counter-small">#}
-{#                                    <h4 class="timer text-success" data-to="{{ yesterday_data.sayer_daramad }}"#}
-{#                                        data-speed="5000">{{ yesterday_data.sayer_daramad }}</h4>#}
-{#                                    <label class="text-capitalize mt-0">دیروز </label>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
-{#                                <a href="/balance-sheet-moin/401" target="_blank">#}
-{##}
-{#                                    <div class="counter counter-small">#}
-{#                                        <h4 class="timer text-danger" data-to="{{ allday_data.sayer_daramad }}"#}
-{#                                            data-speed="5000">{{ allday_data.sayer_daramad }}</h4>#}
-{#                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>#}
-{#                                    </div>#}
-{#                                </a>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                        <div class="divider"></div>#}
-{#                        <h6 class="text-capitalize mt-0 text-center text-danger">سایر هزینه ها</h6>#}
-{#                        <div class="row">#}
-{#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
-{#                                <div class="counter counter-small">#}
-{#                                    <h4 class="timer text-primary" data-to="{{ today_data.sayer_hazine }}"#}
-{#                                        data-speed="5000">{{ today_data.sayer_hazine }}</h4>#}
-{#                                    <label class="text-capitalize mt-0">امروز </label>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
-{#                                <div class="counter counter-small">#}
-{#                                    <h4 class="timer text-success" data-to="{{ yesterday_data.sayer_hazine }}"#}
-{#                                        data-speed="5000">{{ yesterday_data.sayer_hazine }}</h4>#}
-{#                                    <label class="text-capitalize mt-0">دیروز </label>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
-{#                                <a href="/balance-sheet-moin/501" target="_blank">#}
-{#                                    <div class="counter counter-small">#}
-{#                                        <h4 class="timer text-danger" data-to="{{ allday_data.sayer_hazine }}"#}
-{#                                            data-speed="5000">{{ allday_data.sayer_hazine }}</h4>#}
-{#                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>#}
-{#                                    </div>#}
-{#                                </a>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                        <div class="divider"></div>#}
+                        {#                        <h6 class="text-capitalize mt-0 text-center text-primary">سایر درآمدها</h6>#}
+                        {#                        <div class="row">#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {##}
+                        {#                                <div class="counter counter-small">#}
+                        {#                                    <h4 class="timer text-primary" data-to="{{ today_data.sayer_daramad }}"#}
+                        {#                                        data-speed="5000">{{ today_data.sayer_daramad }}</h4>#}
+                        {#                                    <label class="text-capitalize mt-0">امروز ({{ last_update_time|timesince }})#}
+                        {#                                        قبل</label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <div class="counter counter-small">#}
+                        {#                                    <h4 class="timer text-success" data-to="{{ yesterday_data.sayer_daramad }}"#}
+                        {#                                        data-speed="5000">{{ yesterday_data.sayer_daramad }}</h4>#}
+                        {#                                    <label class="text-capitalize mt-0">دیروز </label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <a href="/balance-sheet-moin/401" target="_blank">#}
+                        {##}
+                        {#                                    <div class="counter counter-small">#}
+                        {#                                        <h4 class="timer text-danger" data-to="{{ allday_data.sayer_daramad }}"#}
+                        {#                                            data-speed="5000">{{ allday_data.sayer_daramad }}</h4>#}
+                        {#                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>#}
+                        {#                                    </div>#}
+                        {#                                </a>#}
+                        {#                            </div>#}
+                        {#                        </div>#}
+                        {#                        <div class="divider"></div>#}
+                        {#                        <h6 class="text-capitalize mt-0 text-center text-danger">سایر هزینه ها</h6>#}
+                        {#                        <div class="row">#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <div class="counter counter-small">#}
+                        {#                                    <h4 class="timer text-primary" data-to="{{ today_data.sayer_hazine }}"#}
+                        {#                                        data-speed="5000">{{ today_data.sayer_hazine }}</h4>#}
+                        {#                                    <label class="text-capitalize mt-0">امروز </label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <div class="counter counter-small">#}
+                        {#                                    <h4 class="timer text-success" data-to="{{ yesterday_data.sayer_hazine }}"#}
+                        {#                                        data-speed="5000">{{ yesterday_data.sayer_hazine }}</h4>#}
+                        {#                                    <label class="text-capitalize mt-0">دیروز </label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <a href="/balance-sheet-moin/501" target="_blank">#}
+                        {#                                    <div class="counter counter-small">#}
+                        {#                                        <h4 class="timer text-danger" data-to="{{ allday_data.sayer_hazine }}"#}
+                        {#                                            data-speed="5000">{{ allday_data.sayer_hazine }}</h4>#}
+                        {#                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>#}
+                        {#                                    </div>#}
+                        {#                                </a>#}
+                        {#                            </div>#}
+                        {#                        </div>#}
+                        {#                        <div class="divider"></div>#}
 
 
                         <div class="divider"></div>
@@ -263,13 +299,13 @@
                                 <li class="nav-item">
                                     <a class="nav-link" id="profile-07-tab" data-toggle="tab" href="#profile-07"
                                        role="tab" aria-controls="profile-07" aria-selected="false"><i
-                                            class="fa fa-calendar"></i>  ماهانه </a>
+                                            class="fa fa-calendar"></i> ماهانه </a>
                                 </li>
-{#                                <li class="nav-item">#}
-{#                                    <a class="nav-link" id="portfolio-07-tab" data-toggle="tab" href="#portfolio-07"#}
-{#                                       role="tab" aria-controls="portfolio-07" aria-selected="false"><i#}
-{#                                            class="fa  fa-calendar-o"></i>  سالانه </a>#}
-{#                                </li>#}
+                                {#                                <li class="nav-item">#}
+                                {#                                    <a class="nav-link" id="portfolio-07-tab" data-toggle="tab" href="#portfolio-07"#}
+                                {#                                       role="tab" aria-controls="portfolio-07" aria-selected="false"><i#}
+                                {#                                            class="fa  fa-calendar-o"></i>  سالانه </a>#}
+                                {#                                </li>#}
                                 {#                <li class="nav-item">#}
                                 {#                  <a class="nav-link active show" id="contact-07-tab" data-toggle="tab" href="#contact-07" role="tab" aria-controls="contact-07" aria-selected="true"><i class="fa fa-check-square-o"></i> تماس </a>#}
                                 {#                </li>#}
@@ -290,7 +326,7 @@
                                 </div>
                                 <div class="tab-pane fade " id="contact-07" role="tabpanel"
                                      aria-labelledby="contact-07-tab">
-{#                                    <p>...</p>#}
+                                    {#                                    <p>...</p>#}
                                 </div>
                             </div>
                         </div>
@@ -307,18 +343,18 @@
                                 <li class="nav-item">
                                     <a class="nav-link active show " id="home-08-tab" data-toggle="tab" href="#home-08"
                                        role="tab" aria-controls="home-08" aria-selected="true"> <i
-                                            class="fa fa-calendar-check-o"></i>  روزانه</a>
+                                            class="fa fa-calendar-check-o"></i> روزانه</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" id="profile-08-tab" data-toggle="tab" href="#profile-08"
                                        role="tab" aria-controls="profile-08" aria-selected="false"><i
-                                            class="fa fa-calendar"></i>  ماهانه </a>
+                                            class="fa fa-calendar"></i> ماهانه </a>
                                 </li>
-{#                                <li class="nav-item">#}
-{#                                    <a class="nav-link" id="portfolio-08-tab" data-toggle="tab" href="#portfolio-08"#}
-{#                                       role="tab" aria-controls="portfolio-08" aria-selected="false"><i#}
-{#                                            class="fa  fa-calendar-o"></i>  ماهانه </a>#}
-{#                                </li>#}
+                                {#                                <li class="nav-item">#}
+                                {#                                    <a class="nav-link" id="portfolio-08-tab" data-toggle="tab" href="#portfolio-08"#}
+                                {#                                       role="tab" aria-controls="portfolio-08" aria-selected="false"><i#}
+                                {#                                            class="fa  fa-calendar-o"></i>  ماهانه </a>#}
+                                {#                                </li>#}
                                 {#                <li class="nav-item">#}
                                 {#                  <a class="nav-link active show" id="contact-08-tab" data-toggle="tab" href="#contact-08" role="tab" aria-controls="contact-08" aria-selected="true"><i class="fa fa-check-square-o"></i> تماس </a>#}
                                 {#                </li>#}
@@ -423,7 +459,7 @@
                     </div>
                 </div>
             </div>
-        <!--اسناد پرداختنی-->
+            <!--اسناد پرداختنی-->
             <div class="col-xl-4 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body text-left">
@@ -498,6 +534,74 @@
         </div>
 
 
+        <div class="row">
+
+            <!-- تقوم چک ها -->
+            <div id="calendarf" class="col-md-8 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <h5 class="card-title pb-0 border-0 ">چک های دارای مانده</h5>
+                        <h5 class="card-title pb-0 border-0 ">{{ max_cheque|floatformat:0|intcomma:False }}</h5>
+                        <div class="text-center mb-4">
+                            <h2>{{ month_name }} {{ year }}</h2>
+                        </div>
+                        <div class="calendar-header">
+                            <button id="prev-month" class="btn btn-secondary">&lt;</button>
+                            <span>{{ month_name }} {{ year }}</span>
+                            <button id="next-month" class="btn btn-secondary">&gt;</button>
+                        </div>
+                        <table class="table table-bordered calendar-table">
+                            <thead class="thead-light">
+                            <tr class="text-center">
+                                <th>شنبه</th>
+                                <th>یکشنبه</th>
+                                <th>دوشنبه</th>
+                                <th>سه‌شنبه</th>
+                                <th>چهارشنبه</th>
+                                <th>پنج‌شنبه</th>
+                                <th>جمعه</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for week in days_in_month %}
+                                <tr>
+                                    {% for day in week %} {% if day %}
+                                        <td>
+                                            <div class="fc-day-top">
+                                                <span class="fc-day-number"><h5>{{ day.jday }}</h5></span>
+                                                <span class="fc-recive-number">{{ day.recive|floatformat:0|intcomma:False }}</span>
+                                                <div class="progress mb-3">
+                                                    <div class="progress-bar progress-bar-striped bg-primary"
+                                                         role="progressbar"
+                                                         style="width: {% widthratio day.recive max_cheque 100 %}%"
+                                                         aria-valuenow="{{ day.recive }}" aria-valuemin="0"
+                                                         aria-valuemax="{{ max_cheque }}"></div>
+                                                </div>
+                                                <span class="fc-pay-number">{{ day.pay|floatformat:0|intcomma:False }}</span>
+                                                <div class="progress mb-3">
+                                                    <div class="progress-bar progress-bar-striped bg-danger"
+                                                         role="progressbar"
+                                                         style="width: {% widthratio day.pay max_cheque 100 %}%"
+                                                         aria-valuenow="{{ day.pay }}" aria-valuemin="0"
+                                                         aria-valuemax="{{ max_cheque }}"></div>
+                                                </div>
+                                            </div>
+                                        </td>                                        {% else %}
+                                        <td>
+
+                                        </td>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
     </div>
 
 
@@ -506,10 +610,73 @@
 {% endblock %}
 
 
+
 {% block jscal %}
 
+    {#    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>#}
 
+    <script>
+
+        $(document).ready(function () {
+            var currentYear = {{ year }};
+            var currentMonth = {{ month }};
+            var url = '/';
+
+            console.log("Initial setup");
+            console.log("Current Year: " + currentYear);
+            console.log("Current Month: " + currentMonth);
+            console.log("Initial URL: " + url);
+
+            function loadCalendar(month, year) {
+                console.log("Loading calendar for month: " + month + ", year: " + year);
+                console.log("URL being used for AJAX call: " + url);
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    data: {month: month, year: year},
+                    success: function (data) {
+                        console.log("AJAX call success");
+                        $('#calendarf').html(data);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error loading calendar: ', error);
+                        console.error('XHR:', xhr);
+                        console.error('Status:', status);
+                    }
+                });
+            }
+
+            $('#prev-month').click(function (e) {
+                e.preventDefault();
+                if (currentMonth === 1) {
+                    currentMonth = 12;
+                    currentYear -= 1;
+                } else {
+                    currentMonth -= 1;
+                }
+                console.log("Previous month clicked. New Month: " + currentMonth + ", Year: " + currentYear);
+                loadCalendar(currentMonth, currentYear);
+            });
+
+            $('#next-month').click(function (e) {
+                e.preventDefault();
+                if (currentMonth === 12) {
+                    currentMonth = 1;
+                    currentYear += 1;
+                } else {
+                    currentMonth += 1;
+                }
+                console.log("Next month clicked. New Month: " + currentMonth + ", Year: " + currentYear);
+                loadCalendar(currentMonth, currentYear);
+            });
+        });
+
+
+    </script>
 {% endblock %}
+
+
 
 
 
@@ -694,7 +861,7 @@
 
 
 
-       <!--    4   نمودار مقایسه سود ناویژه روزانه -->
+    <!--    4   نمودار مقایسه سود ناویژه روزانه -->
     <script>
         // دریافت داده‌های تاریخی از Django
         var labels = [
@@ -772,7 +939,7 @@
 
 
 
-       <!--    5   نمودار مقایسه سود ناویژه روزانه -->
+    <!--    5   نمودار مقایسه سود ناویژه روزانه -->
     <script>
         // دریافت داده‌های تاریخی از Django
         var labels = [

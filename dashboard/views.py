@@ -23,6 +23,7 @@ from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
 from django.shortcuts import render
+from khayyam import JalaliDate, JalaliDatetime
 
 
 def TarazCal(fday, lday, data):
@@ -144,6 +145,54 @@ from django.shortcuts import render
 import pandas as pd
 import plotly.express as px
 
+def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_data):
+    # مشخص کردن اولین روز ماه
+    first_day_of_month = jdatetime.date(year, month, 1)
+
+    # روز شروع ماه (شنبه = 0, یکشنبه = 1, ...)
+    start_day_of_week = first_day_of_month.weekday()
+
+    # برای بدست آوردن آخرین روز ماه شمسی
+    lday = first_day_of_month + jdatetime.timedelta(days=30)
+
+    if lday.month != month:
+        lday = first_day_of_month + jdatetime.timedelta(days=29)
+        if lday.month != month:
+            lday = first_day_of_month + jdatetime.timedelta(days=28)
+
+    last_day_of_month = lday
+
+    # تولید ماتریس روزهای ماه
+    days_in_month = []
+    max_cheque = 0
+    week = [None] * start_day_of_week  # اضافه کردن روزهای خالی
+    for i in range((last_day_of_month - first_day_of_month).days + 1):
+        current_day = first_day_of_month + jdatetime.timedelta(days=i)
+        recive = sum (item.total_mandeh for item in cheque_recive_data if item.cheque_date == current_day) * -1/10000000
+        pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date == current_day )/10000000
+        max_cheque = max(max_cheque, abs(recive), abs(pay))
+        day_info = {
+            'jyear': current_day.year,
+            'jmonth': current_day.month,
+            'jday': current_day.day,
+            'recive': recive,
+            'pay': pay
+        }
+        week.append(day_info)
+        if len(week) == 7 or current_day == last_day_of_month:
+            days_in_month.append(week)
+            week = []
+
+    # اضافه کردن هفته‌ای که کمتر از 7 روز است
+    if len(week) > 0:
+        days_in_month.append(week + [None] * (7 - len(week)))
+
+    return days_in_month,max_cheque
+
+
+
+
+
 
 @login_required(login_url='/login')
 def Home1(request, *args, **kwargs):
@@ -249,6 +298,28 @@ def Home1(request, *args, **kwargs):
     }
 
 
+    #تکمیل تقویم
+
+    month = request.GET.get('month', None)
+    year = request.GET.get('year', None)
+    print("Query params - Year:", year, "Month:", month)
+
+    if month is not None and year is not None:
+        current_month = int(month)
+        current_year = int(year)
+    else:
+        today_jalali = JalaliDate.today()
+        current_year = today_jalali.year
+        current_month = today_jalali.month
+
+    months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+    month_name = months[current_month - 1]
+    print("Current Year:", current_year, "Current Month:", current_month)
+
+    cheque_recive_data=ChequesRecieve.objects.filter(total_mandeh__lte=0)
+    cheque_pay_data=ChequesPay.objects.filter(total_mandeh__gt=0)
+
+    days_in_month,max_cheque = generate_calendar_data_cheque(current_month, current_year, cheque_recive_data,cheque_pay_data)
 
 
 
@@ -273,10 +344,20 @@ def Home1(request, *args, **kwargs):
         'chart4_data': chart4_data,
         'chart5_data': chart5_data,
         'chart7_data': chart7_data,
+        #for calendar
+        'month_name': month_name,
+        'year': current_year,
+        'month': current_month,
+        'days_in_month': days_in_month,
+        'max_cheque': max_cheque,
+
     }
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'partial_calendar.html', context)
     return render(request, 'home1.html', context)
 
 
