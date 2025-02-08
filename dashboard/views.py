@@ -2,7 +2,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 from custom_login.models import UserLog
-from mahakupdate.models import Factor, FactorDetaile, SanadDetail, Mtables, ChequesRecieve
+from mahakupdate.models import Factor, FactorDetaile, SanadDetail, Mtables, ChequesRecieve, ChequesPay
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from .models import MasterInfo, MasterReport, MonthlyReport
@@ -177,15 +177,26 @@ def Home1(request, *args, **kwargs):
     chart7_data = [TarazCal(today - timedelta(days=i), today - timedelta(days=i), data)['asnad_daryaftani'] for i in
                    range(8)]
 
-    # دریافت اطلاعات چک‌ها
+    # دریافت اطلاعات چک‌های دریافتی
     chequesr = ChequesRecieve.objects.aggregate(total_mandeh_sum=Sum('total_mandeh'))
     postchequesr = ChequesRecieve.objects.filter(cheque_date__gt=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
     pastchequesr = ChequesRecieve.objects.filter(cheque_date__lte=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
 
-    chequ_data = {
+    r_chequ_data = {
         'tmandeh': (chequesr['total_mandeh_sum'] / 10000000) * -1,
         'pastmandeh': (pastchequesr['total_mandeh_sum'] / 10000000) * -1,
         'postmandeh': (postchequesr['total_mandeh_sum'] / 10000000) * -1,
+    }
+
+    # دریافت اطلاعات چک‌های پرداختی
+    chequesr = ChequesPay.objects.aggregate(total_mandeh_sum=Sum('total_mandeh'))
+    postchequesr = ChequesPay.objects.filter(cheque_date__gt=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
+    pastchequesr = ChequesPay.objects.filter(cheque_date__lte=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
+
+    p_chequ_data = {
+        'tmandeh': (chequesr['total_mandeh_sum'] / 10000000) ,
+        'pastmandeh': (pastchequesr['total_mandeh_sum'] / 10000000) ,
+        'postmandeh': (postchequesr['total_mandeh_sum'] / 10000000) ,
     }
 
     # دریافت گزارش‌ها
@@ -215,7 +226,8 @@ def Home1(request, *args, **kwargs):
 
     monthly_reports = MonthlyReport.objects.order_by('-year', '-month_name')[:12]
     chart2_data = {
-        'labels': [f"{report.month_name} {report.year}" for report in monthly_reports],
+        # 'labels': [f"{report.month_name} {report.year}" for report in monthly_reports],
+        'labels': [f"{report.month_name}" for report in monthly_reports],
         'khales_forosh': [report.khales_forosh for report in monthly_reports],
         'baha_tamam_forosh': [report.baha_tamam_forosh for report in monthly_reports],
         'sood_navizhe': [report.sood_navizhe for report in monthly_reports],
@@ -229,7 +241,8 @@ def Home1(request, *args, **kwargs):
     }
 
     chart5_data = {
-        'labels': [f"{report.month_name} {report.year}" for report in monthly_reports],
+        # 'labels': [f"{report.month_name} {report.year}" for report in monthly_reports],
+        'labels': [f"{report.month_name}" for report in monthly_reports],
         'total_daramad': [report.khales_forosh + report.sayer_daramad for report in monthly_reports],
         'total_hazineh': [report.baha_tamam_forosh + report.sayer_hazine for report in monthly_reports],
         'sood_vizhe': [report.sood_vizhe for report in monthly_reports],
@@ -248,7 +261,13 @@ def Home1(request, *args, **kwargs):
         'today_data': today_data,
         'yesterday_data': yesterday_data,
         'allday_data': allday_data,
-        'chequ_data': chequ_data,
+        'r_chequ_data': r_chequ_data,
+        'p_chequ_data': p_chequ_data,
+
+
+
+
+
         'chart1_data': chart1_data,
         'chart2_data': chart2_data,
         'chart4_data': chart4_data,
