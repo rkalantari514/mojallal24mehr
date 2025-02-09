@@ -3108,7 +3108,7 @@ def Cheques_Recieve(request):
         issuance_tarik = row[3]
         cheque_tarik = row[4]
         cost = Decimal(row[5] or '0.00')
-        bank_name = row[6] or ''
+        bank_name = (row[6] or '').strip()  # حذف اسپیس‌های اضافی
         bank_branch = row[7] or ''
         account_id = safe_int(row[8])  # استفاده از تابع کمکی برای تبدیل عدد
         description = row[9] or ''
@@ -3131,8 +3131,12 @@ def Cheques_Recieve(request):
         # دریافت آخرین جزئیات سند
         last_sanad = sanad_dict.get(cheque_id_str, [])[-1] if sanad_dict.get(cheque_id_str) else None
 
-        # تنظیم bank_logo
-        bank_logo = bank_names_mapping.get(bank_name, "unknown.png")
+        # تنظیم bank_logo با استفاده از جستجو در دیکشنری
+        bank_logo = "unknown.png"
+        for key, value in bank_names_mapping.items():
+            if key in bank_name:
+                bank_logo = value
+                break
 
         if id_mahak in current_cheques:
             cheque = current_cheques[id_mahak]
