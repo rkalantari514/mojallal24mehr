@@ -3039,7 +3039,7 @@ def Cheques_Recieve(request):
 
     # بارگذاری SanadDetail ها به یک دیکشنری
     # sanad_details = SanadDetail.objects.filter(cheque_id__in=[row[1] for row in mahak_data])
-    sanad_details = SanadDetail.objects.filter(cheque_id__in=[row[1] for row in mahak_data]).order_by('date', 'code',
+    sanad_details = SanadDetail.objects.filter(cheque_id__in=[row[1] for row in mahak_data],kol=101,is_active=True).order_by('date', 'code',
                                                                                                       'radif')
 
     sanad_dict = {}
@@ -3205,7 +3205,7 @@ def Cheque_Pay(request):
     cheques_to_update = []
     current_cheques = {cheque.id_mahak: cheque for cheque in ChequesPay.objects.all()}
     BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
-    sanad_details = SanadDetail.objects.filter(cheque_id__in=[row[1] for row in mahak_data]).order_by('date', 'code',
+    sanad_details = SanadDetail.objects.filter(cheque_id__in=[row[1] for row in mahak_data],kol=200,is_active=True).order_by('date', 'code',
                                                                                                       'radif')
     sanad_dict = {}
     for sd in sanad_details:
