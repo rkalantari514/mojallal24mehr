@@ -160,10 +160,10 @@ class AccCodingAdmin(admin.ModelAdmin):
 class ChequesRecieveAdmin(admin.ModelAdmin):
     list_display = (
     'id_mahak', 'cheque_id', 'cheque_row', 'issuance_tarik', 'issuance_date', 'cheque_tarik', 'cheque_date', 'cost',
-    'total_mandeh', 'last_sanad_detaile', 'bank_name', 'bank_branch', 'account_id', 'description', 'status', 'per_code')
+    'total_mandeh', 'last_sanad_detaile', 'bank_name','bank_logo', 'bank_branch', 'account_id', 'description', 'status', 'per_code')
     # list_display = ('id_mahak' , 'cheque_row', 'issuance_tarik', 'issuance_date', 'cheque_tarik', 'cheque_date', 'cost', 'bank_name', 'bank_branch', 'account_id', 'description', 'status', 'per_code')
     search_fields = ('cheque_id', 'bank_name', 'status')
-
+    list_filter=['bank_name']
     class Meta:
         model = ChequesRecieve
 

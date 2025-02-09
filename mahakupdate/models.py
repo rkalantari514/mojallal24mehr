@@ -574,6 +574,7 @@ class ChequesRecieve(models.Model):
     cheque_date = models.DateField(verbose_name="تاریخ چک میلادی")
     cost = models.DecimalField(max_digits=14, decimal_places=2, verbose_name="مبلغ")
     bank_name = models.CharField(max_length=255, verbose_name="نام بانک")
+    bank_logo=models.CharField(blank=True, null=True,max_length=255, verbose_name="نام لگو بانک")
     bank_branch = models.CharField(max_length=255, verbose_name="شعبه بانک")
     account_id = models.IntegerField(verbose_name="شناسه حساب")
     description = models.TextField(verbose_name="توضیحات")
