@@ -599,6 +599,29 @@ class ChequesRecieve(models.Model):
             total_bed=Sum('bed')
         )
         return (totals['total_bes'] or 0) - (totals['total_bed'] or 0)
+    def person(self):
+        name=Person.objects.filter(code=self.per_code).last().name
+        family=Person.objects.filter(code=self.per_code).last().lname
+        return f'{name} {family}'
+
+
+class Bank(models.Model):
+
+    code = models.IntegerField(blank=True, null=True,verbose_name="کد بانک")
+    name = models.CharField(blank=True, null=True,max_length=255, verbose_name="نام بانک")
+    bank_name=models.CharField(blank=True, null=True,max_length=255, verbose_name="نام بانک اصلی")
+    shobe = models.CharField(blank=True, null=True,max_length=255, verbose_name="نام شعبه")
+    sh_h = models.CharField(blank=True, null=True,max_length=255, verbose_name="شماره حساب")
+    type_h = models.CharField(blank=True, null=True,max_length=255, verbose_name="نوع حساب")
+    mogodi=models.DecimalField(blank=True, null=True,max_digits=14, decimal_places=2, verbose_name="موجودی")
+    firstamount=models.DecimalField(blank=True, null=True,max_digits=14, decimal_places=2, verbose_name="موجودی اول دوره")
+
+    class Meta:
+        verbose_name = 'بانک'
+        verbose_name_plural = 'بانک ها'
+
+    def __str__(self):
+        return f"{self.bank_name} - {self.name}"
 
 
 
@@ -612,6 +635,7 @@ class ChequesPay(models.Model):
     cheque_date = models.DateField(verbose_name="تاریخ چک میلادی")
     cost = models.DecimalField(max_digits=14, decimal_places=2, verbose_name="مبلغ")
     bank_code = models.IntegerField(verbose_name="کد بانک")
+    bank=models.ForeignKey(Bank,on_delete=models.SET_NULL, blank=True, null=True)
     description = models.TextField(verbose_name="توضیحات")
     status = models.CharField(max_length=50, verbose_name="وضعیت")
     firstperiod=models.BooleanField(verbose_name='چک اول دوره')

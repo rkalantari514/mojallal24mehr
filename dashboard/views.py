@@ -154,29 +154,33 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
 
     # برای بدست آوردن آخرین روز ماه شمسی
     lday = first_day_of_month + jdatetime.timedelta(days=30)
-
     if lday.month != month:
         lday = first_day_of_month + jdatetime.timedelta(days=29)
         if lday.month != month:
             lday = first_day_of_month + jdatetime.timedelta(days=28)
-
     last_day_of_month = lday
-
     # تولید ماتریس روزهای ماه
     days_in_month = []
     max_cheque = 0
     week = [None] * start_day_of_week  # اضافه کردن روزهای خالی
     for i in range((last_day_of_month - first_day_of_month).days + 1):
         current_day = first_day_of_month + jdatetime.timedelta(days=i)
-        recive = sum (item.total_mandeh for item in cheque_recive_data if item.cheque_date == current_day) * -1/10000000
+        recive = sum (item.total_mandeh for item in cheque_recive_data if item.cheque_date == current_day) /10000000
         pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date == current_day )/10000000
         max_cheque = max(max_cheque, abs(recive), abs(pay))
+        # تبدیل تاریخ شمسی به میلادی
+        current_day_gregorian = current_day.togregorian().isoformat()
+        today_recive_cheque = cheque_recive_data.filter(cheque_date=current_day_gregorian).order_by('-cost')
+        today_pay_cheque = cheque_pay_data.filter(cheque_date=current_day_gregorian).order_by('-cost')
         day_info = {
             'jyear': current_day.year,
             'jmonth': current_day.month,
             'jday': current_day.day,
-            'recive': recive,
-            'pay': pay
+            'recive': -1* recive,
+            'pay': pay,
+            'today_recive_cheque': today_recive_cheque,
+            'today_pay_cheque': today_pay_cheque,
+
         }
         week.append(day_info)
         if len(week) == 7 or current_day == last_day_of_month:
@@ -316,8 +320,8 @@ def Home1(request, *args, **kwargs):
     month_name = months[current_month - 1]
     print("Current Year:", current_year, "Current Month:", current_month)
 
-    cheque_recive_data=ChequesRecieve.objects.filter(total_mandeh__lte=0)
-    cheque_pay_data=ChequesPay.objects.filter(total_mandeh__gt=0)
+    cheque_recive_data=ChequesRecieve.objects.exclude(total_mandeh=0)
+    cheque_pay_data=ChequesPay.objects.exclude(total_mandeh=0)
 
     days_in_month,max_cheque = generate_calendar_data_cheque(current_month, current_year, cheque_recive_data,cheque_pay_data)
 

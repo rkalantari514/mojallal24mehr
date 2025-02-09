@@ -1,32 +1,36 @@
 from django.contrib import admin
 
 from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo, \
-    Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve, MyCondition, ChequesPay
+    Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve, MyCondition, ChequesPay, Bank
 
 
 # Register your models here.
 
 
 class MtablesAdmin(admin.ModelAdmin):
-    list_display = ['__str__','name', 'description', 'in_use','update_priority','last_update_time','row_count','cloumn_count']
+    list_display = ['__str__', 'name', 'description', 'in_use', 'update_priority', 'last_update_time', 'row_count',
+                    'cloumn_count']
     # list_filter = ['description','name', 'in_use']
-    list_editable = ['description', 'in_use','update_priority']
-    search_fields = ['name', 'description', 'in_use','update_priority']
+    list_editable = ['description', 'in_use', 'update_priority']
+    search_fields = ['name', 'description', 'in_use', 'update_priority']
 
     class Meta:
         model = Mtables
 
 
 class KalaAdmin(admin.ModelAdmin):
-    list_display = ['__str__','name', 'code','category','s_m_ratio','total_sale']
+    list_display = ['__str__', 'name', 'code', 'category', 's_m_ratio', 'total_sale']
     list_filter = ['category']
     list_editable = ['category']
     search_fields = ['name', 'code']
 
     class Meta:
         model = Kala
+
+
 class FactorAdmin(admin.ModelAdmin):
-    list_display = ['pdate', 'code','create_time','mablagh_factor','takhfif','darsad_takhfif']
+    list_display = ['pdate', 'code', 'create_time', 'mablagh_factor', 'takhfif', 'darsad_takhfif']
+
     # list_filter = ['name','code']
     # list_editable = ['description', 'in_use']
     # search_fields = ['name', 'code']
@@ -34,8 +38,10 @@ class FactorAdmin(admin.ModelAdmin):
     class Meta:
         model = Factor
 
+
 class FactorDetaileAdmin(admin.ModelAdmin):
-    list_display = ['code_factor', 'kala','count','mablagh_vahed','mablagh_nahaee']
+    list_display = ['code_factor', 'kala', 'count', 'mablagh_vahed', 'mablagh_nahaee']
+
     # list_filter = ['name','code']
     # list_editable = ['description', 'in_use']
     # search_fields = ['name', 'code']
@@ -43,8 +49,9 @@ class FactorDetaileAdmin(admin.ModelAdmin):
     class Meta:
         model = FactorDetaile
 
+
 class WordCountAdmin(admin.ModelAdmin):
-    list_display = ['word','count']
+    list_display = ['word', 'count']
     # list_filter = ['name','code']
     # list_editable = ['description', 'in_use']
     search_fields = ['word']
@@ -52,45 +59,52 @@ class WordCountAdmin(admin.ModelAdmin):
     class Meta:
         model = WordCount
 
+
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['__str__','name','parent','level']
-    list_filter = ['level','parent',]
-    list_editable = ['name','parent','level']
-    search_fields = ['name','level']
+    list_display = ['__str__', 'name', 'parent', 'level']
+    list_filter = ['level', 'parent', ]
+    list_editable = ['name', 'parent', 'level']
+    search_fields = ['name', 'level']
 
     class Meta:
         model = Category
 
+
 class KardexAdmin(admin.ModelAdmin):
-    list_display = ['__str__','date','stock','code_kala','kala','count','ktype','percode','storage','warehousecode','averageprice','sync_mojodi']
-    list_filter = ['warehousecode','sync_mojodi']
+    list_display = ['__str__', 'date', 'stock', 'code_kala', 'kala', 'count', 'ktype', 'percode', 'storage',
+                    'warehousecode', 'averageprice', 'sync_mojodi']
+    list_filter = ['warehousecode', 'sync_mojodi']
     list_editable = ['sync_mojodi']
-    search_fields = ['count','code_kala','stock']
+    search_fields = ['count', 'code_kala', 'stock']
 
     class Meta:
         model = Kardex
+
+
 class MojodiAdmin(admin.ModelAdmin):
-    list_display = ['__str__','stock','total_stock','code_kala','kala','storage','warehousecode','averageprice','mojodi_roz','mojodi_roz_arzesh']
+    list_display = ['__str__', 'stock', 'total_stock', 'code_kala', 'kala', 'storage', 'warehousecode', 'averageprice',
+                    'mojodi_roz', 'mojodi_roz_arzesh']
     list_filter = ['warehousecode']
     # list_editable = ['name','parent','level']
-    search_fields = ['code_kala','stock']
+    search_fields = ['code_kala', 'stock']
 
     class Meta:
         model = Mojodi
 
 
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['__str__','code','name','lname','group']
+    list_display = ['__str__', 'code', 'name', 'lname', 'group']
     # list_filter = ['level','parent',]
     # list_editable = ['name','parent','level']
-    search_fields = ['name','code']
+    search_fields = ['name', 'code']
 
     class Meta:
         model = Person
 
 
 class KalaGroupinfoAdmin(admin.ModelAdmin):
-    list_display = ['__str__','id','code','contain','cat3','cat2','cat1']
+    list_display = ['__str__', 'id', 'code', 'contain', 'cat3', 'cat2', 'cat1']
+
     # list_filter = ['level','parent',]
     # list_editable = ['name','parent','level']
     # search_fields = ['name','lname','group']
@@ -98,8 +112,10 @@ class KalaGroupinfoAdmin(admin.ModelAdmin):
     class Meta:
         model = KalaGroupinfo
 
+
 class StoragekAdmin(admin.ModelAdmin):
-    list_display = ['__str__','code']
+    list_display = ['__str__', 'code']
+
     # list_filter = ['level','parent',]
     # list_editable = ['name','parent','level']
     # search_fields = ['name','lname','group']
@@ -109,7 +125,8 @@ class StoragekAdmin(admin.ModelAdmin):
 
 
 class SanadAdmin(admin.ModelAdmin):
-    list_display = ['__str__','code','tarikh','sharh']
+    list_display = ['__str__', 'code', 'tarikh', 'sharh']
+
     # list_filter = ['level','parent',]
     # list_editable = ['name','parent','level']
     # search_fields = ['name','lname','group']
@@ -117,17 +134,20 @@ class SanadAdmin(admin.ModelAdmin):
     class Meta:
         model = Sanad
 
+
 class SanadDetailAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'code','tarikh','date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount','is_active','is_analiz','cheque_id','syscomment']
-    list_filter = ['is_active','kol', 'moin', 'tafzili']
+    list_display = ['__str__', 'code', 'tarikh', 'date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount',
+                    'is_active', 'is_analiz', 'cheque_id', 'syscomment']
+    list_filter = ['is_active', 'kol', 'moin', 'tafzili']
     list_editable = ['is_analiz']
-    search_fields = ['tarikh','date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount','cheque_id']
+    search_fields = ['tarikh', 'date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount', 'cheque_id']
 
     class Meta:
         model = SanadDetail
 
+
 class AccCodingAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'code', 'name', 'level','parent']
+    list_display = ['__str__', 'code', 'name', 'level', 'parent']
     list_filter = ['level']
 
     # list_editable = ['name','parent','level']
@@ -137,12 +157,12 @@ class AccCodingAdmin(admin.ModelAdmin):
         model = AccCoding
 
 
-
 class ChequesRecieveAdmin(admin.ModelAdmin):
-    list_display = ('id_mahak', 'cheque_id', 'cheque_row', 'issuance_tarik', 'issuance_date', 'cheque_tarik', 'cheque_date', 'cost','total_mandeh','last_sanad_detaile', 'bank_name', 'bank_branch', 'account_id', 'description', 'status', 'per_code')
+    list_display = (
+    'id_mahak', 'cheque_id', 'cheque_row', 'issuance_tarik', 'issuance_date', 'cheque_tarik', 'cheque_date', 'cost',
+    'total_mandeh', 'last_sanad_detaile', 'bank_name', 'bank_branch', 'account_id', 'description', 'status', 'per_code')
     # list_display = ('id_mahak' , 'cheque_row', 'issuance_tarik', 'issuance_date', 'cheque_tarik', 'cheque_date', 'cost', 'bank_name', 'bank_branch', 'account_id', 'description', 'status', 'per_code')
     search_fields = ('cheque_id', 'bank_name', 'status')
-
 
     class Meta:
         model = ChequesRecieve
@@ -150,24 +170,21 @@ class ChequesRecieveAdmin(admin.ModelAdmin):
 
 @admin.register(MyCondition)
 class ConditionAdmin(admin.ModelAdmin):
-    list_display = ('__str__','kol', 'moin', 'tafzili', 'contain', 'equal_to', 'is_active', 'is_new')
+    list_display = ('__str__', 'kol', 'moin', 'tafzili', 'contain', 'equal_to', 'is_active', 'is_new')
     list_filter = ('is_active',)  # امکان فیلتر کردن بر اساس وضعیت فعال بودن
     search_fields = ('kol', 'moin', 'tafzili')
     list_editable = ['kol', 'moin', 'tafzili', 'contain', 'equal_to', 'is_active']
 
 
-
-
-
-
 from django.contrib import admin
 from .models import ChequesRecieve
+
 
 @admin.register(ChequesPay)
 class ChequesPayAdmin(admin.ModelAdmin):
     list_display = (
         'id_mahak', 'cheque_id', 'cheque_row', 'issuance_tarik', 'issuance_date',
-        'cheque_tarik', 'cheque_date', 'cost', 'bank_code', 'description',
+        'cheque_tarik', 'cheque_date', 'cost', 'bank_code', 'bank', 'description',
         'status', 'firstperiod', 'cheque_id_counter', 'per_code',
         'recieve_status', 'total_mandeh', 'last_sanad_detaile'
     )
@@ -176,8 +193,14 @@ class ChequesPayAdmin(admin.ModelAdmin):
     list_per_page = 100
 
 
-
-
+@admin.register(Bank)
+class BankAdmin(admin.ModelAdmin):
+    list_display = (
+        'code','bank_name', 'name', 'shobe', 'sh_h', 'type_h', 'mogodi', 'firstamount'
+    )
+    list_filter = ('bank_name',)
+    # search_fields = ('cheque_id', 'per_code', 'description')
+    list_per_page = 100
 
 
 admin.site.register(Mtables, MtablesAdmin)

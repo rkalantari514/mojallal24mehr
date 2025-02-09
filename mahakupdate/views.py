@@ -4,7 +4,8 @@ from django.db.models import Min
 from datetime import datetime
 from custom_login.models import UserLog
 from dashboard.views import CreateReport, CreateMonthlyReport
-from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category, Sanad, SanadDetail, AccCoding, ChequesPay
+from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category, Sanad, SanadDetail, AccCoding, ChequesPay, \
+    Bank
 from django.shortcuts import render
 from .forms import CategoryForm, KalaForm
 from .models import FactorDetaile
@@ -120,6 +121,7 @@ def Updatedb(request):
         'AccTotals': 'update/acccoding',
         'Cheques_Recieve': 'update/chequesrecieve',
         'Cheque_Pay': 'update/chequepay',
+        'Bank': 'update/bank',
 
     }
 
@@ -171,6 +173,7 @@ def Updateall(request):
         'AccTotals': UpdateAccCoding,
         'Cheques_Recieve': Cheques_Recieve,
         'Cheque_Pay': Cheque_Pay,
+        'Bank': UpdateBank,
     }
 
     responses = []
@@ -2878,7 +2881,130 @@ def safe_int(val):
     except (ValueError, TypeError):
         return 0  # یا هر مقدار پیش‌فرض دیگری که مناسب باشد.
 
+import time
+from decimal import Decimal
+import jdatetime
+from django.utils import timezone
+from django.shortcuts import redirect
 
+def UpdateBank(request):
+    t0 = time.time()
+    print('شروع آپدیت بانک‌ها---------------------------------------------------')
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    t1 = time.time()
+
+    # گرفتن تمامی داده‌ها از دیتابیس خارجی
+    cursor.execute(
+        "SELECT [Code], [Name], [shobe], [sh_h], [type], [mogodi], [Tel], [Fax], [Comment], "
+        "[Code_M], [VoucherCode], [FirstAmount], [DetailUniqueCode], [EndDate], [SecurityCode], "
+        "[CardCode], [Shaba], [CurrCode], [CurrRate], [CreatedTime], [CreatedDate], [ModifiedTime], "
+        "[ModifiedDate], [UserCreated], [UserModified] "
+        "FROM [mahak].[dbo].[Bank]"
+    )
+    mahak_data = cursor.fetchall()
+
+    existing_in_mahak = {int(row[0]) for row in mahak_data}
+    print('تعداد رکوردهای موجود در Mahak:', len(existing_in_mahak))
+
+    banks_to_create = []
+    banks_to_update = []
+    current_banks = {bank.code: bank for bank in Bank.objects.all()}
+    BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
+
+    for counter, row in enumerate(mahak_data, start=1):
+        print(counter)
+
+        code = int(row[0])
+        name = row[1] or ''
+        shobe = row[2] or ''
+        sh_h = row[3] or ''
+        type_h = row[4] or ''
+        mogodi = Decimal(row[5] or '0.00')
+        firstamount = Decimal(row[11] or '0.00')
+
+        if code in current_banks:
+            bank = current_banks[code]
+            if any([
+                bank.name != name,
+                bank.shobe != shobe,
+                bank.sh_h != sh_h,
+                bank.type_h != type_h,
+                bank.mogodi != mogodi,
+                bank.firstamount != firstamount
+            ]):
+                bank.name = name
+                bank.shobe = shobe
+                bank.sh_h = sh_h
+                bank.type_h = type_h
+                bank.mogodi = mogodi
+                bank.firstamount = firstamount
+                banks_to_update.append(bank)
+        else:
+            banks_to_create.append(Bank(
+                code=code, name=name, shobe=shobe,
+                sh_h=sh_h, type_h=type_h, mogodi=mogodi,
+                firstamount=firstamount
+            ))
+
+    if banks_to_create:
+        print('شروع به ساخت بانک‌های جدید')
+        Bank.objects.bulk_create(banks_to_create, batch_size=BATCH_SIZE)
+
+    if banks_to_update:
+        print('شروع به آپدیت بانک‌های موجود')
+        Bank.objects.bulk_update(
+            banks_to_update,
+            ['name', 'shobe', 'sh_h', 'type_h', 'mogodi', 'firstamount'],
+            batch_size=BATCH_SIZE
+        )
+
+    ids_in_external_db = {int(row[0]) for row in mahak_data}
+    ids_in_django_db = {bank.code for bank in current_banks.values()}
+    ids_to_delete = ids_in_django_db - ids_in_external_db
+
+    if ids_to_delete:
+        Bank.objects.filter(code__in=ids_to_delete).delete()
+        print(f"رکوردهای حذف‌شده: {len(ids_to_delete)} رکورد حذف شد.")
+
+    # تعیین نام بانک
+    iran_banks = (
+        'ملل', 'مهر', 'تجارت', 'رفاه', 'صادرات', 'ملت', 'ملي', 'انصار',
+        'عسکريه', 'سپه', 'رفاه', 'شهر', 'متين', 'مسکن', 'نور', 'پارسيان', 'پست'
+    )
+
+    banks_to_update_bank_name = []
+    for bank in Bank.objects.all():
+        for n in iran_banks:
+            if n in bank.name and n != bank.bank_name:
+                bank.bank_name = n
+                banks_to_update_bank_name.append(bank)
+                break
+
+    if banks_to_update_bank_name:
+        Bank.objects.bulk_update(banks_to_update_bank_name, ['bank_name'], batch_size=BATCH_SIZE)
+
+    tend = time.time()
+    total_time = tend - t0
+    db_time = t1 - t0
+    update_time = tend - t1
+
+    table = Mtables.objects.filter(name='Bank').last()
+    table.last_update_time = timezone.now()
+    table.update_duration = update_time
+    cursor.execute("SELECT COUNT(*) FROM Bank")
+    row_count = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Bank'")
+    column_count = cursor.fetchone()[0]
+    table.row_count = row_count
+    table.column_count = column_count
+    table.save()
+
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    print(f"زمان اتصال به دیتابیس: {db_time:.2f} ثانیه")
+    print(f"زمان آپدیت جدول: {update_time:.2f} ثانیه")
+
+    return redirect('/updatedb')
 
 
 def Cheques_Recieve(request):
@@ -3050,6 +3176,178 @@ from django.shortcuts import redirect
 
 
 def Cheque_Pay(request):
+    t0 = time.time()
+    print('شروع آپدیت چک‌های پرداختی---------------------------------------------------')
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    t1 = time.time()
+
+    # گرفتن تمامی داده‌ها از دیتابیس خارجی
+    cursor.execute(
+        "SELECT [ID], [ChequeID], [ChequeRow], [IssuanceDate], [ChequeDate], "
+        "[Cost], [BankCode], [Description], [status], [FirstPeriod], "
+        "[ChequeIDCounter], [PerCode], [RecieveStatus] "
+        "FROM [mahak].[dbo].[Cheque_Pay]"
+    )
+    mahak_data = cursor.fetchall()
+
+    existing_in_mahak = {int(row[0]) for row in mahak_data}
+    print('تعداد رکوردهای موجود در Mahak:', len(existing_in_mahak))
+
+    cheques_to_create = []
+    cheques_to_update = []
+    current_cheques = {cheque.id_mahak: cheque for cheque in ChequesPay.objects.all()}
+    BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
+    sanad_details = SanadDetail.objects.filter(cheque_id__in=[row[1] for row in mahak_data]).order_by('date', 'code',
+                                                                                                      'radif')
+    sanad_dict = {}
+    for sd in sanad_details:
+        if sd.cheque_id not in sanad_dict:
+            sanad_dict[sd.cheque_id] = []
+        sanad_dict[sd.cheque_id].append(sd)
+
+    # ایجاد دیکشنری از بانک‌ها برای استفاده سریعتر
+    bank_dict = {bank.code: bank for bank in Bank.objects.all()}
+
+    for counter, row in enumerate(mahak_data, start=1):
+        print(counter)
+
+        id_mahak = int(row[0])
+        cheque_id_str = row[1]
+        cheque_row = int(row[2])
+
+        # گرفتن تاریخ شمسی از دیتای خارجی
+        issuance_date_str = row[3]
+        cheque_date_str = row[4]
+
+        # تبدیل تاریخ شمسی به میلادی
+        issuance_date = (
+            jdatetime.datetime.strptime(issuance_date_str, "%Y/%m/%d").togregorian() if issuance_date_str else None
+        )
+        cheque_date = (
+            jdatetime.datetime.strptime(cheque_date_str, "%Y/%m/%d").togregorian() if cheque_date_str else None
+        )
+
+        # تاریخ شمسی برای ذخیره در fields
+        issuance_tarik = issuance_date_str  # ذخیره تاریخ شمسی
+        cheque_tarik = cheque_date_str  # ذخیره تاریخ شمسی
+
+        cost = Decimal(row[5] or '0.00')
+        bank_code = int(row[6])  # فرض بر این است که این مقدار عددی است
+        description = row[7] or ''
+        status = row[8] or '0'
+
+        # first_period = fp  # استفاده از مقدار واقعی
+        first_period = row[9]  # استفاده از مقدار واقعی
+        print(first_period, '===============')
+        cheque_id_counter = int(row[10])  # فرض بر این است که این مقدار عددی است
+        per_code = row[11] or '0'
+        recieve_status = int(row[12])  # فرض بر این است که این مقدار عددی است
+
+        # محاسبه مانده کل چک
+        total_bes = sum(sd.bes for sd in sanad_dict.get(cheque_id_str, []))
+        total_bed = sum(sd.bed for sd in sanad_dict.get(cheque_id_str, []))
+        total_mandeh = total_bes - total_bed
+
+        # دریافت آخرین جزئیات سند
+        last_sanad = sanad_dict.get(cheque_id_str, [])[-1] if sanad_dict.get(cheque_id_str) else None
+
+        # یافتن بانک مرتبط با استفاده از bank_code
+        bank = bank_dict.get(bank_code, None)
+
+        # بررسی وجود چک در پایگاه داده Django
+        if id_mahak in current_cheques:
+            cheque = current_cheques[id_mahak]
+            # بررسی تغییرات
+            if (cheque.cheque_id != cheque_id_str or cheque.cheque_row != cheque_row or
+                    cheque.issuance_tarik != issuance_tarik or cheque.cheque_tarik != cheque_tarik or
+                    cheque.cost != cost or cheque.bank_code != bank_code or
+                    cheque.description != description or cheque.status != status or
+                    cheque.firstperiod != first_period or cheque.cheque_id_counter != cheque_id_counter or
+                    cheque.total_mandeh != total_mandeh or cheque.last_sanad_detaile != last_sanad or
+                    cheque.per_code != per_code or cheque.recieve_status != recieve_status or cheque.bank != bank):
+                cheque.cheque_id = cheque_id_str
+                cheque.cheque_row = cheque_row
+                cheque.issuance_tarik = issuance_tarik  # نگهداری تاریخ شمسی
+                cheque.cheque_tarik = cheque_tarik  # نگهداری تاریخ شمسی
+                cheque.cost = cost
+                cheque.bank_code = bank_code
+                cheque.bank = bank  # تنظیم بانک مرتبط
+                cheque.description = description
+                cheque.status = status
+                cheque.firstperiod = first_period
+                cheque.cheque_id_counter = cheque_id_counter
+                cheque.total_mandeh = total_mandeh
+                cheque.last_sanad_detaile = last_sanad
+                cheque.per_code = per_code
+                cheque.recieve_status = recieve_status
+                cheques_to_update.append(cheque)
+        else:
+            # ایجاد چک جدید
+            cheques_to_create.append(ChequesPay(
+                id_mahak=id_mahak, cheque_id=cheque_id_str, cheque_row=cheque_row,
+                issuance_tarik=issuance_tarik, cheque_tarik=cheque_tarik,
+                issuance_date=issuance_date, cheque_date=cheque_date,
+                cost=cost, bank_code=bank_code, bank=bank, description=description,
+                status=status, firstperiod=first_period,
+                cheque_id_counter=cheque_id_counter,
+                per_code=per_code, recieve_status=recieve_status,
+                total_mandeh=total_mandeh, last_sanad_detaile=last_sanad
+            ))
+
+    # Bulk create new cheque details
+    if cheques_to_create:
+        print('شروع به ساخت چک‌های جدید')
+        ChequesPay.objects.bulk_create(cheques_to_create, batch_size=BATCH_SIZE)
+
+    # Bulk update existing cheque details
+    if cheques_to_update:
+        print('شروع به آپدیت چک‌های موجود')
+        ChequesPay.objects.bulk_update(
+            cheques_to_update,
+            ['cheque_id', 'cheque_row', 'issuance_tarik', 'cheque_tarik',
+             'cost', 'bank_code', 'bank', 'description', 'status', 'firstperiod',
+             'cheque_id_counter', 'per_code', 'recieve_status',
+             'total_mandeh', 'last_sanad_detaile'],
+            batch_size=BATCH_SIZE
+        )
+
+    # شناسایی رکوردهای حذف‌شده
+    ids_in_external_db = {int(row[0]) for row in mahak_data}
+    ids_in_django_db = {cheque.id_mahak for cheque in current_cheques.values()}
+    ids_to_delete = ids_in_django_db - ids_in_external_db
+
+    # حذف رکوردهای شناسایی‌شده
+    if ids_to_delete:
+        ChequesPay.objects.filter(id_mahak__in=ids_to_delete).delete()
+        print(f"رکوردهای حذف‌شده: {len(ids_to_delete)} رکورد حذف شد.")
+
+    # محاسبه زمان اجرای کل
+    tend = time.time()
+    total_time = tend - t0
+    db_time = t1 - t0
+    update_time = tend - t1
+
+    # به‌روزرسانی اطلاعات در جدول Mtables
+    table = Mtables.objects.filter(name='Cheque_Pay').last()
+    table.last_update_time = timezone.now()
+    table.update_duration = update_time
+    cursor.execute("SELECT COUNT(*) FROM Cheque_Pay")
+    row_count = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Cheque_Pay'")
+    column_count = cursor.fetchone()[0]
+    table.row_count = row_count
+    table.column_count = column_count
+    table.save()
+
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    print(f"زمان اتصال به دیتابیس: {db_time:.2f} ثانیه")
+    print(f"زمان آپدیت جدول: {update_time:.2f} ثانیه")
+
+    return redirect('/updatedb')
+
+
+def Cheque_Pay_BEFOREBANK(request):
     t0 = time.time()
     print('شروع آپدیت چک‌های پرداختی---------------------------------------------------')
     conn = connect_to_mahak()
