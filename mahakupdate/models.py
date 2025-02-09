@@ -610,6 +610,7 @@ class Bank(models.Model):
     code = models.IntegerField(blank=True, null=True,verbose_name="کد بانک")
     name = models.CharField(blank=True, null=True,max_length=255, verbose_name="نام بانک")
     bank_name=models.CharField(blank=True, null=True,max_length=255, verbose_name="نام بانک اصلی")
+    bank_logo=models.CharField(blank=True, null=True,max_length=255, verbose_name="نام لگو بانک")
     shobe = models.CharField(blank=True, null=True,max_length=255, verbose_name="نام شعبه")
     sh_h = models.CharField(blank=True, null=True,max_length=255, verbose_name="شماره حساب")
     type_h = models.CharField(blank=True, null=True,max_length=255, verbose_name="نوع حساب")

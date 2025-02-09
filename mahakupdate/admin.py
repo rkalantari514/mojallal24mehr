@@ -196,9 +196,10 @@ class ChequesPayAdmin(admin.ModelAdmin):
 @admin.register(Bank)
 class BankAdmin(admin.ModelAdmin):
     list_display = (
-        'code','bank_name', 'name', 'shobe', 'sh_h', 'type_h', 'mogodi', 'firstamount'
+        'code','bank_name', 'name','bank_logo', 'shobe', 'sh_h', 'type_h', 'mogodi', 'firstamount'
     )
     list_filter = ('bank_name',)
+    list_editable = ['bank_logo']
     # search_fields = ('cheque_id', 'per_code', 'description')
     list_per_page = 100
 

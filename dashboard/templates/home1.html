@@ -657,7 +657,7 @@
                                                      </thead>
                                                      <tbody>
                                                              {% for cheque in day.today_pay_cheque %}
-{% with 'images/bank/'|add:cheque.bank.bank_name|add:'.png' as logo_path %}
+{% with 'images/bank/'|add:cheque.bank.bank_logo as logo_path %}
 <tr>
 <td><img src='{% static logo_path %}' class='small-logo'></td>
 <td>{{ cheque.bank.name }}</td>

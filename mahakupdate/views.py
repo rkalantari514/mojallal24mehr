@@ -2967,7 +2967,26 @@ def UpdateBank(request):
         Bank.objects.filter(code__in=ids_to_delete).delete()
         print(f"رکوردهای حذف‌شده: {len(ids_to_delete)} رکورد حذف شد.")
 
-    # تعیین نام بانک
+    # تعریف نگاشت نام‌های فارسی به انگلیسی
+    bank_names_mapping = {
+        'ملل': 'melal.png',
+        'مهر': 'mehr.png',
+        'تجارت': 'tejarat.png',
+        'رفاه': 'refah.png',
+        'صادرات': 'saderat.png',
+        'ملت': 'melat.png',
+        'ملي': 'melli.png',
+        'انصار': 'ansar.png',
+        'عسکريه': 'askariye.png',
+        'سپه': 'sepah.png',
+        'شهر': 'shahr.png',
+        'متين': 'matin.png',
+        'مسکن': 'maskan.png',
+        'نور': 'noor.png',
+        'پارسيان': 'parsian.png',
+        'پست': 'post.png'
+    }
+
     iran_banks = (
         'ملل', 'مهر', 'تجارت', 'رفاه', 'صادرات', 'ملت', 'ملي', 'انصار',
         'عسکريه', 'سپه', 'شهر', 'متين', 'مسکن', 'نور', 'پارسيان', 'پست'
@@ -2977,19 +2996,22 @@ def UpdateBank(request):
     for bank in Bank.objects.all():
         bank_found = False
         for n in iran_banks:
-            if n in bank.name:
+            if n in bank.name :
                 bank.bank_name = n
+                bank.bank_logo = bank_names_mapping.get(n, "unknown")
                 banks_to_update_bank_name.append(bank)
                 bank_found = True
                 break
-        if not bank_found :
+        if not bank_found:
             if bank.bank_name != "نامعلوم":
                 bank.bank_name = "نامعلوم"
+                bank.bank_logo = "unknown.png"
                 banks_to_update_bank_name.append(bank)
 
-
     if banks_to_update_bank_name:
-        Bank.objects.bulk_update(banks_to_update_bank_name, ['bank_name'], batch_size=BATCH_SIZE)
+        Bank.objects.bulk_update(banks_to_update_bank_name, ['bank_name', 'bank_logo'], batch_size=BATCH_SIZE)
+
+
 
     tend = time.time()
     total_time = tend - t0
