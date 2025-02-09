@@ -191,7 +191,24 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
     if len(week) > 0:
         days_in_month.append(week + [None] * (7 - len(week)))
 
-    return days_in_month,max_cheque
+    past_recive = sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date < first_day_of_month) / 10000000
+    post_recive= sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date > last_day_of_month) / 10000000
+    this_month_recive = sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date >= first_day_of_month and item.cheque_date <= last_day_of_month) / 10000000
+
+    past_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date < first_day_of_month) / 10000000
+    post_pay= sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date > last_day_of_month) / 10000000
+    this_month_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date >= first_day_of_month and item.cheque_date <= last_day_of_month) / 10000000
+
+
+    month_cheque_data={
+        'past_recive': past_recive*-1,
+        'post_recive': post_recive*-1,
+        'this_month_recive': this_month_recive*-1,
+        'past_pay': past_pay,
+        'post_pay': post_pay,
+        'this_month_pay': this_month_pay,
+    }
+    return days_in_month,max_cheque,month_cheque_data
 
 
 
@@ -323,7 +340,7 @@ def Home1(request, *args, **kwargs):
     cheque_recive_data=ChequesRecieve.objects.exclude(total_mandeh=0)
     cheque_pay_data=ChequesPay.objects.exclude(total_mandeh=0)
 
-    days_in_month,max_cheque = generate_calendar_data_cheque(current_month, current_year, cheque_recive_data,cheque_pay_data)
+    days_in_month,max_cheque,month_cheque_data = generate_calendar_data_cheque(current_month, current_year, cheque_recive_data,cheque_pay_data)
 
 
 
@@ -354,6 +371,7 @@ def Home1(request, *args, **kwargs):
         'month': current_month,
         'days_in_month': days_in_month,
         'max_cheque': max_cheque,
+        'month_cheque_data': month_cheque_data,
 
     }
 

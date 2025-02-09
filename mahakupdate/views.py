@@ -2970,16 +2970,23 @@ def UpdateBank(request):
     # تعیین نام بانک
     iran_banks = (
         'ملل', 'مهر', 'تجارت', 'رفاه', 'صادرات', 'ملت', 'ملي', 'انصار',
-        'عسکريه', 'سپه', 'رفاه', 'شهر', 'متين', 'مسکن', 'نور', 'پارسيان', 'پست'
+        'عسکريه', 'سپه', 'شهر', 'متين', 'مسکن', 'نور', 'پارسيان', 'پست'
     )
 
     banks_to_update_bank_name = []
     for bank in Bank.objects.all():
+        bank_found = False
         for n in iran_banks:
             if n in bank.name and n != bank.bank_name:
                 bank.bank_name = n
                 banks_to_update_bank_name.append(bank)
+                bank_found = True
                 break
+        if not bank_found:
+            if bank.bank_name != "نامعلوم":
+                bank.bank_name = "نامعلوم"
+                banks_to_update_bank_name.append(bank)
+
 
     if banks_to_update_bank_name:
         Bank.objects.bulk_update(banks_to_update_bank_name, ['bank_name'], batch_size=BATCH_SIZE)
