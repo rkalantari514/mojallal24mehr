@@ -319,7 +319,7 @@ def ChequesRecieveTotal(request, *args, **kwargs):
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return render(request, 'partial_calendar.html', context)
+        return render(request, 'partial_calendar_cheque_recive.html', context)
     return render(request, 'cheques-recieve-total.html', context)
 
 
