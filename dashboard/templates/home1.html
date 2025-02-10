@@ -701,10 +701,7 @@
 
 
 {% block jscal %}
-
-    {#    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>#}
-
-    <script>
+<script>
 
         $(document).ready(function () {
             var currentYear = {{ year }};
@@ -763,11 +760,8 @@
 
 
     </script>
-
-
-
-          // برای پاپ آپ
-<script>
+{#برای تقویم#}
+    <script>
 $(document).ready(function(){
     $('[data-toggle="popover"]').popover({
         trigger: 'click',  // تنظیم برای فعال‌سازی فقط با کلیک
@@ -786,9 +780,6 @@ $(document).ready(function(){
     });
 });
 </script>
-
-
-
 
 {% endblock %}
 

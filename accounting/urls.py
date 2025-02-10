@@ -5,6 +5,7 @@ from accounting.views import TarazKol, ChequesRecieveTotal, balance_sheet_kol, b
     balance_sheet_tafsili, SanadTotal
 
 urlpatterns = [
+    path('acc/cheques_recieve_total', ChequesRecieveTotal, name='cheques-recieve-total'),
 
     path('acc/<col>/<moin>/<tafzili>', TarazKol, name='taraz-kol'),
     path('acc/cheques_recieve_total', ChequesRecieveTotal, name='cheques-recieve-total'),

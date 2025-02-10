@@ -25003,3 +25003,20 @@ body.dark-mode-active card.bg-light {
 			border-bottom-color: #E1E1E1;
 		}
 	}
+
+
+body.dark-mode-active .popover,yes
+
+body.dark-mode-active .popover-header{
+		color: #0c1624;
+		.card-title {
+			color: #141515;
+		}
+		.card-subtitle {
+			color: #141515;
+		}
+		.card-header {
+			color: #000;
+			border-bottom-color: #E1E1E1;
+		}
+	}

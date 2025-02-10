@@ -335,7 +335,7 @@ def Home1(request, *args, **kwargs):
 
     months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
     month_name = months[current_month - 1]
-    print("Current Year:", current_year, "Current Month:", current_month)
+    print("**Current Year:", current_year, "Current Month:", current_month)
 
     cheque_recive_data=ChequesRecieve.objects.exclude(total_mandeh=0)
     cheque_pay_data=ChequesPay.objects.exclude(total_mandeh=0)

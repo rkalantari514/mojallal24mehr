@@ -220,37 +220,37 @@
 
 
     </script>
-{% for week in days_in_month %}
-<tr>
-    {% for day in week %} {% if day %}
-    <td>
-        <div class="fc-day-top">
-            <span class="fc-day-number"><h5>{{ day.jday }}</h5></span>
-            <span class="fc-recive-number">{{ day.recive|floatformat:0|intcomma:False }}</span>
-            <div class="progress mb-3" data-toggle="popover" data-html="true" data-original-title="لیست  چکهای دریافتی" data-content="<table class='table'><thead><tr><th>شناسه چک</th><th>مبلغ</th><th>توضیحات</th></tr></thead><tbody>{% for cheque in day.today_recive_cheque %}<tr><td>{{ cheque.cheque_id }}</td><td>{{ cheque.cost|floatformat:0|intcomma:False }}</td><td>{{ cheque.description }}</td></tr>{% endfor %}</tbody></table>">
-                <div class="progress-bar progress-bar-striped bg-primary" role="progressbar" style="width: {% widthratio day.recive max_cheque 100 %}%" aria-valuenow="{{ day.recive }}" aria-valuemin="0" aria-valuemax="{{ max_cheque }}"></div>
-            </div>
-            <span class="fc-pay-number">{{ day.pay|floatformat:0|intcomma:False }}</span>
-            <div class="progress mb-3" data-toggle="popover" data-html="true" data-original-title="لیست  چکهای پرداختی برای تاریخ {{ day.today_pay_cheque.last.cheque_tarik }}" data-content="<table class='table center-aligned-table mb-0'><thead><tr><th></th><th>بانک</th><th>مبلغ</th></tr></thead><tbody>{% for cheque in day.today_pay_cheque %}{% with 'images/bank/'|add:cheque.bank.bank_name|add:'.png' as logo_path %}<tr><td><img src='{% static logo_path %}' class='small-logo'></td><td>{{ cheque.bank.name }}</td><td>{{ cheque.cost|floatformat:0|intcomma:False }}</td></tr>{% endwith %}{% endfor %}</tbody></table>">
-                <div class="progress-bar progress-bar-striped bg-danger" role="progressbar" style="width: {% widthratio day.pay max_cheque 100 %}%" aria-valuenow="{{ day.pay }}" aria-valuemin="0" aria-valuemax="{{ max_cheque }}"></div>
-            </div>
-        </div>
-    </td>
-    {% else %}
-    <td></td>
-    {% endif %}
-    {% endfor %}
-</tr>
-{% endfor %}
+{#{% for week in days_in_month %}#}
+{#<tr>#}
+{#    {% for day in week %} {% if day %}#}
+{#    <td>#}
+{#        <div class="fc-day-top">#}
+{#            <span class="fc-day-number"><h5>{{ day.jday }}</h5></span>#}
+{#            <span class="fc-recive-number">{{ day.recive|floatformat:0|intcomma:False }}</span>#}
+{#            <div class="progress mb-3" data-toggle="popover" data-html="true" data-original-title="لیست  چکهای دریافتی" data-content="<table class='table'><thead><tr><th>شناسه چک</th><th>مبلغ</th><th>توضیحات</th></tr></thead><tbody>{% for cheque in day.today_recive_cheque %}<tr><td>{{ cheque.cheque_id }}</td><td>{{ cheque.cost|floatformat:0|intcomma:False }}</td><td>{{ cheque.description }}</td></tr>{% endfor %}</tbody></table>">#}
+{#                <div class="progress-bar progress-bar-striped bg-primary" role="progressbar" style="width: {% widthratio day.recive max_cheque 100 %}%" aria-valuenow="{{ day.recive }}" aria-valuemin="0" aria-valuemax="{{ max_cheque }}"></div>#}
+{#            </div>#}
+{#            <span class="fc-pay-number">{{ day.pay|floatformat:0|intcomma:False }}</span>#}
+{#            <div class="progress mb-3" data-toggle="popover" data-html="true" data-original-title="لیست  چکهای پرداختی برای تاریخ {{ day.today_pay_cheque.last.cheque_tarik }}" data-content="<table class='table center-aligned-table mb-0'><thead><tr><th></th><th>بانک</th><th>مبلغ</th></tr></thead><tbody>{% for cheque in day.today_pay_cheque %}{% with 'images/bank/'|add:cheque.bank.bank_name|add:'.png' as logo_path %}<tr><td><img src='{% static logo_path %}' class='small-logo'></td><td>{{ cheque.bank.name }}</td><td>{{ cheque.cost|floatformat:0|intcomma:False }}</td></tr>{% endwith %}{% endfor %}</tbody></table>">#}
+{#                <div class="progress-bar progress-bar-striped bg-danger" role="progressbar" style="width: {% widthratio day.pay max_cheque 100 %}%" aria-valuenow="{{ day.pay }}" aria-valuemin="0" aria-valuemax="{{ max_cheque }}"></div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </td>#}
+{#    {% else %}#}
+{#    <td></td>#}
+{#    {% endif %}#}
+{#    {% endfor %}#}
+{#</tr>#}
+{#{% endfor %}#}
 
-<style>
-.small-logo {
-    width: 20px;  /* تنظیم اندازه کوچک لوگو */
-    height: auto;
-}
-</style>
+{#<style>#}
+{#.small-logo {#}
+{#    width: 20px;  /* تنظیم اندازه کوچک لوگو */#}
+{#    height: auto;#}
+{#}#}
+{#</style>#}
 
-          // برای پاپ آپ
+{#          برای پاپ آپ#}
 <script>
 $(document).ready(function(){
     $('[data-toggle="popover"]').popover({
