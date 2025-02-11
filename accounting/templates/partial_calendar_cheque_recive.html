@@ -227,7 +227,73 @@
 {#            });#}
 {#        });#}
 {#    </script>#}
-    <script>
+
+
+      <script>
+
+        $(document).ready(function () {
+            var currentYear = {{ year }};
+            var currentMonth = {{ month }};
+            var url = '/acc/cheques_recieve_total';
+
+            console.log("Initial setup");
+            console.log("Current Year: " + currentYear);
+            console.log("Current Month: " + currentMonth);
+            console.log("Initial URL: " + url);
+
+            function loadCalendar(month, year) {
+                console.log("Loading calendar for month: " + month + ", year: " + year);
+                console.log("URL being used for AJAX call: " + url);
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    data: {month: month, year: year},
+                    success: function (data) {
+                        console.log("AJAX call success");
+                        $('#calendarf').html(data);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error loading calendar: ', error);
+                        console.error('XHR:', xhr);
+                        console.error('Status:', status);
+                    }
+                });
+            }
+
+            $('#prev-month').click(function (e) {
+                e.preventDefault();
+                if (currentMonth === 1) {
+                    currentMonth = 12;
+                    currentYear -= 1;
+                } else {
+                    currentMonth -= 1;
+                }
+                console.log("Previous month clicked. New Month: " + currentMonth + ", Year: " + currentYear);
+                loadCalendar(currentMonth, currentYear);
+            });
+
+            $('#next-month').click(function (e) {
+                e.preventDefault();
+                if (currentMonth === 12) {
+                    currentMonth = 1;
+                    currentYear += 1;
+                } else {
+                    currentMonth += 1;
+                }
+                console.log("Next month clicked. New Month: " + currentMonth + ", Year: " + currentYear);
+                loadCalendar(currentMonth, currentYear);
+            });
+        });
+    </script>
+
+
+
+
+
+
+
+   <script>
         $(document).ready(function () {
             $('[data-toggle="popover"]').popover({
                 trigger: 'click',  // تنظیم برای فعال‌سازی فقط با کلیک
