@@ -3,6 +3,7 @@ import pyodbc
 from django.db.models import Min
 from datetime import datetime
 from custom_login.models import UserLog
+from dashboard.models import MasterInfo
 from dashboard.views import CreateReport, CreateMonthlyReport
 from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category, Sanad, SanadDetail, AccCoding, ChequesPay, \
     Bank
@@ -147,9 +148,20 @@ def Updatedb(request):
 
 def Updateall(request):
     now = datetime.now()
+    work_time=[8,9,10,11,12,13,16,17,18,19,20,21]
+
     print(now.hour)
     print(now.weekday())
     # بررسی اینکه آیا ساعت بین 1 تا 2 بامداد است
+    if now.hour in work_time:
+        print(f' ساعت کاری: {now.hour}')
+        send_to_admin(f' ساعت کاری: {now.hour}')
+
+        return redirect('/updatedb')
+    else:
+        print(f' ساعت غیر  کاری: {now.hour}')
+        send_to_admin(f' ساعت غیر کاری: {now.hour}')
+
     if now.hour == 1:
         # بررسی اینکه آیا امروز دوشنبه است (0: دوشنبه، 6: یکشنبه)
         if now.weekday() == 1:
@@ -226,7 +238,9 @@ def Updateall(request):
     send_to_admin(f' مجموع تعداد بازدیدها: {userlogcount}')
     data1 = (f"زمان کل: {total_time:.2f} ثانیه")
     send_to_admin(data1)
-
+    masterinfo = MasterInfo.objects.filter(is_active=True).last()
+    masterinfo.last_update_time = timezone.now()
+    masterinfo.save()
     return redirect('/updatedb')
 
 

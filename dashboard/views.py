@@ -17,9 +17,7 @@ import jdatetime
 import pandas as pd
 import plotly.express as px
 from dateutil.relativedelta import relativedelta
-import dash
-from dash import dcc, html
-from dash.dependencies import Input, Output
+
 import plotly.express as px
 import pandas as pd
 from django.shortcuts import render

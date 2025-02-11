@@ -1,5 +1,6 @@
 from django.shortcuts import render
 
+from dashboard.models import MasterInfo
 from mahakupdate.models import Category
 from django.contrib.auth.decorators import login_required
 
@@ -19,8 +20,10 @@ def get_category_tree(parent=None):
 # for render partial
 def header(request, *args, **kwargs):
     user=request.user
+    last_update_time = MasterInfo.objects.filter(is_active=True).last().last_update_time
     context = {
         'user':user,
+        'last_update_time':last_update_time,
     }
     return render(request, 'shared/Header.html', context)
 

@@ -15,12 +15,18 @@ def upload_image_path(instance, filename):
     return f"site/{final_name}"
 
 
+
+from django.utils import timezone
+
+
+
 class MasterInfo(models.Model):
     acc_year = models.IntegerField(blank=True, null=True,verbose_name='سال مالی')
     company_name= models.CharField(max_length=255, null=True,verbose_name='نام شرکت')
     company_logo1 = models.ImageField(upload_to=upload_image_path, null=True, blank=True, verbose_name='لوگوی اصلی')
     is_active = models.BooleanField(default=False, verbose_name='فعال است؟')
     last_report_time=models.DateTimeField(blank=True, null=True,verbose_name='زمان آخرین ارسال گزاش')
+    last_update_time = models.DateTimeField(default=timezone.now, verbose_name='زمان آخرین آپدیت')
 
 
 
