@@ -278,6 +278,7 @@ def Home1(request, *args, **kwargs):
     ).filter(
         Q(kol__in=[500, 400, 403, 101, 401, 501,200])
     ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
+    print(f"1: {time.time() - start_time:.2f} ثانیه")
 
     # محاسبه داده‌ها
     today_data = TarazCal(today, today, data)
@@ -287,17 +288,20 @@ def Home1(request, *args, **kwargs):
     # محاسبه داده‌ها برای 8 روز اخیر
     chart7_data = [TarazCal(today - timedelta(days=i), today - timedelta(days=i), data)['asnad_daryaftani'] for i in
                    range(8)]
+    print(f"2: {time.time() - start_time:.2f} ثانیه")
 
     # دریافت اطلاعات چک‌های دریافتی
     chequesr = ChequesRecieve.objects.aggregate(total_mandeh_sum=Sum('total_mandeh'))
     postchequesr = ChequesRecieve.objects.filter(cheque_date__gt=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
     pastchequesr = ChequesRecieve.objects.filter(cheque_date__lte=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
+    print(f"3: {time.time() - start_time:.2f} ثانیه")
 
     r_chequ_data = {
         'tmandeh': (chequesr['total_mandeh_sum'] / 10000000) * -1,
         'pastmandeh': (pastchequesr['total_mandeh_sum'] / 10000000) * -1,
         'postmandeh': (postchequesr['total_mandeh_sum'] / 10000000) * -1,
     }
+    print(f"4: {time.time() - start_time:.2f} ثانیه")
 
     # دریافت اطلاعات چک‌های پرداختی
     chequesr = ChequesPay.objects.aggregate(total_mandeh_sum=Sum('total_mandeh'))
@@ -309,12 +313,14 @@ def Home1(request, *args, **kwargs):
         'pastmandeh': (pastchequesr['total_mandeh_sum'] / 10000000) ,
         'postmandeh': (postchequesr['total_mandeh_sum'] / 10000000) ,
     }
+    print(f"5: {time.time() - start_time:.2f} ثانیه")
 
     # دریافت گزارش‌ها
     start_date = today - timedelta(days=114)
     end_date = today - timedelta(days=107)
     dayly_reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
     dayly_reports = MasterReport.objects.order_by('-day')[:7][::-1]
+    print(f"6: {time.time() - start_time:.2f} ثانیه")
 
     # روزهای هفته به زبان فارسی
     day_names_persian = {
@@ -327,6 +333,7 @@ def Home1(request, *args, **kwargs):
         6: 'یکشنبه',
     }
 
+    print(f"7: {time.time() - start_time:.2f} ثانیه")
 
     chart1_data = {
         'labels': [day_names_persian[report.day.weekday()] for report in dayly_reports],  # تبدیل شماره روز به نام روز
@@ -334,6 +341,7 @@ def Home1(request, *args, **kwargs):
         'baha_tamam_forosh': [report.baha_tamam_forosh for report in dayly_reports],
         'sood_navizhe': [report.sood_navizhe for report in dayly_reports],
     }
+    print(f"8: {time.time() - start_time:.2f} ثانیه")
 
     monthly_reports = MonthlyReport.objects.order_by('-year', '-month')[:12][::-1]
     chart2_data = {
@@ -343,6 +351,7 @@ def Home1(request, *args, **kwargs):
         'baha_tamam_forosh': [report.baha_tamam_forosh for report in monthly_reports],
         'sood_navizhe': [report.sood_navizhe for report in monthly_reports],
     }
+    print(f"9: {time.time() - start_time:.2f} ثانیه")
 
     chart4_data = {
         'labels': [day_names_persian[report.day.weekday()] for report in dayly_reports],  # تبدیل شماره روز به نام روز
@@ -350,6 +359,7 @@ def Home1(request, *args, **kwargs):
         'total_hazineh': [report.baha_tamam_forosh+report.sayer_hazine for report in dayly_reports],
         'sood_vizhe': [report.sood_vizhe for report in dayly_reports],
     }
+    print(f"10: {time.time() - start_time:.2f} ثانیه")
 
     chart5_data = {
         # 'labels': [f"{report.month_name} {report.year}" for report in monthly_reports],
@@ -359,6 +369,7 @@ def Home1(request, *args, **kwargs):
         'sood_vizhe': [report.sood_vizhe for report in monthly_reports],
     }
 
+    print(f"11: {time.time() - start_time:.2f} ثانیه")
 
     #تکمیل تقویم
 
@@ -373,6 +384,7 @@ def Home1(request, *args, **kwargs):
         today_jalali = JalaliDate.today()
         current_year = today_jalali.year
         current_month = today_jalali.month
+    print(f"12: {time.time() - start_time:.2f} ثانیه")
 
     months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
     month_name = months[current_month - 1]
@@ -384,6 +396,7 @@ def Home1(request, *args, **kwargs):
     days_in_month,max_cheque,month_cheque_data = generate_calendar_data_cheque(current_month, current_year, cheque_recive_data,cheque_pay_data)
 
 
+    print(f"13: {time.time() - start_time:.2f} ثانیه")
 
     context = {
         'title': 'داشبورد مدیریتی',
