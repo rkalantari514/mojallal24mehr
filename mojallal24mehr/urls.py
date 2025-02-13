@@ -16,7 +16,7 @@ Including another URLconf
 """
 from mahakupdate.views import Updateall
 from mojallal24mehr import settings
-from mojallal24mehr.views import header, sidebar, footer
+from mojallal24mehr.views import header, sidebar, footer, update_dark_mode
 
 from django.contrib import admin
 from django.urls import path, include
@@ -33,6 +33,7 @@ urlpatterns = [
     path('', include('custom_login.urls')),
     path('', include('accounting.urls')),
 
+    path('update-dark-mode/', update_dark_mode, name='update_dark_mode'),
 
     path('header', header, name="header"),
     path('sidebar', sidebar, name="sidebar"),

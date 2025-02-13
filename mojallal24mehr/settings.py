@@ -57,9 +57,10 @@ INSTALLED_APPS = [
     'mahakupdate',
     'dashboard',
     'dashkala',
-    'django_apscheduler',
+    # 'django_apscheduler',
     'custom_login',
     'accounting',
+
 ]
 
 MIDDLEWARE = [
@@ -194,8 +195,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "static_cdn", "media_root")
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Format for displaying run time timestamps in the Django admin site.
-APSCHEDULER_RUN_NOW_TIMEOUT = 2500  # Seconds to wait for an explicitly requested job to complete.
+# APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Format for displaying run time timestamps in the Django admin site.
+# APSCHEDULER_RUN_NOW_TIMEOUT = 2500  # Seconds to wait for an explicitly requested job to complete.
 
 
 AUTH_USER_MODEL = 'custom_login.CustomUser'

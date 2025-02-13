@@ -11,6 +11,7 @@
         {#    <a class="navbar-brand brand-logo-mini" href="index.html"><img src="images/logo-icon-light.png" alt=""></a>#}
         <a class="navbar-brand brand-logo-mini" href="/"><img src="{% static 'images/yassmojalal.png' %}" alt=""></a>
     </div>
+
     <!-- Top bar left -->
     <ul class="nav navbar-nav mr-auto">
         <li class="nav-item">
@@ -27,6 +28,10 @@
             </div>
         </li>
     </ul>
+
+  
+    آخرین آپدیت  {{ last_update_time|timesince }} قبل
+    
     <!-- top bar right -->
     <ul class="nav navbar-nav ml-auto">
         <li class="nav-item fullscreen">

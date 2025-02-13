@@ -19,7 +19,8 @@ pip install django-jalali-date
 
 pip install setuptools
 
-
+pip install dash pandas plotly
+pip install python-dateutil
 
 
 INSTALLED_APPS = [

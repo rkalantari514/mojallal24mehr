@@ -12,7 +12,10 @@
     <title>{{ title }}</title>
     {% include 'shared/_HeaderReferences.html' %}
 </head>
-<body>
+{#<body class="dark-mode-active">#}
+{#<body>#}
+<body class="{% if user.is_dark_mode %}dark-mode-active{% endif %}">  
+
 <div class="wrapper">
     <!--=================================
      preloader -->

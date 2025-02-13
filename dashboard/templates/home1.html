@@ -2,6 +2,7 @@
 {% load humanize %}
 {% load static %}
 {% block content %}
+
     <style>
         .datetime-small {
             font-size: 1.2em; /* کوچک‌تر کردن فونت تاریخ و ساعت */
@@ -12,7 +13,50 @@
         .text-facebook {
             display: inline; /* نمایش عنوان در یک خط */
         }
+
     </style>
+    <style>
+        .calendar-table .fc-day-top {
+            position: relative; /* برای قرار دادن فرزندان */
+            padding: 5px; /* کمی فاصله برای زیبایی */
+        }
+
+        .calendar-table .fc-day-number {
+            font-weight: bold;
+            display: block;
+            margin: 0;
+            padding: 0; /* لغو حاشیه */
+            text-align: left; /* تراز چپ */
+        }
+
+        .calendar-table .fc-recive-number,
+        .calendar-table .fc-pay-number {
+            font-size: 1.2rem; /* اندازه متن */
+            display: block; /* تقسیم نمایش به سطرهای جدید */
+        }
+
+        .calendar-table .fc-recive-number {
+            color: #007bff; /* رنگ سبد خرید */
+            text-align: right; /* تراز راست برای شماره دریافتی */
+        }
+
+        .calendar-table .fc-pay-number {
+            color: #df0808; /* رنگ  */
+            text-align: right; /* تراز راست برای شماره پرداختی */
+        }
+
+        .calendar-table th {
+            border: 1px solid #fdd49a;
+            background-color: transparent !important; /* حذف رنگ پس‌زمینه */
+        }
+    </style>
+    <style>
+        .small-logo {
+            width: 20px; /* تنظیم اندازه کوچک لوگو */
+            height: auto;
+        }
+    </style>
+
 
     <div class="content-wrapper">
 
@@ -34,67 +78,10 @@
 
         <div class="row">
             <!--سود ناویژه-->
-            <div class="col-xl-6 mb-30">
+            <div class="col-xl-4 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body text-left">
                         <h5 class="card-title">سود ناویژه</h5>
-                        <h6 class="text-capitalize mt-0 text-center text-primary">خالص در آمد فروش</h6>
-                        <div class="row">
-                            <div class="col-4 col-sm-4 mb-15 text-center">
-                                <div class="counter counter-small">
-                                    <h4 class="timer text-primary" data-to="{{ today_data.khales_forosh }}"
-                                        data-speed="5000">{{ today_data.khales_forosh }}</h4>
-                                    <label class="text-capitalize mt-0">امروز ({{ last_update_time|timesince }})
-                                        قبل</label>
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-4 mb-15 text-center">
-                                <div class="counter counter-small">
-                                    <h4 class="timer text-success" data-to="{{ yesterday_data.khales_forosh }}"
-                                        data-speed="5000">{{ yesterday_data.khales_forosh }}</h4>
-                                    <label class="text-capitalize mt-0">دیروز </label>
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-4 mb-15 text-center">
-                                <a href="/balance-sheet-moin/400" target="_blank">
-                                    <div class="counter counter-small">
-                                        <h4 class="timer text-danger" data-to="{{ allday_data.khales_forosh }}"
-                                            data-speed="5000">{{ allday_data.khales_forosh }}</h4>
-                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="divider"></div>
-                        <h6 class="text-capitalize mt-0 text-center text-danger">بهای تمام شده کالای فروش رفته</h6>
-                        <div class="row">
-                            <div class="col-4 col-sm-4 mb-15 text-center">
-                                <div class="counter counter-small">
-                                    <h4 class="timer text-primary" data-to="{{ today_data.baha_tamam_forosh }}"
-                                        data-speed="5000">{{ today_data.baha_tamam_forosh }}</h4>
-                                    <label class="text-capitalize mt-0">امروز </label>
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-4 mb-15 text-center">
-                                <div class="counter counter-small">
-                                    <h4 class="timer text-success" data-to="{{ yesterday_data.baha_tamam_forosh }}"
-                                        data-speed="5000">{{ yesterday_data.baha_tamam_forosh }}</h4>
-                                    <label class="text-capitalize mt-0">دیروز </label>
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-4 mb-15 text-center">
-                                <a href="/balance-sheet-moin/500" target="_blank">
-
-                                    <div class="counter counter-small">
-                                        <h4 class="timer text-danger" data-to="{{ allday_data.baha_tamam_forosh }}"
-                                            data-speed="5000">{{ allday_data.baha_tamam_forosh }}</h4>
-                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="divider"></div>
-                        <h6 class="text-capitalize mt-0 text-center text-success">سود ناویژه</h6>
                         <div class="row">
                             <div class="col-4 col-sm-4 mb-15 text-center">
                                 <div class="counter counter-small">
@@ -118,7 +105,63 @@
                                 </div>
                             </div>
                         </div>
-
+                        {#                        <div class="divider"></div>#}
+                        {#                        <h6 class="text-capitalize mt-0 text-center text-primary">خالص در آمد فروش</h6>#}
+                        {#                        <div class="row">#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <div class="counter counter-small">#}
+                        {#                                    <h4 class="timer text-primary" data-to="{{ today_data.khales_forosh }}"#}
+                        {#                                        data-speed="5000">{{ today_data.khales_forosh }}</h4>#}
+                        {#                                    <label class="text-capitalize mt-0">امروز ({{ last_update_time|timesince }})#}
+                        {#                                        قبل</label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <div class="counter counter-small">#}
+                        {#                                    <h4 class="timer text-success" data-to="{{ yesterday_data.khales_forosh }}"#}
+                        {#                                        data-speed="5000">{{ yesterday_data.khales_forosh }}</h4>#}
+                        {#                                    <label class="text-capitalize mt-0">دیروز </label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <a href="/balance-sheet-moin/400" target="_blank">#}
+                        {#                                    <div class="counter counter-small">#}
+                        {#                                        <h4 class="timer text-danger" data-to="{{ allday_data.khales_forosh }}"#}
+                        {#                                            data-speed="5000">{{ allday_data.khales_forosh }}</h4>#}
+                        {#                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>#}
+                        {#                                    </div>#}
+                        {#                                </a>#}
+                        {#                            </div>#}
+                        {#                        </div>#}
+                        {#                        <div class="divider"></div>#}
+                        {#                        <h6 class="text-capitalize mt-0 text-center text-danger">بهای تمام شده کالای فروش رفته</h6>#}
+                        {#                        <div class="row">#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <div class="counter counter-small">#}
+                        {#                                    <h4 class="timer text-primary" data-to="{{ today_data.baha_tamam_forosh }}"#}
+                        {#                                        data-speed="5000">{{ today_data.baha_tamam_forosh }}</h4>#}
+                        {#                                    <label class="text-capitalize mt-0">امروز </label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <div class="counter counter-small">#}
+                        {#                                    <h4 class="timer text-success" data-to="{{ yesterday_data.baha_tamam_forosh }}"#}
+                        {#                                        data-speed="5000">{{ yesterday_data.baha_tamam_forosh }}</h4>#}
+                        {#                                    <label class="text-capitalize mt-0">دیروز </label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <a href="/balance-sheet-moin/500" target="_blank">#}
+                        {##}
+                        {#                                    <div class="counter counter-small">#}
+                        {#                                        <h4 class="timer text-danger" data-to="{{ allday_data.baha_tamam_forosh }}"#}
+                        {#                                            data-speed="5000">{{ allday_data.baha_tamam_forosh }}</h4>#}
+                        {#                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>#}
+                        {#                                    </div>#}
+                        {#                                </a>#}
+                        {#                            </div>#}
+                        {#                        </div>#}
+                        {#                        <div class="divider"></div>#}
                         <div class="divider"></div>
                         <div class="row">
                             <div class="col-6 col-sm-4 mt-15 text-center">
@@ -138,68 +181,10 @@
                 </div>
             </div>
             <!--سود ویژه-->
-            <div class="col-xl-6 mb-30">
+            <div class="col-xl-4 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body text-left">
-                        <h5 class="card-title">سود ویژه</h5>
-                        <h6 class="text-capitalize mt-0 text-center text-primary">سایر درآمدها</h6>
-                        <div class="row">
-                            <div class="col-4 col-sm-4 mb-15 text-center">
-
-                                <div class="counter counter-small">
-                                    <h4 class="timer text-primary" data-to="{{ today_data.sayer_daramad }}"
-                                        data-speed="5000">{{ today_data.sayer_daramad }}</h4>
-                                    <label class="text-capitalize mt-0">امروز ({{ last_update_time|timesince }})
-                                        قبل</label>
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-4 mb-15 text-center">
-                                <div class="counter counter-small">
-                                    <h4 class="timer text-success" data-to="{{ yesterday_data.sayer_daramad }}"
-                                        data-speed="5000">{{ yesterday_data.sayer_daramad }}</h4>
-                                    <label class="text-capitalize mt-0">دیروز </label>
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-4 mb-15 text-center">
-                                <a href="/balance-sheet-moin/401" target="_blank">
-
-                                    <div class="counter counter-small">
-                                        <h4 class="timer text-danger" data-to="{{ allday_data.sayer_daramad }}"
-                                            data-speed="5000">{{ allday_data.sayer_daramad }}</h4>
-                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="divider"></div>
-                        <h6 class="text-capitalize mt-0 text-center text-danger">سایر هزینه ها</h6>
-                        <div class="row">
-                            <div class="col-4 col-sm-4 mb-15 text-center">
-                                <div class="counter counter-small">
-                                    <h4 class="timer text-primary" data-to="{{ today_data.sayer_hazine }}"
-                                        data-speed="5000">{{ today_data.sayer_hazine }}</h4>
-                                    <label class="text-capitalize mt-0">امروز </label>
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-4 mb-15 text-center">
-                                <div class="counter counter-small">
-                                    <h4 class="timer text-success" data-to="{{ yesterday_data.sayer_hazine }}"
-                                        data-speed="5000">{{ yesterday_data.sayer_hazine }}</h4>
-                                    <label class="text-capitalize mt-0">دیروز </label>
-                                </div>
-                            </div>
-                            <div class="col-4 col-sm-4 mb-15 text-center">
-                                <a href="/balance-sheet-moin/501" target="_blank">
-                                    <div class="counter counter-small">
-                                        <h4 class="timer text-danger" data-to="{{ allday_data.sayer_hazine }}"
-                                            data-speed="5000">{{ allday_data.sayer_hazine }}</h4>
-                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="divider"></div>
-                        <h6 class="text-capitalize mt-0 text-center text-success">سود ویژه</h6>
+                        <h5 class="card-title">سود خالص</h5>
                         <div class="row">
                             <div class="col-4 col-sm-4 mb-15 text-center">
                                 <div class="counter counter-small">
@@ -223,6 +208,64 @@
                                 </div>
                             </div>
                         </div>
+                        {#                        <h6 class="text-capitalize mt-0 text-center text-primary">سایر درآمدها</h6>#}
+                        {#                        <div class="row">#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {##}
+                        {#                                <div class="counter counter-small">#}
+                        {#                                    <h4 class="timer text-primary" data-to="{{ today_data.sayer_daramad }}"#}
+                        {#                                        data-speed="5000">{{ today_data.sayer_daramad }}</h4>#}
+                        {#                                    <label class="text-capitalize mt-0">امروز ({{ last_update_time|timesince }})#}
+                        {#                                        قبل</label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <div class="counter counter-small">#}
+                        {#                                    <h4 class="timer text-success" data-to="{{ yesterday_data.sayer_daramad }}"#}
+                        {#                                        data-speed="5000">{{ yesterday_data.sayer_daramad }}</h4>#}
+                        {#                                    <label class="text-capitalize mt-0">دیروز </label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <a href="/balance-sheet-moin/401" target="_blank">#}
+                        {##}
+                        {#                                    <div class="counter counter-small">#}
+                        {#                                        <h4 class="timer text-danger" data-to="{{ allday_data.sayer_daramad }}"#}
+                        {#                                            data-speed="5000">{{ allday_data.sayer_daramad }}</h4>#}
+                        {#                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>#}
+                        {#                                    </div>#}
+                        {#                                </a>#}
+                        {#                            </div>#}
+                        {#                        </div>#}
+                        {#                        <div class="divider"></div>#}
+                        {#                        <h6 class="text-capitalize mt-0 text-center text-danger">سایر هزینه ها</h6>#}
+                        {#                        <div class="row">#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <div class="counter counter-small">#}
+                        {#                                    <h4 class="timer text-primary" data-to="{{ today_data.sayer_hazine }}"#}
+                        {#                                        data-speed="5000">{{ today_data.sayer_hazine }}</h4>#}
+                        {#                                    <label class="text-capitalize mt-0">امروز </label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <div class="counter counter-small">#}
+                        {#                                    <h4 class="timer text-success" data-to="{{ yesterday_data.sayer_hazine }}"#}
+                        {#                                        data-speed="5000">{{ yesterday_data.sayer_hazine }}</h4>#}
+                        {#                                    <label class="text-capitalize mt-0">دیروز </label>#}
+                        {#                                </div>#}
+                        {#                            </div>#}
+                        {#                            <div class="col-4 col-sm-4 mb-15 text-center">#}
+                        {#                                <a href="/balance-sheet-moin/501" target="_blank">#}
+                        {#                                    <div class="counter counter-small">#}
+                        {#                                        <h4 class="timer text-danger" data-to="{{ allday_data.sayer_hazine }}"#}
+                        {#                                            data-speed="5000">{{ allday_data.sayer_hazine }}</h4>#}
+                        {#                                        <label class="text-capitalize mt-0">ازابتدای سال مالی</label>#}
+                        {#                                    </div>#}
+                        {#                                </a>#}
+                        {#                            </div>#}
+                        {#                        </div>#}
+                        {#                        <div class="divider"></div>#}
+
 
                         <div class="divider"></div>
                         <div class="row">
@@ -248,7 +291,7 @@
         <!--ردیف گزارش فروش و سود ناخالص-->
         <div class="row">
             <!--نمودار سود ناویژه-->
-            <div class="col-xl-6 mb-30">
+            <div class="col-xl-4 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body">
                         <h5 class="card-title"> گزارش سود ناویژه</h5>
@@ -257,18 +300,18 @@
                                 <li class="nav-item">
                                     <a class="nav-link active show" id="home-07-tab" data-toggle="tab" href="#home-07"
                                        role="tab" aria-controls="home-07" aria-selected="true"> <i
-                                            class="fa fa-calendar-check-o"></i> مقایسه روزانه</a>
+                                            class="fa fa-calendar-check-o"></i> روزانه</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" id="profile-07-tab" data-toggle="tab" href="#profile-07"
                                        role="tab" aria-controls="profile-07" aria-selected="false"><i
-                                            class="fa fa-calendar"></i> مقایسه هفته ای </a>
+                                            class="fa fa-calendar"></i> ماهانه </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="portfolio-07-tab" data-toggle="tab" href="#portfolio-07"
-                                       role="tab" aria-controls="portfolio-07" aria-selected="false"><i
-                                            class="fa  fa-calendar-o"></i> مقایسه ماهانه </a>
-                                </li>
+                                {#                                <li class="nav-item">#}
+                                {#                                    <a class="nav-link" id="portfolio-07-tab" data-toggle="tab" href="#portfolio-07"#}
+                                {#                                       role="tab" aria-controls="portfolio-07" aria-selected="false"><i#}
+                                {#                                            class="fa  fa-calendar-o"></i>  سالانه </a>#}
+                                {#                                </li>#}
                                 {#                <li class="nav-item">#}
                                 {#                  <a class="nav-link active show" id="contact-07-tab" data-toggle="tab" href="#contact-07" role="tab" aria-controls="contact-07" aria-selected="true"><i class="fa fa-check-square-o"></i> تماس </a>#}
                                 {#                </li>#}
@@ -276,20 +319,20 @@
                             <div class="tab-content">
                                 <div class="tab-pane fade active show" id="home-07" role="tabpanel"
                                      aria-labelledby="home-07-tab">
-                                    <canvas id="Chart1"></canvas>
-
+                                    <canvas id="Chart1" height="250"></canvas>
                                 </div>
                                 <div class="tab-pane fade" id="profile-07" role="tabpanel"
                                      aria-labelledby="profile-07-tab">
-                                    <p>.</p>
+                                    <canvas id="Chart2" height="250"></canvas>
+
                                 </div>
                                 <div class="tab-pane fade" id="portfolio-07" role="tabpanel"
                                      aria-labelledby="portfolio-07-tab">
-                                    <p>..</p>
+                                    {#                                    <div id="bar-chart">{{ fig_html3|safe }}</div>#}
                                 </div>
                                 <div class="tab-pane fade " id="contact-07" role="tabpanel"
                                      aria-labelledby="contact-07-tab">
-                                    <p>...</p>
+                                    {#                                    <p>...</p>#}
                                 </div>
                             </div>
                         </div>
@@ -297,27 +340,27 @@
                 </div>
             </div>
             <!--نمودار سود ویژه-->
-            <div class="col-xl-6 mb-30">
+            <div class="col-xl-4 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body">
-                        <h5 class="card-title"> گزارش اسناد دریافتنی</h5>
-                        <div class="tab round">
+                        <h5 class="card-title"> گزارش سود خالص</h5>
+                        <div class="tab round ">
                             <ul class="nav nav-tabs" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active show" id="home-08-tab" data-toggle="tab" href="#home-08"
+                                    <a class="nav-link active show " id="home-08-tab" data-toggle="tab" href="#home-08"
                                        role="tab" aria-controls="home-08" aria-selected="true"> <i
-                                            class="fa fa-calendar-check-o"></i> مقایسه روزانه</a>
+                                            class="fa fa-calendar-check-o"></i> روزانه</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" id="profile-08-tab" data-toggle="tab" href="#profile-08"
                                        role="tab" aria-controls="profile-08" aria-selected="false"><i
-                                            class="fa fa-calendar"></i> مقایسه هفته ای </a>
+                                            class="fa fa-calendar"></i> ماهانه </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="portfolio-08-tab" data-toggle="tab" href="#portfolio-08"
-                                       role="tab" aria-controls="portfolio-08" aria-selected="false"><i
-                                            class="fa  fa-calendar-o"></i> مقایسه ماهانه </a>
-                                </li>
+                                {#                                <li class="nav-item">#}
+                                {#                                    <a class="nav-link" id="portfolio-08-tab" data-toggle="tab" href="#portfolio-08"#}
+                                {#                                       role="tab" aria-controls="portfolio-08" aria-selected="false"><i#}
+                                {#                                            class="fa  fa-calendar-o"></i>  ماهانه </a>#}
+                                {#                                </li>#}
                                 {#                <li class="nav-item">#}
                                 {#                  <a class="nav-link active show" id="contact-08-tab" data-toggle="tab" href="#contact-08" role="tab" aria-controls="contact-08" aria-selected="true"><i class="fa fa-check-square-o"></i> تماس </a>#}
                                 {#                </li>#}
@@ -325,12 +368,12 @@
                             <div class="tab-content">
                                 <div class="tab-pane fade active show" id="home-08" role="tabpanel"
                                      aria-labelledby="home-08-tab">
-                                    <canvas id="Chart4"></canvas>
+                                    <canvas id="Chart4" height="250"></canvas>
 
                                 </div>
                                 <div class="tab-pane fade" id="profile-08" role="tabpanel"
                                      aria-labelledby="profile-08-tab">
-                                    <p>.</p>
+                                    <canvas id="Chart5" height="250"></canvas>
                                 </div>
                                 <div class="tab-pane fade" id="portfolio-08" role="tabpanel"
                                      aria-labelledby="portfolio-08-tab">
@@ -349,12 +392,9 @@
 
 
         <div class="row">
-            <!--خالی-->
-            <div class="col-xl-6 mb-30">
 
-            </div>
             <!--اسناد دریافتنی-->
-            <div class="col-xl-6 mb-30">
+            <div class="col-xl-4 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body text-left">
                         <h5 class="card-title">اسناد در یافتنی</h5>
@@ -362,7 +402,79 @@
                         <div class="row">
                             <div class="col-4 col-sm-4 mb-15 text-center">
                                 <div class="counter counter-small">
-                                    {% if today_data.asnad_pardakhtani > yesterday_data.asnad_pardakhtani %}
+                                    {% if today_data.asnad_daryaftani > yesterday_data.asnad_daryaftani %}
+                                        <h4 class="timer text-danger" data-to="{{ today_data.asnad_daryaftani }}"
+                                            data-speed="5000">
+                                            {{ today_data.asnad_daryaftani }}
+                                        </h4>
+                                        <label class="text-capitalize mt-0"> <i class="fa fa-long-arrow-up text-danger"
+                                                                                aria-hidden="true"></i>
+                                            برآیند امروز ({{ last_update_time|timesince }})قبل
+                                        </label>
+                                    {% else %}
+                                        <h4 class="timer text-success" data-to="{{ today_data.asnad_daryaftani }}"
+                                            data-speed="5000">
+                                            {{ today_data.asnad_daryaftani }}
+                                        </h4>
+                                        <label class="text-capitalize mt-0"> <i class="fa fa-arrow-down text-success"
+                                                                                aria-hidden="true"></i>
+                                            برآیند امروز ({{ last_update_time|timesince }})قبل
+                                        </label>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    {% if today_data.asnad_daryaftani > yesterday_data.asnad_daryaftani %}
+                                        <h4 class="timer text-success" data-to="{{ yesterday_data.asnad_daryaftani }}"
+                                            data-speed="5000">{{ yesterday_data.asnad_daryaftani|floatformat:0 }}</h4>
+                                    {% else %}
+                                        <h4 class="timer text-danger" data-to="{{ yesterday_data.asnad_daryaftani }}"
+                                            data-speed="5000">{{ yesterday_data.asnad_daryaftani }}</h4>
+                                    {% endif %}
+                                    <label class="text-capitalize mt-0">برآیند دیروز </label>
+                                </div>
+                            </div>
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    <h4 class="timer text-danger" data-to="{{ allday_data.asnad_daryaftani }}"
+                                        data-speed="5000">{{ allday_data.asnad_daryaftani }}</h4>
+                                    <label class="text-capitalize mt-0"> مانده </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="row">
+
+                            <div class="col-6 col-sm-4 mt-15 text-center">
+                                <a href="/acc/cheques_recieve_total">
+                                    <b>کل چک های دارای مانده</b>
+                                    <h4>{{ r_chequ_data.tmandeh|floatformat:0|intcomma:False }}</h4>
+                                </a>
+                            </div>
+
+                            <div class="col-6 col-sm-4 mt-15 text-center">
+                                <b>چک های تاریخ گذشته تا امروز</b>
+                                <h4>{{ r_chequ_data.pastmandeh|floatformat:0|intcomma:False }}</h4>
+                            </div>
+                            <div class="col-12 col-sm-4 mt-15 text-center">
+                                <b>چکهای فردا به بعد</b>
+                                <h4>{{ r_chequ_data.postmandeh|floatformat:0|intcomma:False }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--اسناد پرداختنی-->
+            <div class="col-xl-4 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body text-left">
+                        <h5 class="card-title">اسناد پرداختنی</h5>
+                        <h6 class="text-capitalize mt-0">میلیون تومان</h6>
+                        <div class="row">
+                            <div class="col-4 col-sm-4 mb-15 text-center">
+                                <div class="counter counter-small">
+                                    {% if today_data.asnad_pardakhtani < yesterday_data.asnad_pardakhtani %}
                                         <h4 class="timer text-danger" data-to="{{ today_data.asnad_pardakhtani }}"
                                             data-speed="5000">
                                             {{ today_data.asnad_pardakhtani }}
@@ -385,7 +497,7 @@
                             </div>
                             <div class="col-4 col-sm-4 mb-15 text-center">
                                 <div class="counter counter-small">
-                                    {% if today_data.asnad_pardakhtani > yesterday_data.asnad_pardakhtani %}
+                                    {% if today_data.asnad_pardakhtani < yesterday_data.asnad_pardakhtani %}
                                         <h4 class="timer text-success" data-to="{{ yesterday_data.asnad_pardakhtani }}"
                                             data-speed="5000">{{ yesterday_data.asnad_pardakhtani|floatformat:0 }}</h4>
                                     {% else %}
@@ -409,19 +521,170 @@
                             <div class="col-6 col-sm-4 mt-15 text-center">
                                 <a href="/acc/cheques_recieve_total">
                                     <b>کل چک های دارای مانده</b>
-                                    <h4>{{ chequ_data.tmandeh|floatformat:0|intcomma:False }}</h4>
+                                    <h4>{{ p_chequ_data.tmandeh|floatformat:0|intcomma:False }}</h4>
                                 </a>
                             </div>
 
                             <div class="col-6 col-sm-4 mt-15 text-center">
                                 <b>چک های تاریخ گذشته تا امروز</b>
-                                <h4>{{ chequ_data.pastmandeh|floatformat:0|intcomma:False }}</h4>
+                                <h4>{{ p_chequ_data.pastmandeh|floatformat:0|intcomma:False }}</h4>
                             </div>
                             <div class="col-12 col-sm-4 mt-15 text-center">
                                 <b>چکهای فردا به بعد</b>
-                                <h4>{{ chequ_data.postmandeh|floatformat:0|intcomma:False }}</h4>
+                                <h4>{{ p_chequ_data.postmandeh|floatformat:0|intcomma:False }}</h4>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+
+            <!-- تقوم چک ها -->
+            <div id="calendarf" class="col-md-8 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                    <div class="text-center mb-4">
+                            <h2>{{ month_name }} ماه {{ year }}</h2>
+                        </div>
+                    <div class="card-body">
+             <h5 class="mb-15 pb-0 border-0 card-title">چک های دارای مانده </h5>
+              <div class="table-responsive">
+              <table class="table center-aligned-table mb-10 text-center ">
+                <thead>
+                  <tr class="text-dark">
+                    <th></th>
+                    <th></th>
+                    <th>ماه های قبلی</th>
+                    <th>{{ month_name }} ماه {{ year }}</th>
+                    <th>ماه های بعد</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><i class="fa fa-download text-primary fa-2x"></i></td>
+                   <td><h5 class="text-primary">چکهای دریافتی</h5></td>
+                   <td><h5 class="text-danger">{{ month_cheque_data.past_recive|floatformat:0|intcomma:False }}</h5></td>
+                    <td><h5 class="text-twitter">{{ month_cheque_data.this_month_recive|floatformat:0|intcomma:False }}</h5></td>
+                    <td><h5 class="text-success">{{ month_cheque_data.post_recive|floatformat:0|intcomma:False }}</h5></td>
+                  </tr>
+
+                                    <td><i class="fa fa-upload text-danger fa-2x"></i></td>
+                    <td><h5 class="text-danger">چکهای پرداختی</h5></td>
+                    <td><h5 class="text-primary" >{{ month_cheque_data.past_pay|floatformat:0|intcomma:False }}</h5></td>
+                    <td><h5 class="text-danger">{{ month_cheque_data.this_month_pay|floatformat:0|intcomma:False }}</h5></td>
+                    <td><h5 class="text-warning">{{ month_cheque_data.post_pay|floatformat:0|intcomma:False }}</h5></td>
+                  </tr>
+
+                </tbody>
+              </table>
+            </div>
+           </div>
+
+                        <div class="calendar-header">
+                            <button id="prev-month" class="btn btn-secondary">&lt;</button>
+                            <span>{{ month_name }} {{ year }}</span>
+                            <button id="next-month" class="btn btn-secondary">&gt;</button>
+                        </div>
+                        <table class="table table-bordered calendar-table">
+                            <thead class="thead-light">
+                            <tr class="text-center">
+                                <th>شنبه</th>
+                                <th>یکشنبه</th>
+                                <th>دوشنبه</th>
+                                <th>سه‌شنبه</th>
+                                <th>چهارشنبه</th>
+                                <th>پنج‌شنبه</th>
+                                <th>جمعه</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for week in days_in_month %}
+                                <tr>
+                                    {% for day in week %} {% if day %}
+                                        <td>
+                                            <div class="fc-day-top">
+                                                <span class="fc-day-number"><h5>{{ day.jday }}</h5></span>
+                                                <span class="fc-recive-number">{{ day.recive|floatformat:0|intcomma:False }}</span>
+                                                <div class="progress mb-3" data-toggle="popover" data-html="true"
+                                                    data-original-title="لیست  چکهای دریافتی برای تاریخ {{ day.today_recive_cheque.last.cheque_tarik }}"
+
+                                                     data-content="
+                                                     <table class='table'>
+                                                     <thead>
+                                                     <tr>
+                                                     <th></th>
+                                                     <th>بانک</th>
+                                                     <th>شخص</th>
+                                                     <th>مبلغ</th>
+                                                     <tr>
+                                                     </thead>
+                                                     <tbody>
+{% for cheque in day.today_recive_cheque %}
+{% with 'images/bank/'|add:cheque.bank_logo as logo_path %}
+
+<tr>
+<td><img src='{% static logo_path %}' class='small-logo'></td>
+<td>{{ cheque.bank_name }}-{{ cheque.bank_branch }}</td>
+<td>{{ cheque.person }}</td>
+<td>{{ cheque.cost|floatformat:0|intcomma:False }}</td>
+
+</tr>
+{% endwith %}
+{% endfor %}
+</tbody>
+</table>">
+
+                                                    <div class="progress-bar progress-bar-striped bg-primary"
+                                                         role="progressbar"
+                                                         style="width: {% widthratio day.recive max_cheque 100 %}%"
+                                                         aria-valuenow="{{ day.recive }}" aria-valuemin="0"
+                                                         aria-valuemax="{{ max_cheque }}"></div>
+                                                </div>
+                                                <span class="fc-pay-number">{{ day.pay|floatformat:0|intcomma:False }}</span>
+                                                <div class="progress mb-3" data-toggle="popover" data-html="true"
+                                                     data-original-title="لیست  چکهای پرداختی برای تاریخ {{ day.today_pay_cheque.last.cheque_tarik }}"
+                                                     data-content="
+                                                     <table class='table center-aligned-table mb-0'>
+                                                     <thead>
+                                                     <tr>
+                                                     <th></th>
+                                                     <th>بانک</th>
+                                                     <th>مبلغ</th>
+                                                     </tr>
+                                                     </thead>
+                                                     <tbody>
+                                                             {% for cheque in day.today_pay_cheque %}
+{% with 'images/bank/'|add:cheque.bank.bank_logo as logo_path %}
+<tr>
+<td><img src='{% static logo_path %}' class='small-logo'></td>
+<td>{{ cheque.bank.name }}</td>
+<td>{{ cheque.cost|floatformat:0|intcomma:False }}</td>
+</tr>
+{% endwith %}
+{% endfor %}
+</tbody>
+</table>">
+                                                    <div class="progress-bar progress-bar-striped bg-danger"
+                                                         role="progressbar"
+                                                         style="width: {% widthratio day.pay max_cheque 100 %}%"
+                                                         aria-valuenow="{{ day.pay }}" aria-valuemin="0"
+                                                         aria-valuemax="{{ max_cheque }}"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+
+
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -436,10 +699,91 @@
 {% endblock %}
 
 
-{% block jscal %}
 
+{% block jscal %}
+<script>
+
+        $(document).ready(function () {
+            var currentYear = {{ year }};
+            var currentMonth = {{ month }};
+            var url = '/';
+
+            console.log("Initial setup");
+            console.log("Current Year: " + currentYear);
+            console.log("Current Month: " + currentMonth);
+            console.log("Initial URL: " + url);
+
+            function loadCalendar(month, year) {
+                console.log("Loading calendar for month: " + month + ", year: " + year);
+                console.log("URL being used for AJAX call: " + url);
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    data: {month: month, year: year},
+                    success: function (data) {
+                        console.log("AJAX call success");
+                        $('#calendarf').html(data);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error loading calendar: ', error);
+                        console.error('XHR:', xhr);
+                        console.error('Status:', status);
+                    }
+                });
+            }
+
+            $('#prev-month').click(function (e) {
+                e.preventDefault();
+                if (currentMonth === 1) {
+                    currentMonth = 12;
+                    currentYear -= 1;
+                } else {
+                    currentMonth -= 1;
+                }
+                console.log("Previous month clicked. New Month: " + currentMonth + ", Year: " + currentYear);
+                loadCalendar(currentMonth, currentYear);
+            });
+
+            $('#next-month').click(function (e) {
+                e.preventDefault();
+                if (currentMonth === 12) {
+                    currentMonth = 1;
+                    currentYear += 1;
+                } else {
+                    currentMonth += 1;
+                }
+                console.log("Next month clicked. New Month: " + currentMonth + ", Year: " + currentYear);
+                loadCalendar(currentMonth, currentYear);
+            });
+        });
+
+
+    </script>
+{#برای تقویم#}
+    <script>
+$(document).ready(function(){
+    $('[data-toggle="popover"]').popover({
+        trigger: 'click',  // تنظیم برای فعال‌سازی فقط با کلیک
+        placement: 'top',
+        html: true
+    });
+
+    // بستن Popover زمانی که در جای دیگری کلیک شود
+    $(document).on('click', function(e) {
+        $('[data-toggle="popover"]').each(function () {
+            // اگر روی عنصر Popover کلیک نشده باشد
+            if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+                $(this).popover('hide');
+            }
+        });
+    });
+});
+</script>
 
 {% endblock %}
+
+
 
 
 
@@ -462,47 +806,62 @@
         // نمایش اولیه
         updateDateTime();
     </script>
-    <!-- نمودار مقایسه فروش روزانه -->
+
+
+
+    <!--    1   نمودار مقایسه سود ناویژه روزانه -->
     <script>
+        // دریافت داده‌های تاریخی از Django
         var labels = [
-            {% for item in chart1_data %}
-                '{{ item.month_name }}',
-            {% endfor %}
-        ];
-        var labels = ["ژانویه", "فوریه", "مارس", "اوریل", "مه", "ژوئن", "ژولای"];
-
-        var dataValues = [
-            {% for item in chart1_data %}
-                {{ item.total_count }},
+            {% for report in chart1_data.labels %}
+                "{{ report }}"{% if not forloop.last %},{% endif %}
             {% endfor %}
         ];
 
-        var backgroundColors = [
-            'rgba(75, 192, 75, 0.2)',
-            'rgba(75, 192, 75, 0.2)',
-            'rgba(75, 192, 75, 0.2)',
-            'rgba(75, 75, 192, 0.2)',
-            'rgba(75, 75, 192, 0.2)',
-            'rgba(75, 75, 192, 0.2)',
-            'rgba(255, 165, 0, 0.2)',
-            'rgba(255, 165, 0, 0.2)',
-            'rgba(255, 165, 0, 0.2)',
-            'rgba(192, 75, 75, 0.2)',
-            'rgba(192, 75, 75, 0.2)',
-            'rgba(192, 75, 75, 0.2)'
+        var khales_forosh = [
+            {% for value in chart1_data.khales_forosh %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
         ];
 
-        var borderColors = backgroundColors.map((color) => color.replace('0.2', '1'));
+        var baha_tamam_forosh = [
+            {% for value in chart1_data.baha_tamam_forosh %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
 
+        var sood_navizhe = [
+            {% for value in chart1_data.sood_navizhe %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // ساختار داده برای رسم
         var data = {
             labels: labels,
-            datasets: [{
-                label: 'فروش ماهانه',
-                data: dataValues,
-                backgroundColor: backgroundColors,
-                borderColor: borderColors,
-                borderWidth: 1
-            }]
+            datasets: [
+                {
+                    label: 'خالص فروش',
+                    data: khales_forosh,
+                    backgroundColor: 'rgba(0, 123, 255, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'بهای تمام شده',
+                    data: baha_tamam_forosh,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'سود ناویژه',
+                    data: sood_navizhe,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                }
+            ]
         };
 
         var options = {
@@ -510,15 +869,263 @@
                 y: {
                     beginAtZero: true
                 }
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
             }
         };
 
-        drawChart('Chart1', 'line', data, options);
+        // با استفاده از تابع drawChart برای رسم
+        drawChart('Chart1', 'bar', data, options);
+        // اعمال کلاس‌های CSS به عناصر نمودار
+
+    </script>
+
+
+    <!--    2      نمودار مقایسه سود ناویژه ماهانه -->
+    <script>
+        // دریافت داده‌های تاریخی از Django
+        var labels = [
+            {% for report in chart2_data.labels %}
+                "{{ report }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var khales_forosh = [
+            {% for value in chart2_data.khales_forosh %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var baha_tamam_forosh = [
+            {% for value in chart2_data.baha_tamam_forosh %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var sood_navizhe = [
+            {% for value in chart2_data.sood_navizhe %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // ساختار داده برای رسم
+        var data = {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'خالص فروش',
+                    data: khales_forosh,
+                    backgroundColor: 'rgba(0,111,255,0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'بهای تمام شده',
+                    data: baha_tamam_forosh,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'سود ناویژه',
+                    data: sood_navizhe,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                }
+            ]
+        };
+
+        var options = {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            }
+        };
+
+        // با استفاده از تابع drawChart برای رسم
+        drawChart('Chart2', 'bar', data, options);
+
+        // بررسی داده‌ها در کنسول
+        console.log("Labels: ", labels);
+        console.log("Khales Forosh Data: ", khales_forosh);
+        console.log("Baha Tamam Forosh Data: ", baha_tamam_forosh);
+        console.log("Sood Navizhe Data: ", sood_navizhe);
     </script>
 
 
 
-    <!-- چارت 4 میله ای برآیند روز های هفته -->
+    <!--    4   نمودار مقایسه سود ناویژه روزانه -->
+    <script>
+        // دریافت داده‌های تاریخی از Django
+        var labels = [
+            {% for report in chart4_data.labels %}
+                "{{ report }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var total_daramad = [
+            {% for value in chart4_data.total_daramad %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var total_hazineh = [
+            {% for value in chart4_data.total_hazineh %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var sood_vizhe = [
+            {% for value in chart4_data.sood_vizhe %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // ساختار داده برای رسم
+        var data = {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'کل در آمد',
+                    data: total_daramad,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'کل هزینه',
+                    data: total_hazineh,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'سود ویژه',
+                    data: sood_vizhe,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                }
+            ]
+        };
+
+        var options = {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            }
+        };
+
+        // با استفاده از تابع drawChart برای رسم
+        drawChart('Chart4', 'bar', data, options);
+        // اعمال کلاس‌های CSS به عناصر نمودار
+
+    </script>
+
+
+
+    <!--    5   نمودار مقایسه سود ناویژه روزانه -->
+    <script>
+        // دریافت داده‌های تاریخی از Django
+        var labels = [
+            {% for report in chart5_data.labels %}
+                "{{ report }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var total_daramad = [
+            {% for value in chart5_data.total_daramad %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var total_hazineh = [
+            {% for value in chart5_data.total_hazineh %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var sood_vizhe = [
+            {% for value in chart5_data.sood_vizhe %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // ساختار داده برای رسم
+        var data = {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'کل در آمد',
+                    data: total_daramad,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'کل هزینه',
+                    data: total_hazineh,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'سود ویژه',
+                    data: sood_vizhe,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                }
+            ]
+        };
+
+        var options = {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            }
+        };
+
+        // با استفاده از تابع drawChart برای رسم
+        drawChart('Chart5', 'bar', data, options);
+        // اعمال کلاس‌های CSS به عناصر نمودار
+
+    </script>
+
+
+
+
+    <!-- چارت 7 میله ای برآیند روز های هفته -->
     <script>
         const today = new Date();
         const dates = [];
@@ -529,7 +1136,7 @@
         }
 
         var dataValues = [
-            {% for value in chart4_data %}
+            {% for value in chart7_data %}
                 {{ value }},
             {% endfor %}
         ];
@@ -561,8 +1168,10 @@
             }
         };
 
-        drawChart('Chart4', 'bar', data, options);
+        drawChart('Chart7', 'bar', data, options);
     </script>
+
+
 
 {% endblock %}
 
@@ -571,6 +1180,5 @@
 
 
 {% endblock %}
-
 
 

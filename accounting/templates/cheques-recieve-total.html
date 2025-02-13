@@ -25,58 +25,50 @@
 
     </style>
     <style>
-        .calendar-table {
-            table-layout: fixed;
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .calendar-table th, .calendar-table td {
-            width: 14.28%;
-            height: 100px;
-            text-align: center;
-            vertical-align: top;
-            border: 1px solid #fdd49a;
-        }
-
-        .calendar-table th {
-            height: auto; /* تغییر ارتفاع ستون هدر */
-        }
-
         .calendar-table .fc-day-top {
-            background-color: #f9f9f9; /* رنگ پس‌زمینه کم‌رنگ */
             position: relative; /* برای قرار دادن فرزندان */
-            height: 100%; /* ارتفاع کامل سلول */
+            padding: 5px; /* کمی فاصله برای زیبایی */
         }
 
         .calendar-table .fc-day-number {
             font-weight: bold;
             display: block;
-            margin: 0; /* لغو حاشیه */
-            padding-top: 0px; /* فاصله با بالای سلول */
-        }
-
-        .calendar-table .fc-kharid-number,
-        .calendar-table .fc-sales-number {
-            font-size: 1.2rem; /* اندازه متن */
-        }
-
-        .calendar-table .fc-kharid-number {
-            color: #007bff; /* رنگ سبد خرید */
-            position: absolute;
-            bottom: 0px; /* فاصله از پایین سلول */
-            left: 0px; /* فاصله از چپ سلول */
+            margin: 0;
+            padding: 0; /* لغو حاشیه */
             text-align: left; /* تراز چپ */
         }
 
-        .calendar-table .fc-sales-number {
-            color: #28a745; /* رنگ کامیون */
-            position: absolute;
-            bottom: 0px; /* فاصله از پایین سلول */
-            right: 0px; /* فاصله از راست سلول */
-            text-align: right; /* تراز راست */
+        .calendar-table .fc-recive-number,
+        .calendar-table .fc-pay-number {
+            font-size: 1.2rem; /* اندازه متن */
+            display: block; /* تقسیم نمایش به سطرهای جدید */
+        }
+
+        .calendar-table .fc-recive-number {
+            color: #007bff; /* رنگ سبد خرید */
+            text-align: right; /* تراز راست برای شماره دریافتی */
+        }
+
+        .calendar-table .fc-pay-number {
+            color: #df0808; /* رنگ  */
+            text-align: right; /* تراز راست برای شماره پرداختی */
+        }
+
+        .calendar-table th {
+            border: 1px solid #fdd49a;
+            background-color: transparent !important; /* حذف رنگ پس‌زمینه */
         }
     </style>
+    <style>
+        .small-logo {
+            width: 20px; /* تنظیم اندازه کوچک لوگو */
+            height: auto;
+        }
+    </style>
+
+
+
+
     <div class="content-wrapper">
 
         <div class="page-title">
@@ -412,172 +404,412 @@
             </div>
             <!-- ردیف موجودی انبار و تقویم -->
             <div class="row">
-                <div class="col-md-5 mb-30">
+                <div class="col-md-12 mb-30">
                     <div class="col-xl-12 mb-30">
                         <div class="card card-statistics h-100">
                             <div class="card-body">
                                 <div class="table-responsive mt-15 ">
-                                    <h6 class="card-title pb-0 border-0"> چک های دریافتی دارای مانده</h6>
+                                    <h6 class="card-title pb-0 border-0">کل چک های دارای مانده: <span id="total-mandah" class="text-primary"></span> ریال </h6>
+
+
+                                    {#                                    <div class="table-responsive">#}
+                                    {#                                        <table#}
+                                    {#                                                id="table"#}
+                                    {#                                                class="table-striped"#}
+                                    {#                                                data-toggle="table"#}
+                                    {#                                                data-locale="fa-IR"#}
+                                    {#                                                data-search="true"#}
+                                    {#                                                data-show-columns="true"#}
+                                    {#                                                data-show-export="true"#}
+                                    {#                                                data-show-refresh="true"#}
+                                    {#                                                data-show-columns-toggle-all="true"#}
+                                    {#                                                data-show-pagination-switch="true"#}
+                                    {#                                                data-show-toggle="true"#}
+                                    {#                                                data-show-fullscreen="true"#}
+                                    {#                                                data-buttons="buttons"#}
+                                    {#                                                data-search-align="left"#}
+                                    {#                                                data-buttons-class="primary"#}
+                                    {#                                                data-pagination="true"#}
+                                    {#                                                data-show-columns-search="true"#}
+                                    {#                                                data-show-footer="true"#}
+                                    {#                                                data-page-size="10"#}
+                                    {#                                                data-remember-order="true"#}
+                                    {#                                                data-sortable="true"#}
+                                    {#                                                data-show-search-clear-button="true"#}
+                                    {#                                                data-sort-name="date"#}
+                                    {#                                                data-sort-order="desc"#}
+                                    {#                                                data-sort-order="asc"#}
+                                    {#                                                data-filter-control="true"#}
+                                    {#                                                data-show-print="true"#}
+                                    {#                                                data-export-data-type="all"#}
+                                    {#                                                data-export-types=['excel']#}
+                                    {#                                        >#}
+                                    {#                                            <thead>#}
+                                    {#                                            <tr class="tr-class-1">#}
+                                    {#                                                <th></th>#}
+                                    {#                                                 <th class="card-text text-center" data-sortable="true"#}
+                                    {#                                                    data-sorter="numericOnly"#}
+                                    {#                                                    data-field="bank"#}
+                                    {#                                                data-filter-control="select">بانک#}
+                                    {#                                                </th>#}
+                                    {#                                                <th class="card-text text-center" data-sortable="true"#}
+                                    {#                                                    data-sorter="numericOnly"#}
+                                    {#                                                    data-field="shone"#}
+                                    {#                                                data-filter-control="select">شعبه#}
+                                    {#                                                </th>#}
+                                    {##}
+                                    {#                                                <th class="card-text text-center" data-sortable="true"#}
+                                    {#                                                                                                       data-sorter="numericOnly"#}
+                                    {##}
+                                    {#                                                    data-field="year"#}
+                                    {#                                                data-filter-control="select">سال#}
+                                    {#                                                </th>#}
+                                    {#                                                <th class="card-text text-center" data-sortable="true"#}
+                                    {#                                                   data-sorter="numericOnly"#}
+                                    {##}
+                                    {#                                                    data-field="month"#}
+                                    {#                                                data-filter-control="select">ماه#}
+                                    {#                                                </th>#}
+                                    {#                                                <th class="card-text text-center" data-sortable="true"#}
+                                    {#                                                    data-sorter="numericOnly"#}
+                                    {#                                                    data-field="person"#}
+                                    {#                                                data-filter-control="select"#}
+                                    {#                                                >طرف حساب#}
+                                    {#                                                </th>#}
+                                    {#                                                <th class="card-text text-center" data-sortable="true"#}
+                                    {#                                                    data-sorter="numericOnly"#}
+                                    {#                                                    data-field="name">شناسه چک#}
+                                    {#                                                </th>#}
+                                    {#                                                <th class="card-text text-center" data-sortable="true"#}
+                                    {#                                                    data-sorter="numericOnly"#}
+                                    {#                                                    data-field="date"#}
+                                    {#                                                data-filter-control="select">تاریخ چک#}
+                                    {#                                                </th>#}
+                                    {##}
+                                    {#                                                <th class="card-text text-center" data-sortable="true"#}
+                                    {#                                                    data-sorter="numericOnly"#}
+                                    {#                                                    data-field="cat_kala" data-filter-control="select">نوع#}
+                                    {#                                                </th>#}
+                                    {##}
+                                    {##}
+                                    {#                                                <th class="card-text text-center" data-sortable="true"#}
+                                    {#                                                    data-sorter="numericOnly"#}
+                                    {#                                                    data-field="sales" data-filter-control="select">وضعیت#}
+                                    {#                                                </th>#}
+                                    {#                                                <th class="card-text text-center" data-sortable="true"#}
+                                    {#                                                    data-sorter="numericOnly"#}
+                                    {#                                                    data-footer-formatter="priceFormatter"#}
+                                    {#                                                    data-field="mandah">مانده#}
+                                    {#                                                </th>#}
+                                    {##}
+                                    {##}
+                                    {#                                            </tr>#}
+                                    {#                                            </thead>#}
+                                    {#                                            <tbody>#}
+                                    {#                                            {% for t in table1 %}#}
+                                    {#                                                {% with 'images/bank/'|add:t.bank_logo as logo_path %}#}
+                                    {##}
+                                    {#                                                <tr>#}
+                                    {##}
+                                    {##}
+                                    {##}
+                                    {#<td><img src='{% static logo_path %}' class='small-logo'></td>#}
+                                    {##}
+                                    {#                                                    <td class="card-text text-center">#}
+                                    {#                                                        {{ t.bank_name }}</td>#}
+                                    {#                                                    <td class="card-text text-center">#}
+                                    {#                                                        {{ t.bank_branch }}</td>#}
+                                    {#                                                    <td class="card-text text-center">#}
+                                    {#                                                        {{ t.year }}</td>#}
+                                    {#                                                    <td class="card-text text-center">#}
+                                    {#                                                        {{ t.month }}</td>#}
+                                    {#                                                    <td class="card-text text-center">#}
+                                    {#                                                        {{ t.person }}</td>#}
+                                    {#                                                    <td class="card-text text-center">#}
+                                    {#                                                        {{ t.id }}</td>#}
+                                    {#                                                    <td class="card-text text-center">#}
+                                    {#                                                        {{ t.date|to_jalali:'%Y/%m/%d' }}</td>#}
+                                    {#                                                    <td class="card-text text-center">#}
+                                    {#                                                        {{ t.com }}#}
+                                    {##}
+                                    {#                                                    </td>#}
+                                    {#                                                    <td class="card-text text-center">#}
+                                    {#                                                        {{ t.status }}#}
+                                    {##}
+                                    {##}
+                                    {#                                                    </td>#}
+                                    {#                                                    <td class="card-text text-center">#}
+                                    {#                                                        <h5>#}
+                                    {#                                                            {{ t.mandeh|floatformat:0|intcomma:False }}#}
+                                    {#                                                        </h5>#}
+                                    {#                                                    </td>#}
+                                    {##}
+                                    {##}
+                                    {#                                                </tr>#}
+                                    {#                                                {% endwith %}#}
+                                    {#                                            {% endfor %}#}
+                                    {#                                            </tbody>#}
+                                    {#                                        </table>#}
+                                    {##}
+                                    {#                                    </div>#}
+
 
                                     <div class="table-responsive">
-                                        <table
-                                                id="table"
-                                                class="table-striped"
-                                                data-toggle="table"
-                                                data-locale="fa-IR"
-                                                data-search="true"
-                                                data-show-columns="true"
-                                                data-show-export="true"
-                                                data-show-refresh="true"
-                                                data-show-columns-toggle-all="true"
-                                                data-show-pagination-switch="true"
-                                                data-show-toggle="true"
-                                                data-show-fullscreen="true"
-                                                data-buttons="buttons"
-                                                data-search-align="left"
-                                                data-buttons-class="primary"
-                                                data-pagination="true"
-                                                data-show-columns-search="true"
-                                                data-show-footer="true"
-                                                data-page-size="10"
-                                                data-remember-order="true"
-                                                data-sortable="true"
-                                                data-show-search-clear-button="true"
-                                                data-sort-name="date"
-                                                {#                                                data-sort-order="desc"#}
-                                                data-sort-order="asc"
-                                                data-filter-control="true"
-                                                data-show-print="true"
-                                                data-export-data-type="all"
-                                                data-export-types=['excel']
-                                        >
+                                        <table id="table"
+                                               class="table-striped"
+                                               data-toggle="table"
+                                               data-locale="fa-IR"
+                                               data-search="true"
+                                               data-show-columns="true"
+                                               data-show-export="true"
+                                               data-show-refresh="true"
+                                               data-show-columns-toggle-all="true"
+                                               data-show-pagination-switch="true"
+                                               data-show-toggle="true"
+                                               data-show-fullscreen="true"
+                                               data-buttons="buttons"
+                                               data-search-align="left"
+                                               data-buttons-class="primary"
+                                               data-pagination="true"
+                                               data-show-columns-search="true"
+                                               data-show-footer="true"
+                                               data-page-size="10"
+                                               data-remember-order="true"
+                                               data-sortable="true"
+                                               data-show-search-clear-button="true"
+                                               data-sort-name="date"
+                                               data-sort-order="asc"
+                                               data-filter-control="true"
+                                               data-show-print="true"
+                                               data-export-data-type="all"
+                                               data-export-types='["excel"]'>
                                             <thead>
                                             <tr class="tr-class-1">
+                                                <th></th>
+                                                <th class="card-text text-center" data-sortable="true" data-field="bank"
+                                                    data-filter-control="select">بانک
+                                                </th>
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-sorter="numericOnly"
+                                                    data-field="shone" data-filter-control="select">شعبه
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true" data-field="year"
+                                                    data-filter-control="select">سال
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="month" data-filter-control="select">ماه
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="person" data-filter-control="select">طرف حساب
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true"
                                                     data-field="name">شناسه چک
                                                 </th>
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-sorter="numericOnly"
-                                                    data-field="date">تاریخ چک
+                                                <th class="card-text text-center" data-sortable="true" data-field="date"
+                                                    data-filter-control="select">تاریخ چک
                                                 </th>
-
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-sorter="numericOnly"
                                                     data-field="cat_kala" data-filter-control="select">نوع
                                                 </th>
-
-
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-sorter="numericOnly"
                                                     data-field="sales" data-filter-control="select">وضعیت
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-sorter="numericOnly"
-                                                    data-field="smratio">مانده
+                                                    data-footer-formatter="priceFormatter" data-field="mandah">مانده
                                                 </th>
-
-
                                             </tr>
                                             </thead>
                                             <tbody>
                                             {% for t in table1 %}
-
-                                                <tr>
-                                                    <td class="card-text text-center">
-                                                        {{ t.id }}</td>
-                                                    <td class="card-text text-center">
-                                                        {{ t.date|to_jalali:'%Y/%m/%d' }}</td>
-                                                    <td class="card-text text-center">
-                                                        {{ t.com }}
-
-                                                    </td>
-                                                    <td class="card-text text-center">
-                                                        {{ t.status }}
-
-
-                                                    </td>
-                                                    <td class="card-text text-center">{{ t.mandeh|floatformat:0|intcomma:False }}
-                                                    </td>
-
-
-                                                </tr>
+                                                {% with 'images/bank/'|add:t.bank_logo as logo_path %}
+                                                    <tr>
+                                                        <td><img src='{% static logo_path %}' class='small-logo'></td>
+                                                        <td class="card-text text-center">{{ t.bank_name }}</td>
+                                                        <td class="card-text text-center">{{ t.bank_branch }}</td>
+                                                        <td class="card-text text-center">{{ t.year }}</td>
+                                                        <td class="card-text text-center">{{ t.month }}</td>
+                                                        <td class="card-text text-center">{{ t.person }}</td>
+                                                        <td class="card-text text-center">{{ t.id }}</td>
+                                                        <td class="card-text text-center">{{ t.date|to_jalali:'%Y/%m/%d' }}</td>
+                                                        <td class="card-text text-center">{{ t.com }}</td>
+                                                        <td class="card-text text-center">{{ t.status }}</td>
+                                                        <td class="card-text text-center">{{ t.mandeh|floatformat:0|intcomma:False }}</td>
+                                                    </tr>
+                                                {% endwith %}
                                             {% endfor %}
                                             </tbody>
                                         </table>
-
                                     </div>
-
-
                                 </div>
+
+
                             </div>
                         </div>
                     </div>
                 </div>
-
-
-                <!-- تقویم -->
-                <div id="calendarf" class="col-md-7 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <h5 class="card-title pb-0 border-0 "> -------------</h5>
-                            <div class="text-center mb-4">
-                                <h2>{{ month_name }} {{ year }}</h2>
-                            </div>
-                            <div class="calendar-header">
-                                <button id="prev-month" class="btn btn-secondary">&lt;</button>
-                                <span>{{ month_name }} {{ year }}</span>
-                                <button id="next-month" class="btn btn-secondary">&gt;</button>
-                            </div>
-                            <table class="table table-bordered calendar-table">
-                                <thead class="thead-light">
-                                <tr>
-                                    <th>شنبه</th>
-                                    <th>یکشنبه</th>
-                                    <th>دوشنبه</th>
-                                    <th>سه‌شنبه</th>
-                                    <th>چهارشنبه</th>
-                                    <th>پنج‌شنبه</th>
-                                    <th>جمعه</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for week in days_in_month %}
-                                    <tr>
-                                        {% for day in week %} {% if day %}
-                                            <td>
-                                                <div class="fc-day-top">
-                                                    <span class="fc-day-number">{{ day.jday }}</span>
-                                                    {% if day.kharid > 0 %}
-                                                        <span class="fc-kharid-number">
-                                                    <i class="fa fa-truck">
-
-                                                    </i> {{ day.kharid|floatformat:0 }}</span>
-                                                    {% endif %}
-                                                    {% if day.sales > 0 %}
-                                                        <span class="fc-sales-number">{{ day.sales|floatformat:0 }}
-                                                    <i class="fa fa-shopping-cart"></i>
-                                                </span>
-                                                    {% endif %}
-                                                </div>
-                                            </td>
-                                        {% else %}
-                                            <td>
-
-                                            </td>
-                                        {% endif %}
-                                        {% endfor %}
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-
             </div>
+
+
+            <!-- تقوم چک ها -->
+            <div id="calendarf" class="col-md-8 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <h2>{{ month_name }} ماه {{ year }}</h2>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="mb-15 pb-0 border-0 card-title">چک های دارای مانده </h5>
+                            <div class="table-responsive">
+                                <table class="table center-aligned-table mb-10 text-center ">
+                                    <thead>
+                                    <tr class="text-dark">
+                                        <th></th>
+                                        <th></th>
+                                        <th>ماه های قبلی</th>
+                                        <th>{{ month_name }} ماه {{ year }}</th>
+                                        <th>ماه های بعد</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td><i class="fa fa-download text-primary fa-2x"></i></td>
+                                        <td><h5 class="text-primary">چکهای دریافتی</h5></td>
+                                        <td>
+                                            <h5 class="text-danger">{{ month_cheque_data.past_recive|floatformat:0|intcomma:False }}</h5>
+                                        </td>
+                                        <td>
+                                            <h5 class="text-twitter">{{ month_cheque_data.this_month_recive|floatformat:0|intcomma:False }}</h5>
+                                        </td>
+                                        <td>
+                                            <h5 class="text-success">{{ month_cheque_data.post_recive|floatformat:0|intcomma:False }}</h5>
+                                        </td>
+                                    </tr>
+
+                                    <td><i class="fa fa-upload text-danger fa-2x"></i></td>
+                                    <td><h5 class="text-danger">چکهای پرداختی</h5></td>
+                                    <td>
+                                        <h5 class="text-primary">{{ month_cheque_data.past_pay|floatformat:0|intcomma:False }}</h5>
+                                    </td>
+                                    <td>
+                                        <h5 class="text-danger">{{ month_cheque_data.this_month_pay|floatformat:0|intcomma:False }}</h5>
+                                    </td>
+                                    <td>
+                                        <h5 class="text-warning">{{ month_cheque_data.post_pay|floatformat:0|intcomma:False }}</h5>
+                                    </td>
+                                    </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="calendar-header">
+                            <button id="prev-month" class="btn btn-secondary">&lt;</button>
+                            <span>{{ month_name }} {{ year }}</span>
+                            <button id="next-month" class="btn btn-secondary">&gt;</button>
+                        </div>
+                        <table class="table table-bordered calendar-table">
+                            <thead class="thead-light">
+                            <tr class="text-center">
+                                <th>شنبه</th>
+                                <th>یکشنبه</th>
+                                <th>دوشنبه</th>
+                                <th>سه‌شنبه</th>
+                                <th>چهارشنبه</th>
+                                <th>پنج‌شنبه</th>
+                                <th>جمعه</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for week in days_in_month %}
+                                <tr>
+                                    {% for day in week %} {% if day %}
+                                        <td>
+                                            <div class="fc-day-top">
+                                                <span class="fc-day-number"><h5>{{ day.jday }}</h5></span>
+                                                <span class="fc-recive-number">{{ day.recive|floatformat:0|intcomma:False }}</span>
+                                                <div class="progress mb-3" data-toggle="popover" data-html="true"
+                                                     data-original-title="لیست  چکهای دریافتی برای تاریخ {{ day.today_recive_cheque.last.cheque_tarik }}"
+
+                                                     data-content="
+                                                     <table class='table'>
+                                                     <thead>
+                                                     <tr>
+                                                     <th></th>
+                                                     <th>بانک</th>
+                                                     <th>شخص</th>
+                                                     <th>مبلغ</th>
+                                                     <tr>
+                                                     </thead>
+                                                     <tbody>
+{% for cheque in day.today_recive_cheque %}
+{% with 'images/bank/'|add:cheque.bank_logo as logo_path %}
+
+<tr>
+<td><img src='{% static logo_path %}' class='small-logo'></td>
+<td>{{ cheque.bank_name }}-{{ cheque.bank_branch }}</td>
+<td>{{ cheque.person }}</td>
+<td>{{ cheque.cost|floatformat:0|intcomma:False }}</td>
+
+</tr>
+{% endwith %}
+{% endfor %}
+</tbody>
+</table>">
+
+                                                    <div class="progress-bar progress-bar-striped bg-primary"
+                                                         role="progressbar"
+                                                         style="width: {% widthratio day.recive max_cheque 100 %}%"
+                                                         aria-valuenow="{{ day.recive }}" aria-valuemin="0"
+                                                         aria-valuemax="{{ max_cheque }}"></div>
+                                                </div>
+                                                <span class="fc-pay-number">{{ day.pay|floatformat:0|intcomma:False }}</span>
+                                                <div class="progress mb-3" data-toggle="popover" data-html="true"
+                                                     data-original-title="لیست  چکهای پرداختی برای تاریخ {{ day.today_pay_cheque.last.cheque_tarik }}"
+                                                     data-content="
+                                                     <table class='table center-aligned-table mb-0'>
+                                                     <thead>
+                                                     <tr>
+                                                     <th></th>
+                                                     <th>بانک</th>
+                                                     <th>مبلغ</th>
+                                                     </tr>
+                                                     </thead>
+                                                     <tbody>
+                                                             {% for cheque in day.today_pay_cheque %}
+{% with 'images/bank/'|add:cheque.bank.bank_logo as logo_path %}
+<tr>
+<td><img src='{% static logo_path %}' class='small-logo'></td>
+<td>{{ cheque.bank.name }}</td>
+<td>{{ cheque.cost|floatformat:0|intcomma:False }}</td>
+</tr>
+{% endwith %}
+{% endfor %}
+</tbody>
+</table>">
+                                                    <div class="progress-bar progress-bar-striped bg-danger"
+                                                         role="progressbar"
+                                                         style="width: {% widthratio day.pay max_cheque 100 %}%"
+                                                         aria-valuenow="{{ day.pay }}" aria-valuemin="0"
+                                                         aria-valuemax="{{ max_cheque }}"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
+    </div>
 
     </div>
 
@@ -588,167 +820,98 @@
 {% endblock %}
 
 
-{% block jscal %}
-
-    {#    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>#}
-
-    <script>
-
-        $(document).ready(function () {
-            var currentYear = {{ year }};
-            var currentMonth = {{ month }};
-            var code1 = {{ cat_id }};
-            var url = `/dash/kala/category/${code1}`;
-
-            console.log("Initial setup");
-            console.log("Current Year: " + currentYear);
-            console.log("Current Month: " + currentMonth);
-            console.log("Code1: " + code1);
-            console.log("Initial URL: " + url);
-
-            function loadCalendar(month, year) {
-                console.log("Loading calendar for month: " + month + ", year: " + year);
-                console.log("URL being used for AJAX call: " + url);
-
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    data: {month: month, year: year, code1: code1},
-                    success: function (data) {
-                        console.log("AJAX call success");
-                        $('#calendarf').html(data);
-                    },
-                    error: function (xhr, status, error) {
-                        console.error('Error loading calendar: ', error);
-                        console.error('XHR:', xhr);
-                        console.error('Status:', status);
-                    }
-                });
-            }
-
-            $('#prev-month').click(function (e) {
-                e.preventDefault();
-                if (currentMonth === 1) {
-                    currentMonth = 12;
-                    currentYear -= 1;
-                } else {
-                    currentMonth -= 1;
-                }
-                console.log("Previous month clicked. New Month: " + currentMonth + ", Year: " + currentYear);
-                loadCalendar(currentMonth, currentYear);
-            });
-
-            $('#next-month').click(function (e) {
-                e.preventDefault();
-                if (currentMonth === 12) {
-                    currentMonth = 1;
-                    currentYear += 1;
-                } else {
-                    currentMonth += 1;
-                }
-                console.log("Next month clicked. New Month: " + currentMonth + ", Year: " + currentYear);
-                loadCalendar(currentMonth, currentYear);
-            });
-        });
-
-
-    </script>
-{% endblock %}
 
 
 
 {% block myjs %}
 
     <!-- نمودار میله ای چکهای ماهانه -->
-<!-- نمودار میله‌ای چک‌های ماهانه -->
 
+    <!--  اضافه کردن دکمه زیر نمودار -->
+    <script>
+        var labels = [
+            {% for item in chartmahanedata %}
+                '{{ item.month_name }}',
+            {% endfor %}
+        ];
 
-<!--  اضافه کردن دکمه زیر نمودار -->
+        var originalDataValues = [
+            {% for item in chartmahanedata %}
+                {{ item.total_count }},
+            {% endfor %}
+        ];
 
-<script>
-    var labels = [
-        {% for item in chartmahanedata %}
-            '{{ item.month_name }}',
-        {% endfor %}
-    ];
+        var dataValues = originalDataValues.slice();
 
-    var originalDataValues = [
-        {% for item in chartmahanedata %}
-            {{ item.total_count }},
-        {% endfor %}
-    ];
+        var backgroundColors = [
+            'rgba(128, 128, 128, 0.2)',
+            'rgba(75, 192, 75, 0.2)',
+            'rgba(75, 192, 75, 0.2)',
+            'rgba(75, 192, 75, 0.2)',
+            'rgba(75, 75, 192, 0.2)',
+            'rgba(75, 75, 192, 0.2)',
+            'rgba(75, 75, 192, 0.2)',
+            'rgba(255, 165, 0, 0.2)',
+            'rgba(255, 165, 0, 0.2)',
+            'rgba(255, 165, 0, 0.2)',
+            'rgba(192, 75, 75, 0.2)',
+            'rgba(192, 75, 75, 0.2)',
+            'rgba(192, 75, 75, 0.2)',
+            'rgba(128, 0, 128, 0.2)'
+        ];
 
-    var dataValues = originalDataValues.slice();
+        var borderColors = backgroundColors.map((color) => color.replace('0.2', '1'));
 
-    var backgroundColors = [
-        'rgba(128, 128, 128, 0.2)',
-        'rgba(75, 192, 75, 0.2)',
-        'rgba(75, 192, 75, 0.2)',
-        'rgba(75, 192, 75, 0.2)',
-        'rgba(75, 75, 192, 0.2)',
-        'rgba(75, 75, 192, 0.2)',
-        'rgba(75, 75, 192, 0.2)',
-        'rgba(255, 165, 0, 0.2)',
-        'rgba(255, 165, 0, 0.2)',
-        'rgba(255, 165, 0, 0.2)',
-        'rgba(192, 75, 75, 0.2)',
-        'rgba(192, 75, 75, 0.2)',
-        'rgba(192, 75, 75, 0.2)',
-        'rgba(128, 0, 128, 0.2)'
-    ];
+        var data = {
+            labels: labels,
+            datasets: [{
+                label: 'چک‌های ماهانه',
+                data: dataValues,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 1
+            }]
+        };
 
-    var borderColors = backgroundColors.map((color) => color.replace('0.2', '1'));
-
-    var data = {
-        labels: labels,
-        datasets: [{
-            label: 'چک‌های ماهانه',
-            data: dataValues,
-            backgroundColor: backgroundColors,
-            borderColor: borderColors,
-            borderWidth: 1
-        }]
-    };
-
-    var options = {
-        scales: {
-            y: {
-                beginAtZero: false
+        var options = {
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            },
+            onClick: function (event) {
+                var chart = Chart.getChart('ChartMahaneh');
+                var activePoints = chart.getElementsAtEventForMode(event, 'nearest', {intersect: true}, false);
+                if (activePoints.length) {
+                    var index = activePoints[0].index;
+                    // حذف میله موقت
+                    chart.data.datasets[0].data[index] = null;
+                    chart.update();
+                }
             }
-        },
-        onClick: function(event) {
-            var chart = Chart.getChart('ChartMahaneh');
-            var activePoints = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
-            if (activePoints.length) {
-                var index = activePoints[0].index;
-                // حذف میله موقت
-                chart.data.datasets[0].data[index] = null;
-                chart.update();
-            }
-        }
-    };
+        };
 
-    var myChart = new Chart(document.getElementById("ChartMahaneh"), {
-        type: 'bar',
-        data: data,
-        options: options
-    });
+        var myChart = new Chart(document.getElementById("ChartMahaneh"), {
+            type: 'bar',
+            data: data,
+            options: options
+        });
 
-    // اضافه کردن رویداد کلیک به دکمه
-    document.getElementById('resetButton').addEventListener('click', function() {
-        myChart.data.datasets[0].data = originalDataValues.slice(); // بازگرداندن داده‌ها به مقدار اصلی
-        myChart.update();
-    });
-
-    // اضافه کردن کلیک روی عنوان برای بازگرداندن همه میله‌ها
-    document.querySelector('canvas').addEventListener('click', function(event) {
-        var activePoints = myChart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
-        if (!activePoints.length) {
-            myChart.data.datasets[0].data = originalDataValues.slice();
+        // اضافه کردن رویداد کلیک به دکمه
+        document.getElementById('resetButton').addEventListener('click', function () {
+            myChart.data.datasets[0].data = originalDataValues.slice(); // بازگرداندن داده‌ها به مقدار اصلی
             myChart.update();
-        }
-    });
-</script>
+        });
+
+        // اضافه کردن کلیک روی عنوان برای بازگرداندن همه میله‌ها
+        document.querySelector('canvas').addEventListener('click', function (event) {
+            var activePoints = myChart.getElementsAtEventForMode(event, 'nearest', {intersect: true}, false);
+            if (!activePoints.length) {
+                myChart.data.datasets[0].data = originalDataValues.slice();
+                myChart.update();
+            }
+        });
+    </script>
 
 
     <!-- نمودار دونات فروش دسته ها -->
@@ -887,38 +1050,135 @@
     <script src="{% static 'js/table1/jspdf.min.js' %}"></script>
     <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
 
-    <script>
-        var $table = $('#table')
 
-        $(function () {
-            $table.bootstrapTable()
-        })
+    {#    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>#}
+    {#    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.3/bootstrap-table.min.js"></script>#}
+    {#    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.3/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>#}
 
-        function idFormatter() {
-            return 'Total'
-        }
 
-        function nameFormatter(data) {
-            return data.length
-        }
 
-        function priceFormatter(data) {
-            var field = this.field
-            return data.map(function (row) {
-                return +row[field].substring(0)
-            }).reduce(function (sum, i) {
-                return sum + i
-            }, 0)
-        }
+{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>#}
+    {#    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.3/bootstrap-table.min.js"></script>#}
+    {#    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.3/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>#}
 
-        function formatMoney(number) {
-            return number.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
-        }
-    </script>
+
+<script>
+    var $table = $('#table');
+    var totalMandah = 0; // متغیر برای ذخیره مجموع مانده
+
+    $(function () {
+        $table.bootstrapTable();
+        updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده هنگام بارگذاری جدول
+    });
+
+    function priceFormatter(data) {
+        var field = this.field;
+        console.log("Data received for priceFormatter:", data);
+        var result = data.map(function (row) {
+            var valueString = row[field].replace(/,/g, ''); // حذف کاماها
+            var value = parseFloat(valueString);
+            console.log("Processing row:", row);
+            console.log("Parsed value:", value);
+            return isNaN(value) ? 0 : value;
+        }).reduce(function (sum, i) {
+            console.log("Current sum:", sum);
+            return sum + i;
+        }, 0);
+        console.log("Final result for priceFormatter:", result);
+        totalMandah = result; // ذخیره مجموع مانده
+        updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده
+        return result.toLocaleString('fa-IR'); // نمایش با کاما به صورت 3 تا 3 تا
+    }
+
+    function updateTotalMandah() {
+        $('#total-mandah').text(totalMandah.toLocaleString('fa-IR'));
+    }
+</script>
+
+
 
 
 {% endblock %}
 
 
+{% block jscal %}
+    <script>
+
+        $(document).ready(function () {
+            var currentYear = {{ year }};
+            var currentMonth = {{ month }};
+            var url = '/acc/cheques_recieve_total';
+
+            console.log("Initial setup");
+            console.log("Current Year: " + currentYear);
+            console.log("Current Month: " + currentMonth);
+            console.log("Initial URL: " + url);
+
+            function loadCalendar(month, year) {
+                console.log("Loading calendar for month: " + month + ", year: " + year);
+                console.log("URL being used for AJAX call: " + url);
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    data: {month: month, year: year},
+                    success: function (data) {
+                        console.log("AJAX call success");
+                        $('#calendarf').html(data);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error loading calendar: ', error);
+                        console.error('XHR:', xhr);
+                        console.error('Status:', status);
+                    }
+                });
+            }
+
+            $('#prev-month').click(function (e) {
+                e.preventDefault();
+                if (currentMonth === 1) {
+                    currentMonth = 12;
+                    currentYear -= 1;
+                } else {
+                    currentMonth -= 1;
+                }
+                console.log("Previous month clicked. New Month: " + currentMonth + ", Year: " + currentYear);
+                loadCalendar(currentMonth, currentYear);
+            });
+
+            $('#next-month').click(function (e) {
+                e.preventDefault();
+                if (currentMonth === 12) {
+                    currentMonth = 1;
+                    currentYear += 1;
+                } else {
+                    currentMonth += 1;
+                }
+                console.log("Next month clicked. New Month: " + currentMonth + ", Year: " + currentYear);
+                loadCalendar(currentMonth, currentYear);
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="popover"]').popover({
+                trigger: 'click',  // تنظیم برای فعال‌سازی فقط با کلیک
+                placement: 'top',
+                html: true
+            });
+
+            // بستن Popover زمانی که در جای دیگری کلیک شود
+            $(document).on('click', function (e) {
+                $('[data-toggle="popover"]').each(function () {
+                    // اگر روی عنصر Popover کلیک نشده باشد
+                    if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+                        $(this).popover('hide');
+                    }
+                });
+            });
+        });
+    </script>
+
+{% endblock %}
 
 
