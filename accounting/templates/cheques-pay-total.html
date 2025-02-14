@@ -93,7 +93,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
                         <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
-                        <li class="breadcrumb-item active">چک های دریافتی</li>
+                        <li class="breadcrumb-item active">چک های پرداختی</li>
 
                     </ol>
                 </div>
@@ -155,7 +155,7 @@
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark">کل چک های دارای مانده</p>
+                                    <p class="card-text text-dark">کل چک های پرداختنی دارای مانده</p>
                                     <h4>{{ total_data.tmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>
                                 </div>
                             </div>
@@ -391,7 +391,7 @@
                 <div class="col-md-7 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="card-body">
-                            <h5 class="card-title pb-0 border-0 ">گزارش ماهانه چک های دارای مانده</h5>
+                            <h5 class="card-title pb-0 border-0 ">گزارش ماهانه چک های پرداختنی</h5>
                             <canvas id="ChartMahaneh"></canvas>
 
                             <button class="button" id="resetButton">همه ماه ها</button>
@@ -409,7 +409,7 @@
                         <div class="card card-statistics h-100">
                             <div class="card-body">
                                 <div class="table-responsive mt-15 ">
-                                    <h6 class="card-title pb-0 border-0">کل چک های دارای مانده: <span id="total-mandah" class="text-primary"></span> ریال </h6>
+                                    <h6 class="card-title pb-0 border-0">کل چک های پرداختنی: <span id="total-mandah" class="text-primary"></span> ریال </h6>
 
 
                                     {#                                    <div class="table-responsive">#}
@@ -672,7 +672,7 @@
                                     <tbody>
                                     <tr>
                                         <td><i class="fa fa-download text-primary fa-2x"></i></td>
-                                        <td><h5 class="text-primary">چکهای دریافتی</h5></td>
+                                        <td><h5 class="text-primary">چکهای دریافت</h5></td>
                                         <td>
                                             <h5 class="text-danger">{{ month_cheque_data.past_recive|floatformat:0|intcomma:False }}</h5>
                                         </td>
