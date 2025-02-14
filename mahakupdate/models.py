@@ -664,3 +664,46 @@ class ChequesPay(models.Model):
             total_bed=Sum('bed')
         )
         return (totals['total_bes'] or 0) - (totals['total_bed'] or 0)
+
+
+
+
+class Loan(models.Model):
+    code = models.IntegerField(blank=True, null=True, verbose_name='کد')
+    name_code = models.IntegerField(blank=True, null=True, verbose_name='کد نام')
+    person=models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True)
+    tarikh = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ  شمسی')
+    date = models.DateField(blank=True, null=True,verbose_name="تاریخ میلادی")
+    number = models.IntegerField(blank=True, null=True, verbose_name='تعداد اقساط')
+    distance = models.IntegerField(blank=True, null=True, verbose_name='فاصله اقساط')
+    cost = models.DecimalField(max_digits=14, decimal_places=2, verbose_name="مبلغ")
+
+
+    class Meta:
+        verbose_name = 'وام'
+        verbose_name_plural = 'وام ها'
+
+    def __str__(self):
+        return f"{self.code}"
+
+
+
+class LoanDetil(models.Model):
+    code = models.IntegerField(blank=True, null=True, verbose_name='کد')
+    loan_code = models.IntegerField(blank=True, null=True, verbose_name='کد وام')
+    loan=models.ForeignKey(Loan, on_delete=models.SET_NULL, blank=True, null=True)
+    row = models.IntegerField(blank=True, null=True, verbose_name='ردیف')
+    tarikh = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ  شمسی')
+    date = models.DateField(blank=True, null=True,verbose_name="تاریخ میلادی")
+    recive_tarikh = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ  دریافت شمسی')
+    recive_date = models.DateField(blank=True, null=True,verbose_name="تاریخ دریافت میلادی")
+    delay = models.DecimalField(max_digits=14, decimal_places=2, verbose_name="تاخیر")
+    cost = models.DecimalField(max_digits=14, decimal_places=2, verbose_name="مبلغ")
+    comment=models.CharField(blank=True, null=True, max_length=250, verbose_name='توضیح')
+
+    class Meta:
+        verbose_name = 'جزئیات وام'
+        verbose_name_plural = 'جزئیات وام ها'
+
+    def __str__(self):
+        return f"{self.code} - {self.tarikh}"

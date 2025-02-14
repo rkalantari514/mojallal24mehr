@@ -9,7 +9,7 @@ from persianutils import standardize
 
 from custom_login.models import UserLog
 from dashboard.views import generate_calendar_data_cheque
-from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person
+from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan
 from jdatetime import date as jdate
 from datetime import timedelta, date
 from django.shortcuts import render
@@ -1163,3 +1163,147 @@ def SanadTotal(request, *args, **kwargs):
 
 
     return render(request, 'sanad_total.html', context)
+
+
+
+from django.shortcuts import render
+from django.db.models import Sum
+
+from django.shortcuts import render
+from django.db.models import Sum
+
+from django.shortcuts import render
+from django.db.models import Sum
+import locale
+
+# تنظیم محلی برای جداسازی اعداد با کاما
+locale.setlocale(locale.LC_ALL, 'fa_IR.UTF-8')
+
+# def BedehkaranMoshtarian(request):
+#     # محاسبه مجموع curramount بر اساس tafzili
+#     # tafzili_sums = SanadDetail.objects.filter(moin=1, kol=103).values('tafzili').annotate(total_curramount=Sum('curramount')).filter(total_curramount__lt=0)
+#     tafzili_sums = SanadDetail.objects.filter(moin=1, kol=103).values('tafzili').annotate(total_curramount=Sum('curramount'))
+#
+#     # جمع‌آوری داده‌ها برای نمایش در قالب جدول
+#     report_data = []
+#     total_negative_amount = 0
+#
+#     for tafzili_sum in tafzili_sums:
+#         tafzili_code = tafzili_sum['tafzili']
+#         total_curramount = tafzili_sum['total_curramount']
+#         total_negative_amount += total_curramount
+#
+#         # پیدا کردن فرد مربوط به tafzili_code
+#         person = Person.objects.filter(code=tafzili_code).first()
+#         person_data = {
+#             'tafzili': tafzili_code,
+#             'total_curramount': total_curramount,
+#             'name': '',
+#             'lname': '',
+#             'loans': [],
+#             'sum_amount': 0
+#         }
+#
+#         if person:
+#             person_data['name'] = person.name
+#             person_data['lname'] = person.lname
+#
+#             # پیدا کردن وام‌های شخص
+#             loans = Loan.objects.filter(person=person)
+#             if loans.exists():
+#                 person_data['loans'] = [
+#                     {
+#                         'code': loan.code,
+#                         'tarikh': loan.tarikh,
+#                         'cost': loan.cost
+#                     }
+#                     for loan in loans
+#                 ]
+#                 person_data['sum_amount'] = sum(loan['cost'] for loan in person_data['loans'])
+#             else:
+#                 person_data['loans'] = 'NO_LOAN'
+#         else:
+#             person_data['person_not_found'] = True
+#
+#         person_data['total_with_loans'] = person_data['sum_amount'] + total_curramount
+#         report_data.append(person_data)
+#
+#     context = {
+#         'report_data': report_data,
+#         'total_negative_amount': locale.format_string("%d", total_negative_amount, grouping=True)
+#     }
+#     return render(request, 'bedehkaran_moshtarian.html', context)
+
+
+
+from django.shortcuts import render
+from django.db.models import Sum
+import locale
+
+# تنظیم محلی برای جداسازی اعداد با کاما
+locale.setlocale(locale.LC_ALL, 'fa_IR.UTF-8')
+
+def BedehkaranMoshtarian(request, state):
+    # محاسبه مجموع curramount بر اساس tafzili
+    tafzili_sums = SanadDetail.objects.filter(moin=1, kol=103).values('tafzili').annotate(total_curramount=Sum('curramount'))
+
+    # جمع‌آوری داده‌ها برای نمایش در قالب جدول
+    report_data = []
+    total_amount = 0
+
+    for tafzili_sum in tafzili_sums:
+        tafzili_code = tafzili_sum['tafzili']
+        total_curramount = tafzili_sum['total_curramount']
+        total_amount += total_curramount
+
+        # پیدا کردن فرد مربوط به tafzili_code
+        person = Person.objects.filter(code=tafzili_code).first()
+        person_data = {
+            'tafzili': tafzili_code,
+            'total_curramount': total_curramount,
+            'name': '',
+            'lname': '',
+            'loans': [],
+            'sum_amount': 0,
+            'total_with_loans': 0,
+            'person_not_found': False,
+            'no_loans': False
+        }
+
+        if person:
+            person_data['name'] = person.name
+            person_data['lname'] = person.lname
+
+            # پیدا کردن وام‌های شخص
+            loans = Loan.objects.filter(person=person)
+            if loans.exists():
+                person_data['loans'] = [
+                    {
+                        'code': loan.code,
+                        'tarikh': loan.tarikh,
+                        'cost': loan.cost
+                    }
+                    for loan in loans
+                ]
+                person_data['sum_amount'] = sum(loan['cost'] for loan in person_data['loans'])
+            else:
+                person_data['no_loans'] = True
+        else:
+            person_data['person_not_found'] = True
+
+        person_data['total_with_loans'] = person_data['sum_amount'] + total_curramount
+
+        # اعمال شرایط بر اساس state
+        if (state == '1' and total_curramount > 0) or \
+           (state == '2' and total_curramount == 0 and person_data['sum_amount'] == 0) or \
+           (state == '3' and total_curramount == 0 and person_data['sum_amount'] > 0) or \
+           (state == '4' and total_curramount < 0 and person_data['sum_amount'] == 0) or \
+           (state == '5' and total_curramount < 0 and person_data['sum_amount'] > 0 and person_data['total_with_loans'] > 0) or \
+           (state == '6' and total_curramount < 0 and person_data['sum_amount'] > 0 and person_data['total_with_loans'] == 0):
+            report_data.append(person_data)
+
+    context = {
+        'report_data': report_data,
+        'total_amount': locale.format_string("%d", total_amount, grouping=True)
+    }
+    return render(request, 'bedehkaran_moshtarian.html', context)

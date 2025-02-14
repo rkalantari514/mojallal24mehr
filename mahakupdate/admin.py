@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo, \
-    Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve, MyCondition, ChequesPay, Bank
+    Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve, MyCondition, ChequesPay, Bank, Loan, LoanDetil
 
 
 # Register your models here.
@@ -202,6 +202,26 @@ class BankAdmin(admin.ModelAdmin):
     list_editable = ['bank_logo']
     # search_fields = ('cheque_id', 'per_code', 'description')
     list_per_page = 100
+
+
+
+@admin.register(Loan)
+class LoanAdmin(admin.ModelAdmin):
+    list_display = ('code', 'person','tarikh', 'date', 'number', 'cost')
+    search_fields = ('code', 'person__name')
+    list_filter = ('person',)
+
+@admin.register(LoanDetil)
+class LoanDetilAdmin(admin.ModelAdmin):
+    list_display = ('code','loan', 'tarikh', 'date', 'cost')
+    search_fields = ('code','loan', 'tarikh', 'date', 'cost')
+    # list_filter = ('person',)
+
+
+
+
+
+
 
 
 admin.site.register(Mtables, MtablesAdmin)

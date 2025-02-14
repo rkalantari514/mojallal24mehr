@@ -2,9 +2,10 @@ from django.urls import path
 from django.shortcuts import redirect
 
 from accounting.views import TarazKol, ChequesRecieveTotal, balance_sheet_kol, balance_sheet_moin, \
-    balance_sheet_tafsili, SanadTotal, ChequesPayTotal
+    balance_sheet_tafsili, SanadTotal, ChequesPayTotal, BedehkaranMoshtarian
 
 urlpatterns = [
+    path('acc/bedehkaran/moshtarian/<state>', BedehkaranMoshtarian, name='bedehkaran-moshtarian'),
     path('acc/cheques_recieve_total', ChequesRecieveTotal, name='cheques-recieve-total'),
     path('acc/cheques_pay_total', ChequesPayTotal, name='cheques-pay-total'),
 
