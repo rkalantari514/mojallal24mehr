@@ -1,6 +1,7 @@
 
 {% load humanize %}
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fa">
 <head>
     <meta charset="UTF-8">
@@ -57,7 +58,7 @@
                         {% endif %}
                     </td>
                     <td data-value="{{ item.sum_amount }}">{{ item.sum_amount|floatformat:0|intcomma:False }}</td>
-                    <td data-value="{{ item.total_with_loans }}">{{ item.total_with_loans|floatformat:0 }}</td>
+                    <td data-value="{{ item.total_with_loans }}">{{ item.total_with_loans|floatformat:0|intcomma }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

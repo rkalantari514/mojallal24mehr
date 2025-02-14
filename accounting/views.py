@@ -1250,6 +1250,13 @@ import locale
 # تنظیم محلی برای جداسازی اعداد با کاما
 locale.setlocale(locale.LC_ALL, 'fa_IR.UTF-8')
 
+from django.shortcuts import render
+from django.db.models import Sum
+import locale
+
+# تنظیم محلی برای جداسازی اعداد با کاما
+locale.setlocale(locale.LC_ALL, 'fa_IR.UTF-8')
+
 def BedehkaranMoshtarian(request, state):
     # محاسبه مجموع curramount بر اساس tafzili
     tafzili_sums = SanadDetail.objects.filter(moin=1, kol=103).values('tafzili').annotate(total_curramount=Sum('curramount'))
@@ -1305,7 +1312,7 @@ def BedehkaranMoshtarian(request, state):
            (state == '3' and total_curramount == 0 and person_data['sum_amount'] > 0) or \
            (state == '4' and total_curramount < 0 and person_data['sum_amount'] == 0) or \
            (state == '5' and total_curramount < 0 and person_data['sum_amount'] > 0 and person_data['total_with_loans'] > 0) or \
-           (state == '6' and total_curramount < 0 and person_data['sum_amount'] > 0 and person_data['total_with_loans'] == 0):
+           (state == '6' and total_curramount < 0 and person_data['sum_amount'] > 0 and person_data['total_with_loans'] < 0):
             total_amount += person_data['total_with_loans']
             report_data.append(person_data)
 
