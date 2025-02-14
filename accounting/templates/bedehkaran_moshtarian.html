@@ -1,3 +1,5 @@
+
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="fa">
 <head>
@@ -16,8 +18,6 @@
     </style>
 </head>
 <body>
-{% load humanize %}
-
     <div class="container mt-5">
         <h1 class="text-center">گزارش بدهکاران مشتریان</h1>
         <div class="alert alert-info">
@@ -57,7 +57,7 @@
                         {% endif %}
                     </td>
                     <td data-value="{{ item.sum_amount }}">{{ item.sum_amount|floatformat:0|intcomma:False }}</td>
-                    <td data-value="{{ item.total_with_loans }}">{{ item.total_with_loans|floatformat:0|intcomma }}</td>
+                    <td data-value="{{ item.total_with_loans }}">{{ item.total_with_loans|floatformat:0 }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
