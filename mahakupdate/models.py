@@ -677,6 +677,7 @@ class Loan(models.Model):
     number = models.IntegerField(blank=True, null=True, verbose_name='تعداد اقساط')
     distance = models.IntegerField(blank=True, null=True, verbose_name='فاصله اقساط')
     cost = models.DecimalField(max_digits=14, decimal_places=2, verbose_name="مبلغ")
+    loan_mandeh = models.DecimalField(default=0,max_digits=14, decimal_places=2, verbose_name="مانده وام")
 
 
     class Meta:
@@ -686,6 +687,9 @@ class Loan(models.Model):
     def __str__(self):
         return f"{self.code}"
 
+    def tasfiiye(self):
+        tas=self.cost-self.loan_mandeh
+        return tas
 
 
 class LoanDetil(models.Model):

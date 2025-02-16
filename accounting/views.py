@@ -1321,3 +1321,6 @@ def BedehkaranMoshtarian(request, state):
         'total_amount': locale.format_string("%d", total_amount, grouping=True)
     }
     return render(request, 'bedehkaran_moshtarian.html', context)
+
+
+

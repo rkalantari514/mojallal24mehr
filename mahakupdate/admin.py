@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from accounting.models import BedehiMoshtari
 from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo, \
     Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve, MyCondition, ChequesPay, Bank, Loan, LoanDetil
 
@@ -207,19 +208,23 @@ class BankAdmin(admin.ModelAdmin):
 
 @admin.register(Loan)
 class LoanAdmin(admin.ModelAdmin):
-    list_display = ('code', 'person','tarikh', 'date', 'number', 'cost')
+    list_display = ('code', 'person','tarikh', 'date', 'number', 'cost','loan_mandeh','tasfiiye')
     search_fields = ('code', 'person__name')
     list_filter = ('person',)
 
 @admin.register(LoanDetil)
 class LoanDetilAdmin(admin.ModelAdmin):
-    list_display = ('code','loan', 'tarikh', 'date', 'cost')
-    search_fields = ('code','loan', 'tarikh', 'date', 'cost')
+    list_display = ('code','loan','loan_code', 'tarikh','recive_tarikh', 'date', 'cost')
+    search_fields = ('code','loan_code', 'tarikh', 'date', 'cost')
     # list_filter = ('person',)
 
 
 
-
+@admin.register(BedehiMoshtari)
+class BedehiMoshtariAdmin(admin.ModelAdmin):
+    list_display = ('moin','tafzili','person', 'total_mandeh','loans_total', 'total_with_loans')
+    search_fields = ('tafzili','person')
+    # list_filter = ('person',)
 
 
 
