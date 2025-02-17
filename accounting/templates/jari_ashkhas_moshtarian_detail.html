@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        .negative-value {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+{% load humanize %}
+    <div class="container mt-5">
+        <h1 class="text-center">{{ title }}</h1>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>تفصیلی</th>
+                    <th>شخص</th>
+                    <th>مانده کل</th>
+                    <th>مجموع وام‌ها</th>
+                    <th>برآیند بدهی با وام</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.tafzili }}</td>
+                    <td>{{ item.person.name }} {{ item.person.lname }}</td>
+                    <td>{{ item.total_mandeh|floatformat:0|intcomma:False}}</td>
+                    <td>{{ item.loans_total|floatformat:0|intcomma:False}}</td>
+                    <td class="{% if item.total_with_loans < 0 %}negative-value{% endif %}">
+                        {{ item.total_with_loans|floatformat:0|intcomma:False }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

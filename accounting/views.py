@@ -7,6 +7,7 @@ import time
 from openpyxl.styles.builtins import total
 from persianutils import standardize
 
+from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
 from dashboard.views import generate_calendar_data_cheque
 from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan
@@ -1324,3 +1325,70 @@ def BedehkaranMoshtarian(request, state):
 
 
 
+def JariAshkhasMoshtarian(request):
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='حساب مشتریان', code=0)
+
+    start_time = time.time()  # زمان شروع تابع
+
+    filters = [
+        {'filter': {'total_mandeh__gt': 0}, 'negate': False},
+        {'filter': {'total_mandeh__gt': 0, 'loans_total__gt': 0}, 'negate': False},
+        {'filter': {'total_mandeh__gt': 0, 'loans_total': 0}, 'negate': False},
+        {'filter': {'total_mandeh__lt': 0}, 'negate': True},
+        {'filter': {'total_mandeh__lt': 0, 'loans_total__gt': 0}, 'negate': True},
+        {'filter': {'total_mandeh__lt': 0, 'loans_total': 0}, 'negate': True},
+    ]
+
+    table1 = []
+    for f in filters:
+        total_mandeh = BedehiMoshtari.objects.filter(**f['filter']).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+        if f['negate']:
+            total_mandeh = -total_mandeh
+        table1.append(total_mandeh)
+
+    context = {
+        'title': 'حساب مشتریان',
+        'user': user,
+        'table1': table1,
+    }
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+
+    return render(request, 'jari_ashkhas_moshtarian.html', context)
+
+
+
+from django.db.models import F, Func
+
+from django.db.models import F, Func
+
+def JariAshkhasMoshtarianDetail(request, filter_id):
+    filters = {
+        '1': {'total_mandeh__gt': 0},
+        '2': {'total_mandeh__gt': 0, 'loans_total__gt': 0},
+        '3': {'total_mandeh__gt': 0, 'loans_total': 0},
+        '4': {'total_mandeh__lt': 0},
+        '5': {'total_mandeh__lt': 0, 'loans_total__gt': 0},
+        '6': {'total_mandeh__lt': 0, 'loans_total': 0},
+    }
+
+    filter_labels = {
+        '1': 'مشتری‌های بستانکار',
+        '2': 'مشتری‌های بستانکار | دارای وام',
+        '3': 'مشتری‌های بستانکار | بدون وام',
+        '4': 'مشتریان بدهکار',
+        '5': 'مشتریان بدهکار | دارای وام',
+        '6': 'مشتریان بدهکار | بدون وام'
+    }
+
+    filter_criteria = filters.get(str(filter_id), {})
+    items = BedehiMoshtari.objects.filter(**filter_criteria).annotate(abs_total_mandeh=Func(F('total_mandeh'), function='ABS')).order_by('-abs_total_mandeh')
+
+    context = {
+        'title': f'جزئیات حساب مشتریان - {filter_labels.get(str(filter_id), "فیلتر نامشخص")}',
+        'items': items,
+    }
+
+    return render(request, 'jari_ashkhas_moshtarian_detail.html', context)
