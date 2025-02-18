@@ -678,6 +678,7 @@ class Loan(models.Model):
     distance = models.IntegerField(blank=True, null=True, verbose_name='فاصله اقساط')
     cost = models.DecimalField(max_digits=14, decimal_places=2, verbose_name="مبلغ")
     loan_mandeh = models.DecimalField(default=0,max_digits=14, decimal_places=2, verbose_name="مانده وام")
+    actual_loan_mandeh = models.DecimalField(default=0,max_digits=14, decimal_places=2, verbose_name="مانده وام")
 
 
     class Meta:
@@ -704,6 +705,7 @@ class LoanDetil(models.Model):
     delay = models.DecimalField(max_digits=14, decimal_places=2, verbose_name="تاخیر")
     cost = models.DecimalField(max_digits=14, decimal_places=2, verbose_name="مبلغ")
     comment=models.CharField(blank=True, null=True, max_length=250, verbose_name='توضیح')
+    complete_percent  = models.FloatField(default=0.0, verbose_name='درصد تکمیل قسط')
 
     class Meta:
         verbose_name = 'جزئیات وام'

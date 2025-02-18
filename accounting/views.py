@@ -1346,7 +1346,8 @@ def JariAshkhasMoshtarian(request):
         total_mandeh = BedehiMoshtari.objects.filter(**f['filter']).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
         if f['negate']:
             total_mandeh = -total_mandeh
-        table1.append(total_mandeh)
+        table1.append(total_mandeh/10000000)
+    table1.append((BedehiMoshtari.objects.aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0 )/ 10000000)
 
     context = {
         'title': 'حساب مشتریان',

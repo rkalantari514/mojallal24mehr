@@ -208,13 +208,13 @@ class BankAdmin(admin.ModelAdmin):
 
 @admin.register(Loan)
 class LoanAdmin(admin.ModelAdmin):
-    list_display = ('code', 'person','tarikh', 'date', 'number', 'cost','loan_mandeh','tasfiiye')
+    list_display = ('code', 'person','tarikh', 'date', 'number', 'cost','loan_mandeh','actual_loan_mandeh','tasfiiye')
     search_fields = ('code', 'person__name')
     list_filter = ('person',)
 
 @admin.register(LoanDetil)
 class LoanDetilAdmin(admin.ModelAdmin):
-    list_display = ('code','loan','loan_code', 'tarikh','recive_tarikh', 'date', 'cost')
+    list_display = ('code','loan','loan_code', 'tarikh','recive_tarikh', 'date', 'cost','complete_percent')
     search_fields = ('code','loan_code', 'tarikh', 'date', 'cost')
     # list_filter = ('person',)
 

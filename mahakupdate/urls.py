@@ -1,10 +1,9 @@
 from django.urls import path
-from . import views, jobs
-from mahakupdate.views import Update_from_mahak, Kala_group, category_create_view, kala_create_view, Updatedb, \
+from mahakupdate.views import Update_from_mahak, Kala_group, Updatedb, \
     UpdateFactor, UpdateKala, UpdateFactorDetail, Updateall, UpdateKardex, UpdatePerson, UpdateKalaGroupinfo, \
     CreateKalaGroup, UpdateKalaGroup, UpdateStorage, UpdateMojodi, Update_Sales_Mojodi_Ratio, UpdateSanad, \
     UpdateSanadDetail, UpdateAccCoding, Cheques_Recieve, UpdateSanadConditions, Cheque_Pay, UpdateBank, UpdateLoan, \
-    UpdateLoanDetail, UpdateBedehiMoshtari
+    UpdateLoanDetail, UpdateBedehiMoshtari, CompleLoan
 
 urlpatterns = [
     path('1', Update_from_mahak, name="update"),
@@ -33,6 +32,7 @@ urlpatterns = [
     path('update/loan', UpdateLoan, name="updateloan"),
     path('update/loandetail', UpdateLoanDetail, name="updateloan-detail"),
     path('update/bedehimoshtari', UpdateBedehiMoshtari, name="update-bedehi-moshtari"),
+    path('update/compleloan', CompleLoan, name="completloan"),
 
 
 
@@ -41,8 +41,7 @@ urlpatterns = [
 
 
     path('kalagroup', Kala_group, name="kala_group"),
-    path('category/create/', category_create_view, name='category_create'),
-    path('kala/create/', kala_create_view, name='kala_create'),
+
 
 ]
 
