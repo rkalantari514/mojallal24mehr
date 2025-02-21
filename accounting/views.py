@@ -7,9 +7,10 @@ import time
 from openpyxl.styles.builtins import total
 from persianutils import standardize
 
+from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
 from dashboard.views import generate_calendar_data_cheque
-from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person
+from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan
 from jdatetime import date as jdate
 from datetime import timedelta, date
 from django.shortcuts import render
@@ -112,6 +113,47 @@ def ChequesRecieveTotal(request, *args, **kwargs):
         UserLog.objects.create(user=user, page='چک های دریافتی', code=0)
 
     start_time = time.time()  # زمان شروع تابع
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+
+        # تکمیل تقویم
+
+        month = request.GET.get('month', None)
+        year = request.GET.get('year', None)
+        print("Query params - Year:", year, "Month:", month)
+
+        if month is not None and year is not None:
+            current_month = int(month)
+            current_year = int(year)
+        else:
+            today_jalali = JalaliDate.today()
+            current_year = today_jalali.year
+            current_month = today_jalali.month
+
+        months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+        month_name = months[current_month - 1]
+        print("Current Year:", current_year, "Current Month:", current_month)
+
+        cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
+        cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
+
+        days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
+                                                                                     cheque_recive_data,
+                                                                                     cheque_pay_data)
+
+        context = {
+            # for calendar
+            'month_name': month_name,
+            'year': current_year,
+            'month': current_month,
+            'days_in_month': days_in_month,
+            'max_cheque': max_cheque,
+            'month_cheque_data': month_cheque_data,
+
+        }
+
+        print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+
+        return render(request, 'partial_calendar_cheque_recive.html', context)
 
     # گام اول: استخراج تاریخ و ماه
     today = date.today()
@@ -243,6 +285,34 @@ def ChequesRecieveTotal(request, *args, **kwargs):
 
     print(f"7: {time.time() - start_time:.2f} ثانیه")
 
+    # تکمیل تقویم
+
+    month = request.GET.get('month', None)
+    year = request.GET.get('year', None)
+    print("Query params - Year:", year, "Month:", month)
+
+    if month is not None and year is not None:
+        current_month = int(month)
+        current_year = int(year)
+    else:
+        today_jalali = JalaliDate.today()
+        current_year = today_jalali.year
+        current_month = today_jalali.month
+
+    months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+    month_name = months[current_month - 1]
+    print("Current Year:", current_year, "Current Month:", current_month)
+
+    cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
+    cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
+
+    days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
+                                                                                 cheque_recive_data,
+                                                                                 cheque_pay_data)
+
+    print(f"8: {time.time() - start_time:.2f} ثانیه")
+
+
         # آماده‌سازی context برای رندر
     context = {
         'title': 'چکهای دریافتی',
@@ -250,15 +320,252 @@ def ChequesRecieveTotal(request, *args, **kwargs):
         'total_data': total_data,
         'chartmahanedata': chart_data,
         'table1': table1,
+
+
+        # for calendar
         'month_name': month_name,
         'year': current_year,
         'month': current_month,
+        'days_in_month': days_in_month,
+        'max_cheque': max_cheque,
+        'month_cheque_data': month_cheque_data,
     }
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
     return render(request, 'cheques-recieve-total.html', context)
 
+
+
+@login_required(login_url='/login')
+def ChequesPayTotal(request, *args, **kwargs):
+    from django.db.models import Sum  # این خط را به ابتدای تابع منتقل کنید
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='چک های پرداختی', code=0)
+
+    start_time = time.time()  # زمان شروع تابع
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+
+        # تکمیل تقویم
+
+        month = request.GET.get('month', None)
+        year = request.GET.get('year', None)
+        print("Query params - Year:", year, "Month:", month)
+
+        if month is not None and year is not None:
+            current_month = int(month)
+            current_year = int(year)
+        else:
+            today_jalali = JalaliDate.today()
+            current_year = today_jalali.year
+            current_month = today_jalali.month
+
+        months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+        month_name = months[current_month - 1]
+        print("Current Year:", current_year, "Current Month:", current_month)
+
+        cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
+        cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
+
+        days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
+                                                                                     cheque_recive_data,
+                                                                                     cheque_pay_data)
+
+        context = {
+            # for calendar
+            'month_name': month_name,
+            'year': current_year,
+            'month': current_month,
+            'days_in_month': days_in_month,
+            'max_cheque': max_cheque,
+            'month_cheque_data': month_cheque_data,
+
+        }
+
+        print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+
+        return render(request, 'partial_calendar_cheque_pay.html', context)
+
+    # گام اول: استخراج تاریخ و ماه
+    today = date.today()
+    month = request.GET.get('month', None)
+    year = request.GET.get('year', None)
+
+    if month is not None and year is not None:
+        current_month = int(month)
+        current_year = int(year)
+    else:
+        today_jalali = JalaliDate.today()
+        current_year = today_jalali.year
+        current_month = today_jalali.month
+
+    months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+    month_name = months[current_month - 1]
+    print(f"1: {time.time() - start_time:.2f} ثانیه")
+    # گام دوم: بارگذاری چک‌ها به صورت بهینه
+    chequespay = ChequesPay.objects.filter(total_mandeh__gt=0).select_related('last_sanad_detaile').order_by(
+        'cheque_date')
+    print(f"2: {time.time() - start_time:.2f} ثانیه")
+    # گام سوم: محاسبه جمع چک‌ها
+    cheques_data = ChequesPay.objects.aggregate(
+        total_mandeh_sum=Sum('total_mandeh')
+    )
+
+    past_cheques_sum = \
+    ChequesPay.objects.filter(cheque_date__lte=today).aggregate(total_mandeh=Sum('total_mandeh'))[
+        'total_mandeh'] or 0
+    post_cheques_sum = ChequesPay.objects.filter(cheque_date__gt=today).aggregate(total_mandeh=Sum('total_mandeh'))[
+                           'total_mandeh'] or 0
+    tmandeh = cheques_data['total_mandeh_sum'] / 10000000  # تبدیل به میلیون
+    pastmandeh = past_cheques_sum / 10000000
+    postmandeh = post_cheques_sum / 10000000
+
+    # محاسبه مجموع curramount برای kol های 400 و 404
+    total_a = SanadDetail.objects.filter(kol=400).aggregate(total=Sum('curramount'))['total'] or 0
+    total_b = SanadDetail.objects.filter(kol=404).aggregate(total=Sum('curramount'))['total'] or 0
+    total_sum = total_a + total_b
+
+    # محاسبه نسبت ceque_ratio
+    ceque_ratio = (tmandeh / total_sum * 10000000 * 100) if total_sum != 0 else 0
+
+    total_data = {
+        'tmandeh': tmandeh,
+        'pastmandeh': pastmandeh,
+        'postmandeh': postmandeh,
+        'ceque_ratio': ceque_ratio,
+    }
+    print(f"3: {time.time() - start_time:.2f} ثانیه")
+
+    # تبدیل تاریخ امروز به شمسی
+    today_jalali = jdate.fromgregorian(date=today)
+    current_jalali_year = today_jalali.year
+
+    # محاسبه مجموع مانده چک‌های سال‌های قبل و بعد
+    first_day_of_current_year_jalali = jdate(current_jalali_year, 1, 1).togregorian()
+    last_day_of_current_year_jalali = jdate(current_jalali_year, 12, 29).togregorian()
+
+    cheques_before_current_year = \
+    ChequesPay.objects.filter(cheque_date__lt=first_day_of_current_year_jalali).aggregate(
+        total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+    cheques_after_current_year = \
+    ChequesPay.objects.filter(cheque_date__gt=last_day_of_current_year_jalali).aggregate(
+        total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+    print(f"4: {time.time() - start_time:.2f} ثانیه")
+
+    monthly_data = []
+    for month in range(1, 13):
+        first_day_of_month_jalali = jdate(current_jalali_year, month, 1).togregorian()
+        last_day_of_month_jalali = (
+            jdate(current_jalali_year, month + 1, 1).togregorian() - timedelta(days=1) if month < 12 else jdate(
+                current_jalali_year + 1, 1, 1).togregorian() - timedelta(days=1))
+
+        total_mandeh_month = ChequesPay.objects.filter(
+            cheque_date__gte=first_day_of_month_jalali,
+            cheque_date__lte=last_day_of_month_jalali
+        ).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+
+        monthly_data.append({
+            'month_name': months[month - 1],
+            'total_count': float(total_mandeh_month) / 10000000
+        })
+    print(f"5: {time.time() - start_time:.2f} ثانیه")
+
+    chart_data = [
+        {'month_name': 'سال های قبل', 'total_count': float(cheques_before_current_year) / 10000000},
+        *monthly_data,
+        {'month_name': 'سالهای بعد', 'total_count': float(cheques_after_current_year) / 10000000},
+    ]
+    print(f"6: {time.time() - start_time:.2f} ثانیه")
+
+    # مرحله اول: دریافت کدهای منحصر به فرد per_code
+    # per_codes = chequespay.values_list('per_code', flat=True).distinct()
+    # print("Unique per_codes from ChequesRecieve:", per_codes)
+
+    # بارگذاری اطلاعات شخص بر اساس per_code
+    # persons = Person.objects.filter(code__in=per_codes)
+
+    # بارگذاری دیکشنری با کلیدهای به عنوان رشته
+    # persons_map = {str(person.code): f"{person.name} {person.lname}" for person in persons}
+    # print("Loaded Persons Map:", persons_map)
+
+    # آماده‌سازی داده‌ها برای جدول
+    table1 = []
+    for chequ in chequespay:
+        com = chequ.last_sanad_detaile.syscomment if chequ.last_sanad_detaile else ''
+
+        # دسترسی به نام و نام خانوادگی شخص از دیکشنری
+        # person = persons_map.get(str(chequ.per_code), '')  # ساختار به صورت رشته
+
+        # Split تاریخ به سال، ماه و روز
+        year, month, day = chequ.cheque_tarik.split('/')
+
+        # اضافه کردن داده‌ها به جدول
+        table1.append({
+            'id': chequ.cheque_id,
+            'status': chequ.status,
+            'com': extract_first_words(com),
+            'mandeh': chequ.total_mandeh,
+            'date': chequ.cheque_date,
+            'bank_logo': chequ.bank.bank_logo,
+            'bank_name': chequ.bank.bank_name,
+            'bank_branch': chequ.bank.name,
+            # 'person': fix_persian_characters(person),  # Person نام و نام خانوادگی
+            'year': year,
+            'month': month,
+        })
+
+    print(f"7: {time.time() - start_time:.2f} ثانیه")
+
+    # تکمیل تقویم
+
+    month = request.GET.get('month', None)
+    year = request.GET.get('year', None)
+    print("Query params - Year:", year, "Month:", month)
+
+    if month is not None and year is not None:
+        current_month = int(month)
+        current_year = int(year)
+    else:
+        today_jalali = JalaliDate.today()
+        current_year = today_jalali.year
+        current_month = today_jalali.month
+
+    months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+    month_name = months[current_month - 1]
+    print("Current Year:", current_year, "Current Month:", current_month)
+
+    cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
+    cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
+
+    days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
+                                                                                 cheque_recive_data,
+                                                                                 cheque_pay_data)
+
+    print(f"8: {time.time() - start_time:.2f} ثانیه")
+
+
+        # آماده‌سازی context برای رندر
+    context = {
+        'title': 'چکهای پرداختنی',
+        'user': user,
+        'total_data': total_data,
+        'chartmahanedata': chart_data,
+        'table1': table1,
+
+
+        # for calendar
+        'month_name': month_name,
+        'year': current_year,
+        'month': current_month,
+        'days_in_month': days_in_month,
+        'max_cheque': max_cheque,
+        'month_cheque_data': month_cheque_data,
+    }
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+
+    return render(request, 'cheques-pay-total.html', context)
 
 
 
@@ -857,3 +1164,232 @@ def SanadTotal(request, *args, **kwargs):
 
 
     return render(request, 'sanad_total.html', context)
+
+
+
+from django.shortcuts import render
+from django.db.models import Sum
+
+from django.shortcuts import render
+from django.db.models import Sum
+
+from django.shortcuts import render
+from django.db.models import Sum
+import locale
+
+# تنظیم محلی برای جداسازی اعداد با کاما
+locale.setlocale(locale.LC_ALL, 'fa_IR.UTF-8')
+
+# def BedehkaranMoshtarian(request):
+#     # محاسبه مجموع curramount بر اساس tafzili
+#     # tafzili_sums = SanadDetail.objects.filter(moin=1, kol=103).values('tafzili').annotate(total_curramount=Sum('curramount')).filter(total_curramount__lt=0)
+#     tafzili_sums = SanadDetail.objects.filter(moin=1, kol=103).values('tafzili').annotate(total_curramount=Sum('curramount'))
+#
+#     # جمع‌آوری داده‌ها برای نمایش در قالب جدول
+#     report_data = []
+#     total_negative_amount = 0
+#
+#     for tafzili_sum in tafzili_sums:
+#         tafzili_code = tafzili_sum['tafzili']
+#         total_curramount = tafzili_sum['total_curramount']
+#         total_negative_amount += total_curramount
+#
+#         # پیدا کردن فرد مربوط به tafzili_code
+#         person = Person.objects.filter(code=tafzili_code).first()
+#         person_data = {
+#             'tafzili': tafzili_code,
+#             'total_curramount': total_curramount,
+#             'name': '',
+#             'lname': '',
+#             'loans': [],
+#             'sum_amount': 0
+#         }
+#
+#         if person:
+#             person_data['name'] = person.name
+#             person_data['lname'] = person.lname
+#
+#             # پیدا کردن وام‌های شخص
+#             loans = Loan.objects.filter(person=person)
+#             if loans.exists():
+#                 person_data['loans'] = [
+#                     {
+#                         'code': loan.code,
+#                         'tarikh': loan.tarikh,
+#                         'cost': loan.cost
+#                     }
+#                     for loan in loans
+#                 ]
+#                 person_data['sum_amount'] = sum(loan['cost'] for loan in person_data['loans'])
+#             else:
+#                 person_data['loans'] = 'NO_LOAN'
+#         else:
+#             person_data['person_not_found'] = True
+#
+#         person_data['total_with_loans'] = person_data['sum_amount'] + total_curramount
+#         report_data.append(person_data)
+#
+#     context = {
+#         'report_data': report_data,
+#         'total_negative_amount': locale.format_string("%d", total_negative_amount, grouping=True)
+#     }
+#     return render(request, 'bedehkaran_moshtarian.html', context)
+
+
+
+from django.shortcuts import render
+from django.db.models import Sum
+import locale
+
+# تنظیم محلی برای جداسازی اعداد با کاما
+locale.setlocale(locale.LC_ALL, 'fa_IR.UTF-8')
+
+from django.shortcuts import render
+from django.db.models import Sum
+import locale
+
+# تنظیم محلی برای جداسازی اعداد با کاما
+locale.setlocale(locale.LC_ALL, 'fa_IR.UTF-8')
+
+from django.shortcuts import render
+from django.db.models import Sum
+import locale
+
+# تنظیم محلی برای جداسازی اعداد با کاما
+locale.setlocale(locale.LC_ALL, 'fa_IR.UTF-8')
+
+def BedehkaranMoshtarian(request, state):
+    # محاسبه مجموع curramount بر اساس tafzili
+    tafzili_sums = SanadDetail.objects.filter(moin=1, kol=103).values('tafzili').annotate(total_curramount=Sum('curramount'))
+
+    # جمع‌آوری داده‌ها برای نمایش در قالب جدول
+    report_data = []
+    total_amount = 0
+
+    for tafzili_sum in tafzili_sums:
+        tafzili_code = tafzili_sum['tafzili']
+        total_curramount = tafzili_sum['total_curramount']
+
+        # پیدا کردن فرد مربوط به tafzili_code
+        person = Person.objects.filter(code=tafzili_code).first()
+        person_data = {
+            'tafzili': tafzili_code,
+            'total_curramount': total_curramount,
+            'name': '',
+            'lname': '',
+            'loans': [],
+            'sum_amount': 0,
+            'total_with_loans': 0,
+            'person_not_found': False,
+            'no_loans': False
+        }
+
+        if person:
+            person_data['name'] = person.name
+            person_data['lname'] = person.lname
+
+            # پیدا کردن وام‌های شخص
+            loans = Loan.objects.filter(person=person)
+            if loans.exists():
+                person_data['loans'] = [
+                    {
+                        'code': loan.code,
+                        'tarikh': loan.tarikh,
+                        'cost': loan.cost
+                    }
+                    for loan in loans
+                ]
+                person_data['sum_amount'] = sum(loan['cost'] for loan in person_data['loans'])
+            else:
+                person_data['no_loans'] = True
+        else:
+            person_data['person_not_found'] = True
+
+        person_data['total_with_loans'] = person_data['sum_amount'] + total_curramount
+
+        # اعمال شرایط بر اساس state
+        if (state == '1' and total_curramount > 0) or \
+           (state == '2' and total_curramount == 0 and person_data['sum_amount'] == 0) or \
+           (state == '3' and total_curramount == 0 and person_data['sum_amount'] > 0) or \
+           (state == '4' and total_curramount < 0 and person_data['sum_amount'] == 0) or \
+           (state == '5' and total_curramount < 0 and person_data['sum_amount'] > 0 and person_data['total_with_loans'] > 0) or \
+           (state == '6' and total_curramount < 0 and person_data['sum_amount'] > 0 and person_data['total_with_loans'] < 0):
+            total_amount += person_data['total_with_loans']
+            report_data.append(person_data)
+
+    context = {
+        'report_data': report_data,
+        'total_amount': locale.format_string("%d", total_amount, grouping=True)
+    }
+    return render(request, 'bedehkaran_moshtarian.html', context)
+
+
+
+def JariAshkhasMoshtarian(request):
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='حساب مشتریان', code=0)
+
+    start_time = time.time()  # زمان شروع تابع
+
+    filters = [
+        {'filter': {'total_mandeh__gt': 0}, 'negate': False},
+        {'filter': {'total_mandeh__gt': 0, 'loans_total__gt': 0}, 'negate': False},
+        {'filter': {'total_mandeh__gt': 0, 'loans_total': 0}, 'negate': False},
+        {'filter': {'total_mandeh__lt': 0}, 'negate': True},
+        {'filter': {'total_mandeh__lt': 0, 'loans_total__gt': 0}, 'negate': True},
+        {'filter': {'total_mandeh__lt': 0, 'loans_total': 0}, 'negate': True},
+    ]
+
+    table1 = []
+    for f in filters:
+        total_mandeh = BedehiMoshtari.objects.filter(**f['filter']).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+        if f['negate']:
+            total_mandeh = -total_mandeh
+        table1.append(total_mandeh/10000000)
+    table1.append((BedehiMoshtari.objects.aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0 )/ 10000000)
+
+    context = {
+        'title': 'حساب مشتریان',
+        'user': user,
+        'table1': table1,
+    }
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+
+    return render(request, 'jari_ashkhas_moshtarian.html', context)
+
+
+
+from django.db.models import F, Func
+
+from django.db.models import F, Func
+
+def JariAshkhasMoshtarianDetail(request, filter_id):
+    filters = {
+        '1': {'total_mandeh__gt': 0},
+        '2': {'total_mandeh__gt': 0, 'loans_total__gt': 0},
+        '3': {'total_mandeh__gt': 0, 'loans_total': 0},
+        '4': {'total_mandeh__lt': 0},
+        '5': {'total_mandeh__lt': 0, 'loans_total__gt': 0},
+        '6': {'total_mandeh__lt': 0, 'loans_total': 0},
+    }
+
+    filter_labels = {
+        '1': 'مشتری‌های بستانکار',
+        '2': 'مشتری‌های بستانکار | دارای وام',
+        '3': 'مشتری‌های بستانکار | بدون وام',
+        '4': 'مشتریان بدهکار',
+        '5': 'مشتریان بدهکار | دارای وام',
+        '6': 'مشتریان بدهکار | بدون وام'
+    }
+
+    filter_criteria = filters.get(str(filter_id), {})
+    items = BedehiMoshtari.objects.filter(**filter_criteria).annotate(abs_total_mandeh=Func(F('total_mandeh'), function='ABS')).order_by('-abs_total_mandeh')
+
+    context = {
+        'title': f'جزئیات حساب مشتریان - {filter_labels.get(str(filter_id), "فیلتر نامشخص")}',
+        'items': items,
+    }
+
+    return render(request, 'jari_ashkhas_moshtarian_detail.html', context)

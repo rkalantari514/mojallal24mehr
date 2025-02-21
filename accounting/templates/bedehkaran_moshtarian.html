@@ -1,0 +1,87 @@
+
+{% load humanize %}
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>گزارش بدهکاران مشتریان</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
+
+    <style>
+        .highlight-person-not-found {
+            background-color: yellow;
+        }
+        .highlight-no-loan {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">گزارش بدهکاران مشتریان</h1>
+        <div class="alert alert-info">
+            <strong>خلاصه گزارش:</strong> مجموع مانده: {{ total_amount|intcomma:False }}
+        </div>
+        <table id="reportTable" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th data-field="tafzili" data-sortable="true">تفصیلی</th>
+                    <th data-field="total_curramount" data-sortable="true">مانده بدهکار</th>
+                    <th data-field="name" data-sortable="true">نام</th>
+                    <th data-field="lname" data-sortable="true">نام خانوادگی</th>
+                    <th data-field="loans" data-formatter="loanFormatter" data-sortable="false">وام‌ها</th>
+                    <th data-field="sum_amount" data-sortable="true">جمع مبلغ وام‌ها</th>
+                    <th data-field="total_with_loans" data-sortable="true">جمع جبری</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in report_data %}
+                <tr class="{% if item.person_not_found %}highlight-person-not-found{% endif %}">
+                    <td>{{ item.tafzili }}</td>
+                    <td data-value="{{ item.total_curramount }}">{{ item.total_curramount|floatformat:0|intcomma:False }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.lname }}</td>
+                    <td class="{% if item.loans == 'NO_LOAN' %}highlight-no-loan{% endif %}">
+                        {% if item.loans != 'NO_LOAN' %}
+                        <ul>
+                            {% for loan in item.loans %}
+                            <li>
+                                کد: {{ loan.code }}, تاریخ: {{ loan.tarikh }},
+                                مبلغ: {{ loan.cost|floatformat:0|intcomma:False }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        وام یافت نشد
+                        {% endif %}
+                    </td>
+                    <td data-value="{{ item.sum_amount }}">{{ item.sum_amount|floatformat:0|intcomma:False }}</td>
+                    <td data-value="{{ item.total_with_loans }}">{{ item.total_with_loans|floatformat:0|intcomma}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
+    <script>
+        function loanFormatter(value, row, index) {
+            if (Array.isArray(value)) {
+                return '<ul>' + value.map(loan => `
+                    <li>
+                        کد: ${loan.code}, تاریخ: ${loan.tarikh}, مبلغ: ${loan.cost.toLocaleString()}
+                    </li>
+                `).join('') + '</ul>';
+            }
+            return value;
+        }
+        $(document).ready(function() {
+            $('#reportTable').bootstrapTable();
+        });
+    </script>
+</body>
+</html>

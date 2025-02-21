@@ -1,7 +1,8 @@
 from django.contrib import admin
 
+from accounting.models import BedehiMoshtari
 from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo, \
-    Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve, MyCondition, ChequesPay, Bank
+    Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve, MyCondition, ChequesPay, Bank, Loan, LoanDetil
 
 
 # Register your models here.
@@ -202,6 +203,30 @@ class BankAdmin(admin.ModelAdmin):
     list_editable = ['bank_logo']
     # search_fields = ('cheque_id', 'per_code', 'description')
     list_per_page = 100
+
+
+
+@admin.register(Loan)
+class LoanAdmin(admin.ModelAdmin):
+    list_display = ('code', 'person','tarikh', 'date', 'number', 'cost','loan_mandeh','actual_loan_mandeh','tasfiiye')
+    search_fields = ('code', 'person__name')
+    list_filter = ('person',)
+
+@admin.register(LoanDetil)
+class LoanDetilAdmin(admin.ModelAdmin):
+    list_display = ('code','loan','loan_code', 'tarikh','recive_tarikh', 'date', 'cost','complete_percent')
+    search_fields = ('code','loan_code', 'tarikh', 'date', 'cost')
+    # list_filter = ('person',)
+
+
+
+@admin.register(BedehiMoshtari)
+class BedehiMoshtariAdmin(admin.ModelAdmin):
+    list_display = ('moin','tafzili','person', 'total_mandeh','loans_total', 'total_with_loans')
+    search_fields = ('tafzili','person')
+    # list_filter = ('person',)
+
+
 
 
 admin.site.register(Mtables, MtablesAdmin)

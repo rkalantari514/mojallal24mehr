@@ -93,7 +93,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
                         <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
-                        <li class="breadcrumb-item active">چک های دریافتی</li>
+                        <li class="breadcrumb-item active">حساب مشتریان</li>
 
                     </ol>
                 </div>
@@ -155,7 +155,7 @@
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark">کل چک های دریافتنی دارای مانده</p>
+                                    <p class="card-text text-dark">-</p>
                                     <h4>{{ total_data.tmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>
                                 </div>
                             </div>
@@ -172,7 +172,7 @@
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark"> چک های تاریخ گذسته و امروز </p>
+                                    <p class="card-text text-dark"> - </p>
                                     <h4>{{ total_data.pastmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>
                                 </div>
                             </div>
@@ -189,7 +189,7 @@
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark"> چک های فردا به بعد </p>
+                                    <p class="card-text text-dark"> - </p>
                                     <h4>{{ total_data.postmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>
                                 </div>
                             </div>
@@ -206,7 +206,7 @@
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark"> نسبت مجموع چکها به در آمد از فروش </p>
+                                    <p class="card-text text-dark"> - </p>
                                     <h4>{{ total_data.ceque_ratio|floatformat:2 }}%</h4>
                                 </div>
                             </div>
@@ -381,9 +381,62 @@
             <div class="row">
                 <div class="col-md-5 mb-30">
                     <div class="card card-statistics h-100">
-                        <div class="card-body col-9">
-                            <h5 class="card-title pb-0 border-0 ">-------------</h5>
-                            <canvas id="donat-forosh"></canvas>
+                        <div class="card-body col-12">
+                            <h5 class="card-title pb-0 border-0 ">خلاصه حساب مشتریان 1-103</h5>
+{#                            <canvas id="donat-forosh"></canvas>#}
+                                                        <div class="table-responsive">
+                                <table class="table center-aligned-table mb-10 text-center ">
+                                    <thead>
+                                    <tr class="text-dark">
+{#                                        <th></th>#}
+                                        <th>وضعیت</th>
+                                        <th>کل</th>
+                                        <th>دارای وام</th>
+                                        <th>بدون وام</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+{#                                        <td><i class="fa fa-download text-primary fa-2x"></i></td>#}
+                                        <td><h5 class="text-primary">بستانکار</h5></td>
+                                        <td>
+                                            <a href="/acc/jariashkhas/moshtarian/detaile/1" target="_blank"> <h5 class="text-primary">{{ table1.0|floatformat:0|intcomma:False }}</h5></a>
+                                        </td>
+                                        <td>
+                                            <a href="/acc/jariashkhas/moshtarian/detaile/2" target="_blank"> <h5 class="text-primary">{{ table1.1|floatformat:0|intcomma:False }}</h5></a>
+                                        </td>
+                                        <td>
+                                            <a href="/acc/jariashkhas/moshtarian/detaile/3" target="_blank"> <h5 class="text-primary">{{ table1.2|floatformat:0|intcomma:False }}</h5></a>
+                                        </td>
+                                    </tr>
+
+{#                                    <td><i class="fa fa-upload text-danger fa-2x"></i></td>#}
+                                    <td><h5 class="text-danger">بدهکار</h5></td>
+                                    <td>
+                                        <a href="/acc/jariashkhas/moshtarian/detaile/4" target="_blank"> <h5 class="text-danger">{{ table1.3|floatformat:0|intcomma:False }}</h5></a>
+                                    </td>
+                                    <td>
+                                        <a href="/acc/jariashkhas/moshtarian/detaile/5" target="_blank"> <h5 class="text-danger">{{ table1.4|floatformat:0|intcomma:False }}</h5></a>
+                                    </td>
+                                    <td>
+                                        <a href="/acc/jariashkhas/moshtarian/detaile/6" target="_blank"> <h5 class="text-danger">{{ table1.5|floatformat:0|intcomma:False }}</h5></a>
+                                    </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td><h4>مانده</h4></td>
+                                        <td><h4 style="direction: ltr">{{ table1.6|floatformat:0|intcomma:False }}</h4></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+
+
+
                         </div>
                     </div>
 
@@ -391,7 +444,7 @@
                 <div class="col-md-7 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="card-body">
-                            <h5 class="card-title pb-0 border-0 ">گزارش ماهانه چک های دریافتنی </h5>
+                            <h5 class="card-title pb-0 border-0 ">---</h5>
                             <canvas id="ChartMahaneh"></canvas>
 
                             <button class="button" id="resetButton">همه ماه ها</button>
@@ -409,7 +462,7 @@
                         <div class="card card-statistics h-100">
                             <div class="card-body">
                                 <div class="table-responsive mt-15 ">
-                                    <h6 class="card-title pb-0 border-0">کل چک های دریافتنی: <span id="total-mandah" class="text-primary"></span> ریال </h6>
+                                    <h6 class="card-title pb-0 border-0">کل ----: <span id="total-mandah" class="text-primary"></span> ریال </h6>
 
 
                                     {#                                    <div class="table-responsive">#}
@@ -598,9 +651,9 @@
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="month" data-filter-control="select">ماه
                                                 </th>
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-field="person" data-filter-control="select">طرف حساب
-                                                </th>
+{#                                                <th class="card-text text-center" data-sortable="true"#}
+{#                                                    data-field="person" data-filter-control="select">طرف حساب#}
+{#                                                </th>#}
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="name">شناسه چک
                                                 </th>
@@ -619,7 +672,7 @@
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            {% for t in table1 %}
+                                            {% for t in table100 %}
                                                 {% with 'images/bank/'|add:t.bank_logo as logo_path %}
                                                     <tr>
                                                         <td><img src='{% static logo_path %}' class='small-logo'></td>
@@ -627,7 +680,7 @@
                                                         <td class="card-text text-center">{{ t.bank_branch }}</td>
                                                         <td class="card-text text-center">{{ t.year }}</td>
                                                         <td class="card-text text-center">{{ t.month }}</td>
-                                                        <td class="card-text text-center">{{ t.person }}</td>
+{#                                                        <td class="card-text text-center">{{ t.person }}</td>#}
                                                         <td class="card-text text-center">{{ t.id }}</td>
                                                         <td class="card-text text-center">{{ t.date|to_jalali:'%Y/%m/%d' }}</td>
                                                         <td class="card-text text-center">{{ t.com }}</td>
@@ -657,7 +710,7 @@
                             <h2>{{ month_name }} ماه {{ year }}</h2>
                         </div>
                         <div class="card-body">
-                            <h5 class="mb-15 pb-0 border-0 card-title">چک های دارای مانده </h5>
+                            <h5 class="mb-15 pb-0 border-0 card-title">---- ---- </h5>
                             <div class="table-responsive">
                                 <table class="table center-aligned-table mb-10 text-center ">
                                     <thead>
@@ -672,7 +725,7 @@
                                     <tbody>
                                     <tr>
                                         <td><i class="fa fa-download text-primary fa-2x"></i></td>
-                                        <td><h5 class="text-primary">چکهای دریافتی</h5></td>
+                                        <td><h5 class="text-primary">---</h5></td>
                                         <td>
                                             <h5 class="text-danger">{{ month_cheque_data.past_recive|floatformat:0|intcomma:False }}</h5>
                                         </td>
@@ -685,7 +738,7 @@
                                     </tr>
 
                                     <td><i class="fa fa-upload text-danger fa-2x"></i></td>
-                                    <td><h5 class="text-danger">چکهای پرداختی</h5></td>
+                                    <td><h5 class="text-danger">---</h5></td>
                                     <td>
                                         <h5 class="text-primary">{{ month_cheque_data.past_pay|floatformat:0|intcomma:False }}</h5>
                                     </td>
@@ -1107,7 +1160,7 @@
         $(document).ready(function () {
             var currentYear = {{ year }};
             var currentMonth = {{ month }};
-            var url = '/acc/cheques_recieve_total';
+            var url = '/acc/cheques_pay_total';
 
             console.log("Initial setup");
             console.log("Current Year: " + currentYear);
