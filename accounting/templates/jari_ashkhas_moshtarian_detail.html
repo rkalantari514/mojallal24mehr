@@ -27,7 +27,11 @@
             <tbody>
                 {% for item in items %}
                 <tr>
-                    <td>{{ item.tafzili }}</td>
+                    <td>
+                        <a href="/acc/jariashkhas/moshtari/{{ item.tafzili }}" target="_blank">
+                    {{ item.tafzili }}
+                    </a>
+                </td>
                     <td>{{ item.person.name }} {{ item.person.lname }}</td>
                     <td>{{ item.total_mandeh|floatformat:0|intcomma:False}}</td>
                     <td>{{ item.loans_total|floatformat:0|intcomma:False}}</td>

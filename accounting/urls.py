@@ -3,9 +3,10 @@ from django.shortcuts import redirect
 
 from accounting.views import TarazKol, ChequesRecieveTotal, balance_sheet_kol, balance_sheet_moin, \
     balance_sheet_tafsili, SanadTotal, ChequesPayTotal, BedehkaranMoshtarian, JariAshkhasMoshtarian, \
-    JariAshkhasMoshtarianDetail
+    JariAshkhasMoshtarianDetail, HesabMoshtariDetail
 
 urlpatterns = [
+    path('acc/jariashkhas/moshtari/<int:tafsili>', HesabMoshtariDetail, name='hesab-moshtari-detail'),
     path('acc/jariashkhas/moshtarian/detaile/<int:filter_id>', JariAshkhasMoshtarianDetail, name='jari_ashkhas_moshtarian_detail'),
     path('acc/jariashkhas/moshtarian/total', JariAshkhasMoshtarian, name='jari-ashkhas-moshtarian'),
 

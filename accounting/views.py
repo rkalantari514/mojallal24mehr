@@ -1393,3 +1393,21 @@ def JariAshkhasMoshtarianDetail(request, filter_id):
     }
 
     return render(request, 'jari_ashkhas_moshtarian_detail.html', context)
+
+
+
+@login_required(login_url='/login')
+def HesabMoshtariDetail(request, tafsili):
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='حساب مشتری', code=0)
+    print(tafsili)
+    hesabmoshtari= BedehiMoshtari.objects.filter(tafzili=tafsili).last()
+
+
+    context = {
+        'title': f'حساب مشتری',
+        'hesabmoshtari': hesabmoshtari,
+    }
+
+    return render(request, 'moshrari_detail.html', context)

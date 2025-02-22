@@ -29,3 +29,13 @@ def intcomma_custom(value):
     except (ValueError, TypeError):
         return value
     return locale.format_string("%d", value, grouping=True)
+
+
+
+from django import template
+
+register = template.Library()
+
+@register.filter
+def percentage(value):
+    return "{:.0f}".format(value * 100)

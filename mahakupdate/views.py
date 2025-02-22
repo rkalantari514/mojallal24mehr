@@ -2971,6 +2971,9 @@ def CompleLoan(request):
 
     # به روز رسانی اقساطی که تاریخ دریافت آن‌ها مشخص است
     LoanDetil.objects.filter(recive_date__isnull=False).update(complete_percent=1)
+    bestankar_vamdar_list = BedehiMoshtari.objects.filter(total_mandeh__gte=0, loans_total__gt=0).values('tafzili')
+    LoanDetil.objects.filter(loan__name_code__in=bestankar_vamdar_list).update(complete_percent=1)
+
 
     # دریافت مشتریانی که بدهی کل منفی و وام‌های مثبت دارند
     bedehkaran_vamdar = BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0)
@@ -2992,12 +2995,12 @@ def CompleLoan(request):
                 if skip_remaining:
                     lo.complete_percent = 0
                 else:
-                    if sum_completed_loan + lo.cost <= -bedehkar.total_mandeh:
+                    if sum_completed_loan + lo.cost <= sum_lo_detail+bedehkar.total_mandeh:
                         sum_completed_loan += lo.cost
                         lo.complete_percent = 1  # اقساط کامل پرداخت شده
                     else:
                         # محاسبه نسبت برای اقساط ناقص
-                        remaining = -bedehkar.total_mandeh - sum_completed_loan
+                        remaining = sum_lo_detail+bedehkar.total_mandeh - sum_completed_loan
                         if remaining > 0 and lo.cost > 0:  # اطمینان از غیرصفر بودن هزینه
                             lo.complete_percent = max(0, min(1, remaining / lo.cost))  # محدود کردن درصد در بازه ۰ تا ۱
                             print(lo.id, lo.complete_percent)  # پرینت برای بررسی

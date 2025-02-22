@@ -678,7 +678,7 @@ class Loan(models.Model):
     distance = models.IntegerField(blank=True, null=True, verbose_name='فاصله اقساط')
     cost = models.DecimalField(max_digits=14, decimal_places=2, verbose_name="مبلغ")
     loan_mandeh = models.DecimalField(default=0,max_digits=14, decimal_places=2, verbose_name="مانده وام")
-    actual_loan_mandeh = models.DecimalField(default=0,max_digits=14, decimal_places=2, verbose_name="مانده وام")
+    actual_loan_mandeh = models.DecimalField(default=0,max_digits=14, decimal_places=2, verbose_name="مانده وام واقعی")
 
 
     class Meta:
