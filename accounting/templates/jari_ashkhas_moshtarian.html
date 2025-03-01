@@ -75,18 +75,7 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="d-block">
-                        {% if cat_level == 1 %}
-                            <h4 class="card-title text-facebook pb-0 border-0">دسته بندی: {{ cat.name }}<span
-                                    class="badge badge-pill badge-success">1</span></h4>
-                        {% elif cat_level == 2 %}
-                            <h4 class="card-title text-facebook pb-0 border-0">دسته بندی: {{ cat.name }}<span
-                                    class="badge badge-pill badge-info">2</span></h4>
-
-                        {% elif cat_level == 3 %}
-                            <h4 class="card-title text-facebook pb-0 border-0">دسته بندی: {{ cat.name }}<span
-                                    class="badge badge-pill badge-primary">3</span></h4>
-
-                        {% endif %}
+                        <h4 class="card-title text-facebook pb-0 border-0">جاری اشخاص / مشتریان </h4>
                     </div>
 
                 </div>
@@ -98,51 +87,6 @@
                     </ol>
                 </div>
             </div>
-            <!-- ردیف دسته بندی ها -->
-            <div class="text-center">
-                {% for c in cat1 %}
-                    {% if c == par1 or c == cat %}
-                        <a href="/dash/kala/category/{{ c.id }}">
-                            <button type="button" class="btn btn-success category-btn">{{ c.name }}</button>
-                        </a>
-                    {% else %}
-                        <a href="/dash/kala/category/{{ c.id }}">
-                            <button type="button" class="btn btn-secondary category-btn">{{ c.name }}</button>
-                        </a>
-                    {% endif %}
-                {% endfor %}
-
-            </div>
-
-            <div class="text-center">
-                {% for c in cat2 %}
-                    {% if c == par2 %}
-                        <a href="/dash/kala/category/{{ c.id }}">
-                            <button type="button" class="btn btn-info category-btn">{{ c.name }}</button>
-                        </a>
-                    {% else %}
-                        <a href="/dash/kala/category/{{ c.id }}">
-                            <button type="button" class="btn btn-secondary category-btn">{{ c.name }}</button>
-                        </a>
-                    {% endif %}
-                {% endfor %}
-            </div>
-
-            <div class="text-center">
-                {% for c in cat3 %}
-                    {% if c == cat %}
-                        <a href="/dash/kala/category/{{ c.id }}">
-                            <button type="button" class="btn btn-primary category-btn">{{ c.name }}</button>
-                        </a>
-                    {% else %}
-                        <a href="/dash/kala/category/{{ c.id }}">
-                            <button type="button" class="btn btn-secondary category-btn">{{ c.name }}</button>
-                        </a>
-                    {% endif %}
-                {% endfor %}
-            </div>
-
-
             <!-- ردیف اول خلاصه ها -->
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
@@ -155,8 +99,8 @@
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark">-</p>
-                                    <h4>{{ total_data.tmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>
+                                    <p class="card-text text-dark">مجموع بدهکارها</p>
+                                    <h4>{{ table1.3|floatformat:0|intcomma:False }} میلیون تومان</h4>
                                 </div>
                             </div>
                         </div>
@@ -172,8 +116,8 @@
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark"> - </p>
-                                    <h4>{{ total_data.pastmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>
+                                    <p class="card-text text-dark"> بدهکاران بدون وام </p>
+                                    <h4>{{ table1.5|floatformat:0|intcomma:False }} میلیون تومان</h4>
                                 </div>
                             </div>
                         </div>
@@ -189,8 +133,8 @@
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark"> - </p>
-                                    <h4>{{ total_data.postmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>
+                                    <p class="card-text text-dark"> کمبود وام بدهکاران </p>
+                                    <h4>{{ table1.8|floatformat:0|intcomma:False }} میلیون تومان</h4>
                                 </div>
                             </div>
                         </div>
@@ -206,8 +150,25 @@
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark"> - </p>
-                                    <h4>{{ total_data.ceque_ratio|floatformat:2 }}%</h4>
+                                    <p class="card-text text-dark"> اقساط عقب افتاده </p>
+                                    <h4>{{ table1.9|floatformat:0|intcomma:False }} میلیون تومان</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-info rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-percent highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark"> اقساط امروز به بعد </p>
+                                    <h4>{{ table1.10|floatformat:0|intcomma:False }} میلیون تومان</h4>
                                 </div>
                             </div>
                         </div>
@@ -383,12 +344,12 @@
                     <div class="card card-statistics h-100">
                         <div class="card-body col-12">
                             <h5 class="card-title pb-0 border-0 ">خلاصه حساب مشتریان 1-103</h5>
-{#                            <canvas id="donat-forosh"></canvas>#}
-                                                        <div class="table-responsive">
+                            {#                            <canvas id="donat-forosh"></canvas>#}
+                            <div class="table-responsive">
                                 <table class="table center-aligned-table mb-10 text-center ">
                                     <thead>
                                     <tr class="text-dark">
-{#                                        <th></th>#}
+                                        {#                                        <th></th>#}
                                         <th>وضعیت</th>
                                         <th>کل</th>
                                         <th>دارای وام</th>
@@ -397,44 +358,58 @@
                                     </thead>
                                     <tbody>
                                     <tr>
-{#                                        <td><i class="fa fa-download text-primary fa-2x"></i></td>#}
+                                        {#                                        <td><i class="fa fa-download text-primary fa-2x"></i></td>#}
                                         <td><h5 class="text-primary">بستانکار</h5></td>
                                         <td>
-                                            <a href="/acc/jariashkhas/moshtarian/detaile/1" target="_blank"> <h5 class="text-primary">{{ table1.0|floatformat:0|intcomma:False }}</h5></a>
+                                            <a href="/acc/jariashkhas/moshtarian/detaile/1" target="_blank"><h5
+                                                    class="text-primary">{{ table1.0|floatformat:0|intcomma:False }}</h5>
+                                            </a>
                                         </td>
                                         <td>
-                                            <a href="/acc/jariashkhas/moshtarian/detaile/2" target="_blank"> <h5 class="text-primary">{{ table1.1|floatformat:0|intcomma:False }}</h5></a>
+                                            <a href="/acc/jariashkhas/moshtarian/detaile/2" target="_blank"><h5
+                                                    class="text-primary">{{ table1.1|floatformat:0|intcomma:False }}</h5>
+                                            </a>
                                         </td>
                                         <td>
-                                            <a href="/acc/jariashkhas/moshtarian/detaile/3" target="_blank"> <h5 class="text-primary">{{ table1.2|floatformat:0|intcomma:False }}</h5></a>
+                                            <a href="/acc/jariashkhas/moshtarian/detaile/3" target="_blank"><h5
+                                                    class="text-primary">{{ table1.2|floatformat:0|intcomma:False }}</h5>
+                                            </a>
                                         </td>
                                     </tr>
 
-{#                                    <td><i class="fa fa-upload text-danger fa-2x"></i></td>#}
+                                    {#                                    <td><i class="fa fa-upload text-danger fa-2x"></i></td>#}
                                     <td><h5 class="text-danger">بدهکار</h5></td>
                                     <td>
-                                        <a href="/acc/jariashkhas/moshtarian/detaile/4" target="_blank"> <h5 class="text-danger">{{ table1.3|floatformat:0|intcomma:False }}</h5></a>
+                                        <a href="/acc/jariashkhas/moshtarian/detaile/4" target="_blank"><h5
+                                                class="text-danger">{{ table1.3|floatformat:0|intcomma:False }}</h5></a>
                                     </td>
                                     <td>
-                                        <a href="/acc/jariashkhas/moshtarian/detaile/5" target="_blank"> <h5 class="text-danger">{{ table1.4|floatformat:0|intcomma:False }}</h5></a>
+                                        <a href="/acc/jariashkhas/moshtarian/detaile/5" target="_blank"><h5
+                                                class="text-danger">{{ table1.4|floatformat:0|intcomma:False }}</h5></a>
                                     </td>
                                     <td>
-                                        <a href="/acc/jariashkhas/moshtarian/detaile/6" target="_blank"> <h5 class="text-danger">{{ table1.5|floatformat:0|intcomma:False }}</h5></a>
+                                        <a href="/acc/jariashkhas/moshtarian/detaile/6" target="_blank"><h5
+                                                class="text-danger">{{ table1.5|floatformat:0|intcomma:False }}</h5></a>
                                     </td>
                                     </tr>
 
                                     <tr>
                                         <td><h4>مانده</h4></td>
-                                        <td><h4 style="direction: ltr">{{ table1.6|floatformat:0|intcomma:False }}</h4></td>
+                                        <td><h4 style="direction: ltr">{{ table1.6|floatformat:0|intcomma:False }}</h4>
+                                        </td>
                                         <td></td>
                                         <td></td>
                                     </tr>
-
+                                    <tr>
+                                        <td><h4>وام دار بی حساب</h4></td>
+                                        <td><h4 style="direction: ltr">{{ table1.7|floatformat:0|intcomma:False }}</h4>
+                                        </td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
                                     </tbody>
                                 </table>
                             </div>
-
-
 
 
                         </div>
@@ -462,7 +437,9 @@
                         <div class="card card-statistics h-100">
                             <div class="card-body">
                                 <div class="table-responsive mt-15 ">
-                                    <h6 class="card-title pb-0 border-0">کل ----: <span id="total-mandah" class="text-primary"></span> ریال </h6>
+                                    <h6 class="card-title pb-0 border-0">کل ----: <span id="total-mandah"
+                                                                                        class="text-primary"></span>
+                                        ریال </h6>
 
 
                                     {#                                    <div class="table-responsive">#}
@@ -651,9 +628,9 @@
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="month" data-filter-control="select">ماه
                                                 </th>
-{#                                                <th class="card-text text-center" data-sortable="true"#}
-{#                                                    data-field="person" data-filter-control="select">طرف حساب#}
-{#                                                </th>#}
+                                                {#                                                <th class="card-text text-center" data-sortable="true"#}
+                                                {#                                                    data-field="person" data-filter-control="select">طرف حساب#}
+                                                {#                                                </th>#}
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="name">شناسه چک
                                                 </th>
@@ -666,7 +643,8 @@
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="sales" data-filter-control="select">وضعیت
                                                 </th>
-                                                <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter" data-field="mandah">مانده
                                                 </th>
                                             </tr>
@@ -680,7 +658,7 @@
                                                         <td class="card-text text-center">{{ t.bank_branch }}</td>
                                                         <td class="card-text text-center">{{ t.year }}</td>
                                                         <td class="card-text text-center">{{ t.month }}</td>
-{#                                                        <td class="card-text text-center">{{ t.person }}</td>#}
+                                                        {#                                                        <td class="card-text text-center">{{ t.person }}</td>#}
                                                         <td class="card-text text-center">{{ t.id }}</td>
                                                         <td class="card-text text-center">{{ t.date|to_jalali:'%Y/%m/%d' }}</td>
                                                         <td class="card-text text-center">{{ t.com }}</td>
@@ -1110,43 +1088,43 @@
 
 
 
-{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>#}
+    {#    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>#}
     {#    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.3/bootstrap-table.min.js"></script>#}
     {#    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.3/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>#}
 
 
-<script>
-    var $table = $('#table');
-    var totalMandah = 0; // متغیر برای ذخیره مجموع مانده
+    <script>
+        var $table = $('#table');
+        var totalMandah = 0; // متغیر برای ذخیره مجموع مانده
 
-    $(function () {
-        $table.bootstrapTable();
-        updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده هنگام بارگذاری جدول
-    });
+        $(function () {
+            $table.bootstrapTable();
+            updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده هنگام بارگذاری جدول
+        });
 
-    function priceFormatter(data) {
-        var field = this.field;
-        console.log("Data received for priceFormatter:", data);
-        var result = data.map(function (row) {
-            var valueString = row[field].replace(/,/g, ''); // حذف کاماها
-            var value = parseFloat(valueString);
-            console.log("Processing row:", row);
-            console.log("Parsed value:", value);
-            return isNaN(value) ? 0 : value;
-        }).reduce(function (sum, i) {
-            console.log("Current sum:", sum);
-            return sum + i;
-        }, 0);
-        console.log("Final result for priceFormatter:", result);
-        totalMandah = result; // ذخیره مجموع مانده
-        updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده
-        return result.toLocaleString('fa-IR'); // نمایش با کاما به صورت 3 تا 3 تا
-    }
+        function priceFormatter(data) {
+            var field = this.field;
+            console.log("Data received for priceFormatter:", data);
+            var result = data.map(function (row) {
+                var valueString = row[field].replace(/,/g, ''); // حذف کاماها
+                var value = parseFloat(valueString);
+                console.log("Processing row:", row);
+                console.log("Parsed value:", value);
+                return isNaN(value) ? 0 : value;
+            }).reduce(function (sum, i) {
+                console.log("Current sum:", sum);
+                return sum + i;
+            }, 0);
+            console.log("Final result for priceFormatter:", result);
+            totalMandah = result; // ذخیره مجموع مانده
+            updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده
+            return result.toLocaleString('fa-IR'); // نمایش با کاما به صورت 3 تا 3 تا
+        }
 
-    function updateTotalMandah() {
-        $('#total-mandah').text(totalMandah.toLocaleString('fa-IR'));
-    }
-</script>
+        function updateTotalMandah() {
+            $('#total-mandah').text(totalMandah.toLocaleString('fa-IR'));
+        }
+    </script>
 
 
 

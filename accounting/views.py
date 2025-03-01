@@ -3,14 +3,17 @@
 import re
 from django.contrib.auth.decorators import login_required
 import time
-
+from datetime import date
+from django.db.models import Sum, F, FloatField
+from django.db.models.functions import Cast
 from openpyxl.styles.builtins import total
 from persianutils import standardize
+from django.db.models import Sum, F, DecimalField
 
 from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
 from dashboard.views import generate_calendar_data_cheque
-from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan
+from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan, LoanDetil
 from jdatetime import date as jdate
 from datetime import timedelta, date
 from django.shortcuts import render
@@ -1347,7 +1350,46 @@ def JariAshkhasMoshtarian(request):
         if f['negate']:
             total_mandeh = -total_mandeh
         table1.append(total_mandeh/10000000)
+    # 6 مانده کل
     table1.append((BedehiMoshtari.objects.aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0 )/ 10000000)
+    # 7 وام دار بی حساب
+    table1.append((BedehiMoshtari.objects.filter(total_mandeh=0,loans_total__gt=0).aggregate(loans_total=Sum('loans_total'))['loans_total'] or 0 )/ 10000000)
+
+    # 8 وام دار - کمبود وام
+    table1.append(-(BedehiMoshtari.objects.filter(total_mandeh__lt=0,loans_total__gt=0,total_with_loans__lt=0).aggregate(total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0 )/ 10000000)
+    today = date.today()
+
+    # 9 قسط عقب افتاده
+    total_cost = LoanDetil.objects.filter(
+        complete_percent__lt=1,  # فرض کنیم درصد کامل باید کمتر از 100 باشد
+        date__lt=today
+    ).annotate(
+        adjusted_cost=F('cost') * (1 - Cast(F('complete_percent'), DecimalField(max_digits=5, decimal_places=2)))
+        # تبدیل complete_percent به Decimal
+    ).aggregate(
+        total_adjusted_cost=Sum('adjusted_cost')
+    )['total_adjusted_cost'] or 0
+
+    # تقسیم بر 10,000,000
+    final_result = total_cost / 10000000
+    # 9 قسط عقب افتاده
+    table1.append(final_result)
+
+    # 10 اقساط امروز به بعد
+    total_cost = LoanDetil.objects.filter(
+        complete_percent__lt=1,  # فرض کنیم درصد کامل باید کمتر از 100 باشد
+        date__gte=today
+    ).annotate(
+        adjusted_cost=F('cost') * (1 - Cast(F('complete_percent'), DecimalField(max_digits=5, decimal_places=2)))
+        # تبدیل complete_percent به Decimal
+    ).aggregate(
+        total_adjusted_cost=Sum('adjusted_cost')
+    )['total_adjusted_cost'] or 0
+
+    # تقسیم بر 10,000,000
+    final_result = total_cost / 10000000
+    # 10 اقساط امروز به بعد
+    table1.append(final_result)
 
     context = {
         'title': 'حساب مشتریان',
