@@ -30,8 +30,8 @@
         }
 
         .calendar-table .fc-recive-number,
-        .calendar-table .fc-pay-number ,
-        .calendar-table .fc-loan-number  {
+        .calendar-table .fc-pay-number,
+        .calendar-table .fc-loan-number {
             font-size: 1.2rem; /* اندازه متن */
             display: block; /* تقسیم نمایش به سطرهای جدید */
         }
@@ -552,53 +552,106 @@
             <div id="calendarf" class="col-md-8 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body">
-                    <div class="text-center mb-4">
+                        <div class="text-center mb-4">
                             <h2>{{ month_name }} ماه {{ year }}</h2>
                         </div>
-                    <div class="card-body">
-             <h5 class="mb-15 pb-0 border-0 card-title">چک ها و اقساط </h5>
-              <div class="table-responsive">
-              <table class="table center-aligned-table mb-10 text-center ">
-                <thead>
-                  <tr class="text-dark">
-                    <th></th>
-                    <th></th>
-                    <th>بدون وام</th>
-                    <th>ماه های قبلی</th>
-                    <th>{{ month_name }} ماه {{ year }}</th>
-                    <th>ماه های بعد</th>
-                  </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td><i class="fa fa-download text-facebook fa-2x"></i></td>
-                   <td><h5 class="text-facebook">اقساط بدهکاران</h5></td>
-                   <td><h5 class="text-danger">{{ month_cheque_data.past_recive|floatformat:0|intcomma:False }}</h5></td>
-                   <td><h5 class="text-danger">{{ month_cheque_data.past_recive|floatformat:0|intcomma:False }}</h5></td>
-                    <td><h5 class="text-twitter">{{ month_cheque_data.this_month_recive|floatformat:0|intcomma:False }}</h5></td>
-                    <td><h5 class="text-success">{{ month_cheque_data.post_recive|floatformat:0|intcomma:False }}</h5></td>
-                  </tr>
-                  <tr>
-                    <td><i class="fa fa-download text-primary fa-2x"></i></td>
-                   <td><h5 class="text-primary">چکهای دریافتی</h5></td>
-                   <td></td>
-                   <td><h5 class="text-danger">{{ month_cheque_data.past_recive|floatformat:0|intcomma:False }}</h5></td>
-                    <td><h5 class="text-twitter">{{ month_cheque_data.this_month_recive|floatformat:0|intcomma:False }}</h5></td>
-                    <td><h5 class="text-success">{{ month_cheque_data.post_recive|floatformat:0|intcomma:False }}</h5></td>
-                  </tr>
+                        <div class="card-body">
+                            <h5 class="mb-15 pb-0 border-0 card-title">بدهکاران و اقساط</h5>
+                            <div class="table-responsive">
+                                <table class="table center-aligned-table mb-10 text-center ">
+                                    <thead>
+                                    <tr class="text-dark">
+                                        <th></th>
+                                        <th></th>
+                                        <th>کل بدهی</th>
+                                        <th>بدون وام</th>
+                                        <th>کسری وام</th>
+                                        <th>اقساط ماه های قبل</th>
+                                        <th>{{ month_name }} ماه {{ year }}</th>
+                                        <th>اقساط ماه های بعد</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
 
+                                    <tr>
+                                        <td><i class="fa fa-download text-facebook fa-2x"></i></td>
+                                        <td><h5 class="text-facebook">مشتریان</h5></td>
+                                        <td>
+                                            <h5 class="text-linkedin">{{ month_loan_data.total_bedehkar|floatformat:0|intcomma:False }}</h5>
+                                        </td>
+
+                                        <td>
+                                            <h5 class="text-danger">{{ month_loan_data.not_loan|floatformat:0|intcomma:False }}</h5>
+                                        </td>
+                                        <td>
+                                            <h5 class="text-danger">{{ month_loan_data.loan_gap|floatformat:0|intcomma:False }}</h5>
+                                        </td>
+
+                                        <td>
+                                            <h5 class="text-danger">{{ month_loan_data.past_month_loan|floatformat:0|intcomma:False }}</h5>
+                                        </td>
+
+                                        <td>
+                                            <h5 class="text-dark">{{ month_loan_data.this_month_loan|floatformat:0|intcomma:False }}</h5>
+                                        </td>
+
+                                        <td>
+                                            <h5 class="text-success">{{ month_loan_data.post_month_loan|floatformat:0|intcomma:False }}</h5>
+                                        </td>
+                                    </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+
+                        <div class="card-body">
+                            <h5 class="mb-15 pb-0 border-0 card-title">چک ها</h5>
+                            <div class="table-responsive">
+                                <table class="table center-aligned-table mb-10 text-center ">
+                                    <thead>
+                                    <tr class="text-dark">
+                                        <th></th>
+                                        <th></th>
+                                        <th>ماه های قبلی</th>
+                                        <th>{{ month_name }} ماه {{ year }}</th>
+                                        <th>ماه های بعد</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    <tr>
+                                        <td><i class="fa fa-download text-primary fa-2x"></i></td>
+                                        <td><h5 class="text-primary">چکهای دریافتی</h5></td>
+                                        <td>
+                                            <h5 class="text-danger">{{ month_cheque_data.past_recive|floatformat:0|intcomma:False }}</h5>
+                                        </td>
+                                        <td>
+                                            <h5 class="text-twitter">{{ month_cheque_data.this_month_recive|floatformat:0|intcomma:False }}</h5>
+                                        </td>
+                                        <td>
+                                            <h5 class="text-success">{{ month_cheque_data.post_recive|floatformat:0|intcomma:False }}</h5>
+                                        </td>
+                                    </tr>
+ <tr>
                                     <td><i class="fa fa-upload text-danger fa-2x"></i></td>
-                    <td><h5 class="text-danger">چکهای پرداختی</h5></td>
-                                   <td></td>
-                    <td><h5 class="text-primary" >{{ month_cheque_data.past_pay|floatformat:0|intcomma:False }}</h5></td>
-                    <td><h5 class="text-danger">{{ month_cheque_data.this_month_pay|floatformat:0|intcomma:False }}</h5></td>
-                    <td><h5 class="text-warning">{{ month_cheque_data.post_pay|floatformat:0|intcomma:False }}</h5></td>
-                  </tr>
+                                    <td><h5 class="text-danger">چکهای پرداختی</h5></td>
+                                    <td>
+                                        <h5 class="text-primary">{{ month_cheque_data.past_pay|floatformat:0|intcomma:False }}</h5>
+                                    </td>
+                                    <td>
+                                        <h5 class="text-danger">{{ month_cheque_data.this_month_pay|floatformat:0|intcomma:False }}</h5>
+                                    </td>
+                                    <td>
+                                        <h5 class="text-warning">{{ month_cheque_data.post_pay|floatformat:0|intcomma:False }}</h5>
+                                    </td>
+                                    </tr>
 
-                </tbody>
-              </table>
-            </div>
-           </div>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
                         <div class="calendar-header">
                             <button id="prev-month" class="btn btn-secondary">&lt;</button>
@@ -654,7 +707,7 @@
                                                 </div>
                                                 <span class="fc-recive-number">{{ day.recive|floatformat:0|intcomma:False }}</span>
                                                 <div class="progress mb-3" data-toggle="popover" data-html="true"
-                                                    data-original-title="لیست  چکهای دریافتی برای تاریخ {{ day.today_recive_cheque.last.cheque_tarik }}"
+                                                     data-original-title="لیست  چکهای دریافتی برای تاریخ {{ day.today_recive_cheque.last.cheque_tarik }}"
 
                                                      data-content="
                                                      <table class='table'>
@@ -747,7 +800,7 @@
 
 
 {% block jscal %}
-<script>
+    <script>
 
         $(document).ready(function () {
             var currentYear = {{ year }};
@@ -806,26 +859,26 @@
 
 
     </script>
-{#برای تقویم#}
+    {#برای تقویم#}
     <script>
-$(document).ready(function(){
-    $('[data-toggle="popover"]').popover({
-        trigger: 'click',  // تنظیم برای فعال‌سازی فقط با کلیک
-        placement: 'top',
-        html: true
-    });
+        $(document).ready(function () {
+            $('[data-toggle="popover"]').popover({
+                trigger: 'click',  // تنظیم برای فعال‌سازی فقط با کلیک
+                placement: 'top',
+                html: true
+            });
 
-    // بستن Popover زمانی که در جای دیگری کلیک شود
-    $(document).on('click', function(e) {
-        $('[data-toggle="popover"]').each(function () {
-            // اگر روی عنصر Popover کلیک نشده باشد
-            if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
-                $(this).popover('hide');
-            }
+            // بستن Popover زمانی که در جای دیگری کلیک شود
+            $(document).on('click', function (e) {
+                $('[data-toggle="popover"]').each(function () {
+                    // اگر روی عنصر Popover کلیک نشده باشد
+                    if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+                        $(this).popover('hide');
+                    }
+                });
+            });
         });
-    });
-});
-</script>
+    </script>
 
 {% endblock %}
 

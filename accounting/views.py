@@ -141,7 +141,7 @@ def ChequesRecieveTotal(request, *args, **kwargs):
 
         loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
 
-        days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
+        days_in_month, max_cheque, month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year,
                                                                                      cheque_recive_data,
                                                                                      cheque_pay_data, loan_detail_data)
 
@@ -153,6 +153,7 @@ def ChequesRecieveTotal(request, *args, **kwargs):
             'days_in_month': days_in_month,
             'max_cheque': max_cheque,
             'month_cheque_data': month_cheque_data,
+            'month_loan_data': month_loan_data,
 
         }
 
@@ -313,7 +314,7 @@ def ChequesRecieveTotal(request, *args, **kwargs):
 
     loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
 
-    days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
+    days_in_month, max_cheque, month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year,
                                                                                  cheque_recive_data,
                                                                                  cheque_pay_data, loan_detail_data)
 
@@ -336,6 +337,7 @@ def ChequesRecieveTotal(request, *args, **kwargs):
         'days_in_month': days_in_month,
         'max_cheque': max_cheque,
         'month_cheque_data': month_cheque_data,
+        'month_loan_data': month_loan_data,
     }
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
@@ -377,7 +379,7 @@ def ChequesPayTotal(request, *args, **kwargs):
 
         loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
 
-        days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
+        days_in_month, max_cheque, month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year,
                                                                                      cheque_recive_data,
                                                                                      cheque_pay_data, loan_detail_data)
 
@@ -389,6 +391,7 @@ def ChequesPayTotal(request, *args, **kwargs):
             'days_in_month': days_in_month,
             'max_cheque': max_cheque,
             'month_cheque_data': month_cheque_data,
+            'month_loan_data': month_loan_data,
 
         }
 
@@ -549,7 +552,7 @@ def ChequesPayTotal(request, *args, **kwargs):
 
     loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
 
-    days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
+    days_in_month, max_cheque, month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year,
                                                                                  cheque_recive_data,
                                                                                  cheque_pay_data, loan_detail_data)
 
@@ -572,6 +575,7 @@ def ChequesPayTotal(request, *args, **kwargs):
         'days_in_month': days_in_month,
         'max_cheque': max_cheque,
         'month_cheque_data': month_cheque_data,
+        'month_loan_data': month_loan_data,
     }
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
@@ -582,268 +586,6 @@ def ChequesPayTotal(request, *args, **kwargs):
 
 
 
-def ChequesRecieveTotal1(request, *args, **kwargs):
-    from django.db.models import Sum  # این خط را به ابتدای تابع منتقل کنید
-    user = request.user
-    if user.mobile_number != '09151006447':
-        UserLog.objects.create(user=user, page='چک های دریافتی', code=0)
-
-    start_time = time.time()  # زمان شروع تابع
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-
-        # تکمیل تقویم
-
-        month = request.GET.get('month', None)
-        year = request.GET.get('year', None)
-        print("Query params - Year:", year, "Month:", month)
-
-        if month is not None and year is not None:
-            current_month = int(month)
-            current_year = int(year)
-        else:
-            today_jalali = JalaliDate.today()
-            current_year = today_jalali.year
-            current_month = today_jalali.month
-
-        months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
-        month_name = months[current_month - 1]
-        print("Current Year:", current_year, "Current Month:", current_month)
-
-        cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
-        cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
-
-        loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
-
-        days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
-                                                                                     cheque_recive_data,
-                                                                                     cheque_pay_data, loan_detail_data)
-
-        context = {
-            # for calendar
-            'month_name': month_name,
-            'year': current_year,
-            'month': current_month,
-            'days_in_month': days_in_month,
-            'max_cheque': max_cheque,
-            'month_cheque_data': month_cheque_data,
-
-        }
-
-        print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
-
-        return render(request, 'partial_calendar_cheque_recive.html', context)
-
-
-
-
-    today = date.today()
-    # بارگذاری چک‌ها با بهینه‌سازی
-    chequesrecieve = ChequesRecieve.objects.filter(total_mandeh__lt=0).select_related('last_sanad_detaile').order_by('cheque_date').all()
-
-    chequesr = ChequesRecieve.objects.aggregate(total_mandeh_sum=Sum('total_mandeh'))
-    postchequesr = ChequesRecieve.objects.filter(cheque_date__gt=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
-    pastchequesr = ChequesRecieve.objects.filter(cheque_date__lte=today).aggregate(
-        total_mandeh_sum=Sum('total_mandeh'))
-
-    tmandeh = (chequesr['total_mandeh_sum'] / 10000000) * -1
-    pastmandeh = (pastchequesr['total_mandeh_sum'] / 10000000) * -1
-    postmandeh = (postchequesr['total_mandeh_sum'] / 10000000) * -1
-
-    from django.db.models import Sum
-
-    # جمع مقادیر curramount برای kol های 400 و 404
-    total_a = SanadDetail.objects.filter(kol=400).aggregate(total=Sum('curramount'))['total'] or 0
-    total_b = SanadDetail.objects.filter(kol=404).aggregate(total=Sum('curramount'))['total'] or 0
-    # محاسبه مجموع
-    total_sum = total_a + total_b
-
-    # محاسبه نسبت ceque_ratio
-    if total_sum != 0:
-        ceque_ratio = (tmandeh / total_sum) * 10000000 * 100
-    else:
-        ceque_ratio = 0
-
-    total_data = {
-        'tmandeh': tmandeh,
-        'pastmandeh': pastmandeh,
-        'postmandeh': postmandeh,
-        'ceque_ratio': ceque_ratio,
-
-    }
-
-
-
-    # تبدیل تاریخ امروز به شمسی
-    today_jalali = jdate.fromgregorian(date=today)
-
-    # سال شمسی جاری
-    current_jalali_year = today_jalali.year
-
-    # اولین روز سال جاری شمسی
-    first_day_of_current_year_jalali = jdate(current_jalali_year, 1, 1).togregorian()
-
-    # آخرین روز سال جاری شمسی
-    last_day_of_current_year_jalali = jdate(current_jalali_year, 12, 29).togregorian()  # اسفند ۲۹ روز دارد
-
-    # محاسبه مجموع مانده چک‌های سال‌های قبل
-    cheques_before_current_year = ChequesRecieve.objects.filter(
-        cheque_date__lt=first_day_of_current_year_jalali
-    ).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
-
-    # محاسبه مجموع مانده چک‌های سال‌های بعد
-    cheques_after_current_year = ChequesRecieve.objects.filter(
-        cheque_date__gt=last_day_of_current_year_jalali
-    ).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
-
-    # محاسبه مجموع مانده چک‌ها برای هر ماه سال جاری
-    month_names = {
-        1: 'فروردین',
-        2: 'اردیبهشت',
-        3: 'خرداد',
-        4: 'تیر',
-        5: 'مرداد',
-        6: 'شهریور',
-        7: 'مهر',
-        8: 'آبان',
-        9: 'آذر',
-        10: 'دی',
-        11: 'بهمن',
-        12: 'اسفند',
-    }
-
-
-
-
-
-    monthly_data = []
-    for month in range(1, 13):  # از فروردین (ماه ۱) تا اسفند (ماه ۱۲)
-        first_day_of_month_jalali = jdate(current_jalali_year, month, 1).togregorian()
-        last_day_of_month_jalali = (jdate(current_jalali_year, month + 1, 1) if month < 12 else jdate(
-            current_jalali_year + 1, 1, 1)).togregorian() - timedelta(days=1)
-
-        total_mandeh_month = ChequesRecieve.objects.filter(
-            cheque_date__gte=first_day_of_month_jalali,
-            cheque_date__lte=last_day_of_month_jalali
-        ).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
-
-        # monthly_data.append({
-        #     'month_name': jdate(current_jalali_year, month, 1).strftime('%B'),  # نام ماه به فارسی
-        #     'total_count': float(total_mandeh_month) * -1/10000000  # ضرب در منفی ۱
-        # })
-        # در حلقه ماه‌ها
-        monthly_data.append({
-            'month_name': month_names[month],  # استفاده از دیکشنری
-            'total_count': float(total_mandeh_month) * -1 / 10000000
-        })
-
-    # آماده‌سازی داده‌ها برای نمودار
-    chartmahanedata = [
-        {
-            'month_name': 'سال های قبل',
-            'total_count': float(cheques_before_current_year) * -1/10000000  # ضرب در منفی ۱
-        }
-    ]
-
-    # اضافه کردن داده‌های ماه‌های سال جاری
-    chartmahanedata.extend(monthly_data)
-
-    # اضافه کردن داده‌های سال‌های بعد
-    chartmahanedata.append({
-        'month_name': 'سالهای بعد',
-        'total_count': float(cheques_after_current_year) * -1 /10000000 # ضرب در منفی ۱
-    })
-
-    for c in chartmahanedata:
-        print(c)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    table1 = []
-    # تغییر به cheque_id به جای id
-    last_sanad_comments = {chequ.cheque_id: chequ.last_sanad_detaile.syscomment for chequ in chequesrecieve if chequ.last_sanad_detaile}
-
-    for chequ in chequesrecieve:
-        com = last_sanad_comments.get(chequ.cheque_id, '')
-        person=fix_persian_characters(chequ.person())
-        year, month, day = chequ.cheque_tarik.split('/')
-        table1.append(
-            {
-                'id': chequ.cheque_id,
-                'status': chequ.status,
-                'com': extract_first_words(com),
-                'mandeh': -1*chequ.total_mandeh,
-                'date':chequ.cheque_date,
-                'bank_logo':chequ.bank_logo,
-                'bank_name':chequ.bank_name,
-                'bank_branch':chequ.bank_branch,
-                'person':person,
-                'year':year,
-                'month':month,
-
-            }
-        )
-
-    # تکمیل تقویم
-
-    month = request.GET.get('month', None)
-    year = request.GET.get('year', None)
-    print("Query params - Year:", year, "Month:", month)
-
-    if month is not None and year is not None:
-        current_month = int(month)
-        current_year = int(year)
-    else:
-        today_jalali = JalaliDate.today()
-        current_year = today_jalali.year
-        current_month = today_jalali.month
-
-    months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
-    month_name = months[current_month - 1]
-    print("Current Year:", current_year, "Current Month:", current_month)
-
-    cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
-    cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
-
-    days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
-                                                                                 cheque_recive_data,
-                                                                                 cheque_pay_data)
-
-    context = {
-        'title': 'چکهای دریافتی',
-        'user': user,
-        'total_data': total_data,
-        'chartmahanedata': chartmahanedata,
-        'table1': table1,
-
-        # for calendar
-        'month_name': month_name,
-        'year': current_year,
-        'month': current_month,
-        'days_in_month': days_in_month,
-        'max_cheque': max_cheque,
-        'month_cheque_data': month_cheque_data,
-
-    }
-
-    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
-
-    # if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-    #     return render(request, 'partial_calendar_cheque_recive.html', context)
-    return render(request, 'cheques-recieve-total.html', context)
 
 
 

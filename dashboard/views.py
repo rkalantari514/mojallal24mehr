@@ -1,5 +1,7 @@
 import logging
 
+from accounting.models import BedehiMoshtari
+
 logger = logging.getLogger(__name__)
 from custom_login.models import UserLog
 from mahakupdate.models import Factor, FactorDetaile, SanadDetail, Mtables, ChequesRecieve, ChequesPay, LoanDetil
@@ -220,18 +222,33 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
 
 
 
+    total_bedehkar=BedehiMoshtari.objects.filter(total_mandeh__lt=0).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+    not_loan=BedehiMoshtari.objects.filter(total_mandeh__lt=0,loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+    loan_gap=BedehiMoshtari.objects.filter(total_mandeh__lt=0,loans_total__gt=0,total_with_loans__lt=0).aggregate(total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0
+    this_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
+                item.date >= first_day_of_month and item.date <= last_day_of_month) / Decimal(10000000)
+    past_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
+                    item.date < first_day_of_month) / Decimal(10000000)
+    post_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
+                          item.date > last_day_of_month) / Decimal(10000000)
+
+    # تبدیل به float
+    not_loan = float(not_loan)
+    loan_gap = float(loan_gap)
+    total_bedehkar = float(total_bedehkar)
 
     month_loan_data={
-        'past_recive': past_recive*-1,
-        'post_recive': post_recive*-1,
-        'this_month_recive': this_month_recive*-1,
-        'past_pay': past_pay,
-        'post_pay': post_pay,
-        'this_month_pay': this_month_pay,
+        'not_loan': -1.0/10000000.0 * not_loan,
+        'loan_gap':-1.0/10000000.0 * loan_gap,
+        'this_month_loan':this_month_loan,
+        'past_month_loan':past_month_loan,
+        'post_month_loan':post_month_loan,
+        'total_bedehkar':-1/10000000 * total_bedehkar,
+
     }
 
 
-    return days_in_month,max_cheque,month_cheque_data
+    return days_in_month,max_cheque,month_cheque_data,month_loan_data
 
 
 
@@ -270,7 +287,7 @@ def Home1(request, *args, **kwargs):
 
         loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
 
-        days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
+        days_in_month, max_cheque, month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year,
                                                                                      cheque_recive_data,
                                                                                      cheque_pay_data, loan_detail_data)
 
@@ -282,6 +299,7 @@ def Home1(request, *args, **kwargs):
                 'days_in_month': days_in_month,
                 'max_cheque': max_cheque,
                 'month_cheque_data': month_cheque_data,
+                'month_loan_data': month_loan_data,
 
             }
 
@@ -422,7 +440,7 @@ def Home1(request, *args, **kwargs):
     loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
 
 
-    days_in_month,max_cheque,month_cheque_data = generate_calendar_data_cheque(current_month, current_year, cheque_recive_data,cheque_pay_data,loan_detail_data)
+    days_in_month,max_cheque,month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year, cheque_recive_data,cheque_pay_data,loan_detail_data)
 
 
     print(f"13: {time.time() - start_time:.2f} ثانیه")
@@ -455,6 +473,7 @@ def Home1(request, *args, **kwargs):
         'days_in_month': days_in_month,
         'max_cheque': max_cheque,
         'month_cheque_data': month_cheque_data,
+        'month_loan_data': month_loan_data,
 
     }
 
