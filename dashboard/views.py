@@ -2,7 +2,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 from custom_login.models import UserLog
-from mahakupdate.models import Factor, FactorDetaile, SanadDetail, Mtables, ChequesRecieve, ChequesPay
+from mahakupdate.models import Factor, FactorDetaile, SanadDetail, Mtables, ChequesRecieve, ChequesPay, LoanDetil
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from .models import MasterInfo, MasterReport, MonthlyReport
@@ -142,8 +142,10 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 import pandas as pd
 import plotly.express as px
+from decimal import Decimal
 
-def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_data):
+
+def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_data,loan_detail_data):
     # مشخص کردن اولین روز ماه
     first_day_of_month = jdatetime.date(year, month, 1)
 
@@ -170,6 +172,13 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
         current_day_gregorian = current_day.togregorian().isoformat()
         today_recive_cheque = cheque_recive_data.filter(cheque_date=current_day_gregorian).order_by('-cost')
         today_pay_cheque = cheque_pay_data.filter(cheque_date=current_day_gregorian).order_by('-cost')
+
+        #وام ها
+        loans = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
+                    item.date == current_day) / Decimal(10000000)
+
+        today_loans = loan_detail_data.filter(date=current_day_gregorian).order_by('-cost')
+
         day_info = {
             'jyear': current_day.year,
             'jmonth': current_day.month,
@@ -178,7 +187,9 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
             'pay': pay,
             'today_recive_cheque': today_recive_cheque,
             'today_pay_cheque': today_pay_cheque,
+            'today_loans': today_loans,
 
+            'loans':loans,
         }
         week.append(day_info)
         if len(week) == 7 or current_day == last_day_of_month:
@@ -206,6 +217,20 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
         'post_pay': post_pay,
         'this_month_pay': this_month_pay,
     }
+
+
+
+
+    month_loan_data={
+        'past_recive': past_recive*-1,
+        'post_recive': post_recive*-1,
+        'this_month_recive': this_month_recive*-1,
+        'past_pay': past_pay,
+        'post_pay': post_pay,
+        'this_month_pay': this_month_pay,
+    }
+
+
     return days_in_month,max_cheque,month_cheque_data
 
 
@@ -235,7 +260,7 @@ def Home1(request, *args, **kwargs):
             today_jalali = JalaliDate.today()
             current_year = today_jalali.year
             current_month = today_jalali.month
-
+        print(f"12: {time.time() - start_time:.2f} ثانیه")
         months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
         month_name = months[current_month - 1]
         print("**Current Year:", current_year, "Current Month:", current_month)
@@ -243,20 +268,24 @@ def Home1(request, *args, **kwargs):
         cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
         cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
 
+        loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
+        for l in loan_detail_data:
+            print(l.tarikh, l.cost, l.complete_percent)
+
         days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
                                                                                      cheque_recive_data,
-                                                                                     cheque_pay_data)
+                                                                                     cheque_pay_data, loan_detail_data)
 
         context = {
-            # for calendar
-            'month_name': month_name,
-            'year': current_year,
-            'month': current_month,
-            'days_in_month': days_in_month,
-            'max_cheque': max_cheque,
-            'month_cheque_data': month_cheque_data,
+                # for calendar
+                'month_name': month_name,
+                'year': current_year,
+                'month': current_month,
+                'days_in_month': days_in_month,
+                'max_cheque': max_cheque,
+                'month_cheque_data': month_cheque_data,
 
-        }
+            }
 
         total_time = time.time() - start_time  # محاسبه زمان اجرا
         print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
@@ -385,7 +414,6 @@ def Home1(request, *args, **kwargs):
         current_year = today_jalali.year
         current_month = today_jalali.month
     print(f"12: {time.time() - start_time:.2f} ثانیه")
-
     months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
     month_name = months[current_month - 1]
     print("**Current Year:", current_year, "Current Month:", current_month)
@@ -393,7 +421,10 @@ def Home1(request, *args, **kwargs):
     cheque_recive_data=ChequesRecieve.objects.exclude(total_mandeh=0)
     cheque_pay_data=ChequesPay.objects.exclude(total_mandeh=0)
 
-    days_in_month,max_cheque,month_cheque_data = generate_calendar_data_cheque(current_month, current_year, cheque_recive_data,cheque_pay_data)
+    loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
+
+
+    days_in_month,max_cheque,month_cheque_data = generate_calendar_data_cheque(current_month, current_year, cheque_recive_data,cheque_pay_data,loan_detail_data)
 
 
     print(f"13: {time.time() - start_time:.2f} ثانیه")

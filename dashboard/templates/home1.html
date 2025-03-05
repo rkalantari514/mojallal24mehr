@@ -30,7 +30,8 @@
         }
 
         .calendar-table .fc-recive-number,
-        .calendar-table .fc-pay-number {
+        .calendar-table .fc-pay-number ,
+        .calendar-table .fc-loan-number  {
             font-size: 1.2rem; /* اندازه متن */
             display: block; /* تقسیم نمایش به سطرهای جدید */
         }
@@ -42,6 +43,11 @@
 
         .calendar-table .fc-pay-number {
             color: #df0808; /* رنگ  */
+            text-align: right; /* تراز راست برای شماره پرداختی */
+        }
+
+        .calendar-table .fc-loan-number {
+            color: #3b5998; /* رنگ  */
             text-align: right; /* تراز راست برای شماره پرداختی */
         }
 
@@ -550,22 +556,32 @@
                             <h2>{{ month_name }} ماه {{ year }}</h2>
                         </div>
                     <div class="card-body">
-             <h5 class="mb-15 pb-0 border-0 card-title">چک های دارای مانده </h5>
+             <h5 class="mb-15 pb-0 border-0 card-title">چک ها و اقساط </h5>
               <div class="table-responsive">
               <table class="table center-aligned-table mb-10 text-center ">
                 <thead>
                   <tr class="text-dark">
                     <th></th>
                     <th></th>
+                    <th>بدون وام</th>
                     <th>ماه های قبلی</th>
                     <th>{{ month_name }} ماه {{ year }}</th>
                     <th>ماه های بعد</th>
                   </tr>
                 </thead>
                 <tbody>
+                <tr>
+                    <td><i class="fa fa-download text-facebook fa-2x"></i></td>
+                   <td><h5 class="text-facebook">اقساط بدهکاران</h5></td>
+                   <td><h5 class="text-danger">{{ month_cheque_data.past_recive|floatformat:0|intcomma:False }}</h5></td>
+                   <td><h5 class="text-danger">{{ month_cheque_data.past_recive|floatformat:0|intcomma:False }}</h5></td>
+                    <td><h5 class="text-twitter">{{ month_cheque_data.this_month_recive|floatformat:0|intcomma:False }}</h5></td>
+                    <td><h5 class="text-success">{{ month_cheque_data.post_recive|floatformat:0|intcomma:False }}</h5></td>
+                  </tr>
                   <tr>
                     <td><i class="fa fa-download text-primary fa-2x"></i></td>
                    <td><h5 class="text-primary">چکهای دریافتی</h5></td>
+                   <td></td>
                    <td><h5 class="text-danger">{{ month_cheque_data.past_recive|floatformat:0|intcomma:False }}</h5></td>
                     <td><h5 class="text-twitter">{{ month_cheque_data.this_month_recive|floatformat:0|intcomma:False }}</h5></td>
                     <td><h5 class="text-success">{{ month_cheque_data.post_recive|floatformat:0|intcomma:False }}</h5></td>
@@ -573,6 +589,7 @@
 
                                     <td><i class="fa fa-upload text-danger fa-2x"></i></td>
                     <td><h5 class="text-danger">چکهای پرداختی</h5></td>
+                                   <td></td>
                     <td><h5 class="text-primary" >{{ month_cheque_data.past_pay|floatformat:0|intcomma:False }}</h5></td>
                     <td><h5 class="text-danger">{{ month_cheque_data.this_month_pay|floatformat:0|intcomma:False }}</h5></td>
                     <td><h5 class="text-warning">{{ month_cheque_data.post_pay|floatformat:0|intcomma:False }}</h5></td>
@@ -607,6 +624,34 @@
                                         <td>
                                             <div class="fc-day-top">
                                                 <span class="fc-day-number"><h5>{{ day.jday }}</h5></span>
+                                                <span class="fc-loan-number">{{ day.loans|floatformat:0|intcomma:False }}</span>
+                                                <div class="progress mb-3" data-toggle="popover" data-html="true"
+                                                     data-original-title="لیست  اقساط برای تاریخ {{ day.today_loans.last.tarikh }}"
+                                                     data-content="
+                                                     <table class='table center-aligned-table mb-0'>
+                                                     <thead>
+                                                     <tr>
+                                                     <th>کد قسط</th>
+                                                     <th>فرد</th>
+                                                     <th>مبلغ</th>
+                                                     </tr>
+                                                     </thead>
+                                                     <tbody>
+                                                             {% for l in day.today_loans %}
+<tr>
+<td>{{ l.loan_code }}</td>
+<td>{{ l.loan.person.name }}{{ l.loan.person.lname }}</td>
+<td>{{ l.cost|floatformat:0|intcomma:False }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>">
+                                                    <div class="progress-bar progress-bar-striped bg-facebook"
+                                                         role="progressbar"
+                                                         style="width: {% widthratio day.loans max_cheque 100 %}%"
+                                                         aria-valuenow="{{ day.loans }}" aria-valuemin="0"
+                                                         aria-valuemax="{{ max_cheque }}"></div>
+                                                </div>
                                                 <span class="fc-recive-number">{{ day.recive|floatformat:0|intcomma:False }}</span>
                                                 <div class="progress mb-3" data-toggle="popover" data-html="true"
                                                     data-original-title="لیست  چکهای دریافتی برای تاریخ {{ day.today_recive_cheque.last.cheque_tarik }}"
@@ -673,6 +718,7 @@
                                                          aria-valuenow="{{ day.pay }}" aria-valuemin="0"
                                                          aria-valuemax="{{ max_cheque }}"></div>
                                                 </div>
+
                                             </div>
                                         </td>
                                     {% else %}
