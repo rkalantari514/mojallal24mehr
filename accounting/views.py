@@ -139,9 +139,11 @@ def ChequesRecieveTotal(request, *args, **kwargs):
         cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
         cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
 
+        loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
+
         days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
                                                                                      cheque_recive_data,
-                                                                                     cheque_pay_data)
+                                                                                     cheque_pay_data, loan_detail_data)
 
         context = {
             # for calendar
@@ -309,9 +311,11 @@ def ChequesRecieveTotal(request, *args, **kwargs):
     cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
     cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
 
+    loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
+
     days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
                                                                                  cheque_recive_data,
-                                                                                 cheque_pay_data)
+                                                                                 cheque_pay_data, loan_detail_data)
 
     print(f"8: {time.time() - start_time:.2f} ثانیه")
 
@@ -371,9 +375,11 @@ def ChequesPayTotal(request, *args, **kwargs):
         cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
         cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
 
+        loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
+
         days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
                                                                                      cheque_recive_data,
-                                                                                     cheque_pay_data)
+                                                                                     cheque_pay_data, loan_detail_data)
 
         context = {
             # for calendar
@@ -541,9 +547,11 @@ def ChequesPayTotal(request, *args, **kwargs):
     cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
     cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
 
+    loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
+
     days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
                                                                                  cheque_recive_data,
-                                                                                 cheque_pay_data)
+                                                                                 cheque_pay_data, loan_detail_data)
 
     print(f"8: {time.time() - start_time:.2f} ثانیه")
 
@@ -604,9 +612,11 @@ def ChequesRecieveTotal1(request, *args, **kwargs):
         cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
         cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
 
+        loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
+
         days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
                                                                                      cheque_recive_data,
-                                                                                     cheque_pay_data)
+                                                                                     cheque_pay_data, loan_detail_data)
 
         context = {
             # for calendar

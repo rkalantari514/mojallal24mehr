@@ -269,8 +269,6 @@ def Home1(request, *args, **kwargs):
         cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
 
         loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
-        for l in loan_detail_data:
-            print(l.tarikh, l.cost, l.complete_percent)
 
         days_in_month, max_cheque, month_cheque_data = generate_calendar_data_cheque(current_month, current_year,
                                                                                      cheque_recive_data,
