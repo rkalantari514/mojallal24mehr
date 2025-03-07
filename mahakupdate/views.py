@@ -185,6 +185,7 @@ def Updateall(request):
         '/update/mojodi',
         '/update/updatsmratio',
         '/update/updatesanadconditions',
+        '/update/updatemycondition',
         '/createreport',
         '/create_monthly_report',
         'update/bedehimoshtari',
@@ -197,6 +198,7 @@ def Updateall(request):
         '/update/updatekalagroup': UpdateKalaGroup,
         '/update/mojodi': UpdateMojodi,
         '/update/updatsmratio': Update_Sales_Mojodi_Ratio,
+        '/update/updatemycondition': UpdateMyCondition,
         '/update/updatesanadconditions': UpdateSanadConditions,
         '/createreport': CreateReport,
         '/create_monthly_report': CreateMonthlyReport,
@@ -2767,13 +2769,13 @@ def UpdateSanadConditions(request):
     print('شروع آپدیت شرایط اسناد---------------------------------------')
 
     # فعال کردن همه اسناد
-    SanadDetail.objects.all().update(is_active=True)
+    SanadDetail.objects.filter(is_active=False).update(is_active=True)
 
     # گرفتن تمامی شرایط فعال
     # conditions = MyCondition.objects.filter(is_active=True,is_new=True)
     conditions = MyCondition.objects.filter(is_active=True)
     to_update = []
-
+    print('شروع بررسی')
     for condition in conditions:
 
         # بررسی مقادیر
@@ -3021,3 +3023,77 @@ def CompleLoan(request):
     total_time = tend - t0
     print(f"زمان کل: {total_time:.2f} ثانیه")
     return redirect('/updatedb')
+
+
+import os
+import pandas as pd
+from django.shortcuts import redirect
+from django.conf import settings
+
+import os
+import pandas as pd
+from django.shortcuts import redirect
+from django.conf import settings
+from .models import MyCondition  # فرض بر این است که مدل در یک فایل به نام models.py تعریف شده است
+
+
+def UpdateMyCondition(request):
+    print('def UpdateMyCondition=========================================')
+
+    # مسیر فایل اکسل
+    file_path = os.path.join(settings.BASE_DIR, 'temp', 'mycondition.xlsx')
+
+    # خواندن فایل اکسل با Pandas
+    try:
+        df = pd.read_excel(file_path)
+    except FileNotFoundError:
+        print(f"فایل اکسل {file_path} یافت نشد.")
+        # می توانید یک پیام خطا به کاربر نمایش دهید یا یک مسیر پیش فرض را استفاده کنید
+        return redirect('/error_page')  # فرضاً یک صفحه خطا دارید
+
+    # تبدیل مقادیر 1 و 0 به True و False
+    df['is_active'] = df['is_active'].astype(bool)
+    df['is_new'] = df['is_new'].astype(bool)
+
+    # لیست شناسه های موجود در فایل اکسل
+    excel_ids = df.index.tolist()  # Assuming you want to use the index from the excel file
+
+    # واکشی تمام رکوردهای موجود در پایگاه داده
+    db_records = MyCondition.objects.all()
+    db_ids = [record.pk for record in db_records]  # Assuming you want to use the pk from the model
+
+    # شناسایی شناسه هایی که در اکسل نیستند و باید حذف شوند
+    ids_to_delete = list(set(db_ids) - set(excel_ids))
+
+    # حذف رکوردهایی که در اکسل وجود ندارند
+    MyCondition.objects.filter(pk__in=ids_to_delete).delete()
+
+    # پردازش داده‌ها و به‌روزرسانی/ایجاد مدل
+    for index, row in df.iterrows():
+        # دریافت مقادیر از ستون ها
+        kol = row['kol']
+        moin = row['moin']
+        tafzili = row['tafzili']
+
+        # بررسی خالی بودن سلول و قرار دادن None بجای آن
+        contain = row['contain'] if pd.notna(row['contain']) else None
+        equal_to = row['equal_to'] if pd.notna(row['equal_to']) else None
+
+        is_active = row['is_active']
+        is_new = row['is_new']
+
+        # آپدیت یا ایجاد رکورد جدید
+        MyCondition.objects.update_or_create(
+            pk=index,  # استفاده از pk (شناسه) فایل اکسل برای آپدیت. فرض بر این است که شناسه در فایل اکسل موجود است
+            defaults={
+                'kol': kol,
+                'moin': moin,
+                'tafzili': tafzili,
+                'contain': contain,
+                'equal_to': equal_to,
+                'is_active': is_active,
+                'is_new': is_new
+            }
+        )
+
+    return redirect('/updatedb')  # یا هر آدرسی که می‌خواهید بعد از به‌روزرسانی به آن منتقل شوید

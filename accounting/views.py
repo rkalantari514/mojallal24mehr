@@ -1167,6 +1167,7 @@ def JariAshkhasMoshtarianDetail(request, filter_id):
         '4': {'total_mandeh__lt': 0},
         '5': {'total_mandeh__lt': 0, 'loans_total__gt': 0},
         '6': {'total_mandeh__lt': 0, 'loans_total': 0},
+        '7': {'total_mandeh__lt': 0, 'loans_total__gt': 0 , 'total_with_loans__lt' : 0},
     }
 
     filter_labels = {
@@ -1175,7 +1176,9 @@ def JariAshkhasMoshtarianDetail(request, filter_id):
         '3': 'مشتری‌های بستانکار | بدون وام',
         '4': 'مشتریان بدهکار',
         '5': 'مشتریان بدهکار | دارای وام',
-        '6': 'مشتریان بدهکار | بدون وام'
+        '6': 'مشتریان بدهکار | بدون وام',
+        '7': 'مشتریان بدهکار | کمبود وام'
+
     }
 
     filter_criteria = filters.get(str(filter_id), {})
