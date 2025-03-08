@@ -1143,10 +1143,71 @@ def JariAshkhasMoshtarian(request):
     # 10 اقساط امروز به بعد
     table1.append(final_result)
 
+
+
+    # تقویم اقساط و بدهی ها
+    # تبدیل تاریخ امروز به شمسی
+    today_jalali = jdate.fromgregorian(date=today)
+    current_jalali_year = today_jalali.year
+    months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+    # تبدیل تاریخ امروز به شمسی
+    today_jalali = jdate.fromgregorian(date=today)
+    current_jalali_year = today_jalali.year
+
+    # محاسبه مجموع مانده چک‌های سال‌های قبل و بعد
+    first_day_of_current_year_jalali = jdate(current_jalali_year, 1, 1).togregorian()
+    last_day_of_current_year_jalali = jdate(current_jalali_year, 12, 29).togregorian()
+
+    monthly_data = []
+    for month in range(1, 13):
+        first_day_of_month_jalali = jdate(current_jalali_year, month, 1).togregorian()
+        last_day_of_month_jalali = (
+            jdate(current_jalali_year, month + 1, 1).togregorian() - timedelta(days=1) if month < 12 else jdate(
+                current_jalali_year + 1, 1, 1).togregorian() - timedelta(days=1))
+
+        # total_mandeh_month = ChequesPay.objects.filter(
+        total_loans_month = LoanDetil.objects.filter(
+            date__gte=first_day_of_month_jalali,
+            date__lte=last_day_of_month_jalali,
+            complete_percent__lt=1
+        ).aggregate(cost=Sum('cost'))['cost'] or 0
+
+        monthly_data.append({
+            'month_name': months[month - 1],
+            'total_count': float(total_loans_month) / 10000000
+        })
+    print(f"5: {time.time() - start_time:.2f} ثانیه")
+    no_loan=BedehiMoshtari.objects.filter(total_mandeh__lt=0,loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+    loan_gap=BedehiMoshtari.objects.filter(total_mandeh__lt=0,loans_total__gt=0,total_with_loans__lt=0).aggregate(total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0
+
+    loan_before_current_year =LoanDetil.objects.filter(
+        date__lt=first_day_of_current_year_jalali,
+        complete_percent__lt=1
+    ).aggregate(
+            cost=Sum('cost'))['cost'] or 0
+
+    loan_after_current_year =LoanDetil.objects.filter(
+        date__gt=last_day_of_current_year_jalali,
+        complete_percent__lt=1
+    ).aggregate(
+            cost=Sum('cost'))['cost'] or 0
+
+
+
+    chart_data = [
+        {'month_name': 'بدون وام', 'total_count': float(no_loan) *-1 / 10000000},
+        {'month_name': 'کمبود وام', 'total_count': float(loan_gap) *-1 / 10000000},
+        {'month_name': 'معوق سال های قبل', 'total_count': float(loan_after_current_year)  / 10000000},
+        *monthly_data,
+        {'month_name': 'سال های بعد', 'total_count': float(loan_after_current_year) / 10000000},
+    ]
+    print(f"6: {time.time() - start_time:.2f} ثانیه")
+
     context = {
         'title': 'حساب مشتریان',
         'user': user,
         'table1': table1,
+        'chartmahanedata': chart_data,
     }
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
@@ -1168,6 +1229,7 @@ def JariAshkhasMoshtarianDetail(request, filter_id):
         '5': {'total_mandeh__lt': 0, 'loans_total__gt': 0},
         '6': {'total_mandeh__lt': 0, 'loans_total': 0},
         '7': {'total_mandeh__lt': 0, 'loans_total__gt': 0 , 'total_with_loans__lt' : 0},
+        '8': {'total_mandeh': 0, 'loans_total__gt': 0},
     }
 
     filter_labels = {
@@ -1177,7 +1239,8 @@ def JariAshkhasMoshtarianDetail(request, filter_id):
         '4': 'مشتریان بدهکار',
         '5': 'مشتریان بدهکار | دارای وام',
         '6': 'مشتریان بدهکار | بدون وام',
-        '7': 'مشتریان بدهکار | کمبود وام'
+        '7': 'مشتریان بدهکار | کمبود وام',
+        '8': 'مشتریان بی حساب | دارای وام'
 
     }
 
