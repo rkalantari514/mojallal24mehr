@@ -1203,11 +1203,14 @@ def JariAshkhasMoshtarian(request):
     ]
     print(f"6: {time.time() - start_time:.2f} ثانیه")
 
+    loans=Loan.objects.all()
+
     context = {
         'title': 'حساب مشتریان',
         'user': user,
         'table1': table1,
         'chartmahanedata': chart_data,
+        'loans': loans,
     }
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")

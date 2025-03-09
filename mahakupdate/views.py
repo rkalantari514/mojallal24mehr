@@ -2905,7 +2905,8 @@ import time
 from django.db.models import Sum
 from django.shortcuts import redirect
 import time
-
+from django.shortcuts import render, redirect
+from django.db.models import F, Sum, ExpressionWrapper, FloatField
 
 from django.db.models import Sum
 from django.shortcuts import redirect
@@ -3018,7 +3019,34 @@ def CompleLoan(request):
             # به روز رسانی همه اقساط به صورت همزمان
             LoanDetil.objects.bulk_update(updated_loans, ['complete_percent'])
 
-    # محاسبه زمان اجرای کل
+    # مانده واقعی وام ها
+    # دریافت تمام وام‌ها
+    loans = Loan.objects.all()
+    # لیست برای نگهداری وام‌هایی که نیاز به به‌روزرسانی دارند
+    loans_to_update = []
+
+    for loan in loans:
+        # محاسبه مقدار جدید actual_loan_mandeh به صورت مستقیم در ویو
+        remaining_installments_amount = loan.loandetil_set.filter(complete_percent__lt=1).annotate(
+            remaining_amount=ExpressionWrapper(
+                (1 - F('complete_percent')) * F('cost'),
+                output_field=FloatField()
+            )
+        ).aggregate(total_remaining=Sum('remaining_amount'))['total_remaining'] or 0
+
+        new_actual_loan_mandeh = remaining_installments_amount
+
+        # بررسی اگر نیاز به به‌روزرسانی است
+        if loan.actual_loan_mandeh != new_actual_loan_mandeh:
+            loan.actual_loan_mandeh = new_actual_loan_mandeh
+            loans_to_update.append(loan)
+
+            # به‌روزرسانی دسته‌ای وام‌ها
+    Loan.objects.bulk_update(loans_to_update, ['actual_loan_mandeh'])
+
+
+
+        # محاسبه زمان اجرای کل
     tend = time.time()
     total_time = tend - t0
     print(f"زمان کل: {total_time:.2f} ثانیه")
