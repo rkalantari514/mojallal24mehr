@@ -679,6 +679,7 @@ class Loan(models.Model):
     cost = models.DecimalField(max_digits=14, decimal_places=2, verbose_name="مبلغ")
     loan_mandeh = models.DecimalField(default=0,max_digits=14, decimal_places=2, verbose_name="مانده وام")
     actual_loan_mandeh = models.DecimalField(default=0,max_digits=14, decimal_places=2, verbose_name="مانده وام واقعی")
+    delayed_loan = models.DecimalField(default=0,max_digits=14, decimal_places=2, verbose_name="مانده وام معوق")
 
 
     class Meta:

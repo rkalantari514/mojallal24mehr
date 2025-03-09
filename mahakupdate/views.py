@@ -3020,13 +3020,40 @@ def CompleLoan(request):
             LoanDetil.objects.bulk_update(updated_loans, ['complete_percent'])
 
     # مانده واقعی وام ها
+    # # دریافت تمام وام‌ها
+    # loans = Loan.objects.all()
+    # # لیست برای نگهداری وام‌هایی که نیاز به به‌روزرسانی دارند
+    # loans_to_update = []
+    #
+    # for loan in loans:
+    #     # محاسبه مقدار جدید actual_loan_mandeh به صورت مستقیم در ویو
+    #     remaining_installments_amount = loan.loandetil_set.filter(complete_percent__lt=1).annotate(
+    #         remaining_amount=ExpressionWrapper(
+    #             (1 - F('complete_percent')) * F('cost'),
+    #             output_field=FloatField()
+    #         )
+    #     ).aggregate(total_remaining=Sum('remaining_amount'))['total_remaining'] or 0
+    #
+    #     new_actual_loan_mandeh = remaining_installments_amount
+    #
+    #     # بررسی اگر نیاز به به‌روزرسانی است
+    #     if loan.actual_loan_mandeh != new_actual_loan_mandeh:
+    #         loan.actual_loan_mandeh = new_actual_loan_mandeh
+    #         loans_to_update.append(loan)
+    #
+    #         # به‌روزرسانی دسته‌ای وام‌ها
+    # Loan.objects.bulk_update(loans_to_update, ['actual_loan_mandeh'])
+
     # دریافت تمام وام‌ها
     loans = Loan.objects.all()
+
     # لیست برای نگهداری وام‌هایی که نیاز به به‌روزرسانی دارند
     loans_to_update = []
 
+    today = timezone.now().date()  # تاریخ امروز
+
     for loan in loans:
-        # محاسبه مقدار جدید actual_loan_mandeh به صورت مستقیم در ویو
+        # محاسبه مقدار جدید actual_loan_mandeh
         remaining_installments_amount = loan.loandetil_set.filter(complete_percent__lt=1).annotate(
             remaining_amount=ExpressionWrapper(
                 (1 - F('complete_percent')) * F('cost'),
@@ -3036,17 +3063,29 @@ def CompleLoan(request):
 
         new_actual_loan_mandeh = remaining_installments_amount
 
+        # محاسبه مقدار جدید delayed_loan (مانده وام معوق)
+        delayed_installments_amount = loan.loandetil_set.filter(
+            date__lt=today,  # فیلتر کردن اقساط با تاریخ قبل از امروز
+            complete_percent__lt=1  # فیلتر کردن اقساط ناقص
+        ).annotate(
+            remaining_amount=ExpressionWrapper(
+                (1 - F('complete_percent')) * F('cost'),
+                output_field=FloatField()
+            )
+        ).aggregate(total_remaining=Sum('remaining_amount'))['total_remaining'] or 0
+
+        new_delayed_loan = delayed_installments_amount
+
         # بررسی اگر نیاز به به‌روزرسانی است
-        if loan.actual_loan_mandeh != new_actual_loan_mandeh:
+        if loan.actual_loan_mandeh != new_actual_loan_mandeh or loan.delayed_loan != new_delayed_loan:
             loan.actual_loan_mandeh = new_actual_loan_mandeh
+            loan.delayed_loan = new_delayed_loan
             loans_to_update.append(loan)
 
             # به‌روزرسانی دسته‌ای وام‌ها
-    Loan.objects.bulk_update(loans_to_update, ['actual_loan_mandeh'])
+    Loan.objects.bulk_update(loans_to_update, ['actual_loan_mandeh', 'delayed_loan'])
 
-
-
-        # محاسبه زمان اجرای کل
+            # محاسبه زمان اجرای کل
     tend = time.time()
     total_time = tend - t0
     print(f"زمان کل: {total_time:.2f} ثانیه")

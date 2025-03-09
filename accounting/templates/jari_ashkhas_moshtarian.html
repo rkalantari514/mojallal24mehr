@@ -389,6 +389,12 @@
                                                     data-footer-formatter="priceFormatter">مانده واقعی
                                                 </th>
 
+<th class="card-text text-center" data-sortable="true"
+                                                    data-field="actuadelaylcost"
+                                                    data-filter-control="input" data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">مانده معوق
+                                                </th>
+
 
                                             </tr>
                                             </thead>
@@ -412,6 +418,7 @@
                                                     <td class="card-text text-center">{{ l.number }}</td>
                                                     <td class="card-text text-center">{{ l.cost|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ l.loan_mandeh|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ l.delayed_loan|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ l.actual_loan_mandeh|floatformat:0|intcomma:False }}</td>
                                                 </tr>
                                             {% endfor %}
