@@ -32,6 +32,25 @@
 </script>
 
 
+<script>
+    function updateOnlineStatus() {  
+    const statusElement = document.getElementById('status');  
+    if (navigator.onLine) {  
+        // اگر وصل باشد، حاشیه قرمز را پاک کنید  
+        statusElement.style.display = 'none';  
+    } else {  
+        // اگر وصل نباشد، حاشیه قرمز را نمایش دهید  
+        statusElement.style.display = 'block';  
+        statusElement.innerText = 'به سامانه متصل نیستید';  
+    }  
+}  
 
+// بررسی وضعیت اتصال هنگام بارگذاری صفحه  
+window.addEventListener('load', updateOnlineStatus);  
+
+// بررسی وضعیت اتصال زمانی که وضعیت تغییر کند  
+window.addEventListener('online', updateOnlineStatus);  
+window.addEventListener('offline', updateOnlineStatus);  
+</script>
     
     

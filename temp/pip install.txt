@@ -23,6 +23,13 @@ pip install dash pandas plotly
 pip install python-dateutil
 
 
+pip install django-pwa django-service-worker
+
+
+
+
+
+
 INSTALLED_APPS = [
     ...
     'django_jalali',

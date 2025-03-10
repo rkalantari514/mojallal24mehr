@@ -26,6 +26,9 @@
      header start-->
     {% render_partial 'header' %}
     <div class="container-fluid">
+    <div id="status" style="display:none; background-color: red; color: white; text-align: center; padding: 10px;">  
+    به سامانه متصل نیستید  
+</div>  
         <div class="row">
         {% if user.is_authenticated %}
             {% render_partial 'sidebar' %}
