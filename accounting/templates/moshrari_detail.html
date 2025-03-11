@@ -220,54 +220,58 @@
                     <div class="col-md-7 mb-30">
                         <div class="card card-statistics h-100">
                             <div class="card-body">
-                                                           <h5 class="card-title pb-0 border-0 ">جزئیات وام ها</h5>
-                            <div class="table-responsive scrollbar max-h-380">
-                                <table class="table center-aligned-table mb-10 text-center ">
+                                <h5 class="card-title pb-0 border-0 ">جزئیات وام ها</h5>
+                                <div class="table-responsive scrollbar max-h-380">
+                                    <table class="table center-aligned-table mb-10 text-center ">
 
-                                    <tbody>
-                                    {% for loan in hesabmoshtari.loans.all %}
+                                        <tbody>
+                                        {% for loan in hesabmoshtari.loans.all %}
 
-                                        <div class="table-responsive">
-                                            <table class="table center-aligned-table mb-10 text-center ">
-                                                <thead>
-                                                <tr class="text-dark">
-                                                    <th>شماره قسط</th>
-                                                    <th>تاریخ</th>
-                                                    <th> تاریخ دریافت</th>
-                                                    <th>مبلغ</th>
-                                                    <th>درصد پرداخت</th>
-                                                    <th>وضعیت</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                {% for lo in loan.loandetil_set.all %}
-                                                    <tr>
-                                                        <td>{{ lo.row }}</td>
-                                                        <td>{{ lo.tarikh }}</td>
-                                                        <td>{{ lo.recive_tarikh }}</td>
-                                                        <td>{{ lo.cost|floatformat:0|intcomma:False }}</td>
-                                                        <td>{{ lo.complete_percent|percentage }}%</td>
-<td>
-                {% if lo.complete_percent == 1 %}
-                    <span class="btn btn-success">پاس</span>
-                {% elif lo.date < today %}
-                    <span class="btn btn-danger">معوق</span>
-                {% else %}
-                    <span class="btn btn-primary">عادی</span>
-                {% endif %}
-            </td>
-
+                                            <div class="table-responsive">
+                                                <table class="table center-aligned-table mb-10 text-center ">
+                                                    <thead>
+                                                    <tr class="text-dark">
+                                                        <th>شماره قسط</th>
+                                                        <th>تاریخ</th>
+                                                        <th> تاریخ دریافت</th>
+                                                        <th>مبلغ</th>
+                                                        <th>درصد پرداخت</th>
+                                                        <th>وضعیت</th>
                                                     </tr>
-                                                {% endfor %}
+                                                    </thead>
+                                                    <tbody>
+                                                    {% for lo in loan.loandetil_set.all %}
+                                                        <tr>
+                                                            <td>{{ lo.row }}</td>
+                                                            <td>{{ lo.tarikh }}</td>
+                                                            <td>{{ lo.recive_tarikh }}</td>
+                                                            <td>{{ lo.cost|floatformat:0|intcomma:False }}</td>
+                                                            <td>{{ lo.complete_percent|percentage }}%</td>
+                                                            <td>
+                                                                {% if lo.complete_percent == 1 %}
+                                                                    {% if lo.date < today %}
+                                                                        <span class="btn btn-sm btn-success">پاس</span>
+                                                                    {% else %}
+                                                                        <span class="btn btn-sm btn-info">تعجیل</span>
+                                                                    {% endif %}
+                                                                {% elif lo.date < today %}
+                                                                    <span class="btn btn-sm btn-danger">معوق</span>
+                                                                {% else %}
+                                                                    <span class="btn btn-sm btn-primary">عادی</span>
+                                                                {% endif %}
+                                                            </td>
 
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    {% endfor %}
+                                                        </tr>
+                                                    {% endfor %}
 
-                                    </tbody>
-                                </table>
-                            </div>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        {% endfor %}
+
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
