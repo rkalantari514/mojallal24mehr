@@ -4,6 +4,7 @@ import re
 from django.contrib.auth.decorators import login_required
 import time
 from datetime import date
+from django.utils import timezone
 from django.db.models import Sum, F, FloatField
 from django.db.models.functions import Cast
 from openpyxl.styles.builtins import total
@@ -1266,11 +1267,12 @@ def HesabMoshtariDetail(request, tafsili):
         UserLog.objects.create(user=user, page='حساب مشتری', code=0)
     print(tafsili)
     hesabmoshtari= BedehiMoshtari.objects.filter(tafzili=tafsili).last()
-
+    today = timezone.now().date()
 
     context = {
         'title': f'حساب مشتری',
         'hesabmoshtari': hesabmoshtari,
+        'today': today,
     }
 
     return render(request, 'moshrari_detail.html', context)
