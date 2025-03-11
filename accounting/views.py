@@ -1268,11 +1268,12 @@ def HesabMoshtariDetail(request, tafsili):
     print(tafsili)
     hesabmoshtari= BedehiMoshtari.objects.filter(tafzili=tafsili).last()
     today = timezone.now().date()
-
+    asnad=SanadDetail.objects.filter(kol=103,moin=1,tafzili=tafsili).order_by('date','radif')
     context = {
         'title': f'حساب مشتری',
         'hesabmoshtari': hesabmoshtari,
         'today': today,
+        'asnad':asnad,
     }
 
     return render(request, 'moshrari_detail.html', context)
