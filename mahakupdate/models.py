@@ -488,6 +488,26 @@ class SanadDetail(models.Model):
     def __str__(self):
         return f"{self.code}-{self.radif}"
 
+    def kind(self):
+        kin = []
+        k = self.sharh.split('(')[0].strip()  # جدا کردن متن قبل از اولین پرانتز باز و حذف فاصله‌های اضافی
+        kin.append(k)
+
+        # تعریف یک دیکشنری برای شرایط
+        conditions = {
+            'اول دوره شخص': ['اول دوره', 'primary'],
+            'خريدار در فاکتور فروش': ['فروش', 'danger'],
+            'مبلغ نقدي در دريافت': ['دریافت/نقدی', 'success'],
+            'حواله دريافتي در دريافت': ['دریافت/حواله', 'success'],
+            'تخفيف فاکتور فروش': ['تخفیف', 'flickr']
+        }
+
+        # بررسی وجود مقدار در دیکشنری
+        if k in conditions:
+            kin.extend(conditions[k])  # افزودن مقادیر مرتبط به لیست
+
+        return kin
+
 
 from django.db import models
 
