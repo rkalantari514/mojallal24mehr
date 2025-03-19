@@ -1258,22 +1258,47 @@ def JariAshkhasMoshtarianDetail(request, filter_id):
 
     return render(request, 'jari_ashkhas_moshtarian_detail.html', context)
 
-
+import datetime
+from django.utils import timezone
+import datetime
+from collections import defaultdict
+from django.utils import timezone
+from django.utils import timezone
+from collections import defaultdict
+import datetime
 
 @login_required(login_url='/login')
+
+
 def HesabMoshtariDetail(request, tafsili):
     user = request.user
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page='حساب مشتری', code=0)
-    print(tafsili)
-    hesabmoshtari= BedehiMoshtari.objects.filter(tafzili=tafsili).last()
+
+    حساب_مشتری = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
     today = timezone.now().date()
-    asnad=SanadDetail.objects.filter(kol=103,moin=1,tafzili=tafsili).order_by('date','code','radif')
+    asnad = SanadDetail.objects.filter(kol=103, moin=1, tafzili=tafsili).order_by('date', 'code', 'radif')
+
+    chart_data = defaultdict(lambda: {'value': 0})
+
+    for item in asnad:
+        g_date = item.date.strftime('%Y-%m-%d')  # فرمت تاریخ به ISO
+
+        # محاسبه مقدار تجمعی
+        chart_data[g_date]['value'] += item.curramount if item.curramount else 0
+
+    # اکنون با داده‌های جمع‌آوری شده به فرمت مناسب برای Chart.js
+    labels = list(chart_data.keys())  # تاریخ‌ها به عنوان لیبل
+    data_values = [data['value'] for data in chart_data.values()]  # مقادیر تجمعی
+
     context = {
-        'title': f'حساب مشتری',
-        'hesabmoshtari': hesabmoshtari,
+        'title': 'حساب مشتری',
+        'hesabmoshtari': حساب_مشتری,
         'today': today,
-        'asnad':asnad,
+        'asnad': asnad,
+        'final_chart_data': [{'date': date, 'value': data['value']} for date, data in chart_data.items()],
+        'labels': labels,
+        'data_values': data_values,
     }
 
     return render(request, 'moshrari_detail.html', context)
