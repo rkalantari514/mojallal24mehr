@@ -137,7 +137,7 @@ def Updateall(request):
     #     send_to_admin(f' ساعت کاری: {now.hour}')
     send_to_admin(f' لغو: {now.hour}')
 
-    #     return redirect('/updatedb')
+    return redirect('/updatedb')
     # else:
     #     print(f' ساعت غیر  کاری: {now.hour}')
     #     send_to_admin(f' ساعت غیر کاری: {now.hour}')
