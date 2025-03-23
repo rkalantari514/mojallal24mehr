@@ -258,6 +258,7 @@ class Kala(models.Model):
 
 
 class Factor(models.Model):
+    acc_year = models.IntegerField(default=1403,verbose_name='سال مالی')
     code = models.IntegerField(blank=True, null=True, default=0, verbose_name='شماره فاکتور')
     pdate = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ شمسی')
     mablagh_factor = models.FloatField(blank=True, null=True, default=0, verbose_name='مبلغ فاکتور')
@@ -275,6 +276,7 @@ class Factor(models.Model):
 
 
 class FactorDetaile(models.Model):
+    acc_year = models.IntegerField(default=1403,verbose_name='سال مالی')
     code_factor = models.IntegerField(blank=True, null=True, default=0, verbose_name='شماره فاکتور')
     radif = models.IntegerField(blank=True, null=True, default=0, verbose_name='ردیف')
     factor = models.ForeignKey(Factor, on_delete=models.SET_NULL, related_name='details', null=True, blank=True)
@@ -305,6 +307,7 @@ class Storagek(models.Model):
 
 
 class Kardex(models.Model):
+    acc_year = models.IntegerField(default=1403,verbose_name='سال مالی')
     pdate = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ شمسی')
     date = models.DateField(blank=True, null=True, verbose_name='تاریخ میلادی')
     percode = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد شخص')
@@ -445,6 +448,7 @@ class WordCount(models.Model):
 
 
 class Sanad(models.Model):
+    acc_year = models.IntegerField(default=1403,verbose_name='سال مالی')
     code = models.IntegerField(blank=True, null=True, verbose_name='کد')
     tarikh = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ  شمسی')
     sharh = models.CharField(blank=True, null=True, max_length=300, verbose_name='شرح سند')
@@ -459,6 +463,7 @@ class Sanad(models.Model):
 
 
 class SanadDetail(models.Model):
+    acc_year = models.IntegerField(default=1403,verbose_name='سال مالی')
     code = models.IntegerField(blank=True, null=True, verbose_name='کد')
     tarikh = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ  شمسی')
     date = models.DateField(blank=True, null=True, verbose_name='تاریخ سند')
@@ -481,7 +486,7 @@ class SanadDetail(models.Model):
     is_active = models.BooleanField(default=True, verbose_name='فعال است')
 
     class Meta:
-        unique_together = (('code', 'radif'),)  # تعریف کلید یگانه
+        unique_together = (('acc_year','code', 'radif'),)  # تعریف کلید یگانه
         verbose_name = 'جزئیات سند'
         verbose_name_plural = 'جزئیات اسناد'
 

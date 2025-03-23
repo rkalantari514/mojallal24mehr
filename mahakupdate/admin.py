@@ -30,9 +30,9 @@ class KalaAdmin(admin.ModelAdmin):
 
 
 class FactorAdmin(admin.ModelAdmin):
-    list_display = ['pdate', 'code', 'create_time', 'mablagh_factor', 'takhfif', 'darsad_takhfif']
+    list_display = ['acc_year','pdate', 'code', 'create_time', 'mablagh_factor', 'takhfif', 'darsad_takhfif']
 
-    # list_filter = ['name','code']
+    list_filter = ['acc_year']
     # list_editable = ['description', 'in_use']
     # search_fields = ['name', 'code']
 
@@ -41,7 +41,8 @@ class FactorAdmin(admin.ModelAdmin):
 
 
 class FactorDetaileAdmin(admin.ModelAdmin):
-    list_display = ['code_factor', 'kala', 'count', 'mablagh_vahed', 'mablagh_nahaee']
+    list_display = ['acc_year','code_factor', 'kala', 'count', 'mablagh_vahed', 'mablagh_nahaee']
+    list_filter = ['acc_year']
 
     # list_filter = ['name','code']
     # list_editable = ['description', 'in_use']
@@ -72,9 +73,9 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 class KardexAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'date', 'stock', 'code_kala', 'kala', 'count', 'ktype', 'percode', 'storage',
+    list_display = ['acc_year','__str__', 'date', 'stock', 'code_kala', 'kala', 'count', 'ktype', 'percode', 'storage',
                     'warehousecode', 'averageprice', 'sync_mojodi']
-    list_filter = ['warehousecode', 'sync_mojodi']
+    list_filter = ['acc_year','warehousecode', 'sync_mojodi']
     list_editable = ['sync_mojodi']
     search_fields = ['count', 'code_kala', 'stock']
 
@@ -126,9 +127,9 @@ class StoragekAdmin(admin.ModelAdmin):
 
 
 class SanadAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'code', 'tarikh', 'sharh']
+    list_display = ['acc_year','__str__', 'code', 'tarikh', 'sharh']
 
-    # list_filter = ['level','parent',]
+    list_filter = ['acc_year']
     # list_editable = ['name','parent','level']
     # search_fields = ['name','lname','group']
 
@@ -137,9 +138,9 @@ class SanadAdmin(admin.ModelAdmin):
 
 
 class SanadDetailAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'code', 'tarikh', 'date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount',
+    list_display = ['acc_year','__str__', 'code', 'tarikh', 'date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount',
                     'is_active', 'is_analiz', 'cheque_id', 'syscomment']
-    list_filter = ['is_active', 'kol', 'moin', 'tafzili']
+    list_filter = ['acc_year','is_active', 'kol', 'moin', 'tafzili']
     list_editable = ['is_analiz']
     search_fields = ['tarikh', 'date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount', 'cheque_id']
 

@@ -236,7 +236,6 @@ def Updateall(request):
 def UpdateFactor(request):
     t0 = time.time()
     print('شروع آپدیت فاکتور--------------------------------------')
-
     conn = connect_to_mahak()  # تابع تخمینی برای اتصال به پایگاه داده Mahak
     cursor = conn.cursor()
     t1 = time.time()
@@ -248,7 +247,11 @@ def UpdateFactor(request):
     factors_to_create = []
     factors_to_update = []
 
-    current_factors = {factor.code: factor for factor in Factor.objects.iterator()}
+    # دریافت سال مالی فعال
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    # فیلتر فاکتورها بر اساس سال مالی
+    current_factors = {(factor.code, factor.acc_year): factor for factor in
+                       Factor.objects.filter(acc_year=acc_year).iterator()}
 
     for row in mahakt_data:
         code = row[0]
@@ -258,10 +261,14 @@ def UpdateFactor(request):
             'takhfif': Decimal(row[6]),
             'create_time': row[38],
             'darsad_takhfif': Decimal(row[44]),
+            'acc_year': acc_year,  # سال مالی به اطلاعات پیش‌فرض اضافه می‌شود
         }
 
-        if code in current_factors:
-            factor = current_factors[code]
+        # کلید ترکیبی شامل کد و سال مالی
+        key = (code, acc_year)
+
+        if key in current_factors:
+            factor = current_factors[key]
             if any(
                     (isinstance(getattr(factor, attr), (int, float, Decimal)) and
                      Decimal(getattr(factor, attr)).quantize(Decimal('0.00')) != Decimal(value).quantize(
@@ -291,8 +298,10 @@ def UpdateFactor(request):
             Factor.objects.bulk_create(factors_to_create)
         if factors_to_update:
             Factor.objects.bulk_update(factors_to_update,
-                                       ['pdate', 'mablagh_factor', 'takhfif', 'create_time', 'darsad_takhfif'])
+                                       ['pdate', 'mablagh_factor', 'takhfif', 'create_time', 'darsad_takhfif',
+                                        'acc_year'])
 
+            # پاکسازی فاکتورهایی که در پایگاه داده Mahak وجود ندارند
         Factor.objects.exclude(code__in=existing_in_mahak).delete()
 
     tend = time.time()
@@ -314,7 +323,6 @@ def UpdateFactor(request):
 
     return redirect('/updatedb')
 
-
 # آپدیت کاردکس
 def UpdateKardex(request):
     t0 = time.time()
@@ -329,9 +337,12 @@ def UpdateKardex(request):
     updates = []
     new_records = []
 
+    # دریافت سال مالی فعال
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+
     existing_kardex = {
         (k.pdate, k.code_kala, k.stock, k.radif): k
-        for k in Kardex.objects.all()
+        for k in Kardex.objects.filter(acc_year=acc_year)  # فقط رکوردهای سال مالی جاری
     }
 
     new_keys = set()
@@ -349,6 +360,7 @@ def UpdateKardex(request):
             'count': row[7],
             'ktype': row[5],
             'averageprice': row[11],
+            'acc_year': acc_year,  # اضافه کردن سال مالی به اطلاعات پیش‌فرض
         }
 
         key = (pdate, code_kala, stock, radif)
@@ -379,11 +391,14 @@ def UpdateKardex(request):
                 **defaults
             ))
 
+    # ذخیره رکوردهای به‌روزرسانی و جدید
     if updates or new_records:
         with transaction.atomic():
-            Kardex.objects.bulk_update(updates,
-                                       ['code_factor', 'percode', 'warehousecode', 'mablaghsanad', 'count',
-                                        'ktype', 'averageprice', 'sync_mojodi'])
+            Kardex.objects.bulk_update(
+                updates,
+                ['code_factor', 'percode', 'warehousecode', 'mablaghsanad', 'count',
+                 'ktype', 'averageprice', 'sync_mojodi']  # سال مالی به صورت خودکار در پیش‌فرض‌ها لحاظ شده است
+            )
             Kardex.objects.bulk_create(new_records)
             print(f"{len(updates) + len(new_records)} رکورد به‌روز رسانی یا ایجاد شد.")
             send_to_admin(f"{len(updates)} به روز رسانی کاردکس")
@@ -402,13 +417,15 @@ def UpdateKardex(request):
                 pdate__in=[key[0] for key in batch_keys],
                 code_kala__in=[key[1] for key in batch_keys],
                 stock__in=[key[2] for key in batch_keys],
-                radif__in=[key[3] for key in batch_keys]
+                radif__in=[key[3] for key in batch_keys],
+                acc_year=acc_year  # فقط رکوردهای مربوط به سال مالی جاری را حذف کنید
             ).delete()
             print(f"{len(batch_keys)} رکورد اضافی حذف شد.")
             send_to_admin(f"{len(batch_keys)} کاردکس حذف")
 
-    kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala', 'storage').all())
+    kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala', 'storage').filter(acc_year=acc_year))  # فقط رکوردهای سال مالی جاری
     updates = []
+
 
     # تقسیم کدها به دسته‌های کوچک‌تر
     factor_codes = [k.code_factor for k in kardex_instances]
@@ -419,8 +436,7 @@ def UpdateKardex(request):
         factors.update({factor.code: factor for factor in Factor.objects.filter(code__in=batch_factor_codes)})
 
     kalas = {kala.code: kala for kala in Kala.objects.filter(code__in=[k.code_kala for k in kardex_instances])}
-    storages = {storage.code: storage for storage in
-                Storagek.objects.filter(code__in=[k.warehousecode for k in kardex_instances])}
+    storages = {storage.code: storage for storage in Storagek.objects.filter(code__in=[k.warehousecode for k in kardex_instances])}
 
     for kardex in kardex_instances:
         factor = factors.get(kardex.code_factor)
@@ -452,9 +468,10 @@ def UpdateKardex(request):
 
     if updates:
         with transaction.atomic():
-            Kardex.objects.bulk_update(updates,
-                                       ['factor', 'kala', 'storage', 'warehousecode', 'code_kala', 'code_factor',
-                                        'date'])
+            Kardex.objects.bulk_update(
+                updates,
+                ['factor', 'kala', 'storage', 'warehousecode', 'code_kala', 'code_factor', 'date']
+            )
             print(f"{len(updates)} رکورد به‌روز رسانی سیگنال‌ها انجام شد.")
 
     t3 = time.time()
@@ -494,6 +511,11 @@ def UpdateKardex(request):
     return redirect('/updatedb')
 
 
+
+
+
+
+
 def UpdateFactorDetail(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات فاکتور-------------------------------------------------')
@@ -508,9 +530,13 @@ def UpdateFactorDetail(request):
 
     existing_in_mahak = set((row[0], row[1]) for row in mahakt_data)
 
+    # دریافت سال مالی فعال
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
     up_start_time = time.time()
     updates = []
-    factors = {factor.code: factor for factor in Factor.objects.all()}
+
+    # بارگذاری فاکتورها و کالاها
+    factors = {factor.code: factor for factor in Factor.objects.filter(acc_year=acc_year)}
     kalas = {kala.code: kala for kala in Kala.objects.all()}
 
     for row in mahakt_data:
@@ -521,6 +547,7 @@ def UpdateFactorDetail(request):
             'count': row[5],
             'mablagh_vahed': row[6],
             'mablagh_nahaee': row[29],
+            'acc_year': acc_year,  # سال مالی به اطلاعات پیش‌فرض اضافه می‌شود
         }
 
         # پیدا کردن عامل و کالا
@@ -553,7 +580,8 @@ def UpdateFactorDetail(request):
             # حذف رکوردهای غیرضروری
     FactorDetaile.objects.exclude(
         code_factor__in=[k[0] for k in existing_in_mahak],
-        radif__in=[k[1] for k in existing_in_mahak]
+        radif__in=[k[1] for k in existing_in_mahak],
+        acc_year=acc_year  # فقط رکوردهای مربوط به سال مالی جاری را حذف کنید
     ).delete()
 
     t2 = time.time()
@@ -583,7 +611,6 @@ def UpdateFactorDetail(request):
     table.save()
 
     return redirect('/updatedb')
-
 
 def UpdateKala(request):
     t0 = time.time()
@@ -1355,7 +1382,6 @@ def Update_Sales_Mojodi_Ratio(request):
 def UpdateSanad(request):
     t0 = time.time()
     print('شروع آپدیت سند---------------------------------------------------')
-
     conn = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
@@ -1369,7 +1395,11 @@ def UpdateSanad(request):
     sanads_to_create = []
     sanads_to_update = []
 
-    current_sanads = {sanad.code: sanad for sanad in Sanad.objects.all()}
+    # دریافت سال مالی جاری
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+
+    # فقط رکوردهای سال مالی جاری را دریافت کنید
+    current_sanads = {sanad.code: sanad for sanad in Sanad.objects.filter(acc_year=acc_year)}
 
     BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
 
@@ -1388,7 +1418,7 @@ def UpdateSanad(request):
                 sanad.sanadid = sanadid
                 sanads_to_update.append(sanad)
         else:
-            sanads_to_create.append(Sanad(code=code, tarikh=tarikh, sharh=sharh, sanadid=sanadid))
+            sanads_to_create.append(Sanad(code=code, tarikh=tarikh, sharh=sharh, sanadid=sanadid, acc_year=acc_year))
 
     # Bulk create new sanads
     Sanad.objects.bulk_create(sanads_to_create, batch_size=BATCH_SIZE)
@@ -1400,13 +1430,13 @@ def UpdateSanad(request):
     sanads_to_delete = []
 
     # ابتدا شناسه‌های رکوردهای موجود را دریافت کنید
-    current_sanad_codes = set(Sanad.objects.values_list('code', flat=True))
+    current_sanad_codes = set(Sanad.objects.filter(acc_year=acc_year).values_list('code', flat=True))
 
     # حالا شروع به مقایسه با existing_in_mahak کنید
     for code in current_sanad_codes:
         if code not in existing_in_mahak:
             # استفاده از filter به جای get
-            duplicate_records = Sanad.objects.filter(code=code)
+            duplicate_records = Sanad.objects.filter(code=code, acc_year=acc_year)  # فیلتر بر اساس سال مالی
             if duplicate_records.exists():
                 sanads_to_delete.append(duplicate_records.first().id)  # فقط اولین رکورد را نگه دارید
 
@@ -1426,8 +1456,8 @@ def UpdateSanad(request):
     update_time = tend - t1
 
     print(f"زمان کل: {total_time:.2f} ثانیه")
-    print(f" اتصال به دیتا بیس: {db_time:.2f} ثانیه")
-    print(f" زمان آپدیت جدول: {update_time:.2f} ثانیه")
+    print(f"اتصال به دیتا بیس: {db_time:.2f} ثانیه")
+    print(f"زمان آپدیت جدول: {update_time:.2f} ثانیه")
 
     cursor.execute("SELECT COUNT(*) FROM Sanad")  # محاسبه تعداد کل رکوردها
     row_count = cursor.fetchone()[0]
@@ -1440,7 +1470,280 @@ def UpdateSanad(request):
     table.last_update_time = timezone.now()
     table.update_duration = update_time
     table.row_count = row_count
-    table.cloumn_count = column_count
+    table.column_count = column_count
+    table.save()
+
+    return redirect('/updatedb')
+
+
+def UpdateSanadDetail(request):
+    t0 = time.time()
+    print('شروع آپدیت جزئیات سند---------------------------------------------------')
+    # BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
+    #
+    # # حذف رکوردها به صورت دسته‌ای
+    # while True:
+    #     # دریافت دسته‌ای از رکوردها
+    #     queryset = SanadDetail.objects.filter(acc_year=1404)[:BATCH_SIZE]
+    #
+    #     # اگر هیچ رکوردی موجود نباشد، حلقه را ترک کنید
+    #     if not queryset:
+    #         break
+    #
+    #         # حذف رکوردها
+    #     for sanad in queryset[:BATCH_SIZE]:
+    #         sanad.delete()
+    # return redirect('/updatedb')
+
+
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    t1 = time.time()
+
+    # دریافت داده‌ها از دیتابیس خارجی
+    cursor.execute(
+        "SELECT code, radif, kol, moin, tafzili, sharh, bed, bes, Sanad_Code, Sanad_Type, "
+        "Meghdar, SysComment, CurrAmount, UserCreated, VoucherDate FROM [mahak].[dbo].[Sanad_detail]")
+    mahakt_data = cursor.fetchall()
+
+    existing_in_mahak = {(int(row[0]), int(row[1])) for row in mahakt_data}
+    print('تعداد رکوردهای موجود در Mahak:', len(existing_in_mahak))
+    send_to_admin(f'sanad detile {len(existing_in_mahak)}')
+
+    sanads_to_create = []
+    sanads_to_update = []
+
+    # دریافت سال مالی جاری
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+
+    # فقط رکوردهای سال مالی جاری را دریافت کنید
+    current_sanads = {(sanad.code, sanad.radif): sanad for sanad in SanadDetail.objects.filter(acc_year=acc_year)}
+
+    BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
+
+    # پردازش داده‌های جدید
+    counter = 1
+    for row in mahakt_data:
+        print(counter)
+        counter += 1
+        code = int(row[0])
+        radif = int(row[1])
+        try:
+            kol = int(row[2]) if row[2] is not None else 0
+            moin = int(row[3]) if row[3] is not None else 0
+            tafzili = int(row[4]) if row[4] is not None else 0
+            sharh = row[5] if row[5] is not None else ''
+            bed = Decimal(row[6]) if row[6] is not None else Decimal('0.0000000000')
+            bes = Decimal(row[7]) if row[7] is not None else Decimal('0.0000000000')
+            sanad_code = int(row[8]) if row[8] is not None else None
+            sanad_type = int(row[9]) if row[9] is not None else None
+            meghdar = Decimal(row[10]) if row[10] is not None else Decimal('0.0000000000')
+            syscomment = row[11] if row[11] is not None else ''
+            curramount = Decimal(row[12]) if row[12] is not None else Decimal('0.0000000000')
+            usercreated = row[13] if row[13] is not None else ''
+            voucher_date = row[14]  # تاریخ وچر از دیتابیس
+
+        except (ValueError, InvalidOperation) as e:
+            print(f"خطا در پردازش رکورد {row}: {e}. گذر از این رکورد.")
+            continue  # این رکورد را بگذرانید
+
+        # استفاده از ترکیب جدید برای کلید
+        key = (acc_year, code, radif)
+
+        # بررسی رکوردهای فعلی با ترکیب جدید
+        if key in current_sanads:
+            sanad = current_sanads[key]
+            # بررسی و بروزرسانی فیلدها
+            if (sanad.kol != kol or sanad.moin != moin or sanad.tafzili != tafzili or
+                    sanad.sharh != sharh or sanad.bed != bed or sanad.bes != bes or
+                    sanad.sanad_code != sanad_code or sanad.sanad_type != sanad_type or
+                    sanad.meghdar != meghdar or sanad.syscomment != syscomment or
+                    sanad.curramount != curramount or sanad.usercreated != usercreated or
+                    sanad.tarikh != voucher_date):
+                sanad.kol = kol
+                sanad.moin = moin
+                sanad.tafzili = tafzili
+                sanad.sharh = sharh
+                sanad.bed = bed
+                sanad.bes = bes
+                sanad.sanad_code = sanad_code
+                sanad.sanad_type = sanad_type
+                sanad.meghdar = meghdar
+                sanad.syscomment = syscomment
+                sanad.curramount = curramount
+                sanad.usercreated = usercreated
+                sanad.tarikh = voucher_date  # بروزرسانی تاریخ شمسی
+                sanad.is_analiz = False  # تنظیم is_analiz به False
+                sanads_to_update.append(sanad)
+        else:
+            sanads_to_create.append(SanadDetail(
+                code=code, radif=radif, kol=kol, moin=moin, tafzili=tafzili,
+                sharh=sharh, bed=bed, bes=bes, sanad_code=sanad_code,
+                sanad_type=sanad_type, meghdar=meghdar, syscomment=syscomment,
+                curramount=curramount, usercreated=usercreated,
+                tarikh=voucher_date,  # ذخیره تاریخ شمسی
+                is_analiz=False,  # تنظیم is_analiz به False
+                acc_year=acc_year  # اضافه کردن سال مالی
+            ))
+
+            # Bulk create new sanad details
+    if sanads_to_create:
+        print('شروع به ساخت')
+        SanadDetail.objects.bulk_create(sanads_to_create, batch_size=BATCH_SIZE)
+
+
+    # Bulk update existing sanad details
+    if sanads_to_update:
+        print('شروع به آپدیت')
+    SanadDetail.objects.bulk_update(
+        sanads_to_update,
+        ['kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
+         'sanad_code', 'sanad_type', 'meghdar',
+         'syscomment', 'curramount', 'usercreated', 'tarikh', 'is_analiz'],
+        batch_size=BATCH_SIZE
+    )
+
+
+
+        # پس از بخش پردازش ثبت‌نام
+    print('بررسی تاریخ')
+    counter2 = 1
+
+    print('تعداد اسناد که آپدیت می‌شوند:', len(sanads_to_update))
+    # بارگذاری تمامی اسناد با تاریخ میلادی خالی
+    empty_date_sanads = SanadDetail.objects.filter(date__isnull=True, acc_year=acc_year)
+
+    # بروزرسانی تاریخ برای اسناد با تاریخ میلادی خالی
+    for sanad in empty_date_sanads:
+        if sanad.tarikh:  # فرض بر این است که tarikh مقداری دارد
+            # تبدیل تاریخ شمسی به میلادی
+            voucher_date = sanad.tarikh
+            try:
+                year, month, day = map(int, voucher_date.split('/'))
+                gregorian_date = jdatetime.date(year, month, day).togregorian()
+                miladi_date = gregorian_date.strftime('%Y-%m-%d')
+                # پر کردن تاریخ میلادی
+                sanad.date = miladi_date
+            except Exception as e:
+                print(f"خطا در تبدیل تاریخ برای {sanad.code}, {sanad.radif}: {e}")
+
+    # پردازش اسناد جدید و پر کردن تاریخ میلادی
+    for sanad in sanads_to_create:
+        if sanad.tarikh:  # فرض بر این است که tarikh مقداری دارد
+            try:
+                year, month, day = map(int, sanad.tarikh.split('/'))
+                gregorian_date = jdatetime.date(year, month, day).togregorian()
+                miladi_date = gregorian_date.strftime('%Y-%m-%d')
+                sanad.date = miladi_date  # پر کردن تاریخ میلادی برای اسناد جدید
+            except Exception as e:
+                print(f"خطا در تبدیل تاریخ برای سند جدید {sanad.code}, {sanad.radif}: {e}")
+
+    # بروزرسانی تاریخ‌های میلادی در صورت نیاز
+    if empty_date_sanads or sanads_to_create:
+        print('شروع به آپدیت تاریخ‌های میلادی')
+        SanadDetail.objects.bulk_update(list(empty_date_sanads) + sanads_to_create, ['date'], batch_size=BATCH_SIZE)
+
+    # حذف رکوردهای اضافی
+    sanads_to_delete = []
+    current_sanad_keys = {(sd.code, sd.radif) for sd in SanadDetail.objects.filter(acc_year=acc_year)}
+
+    for key in current_sanad_keys:
+        if key not in existing_in_mahak:
+            sanads_to_delete.append(SanadDetail.objects.get(code=key[0], radif=key[1]).id)
+
+    # حذف به صورت دسته‌ای
+    if sanads_to_delete:
+        print('شروع به حذف')
+        for i in range(0, len(sanads_to_delete), BATCH_SIZE):
+            batch = sanads_to_delete[i:i + BATCH_SIZE]
+            print(f"حذف شناسه‌ها: {batch}")  # برای بررسی، شناسه‌های حذف را چاپ کنید
+            SanadDetail.objects.filter(id__in=batch).delete()
+    else:
+        print("هیچ رکوردی برای حذف وجود ندارد.")
+
+    import re
+
+    # بررسی اسناد دریافتنی
+    # پر کردن cheque_id و به‌روزرسانی is_analiz
+    to_analiz = SanadDetail.objects.filter(kol=101, is_analiz=False)
+
+    # الگوی یافتن شناسه چک
+    cheque_pattern = r'(چک\s*دريافتي\s*اول\s*دوره|چک\s*دريافتي|چک\s*خرج\s*شده|چک\s*درجريان\s*وصول|چک).*?\(([\d/]+)\)'
+
+    # ایجاد یک لیست برای ذخیره تغییرات
+    updates = []
+
+    for t in to_analiz:
+        syscomment = t.syscomment
+        cheque_id = None  # مقدار پیش‌فرض برای cheque_id
+
+        if syscomment:  # بررسی وجود مقدار در syscomment
+            match = re.search(cheque_pattern, syscomment)
+            if match:
+                cheque_id = match.group(2)  # ذخیره شناسه چک
+
+        # به‌روزرسانی ویژگی‌ها
+        t.cheque_id = cheque_id
+        t.is_analiz = cheque_id is not None  # اگر شناسه چک پیدا شده باشد، is_analiz را به True تغییر دهید
+
+        # افزودن به لیست تغییرات
+        updates.append(t)
+
+    # ذخیره تغییرات در دیتابیس
+    if updates:
+        SanadDetail.objects.bulk_update(updates, ['cheque_id', 'is_analiz'], batch_size=BATCH_SIZE)
+
+    # بررسی اسناد پرداختنی
+    # پر کردن cheque_id و به‌روزرسانی is_analiz
+    to_analiz = SanadDetail.objects.filter(kol=200, is_analiz=False)
+
+    # الگوی یافتن شناسه چک
+    cheque_pattern = r'(چک\s*|چک\s*پرداختي\s*اول\s*دوره|چک\s*پرداختي|عودت\s*چک\s*پرداختي).*?\((\d+)\)'
+    updates = []
+
+    for t in to_analiz:
+        syscomment = t.syscomment
+        cheque_id = None  # مقدار پیش‌فرض برای cheque_id
+
+        if syscomment:  # بررسی وجود مقدار در syscomment
+            match = re.search(cheque_pattern, syscomment)
+            if match:
+                cheque_id = match.group(2)  # ذخیره شناسه چک
+
+        # به‌روزرسانی ویژگی‌ها
+        t.cheque_id = cheque_id
+        t.is_analiz = cheque_id is not None  # اگر شناسه چک پیدا شده باشد، is_analiz را به True تغییر دهید
+
+        # افزودن به لیست تغییرات
+        updates.append(t)
+
+    # ذخیره تغییرات در دیتابیس
+    if updates:
+        SanadDetail.objects.bulk_update(updates, ['cheque_id', 'is_analiz'], batch_size=BATCH_SIZE)
+
+    # محاسبه زمان اجرای کل
+    tend = time.time()
+    total_time = tend - t0
+    db_time = t1 - t0
+    update_time = tend - t1
+
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    print(f" زمان اتصال به دیتا بیس: {db_time:.2f} ثانیه")
+    print(f" زمان آپدیت جدول: {update_time:.2f} ثانیه")
+
+    cursor.execute("SELECT COUNT(*) FROM Sanad_detail")  # محاسبه تعداد کل رکوردها
+    row_count = cursor.fetchone()[0]
+
+    cursor.execute(
+        "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Sanad_detail'")  # محاسبه تعداد ستون‌ها
+    column_count = cursor.fetchone()[0]
+
+    # به‌روزرسانی اطلاعات در جدول Mtables
+    table = Mtables.objects.filter(name='Sanad_detail').last()
+    table.last_update_time = timezone.now()
+    table.update_duration = update_time
+    table.row_count = row_count
+    table.column_count = column_count
     table.save()
 
     return redirect('/updatedb')
@@ -1448,7 +1751,12 @@ def UpdateSanad(request):
 
 
 
-def UpdateSanadDetail(request):
+
+
+
+
+
+def UpdateSanadDetail1403(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات سند---------------------------------------------------')
     conn = connect_to_mahak()
