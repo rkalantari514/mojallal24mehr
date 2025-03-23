@@ -1517,7 +1517,7 @@ def UpdateSanadDetail(request):
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
 
     # فقط رکوردهای سال مالی جاری را دریافت کنید
-    current_sanads = {(acc_year,sanad.code, sanad.radif): sanad for sanad in SanadDetail.objects.filter(acc_year=acc_year)}
+    current_sanads = {(sanad.acc_year,sanad.code, sanad.radif): sanad for sanad in SanadDetail.objects.filter(acc_year=acc_year)}
 
     BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
 
