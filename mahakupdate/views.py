@@ -1555,36 +1555,37 @@ def UpdateSanadDetail(request):
             sanad = current_sanads[key]
             print("------------------------------------")
             # بررسی کد مقایسه
-            if sanad.kol != kol:
-                print(f'kol mismatch: {sanad.kol} != {kol}')
-            if sanad.moin != moin:
-                print(f'moin mismatch: {sanad.moin} != {moin}')
-            if sanad.tafzili != tafzili:
-                print(f'tafzili mismatch: {sanad.moin} ++ {sanad.tafzili} != {tafzili}')
-            if sanad.sharh != sharh:
-                print(f'sharh mismatch: {sanad.sharh} != {sharh}')
-            if sanad.bed != bed:
-                print(f'bed mismatch: {sanad.bed} != {bed}')
-            if sanad.bes != bes:
-                print(f'bes mismatch: {sanad.bes} != {bes}')
-            if sanad.sanad_code != sanad_code:
-                print(f'sanad_code mismatch: {sanad.sanad_code} != {sanad_code}')
-            if sanad.sanad_type != sanad_type:
-                print(f'sanad_type mismatch: {sanad.sanad_type} != {sanad_type}')
-            if sanad.meghdar != meghdar:
-                print(f'meghdar mismatch: {sanad.meghdar} != {meghdar}')
-            if sanad.syscomment != syscomment:
-                print(f'syscomment mismatch: {sanad.syscomment} != {syscomment}')
-            if sanad.curramount != curramount:
-                print(f'curramount mismatch: {sanad.curramount} != {curramount}')
-            if sanad.usercreated != usercreated:
-                print(f'usercreated mismatch: {sanad.usercreated} != {usercreated}')
-            if sanad.tarikh != voucher_date:
-                print(f'tarikh mismatch: {sanad.tarikh} != {voucher_date}')
+            # if sanad.kol != kol:
+            #     print(f'kol mismatch: {sanad.kol} != {kol}')
+            # if sanad.moin != moin:
+            #     print(f'moin mismatch: {sanad.moin} != {moin}')
+            # if sanad.tafzili != tafzili:
+            #     print(f'tafzili mismatch: {sanad.moin} ++ {sanad.tafzili} != {tafzili}')
+            # if sanad.sharh != sharh:
+            #     print(f'sharh mismatch: {sanad.sharh} != {sharh}')
+            # if sanad.bed != bed:
+            #     print(f'bed mismatch: {sanad.bed} != {bed}')
+            # if sanad.bes != bes:
+            #     print(f'bes mismatch: {sanad.bes} != {bes}')
+            # if sanad.sanad_code != sanad_code:
+            #     print(f'sanad_code mismatch: {sanad.sanad_code} != {sanad_code}')
+            # if sanad.sanad_type != sanad_type:
+            #     print(f'sanad_type mismatch: {sanad.sanad_type} != {sanad_type}')
+            # if sanad.meghdar != meghdar:
+            #     print(f'meghdar mismatch: {sanad.meghdar} != {meghdar}')
+            # if sanad.syscomment != syscomment:
+            #     print(f'syscomment mismatch: {sanad.syscomment} != {syscomment}')
+            # if sanad.curramount != curramount:
+            #     print(f'curramount mismatch: {sanad.curramount} != {curramount}')
+            # if sanad.usercreated != usercreated:
+            #     print(f'usercreated mismatch: {sanad.usercreated} != {usercreated}')
+            # if sanad.tarikh != voucher_date:
+            #     print(f'tarikh mismatch: {sanad.tarikh} != {voucher_date}')
 
             # حالا شرط اصلی
             # بررسی و بروزرسانی فیلدها
-            if (sanad.kol != kol or sanad.moin != moin or sanad.tafzili != tafzili or
+            if (sanad.kol != kol or sanad.moin != moin or
+                    # sanad.tafzili != tafzili or
                     sanad.sharh != sharh or sanad.bed != bed or sanad.bes != bes or
                     sanad.sanad_code != sanad_code or sanad.sanad_type != sanad_type or
                     sanad.meghdar != meghdar or sanad.syscomment != syscomment or
@@ -1626,13 +1627,13 @@ def UpdateSanadDetail(request):
     if sanads_to_update:
         print('تعداد اسناد که آپدیت می‌شوند:', len(sanads_to_update))
         print('شروع به آپدیت')
-    # SanadDetail.objects.bulk_update(
-    #     sanads_to_update,
-    #     ['kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
-    #      'sanad_code', 'sanad_type', 'meghdar',
-    #      'syscomment', 'curramount', 'usercreated', 'tarikh', 'is_analiz'],
-    #     batch_size=BATCH_SIZE
-    # )
+    SanadDetail.objects.bulk_update(
+        sanads_to_update,
+        ['kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
+         'sanad_code', 'sanad_type', 'meghdar',
+         'syscomment', 'curramount', 'usercreated', 'tarikh', 'is_analiz'],
+        batch_size=BATCH_SIZE
+    )
 
 
 
