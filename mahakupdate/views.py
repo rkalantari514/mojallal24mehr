@@ -1517,7 +1517,7 @@ def UpdateSanadDetail(request):
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
 
     # فقط رکوردهای سال مالی جاری را دریافت کنید
-    current_sanads = {(sanad.acc_year,sanad.code, sanad.radif): sanad for sanad in SanadDetail.objects.filter(acc_year=acc_year)}
+    current_sanads = {(sanad.code, sanad.radif): sanad for sanad in SanadDetail.objects.filter(acc_year=acc_year)}
 
     BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
 
@@ -1548,11 +1548,41 @@ def UpdateSanadDetail(request):
             continue  # این رکورد را بگذرانید
 
         # استفاده از ترکیب جدید برای کلید
-        key = (acc_year, code, radif)
+        key = (code, radif)
 
         # بررسی رکوردهای فعلی با ترکیب جدید
         if key in current_sanads:
             sanad = current_sanads[key]
+            print("------------------------------------")
+            # بررسی کد مقایسه
+            if sanad.kol != kol:
+                print(f'kol mismatch: {sanad.kol} != {kol}')
+            if sanad.moin != moin:
+                print(f'moin mismatch: {sanad.moin} != {moin}')
+            if sanad.tafzili != tafzili:
+                print(f'tafzili mismatch: {sanad.tafzili} != {tafzili}')
+            if sanad.sharh != sharh:
+                print(f'sharh mismatch: {sanad.sharh} != {sharh}')
+            if sanad.bed != bed:
+                print(f'bed mismatch: {sanad.bed} != {bed}')
+            if sanad.bes != bes:
+                print(f'bes mismatch: {sanad.bes} != {bes}')
+            if sanad.sanad_code != sanad_code:
+                print(f'sanad_code mismatch: {sanad.sanad_code} != {sanad_code}')
+            if sanad.sanad_type != sanad_type:
+                print(f'sanad_type mismatch: {sanad.sanad_type} != {sanad_type}')
+            if sanad.meghdar != meghdar:
+                print(f'meghdar mismatch: {sanad.meghdar} != {meghdar}')
+            if sanad.syscomment != syscomment:
+                print(f'syscomment mismatch: {sanad.syscomment} != {syscomment}')
+            if sanad.curramount != curramount:
+                print(f'curramount mismatch: {sanad.curramount} != {curramount}')
+            if sanad.usercreated != usercreated:
+                print(f'usercreated mismatch: {sanad.usercreated} != {usercreated}')
+            if sanad.tarikh != voucher_date:
+                print(f'tarikh mismatch: {sanad.tarikh} != {voucher_date}')
+
+            # حالا شرط اصلی
             # بررسی و بروزرسانی فیلدها
             if (sanad.kol != kol or sanad.moin != moin or sanad.tafzili != tafzili or
                     sanad.sharh != sharh or sanad.bed != bed or sanad.bes != bes or
