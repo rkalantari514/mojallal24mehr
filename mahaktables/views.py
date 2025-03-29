@@ -145,7 +145,9 @@ def table_detail(request, table_name):
         columns = get_table_columns(cursor, table_name)
         query += " OR ".join([f"{col} LIKE '%{search_query}%'" for col in columns])
     else:
-        query = f"SELECT * FROM {table_name}"
+        # query = f"SELECT * FROM {table_name}"
+        # query = f"SELECT TOP 1000 * FROM {table_name}"
+        query = f"SELECT * FROM {table_name} ORDER BY some_column OFFSET 5000 ROWS FETCH NEXT 1000 ROWS ONLY"
 
     cursor.execute(query)
     rows = cursor.fetchall()

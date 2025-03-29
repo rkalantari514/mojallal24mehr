@@ -1560,7 +1560,7 @@ def UpdateSanadDetail(request):
             if sanad.moin != moin:
                 print(f'moin mismatch: {sanad.moin} != {moin}')
             if sanad.tafzili != tafzili:
-                print(f'tafzili mismatch: {sanad.tafzili} != {tafzili}')
+                print(f'tafzili mismatch: {sanad.moin} ++ {sanad.tafzili} != {tafzili}')
             if sanad.sharh != sharh:
                 print(f'sharh mismatch: {sanad.sharh} != {sharh}')
             if sanad.bed != bed:
