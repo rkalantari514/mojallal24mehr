@@ -1624,6 +1624,7 @@ def UpdateSanadDetail(request):
 
     # Bulk update existing sanad details
     if sanads_to_update:
+        print('تعداد اسناد که آپدیت می‌شوند:', len(sanads_to_update))
         print('شروع به آپدیت')
     SanadDetail.objects.bulk_update(
         sanads_to_update,
@@ -1639,7 +1640,7 @@ def UpdateSanadDetail(request):
     print('بررسی تاریخ')
     counter2 = 1
 
-    print('تعداد اسناد که آپدیت می‌شوند:', len(sanads_to_update))
+
     # بارگذاری تمامی اسناد با تاریخ میلادی خالی
     empty_date_sanads = SanadDetail.objects.filter(date__isnull=True, acc_year=acc_year)
 
