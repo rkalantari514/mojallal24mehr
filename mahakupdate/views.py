@@ -1626,13 +1626,13 @@ def UpdateSanadDetail(request):
     if sanads_to_update:
         print('تعداد اسناد که آپدیت می‌شوند:', len(sanads_to_update))
         print('شروع به آپدیت')
-    SanadDetail.objects.bulk_update(
-        sanads_to_update,
-        ['kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
-         'sanad_code', 'sanad_type', 'meghdar',
-         'syscomment', 'curramount', 'usercreated', 'tarikh', 'is_analiz'],
-        batch_size=BATCH_SIZE
-    )
+    # SanadDetail.objects.bulk_update(
+    #     sanads_to_update,
+    #     ['kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
+    #      'sanad_code', 'sanad_type', 'meghdar',
+    #      'syscomment', 'curramount', 'usercreated', 'tarikh', 'is_analiz'],
+    #     batch_size=BATCH_SIZE
+    # )
 
 
 
