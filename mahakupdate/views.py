@@ -302,7 +302,7 @@ def UpdateFactor(request):
                                         'acc_year'])
 
             # پاکسازی فاکتورهایی که در پایگاه داده Mahak وجود ندارند
-        Factor.objects.exclude(code__in=existing_in_mahak).delete()
+        Factor.objects.exclude(code__in=existing_in_mahak).filter(acc_year=acc_year).delete()
 
     tend = time.time()
     print(f"زمان کل: {tend - t0:.2f} ثانیه")
@@ -578,11 +578,11 @@ def UpdateFactorDetail(request):
             FactorDetaile.objects.bulk_update(updates, ['factor', 'kala'])
 
             # حذف رکوردهای غیرضروری
-    FactorDetaile.objects.exclude(
+    (FactorDetaile.objects.exclude(
         code_factor__in=[k[0] for k in existing_in_mahak],
         radif__in=[k[1] for k in existing_in_mahak],
-        acc_year=acc_year  # فقط رکوردهای مربوط به سال مالی جاری را حذف کنید
-    ).delete()
+        # acc_year=acc_year  # فقط رکوردهای مربوط به سال مالی جاری را حذف کنید
+    ).filter(acc_year=acc_year).delete())
 
     t2 = time.time()
     print('آپدیت انجام شد', t2 - t1)
