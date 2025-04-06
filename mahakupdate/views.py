@@ -39,16 +39,24 @@ def connect_to_mahak():
     sn = os.getenv('COMPUTERNAME')
     print('sn')
     print(sn)
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
 
-    connections = {
-        'DESKTOP-ITU3EHV': ('DESKTOP-ITU3EHV\\MAHAK14', 'mahak'),
-        'TECH_MANAGER': ('TECH_MANAGER\\RKALANTARI', 'mahak'),
-        'DESKTOP-1ERPR1M': ('DESKTOP-1ERPR1M\\MAHAK', 'mahak'),
-        # 'RP-MAHAK': ('Ac\\MAHAK', 'mahak'),
-        'RP-MAHAK': ('Ac\\MAHAK', 'mahak_FY_1403')
-        # 'RP-MAHAK': ('Ac\\MAHAK', 'mahak1002')
-    #
-    }
+    if acc_year==1403:
+        connections = {
+            'DESKTOP-ITU3EHV': ('DESKTOP-ITU3EHV\\MAHAK14', 'mahak'),
+            'TECH_MANAGER': ('TECH_MANAGER\\RKALANTARI', 'mahak'),
+            'DESKTOP-1ERPR1M': ('DESKTOP-1ERPR1M\\MAHAK', 'mahak'),
+            # 'RP-MAHAK': ('Ac\\MAHAK', 'mahak'),
+            'RP-MAHAK': ('Ac\\MAHAK', 'mahak_FY_1403')
+        }
+
+    if acc_year==1404:
+        connections = {
+            'DESKTOP-ITU3EHV': ('DESKTOP-ITU3EHV\\MAHAK14', 'mahak'),
+            'TECH_MANAGER': ('TECH_MANAGER\\RKALANTARI', 'mahak'),
+            'DESKTOP-1ERPR1M': ('DESKTOP-1ERPR1M\\MAHAK', 'mahak'),
+            'RP-MAHAK': ('Ac\\MAHAK', 'mahak'),
+        }
 
     if sn in connections:
         server, database = connections[sn]
