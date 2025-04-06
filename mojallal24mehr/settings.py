@@ -38,7 +38,7 @@ SECRET_KEY = 'django-insecure--o*rtwaxd%_%yz7t2505stw(r_l$ftjl^7l$c_nr5k4#hcjgj*
 DEBUG = True
 
 
-ALLOWED_HOSTS = ['localhost','172.16.1.14','rp-mahak.ymv.ir','192.168.1.102']
+ALLOWED_HOSTS = ['localhost','172.16.1.14','rp-mahak.ymv.ir','192.168.1.102','127.0.0.1']
 
 # Application definition
 

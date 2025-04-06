@@ -44,7 +44,10 @@ def connect_to_mahak():
         'DESKTOP-ITU3EHV': ('DESKTOP-ITU3EHV\\MAHAK14', 'mahak'),
         'TECH_MANAGER': ('TECH_MANAGER\\RKALANTARI', 'mahak'),
         'DESKTOP-1ERPR1M': ('DESKTOP-1ERPR1M\\MAHAK', 'mahak'),
-        'RP-MAHAK': ('Ac\\MAHAK', 'mahak')
+        # 'RP-MAHAK': ('Ac\\MAHAK', 'mahak'),
+        'RP-MAHAK': ('Ac\\MAHAK', 'mahak_FY_1403')
+        # 'RP-MAHAK': ('Ac\\MAHAK', 'mahak1002')
+    #
     }
 
     if sn in connections:
@@ -1391,7 +1394,7 @@ def UpdateSanad(request):
     existing_in_mahak = {int(row[0]) for row in mahakt_data}
     print('len(existing_in_mahak)')
     print(len(existing_in_mahak))
-
+    # return redirect('/updatedb')
     sanads_to_create = []
     sanads_to_update = []
 
@@ -1406,11 +1409,13 @@ def UpdateSanad(request):
     # پردازش داده‌های جدید
     for row in mahakt_data:
         code = int(row[0])
+        print('code=',code)
         tarikh = row[1]
         sharh = row[2] if row[2] is not None else ''
         sanadid = row[3]
 
         if code in current_sanads:
+            print('code in current_sanads')
             sanad = current_sanads[code]
             if sanad.tarikh != tarikh or sanad.sharh != sharh or sanad.sanadid != sanadid:
                 sanad.tarikh = tarikh
@@ -1418,7 +1423,12 @@ def UpdateSanad(request):
                 sanad.sanadid = sanadid
                 sanads_to_update.append(sanad)
         else:
+            print('else')
             sanads_to_create.append(Sanad(code=code, tarikh=tarikh, sharh=sharh, sanadid=sanadid, acc_year=acc_year))
+
+    print('to create',len(sanads_to_create))
+    print('to update',len(sanads_to_update))
+    return redirect('/updatedb')
 
     # Bulk create new sanads
     Sanad.objects.bulk_create(sanads_to_create, batch_size=BATCH_SIZE)
@@ -1503,7 +1513,7 @@ def UpdateSanadDetail(request):
     # دریافت داده‌ها از دیتابیس خارجی
     cursor.execute(
         "SELECT code, radif, kol, moin, tafzili, sharh, bed, bes, Sanad_Code, Sanad_Type, "
-        "Meghdar, SysComment, CurrAmount, UserCreated, VoucherDate FROM [mahak].[dbo].[Sanad_detail]")
+        "Meghdar, SysComment, CurrAmount, UserCreated, VoucherDate FROM Sanad_detail")
     mahakt_data = cursor.fetchall()
 
     existing_in_mahak = {(int(row[0]), int(row[1])) for row in mahakt_data}
@@ -1798,7 +1808,7 @@ def UpdateSanadDetail1403(request):
     # دریافت داده‌ها از دیتابیس خارجی
     cursor.execute(
         "SELECT code, radif, kol, moin, tafzili, sharh, bed, bes, Sanad_Code, Sanad_Type, "
-        "Meghdar, SysComment, CurrAmount, UserCreated, VoucherDate FROM [mahak].[dbo].[Sanad_detail]")
+        "Meghdar, SysComment, CurrAmount, UserCreated, VoucherDate FROM Sanad_detail")
     mahakt_data = cursor.fetchall()
 
     existing_in_mahak = {(int(row[0]), int(row[1])) for row in mahakt_data}
@@ -2044,7 +2054,7 @@ def UpdateSanadDetail1(request):
     t1 = time.time()
     # دریافت داده‌ها از دیتابیس خارجی
     cursor.execute(
-        "SELECT code, radif, kol, moin, tafzili, sharh, bed, bes, Sanad_Code, Sanad_Type, Meghdar, SysComment, CurrAmount, UserCreated FROM [mahak].[dbo].[Sanad_detail]")
+        "SELECT code, radif, kol, moin, tafzili, sharh, bed, bes, Sanad_Code, Sanad_Type, Meghdar, SysComment, CurrAmount, UserCreated FROM Sanad_detail")
     mahakt_data = cursor.fetchall()
     existing_in_mahak = {(int(row[0]), int(row[1])) for row in mahakt_data}
     print('تعداد رکوردهای موجود در Mahak:', len(existing_in_mahak))
@@ -2304,7 +2314,7 @@ def UpdateBank(request):
         "[Code_M], [VoucherCode], [FirstAmount], [DetailUniqueCode], [EndDate], [SecurityCode], "
         "[CardCode], [Shaba], [CurrCode], [CurrRate], [CreatedTime], [CreatedDate], [ModifiedTime], "
         "[ModifiedDate], [UserCreated], [UserModified] "
-        "FROM [mahak].[dbo].[Bank]"
+        "FROM Bank"
     )
     mahak_data = cursor.fetchall()
 
@@ -2449,7 +2459,7 @@ def Cheques_Recieve(request):
     cursor.execute(
         "SELECT [ID], [ChequeID], [ChequeRow], [IssuanceDate], [ChequeDate], "
         "[Cost], [BankName], [BankBranch], [AccountID], [Description], [Status], [PerCode] "
-        "FROM [mahak].[dbo].[Cheques_Recieve]"
+        "FROM Cheques_Recieve"
     )
     mahak_data = cursor.fetchall()
 
@@ -2647,7 +2657,7 @@ def Cheque_Pay(request):
         "SELECT [ID], [ChequeID], [ChequeRow], [IssuanceDate], [ChequeDate], "
         "[Cost], [BankCode], [Description], [status], [FirstPeriod], "
         "[ChequeIDCounter], [PerCode], [RecieveStatus] "
-        "FROM [mahak].[dbo].[Cheque_Pay]"
+        "FROM Cheque_Pay"
     )
     mahak_data = cursor.fetchall()
 
@@ -2821,7 +2831,7 @@ def UpdateLoan(request):
     # گرفتن تمامی داده‌ها از دیتابیس خارجی
     cursor.execute(
         "SELECT [Code], [NameCode], [Date], [Number], [Distance], [Cost] "
-        "FROM [mahak].[dbo].[Loan]"
+        "FROM Loan"
     )
     mahak_data = cursor.fetchall()
 
@@ -2938,7 +2948,7 @@ def UpdateLoanDetail(request):
     # گرفتن تمامی داده‌ها از دیتابیس خارجی
     cursor.execute(
         "SELECT [ID], [LoanCode], [Row], [Date], [RecieveDate], [Delay], [Cost], [Comment] "
-        "FROM [mahak].[dbo].[LoanDetail]"
+        "FROM LoanDetail"
     )
     mahak_data = cursor.fetchall()
 
