@@ -1436,7 +1436,7 @@ def UpdateSanad(request):
 
     print('to create',len(sanads_to_create))
     print('to update',len(sanads_to_update))
-    return redirect('/updatedb')
+    # return redirect('/updatedb')
 
     # Bulk create new sanads
     Sanad.objects.bulk_create(sanads_to_create, batch_size=BATCH_SIZE)
