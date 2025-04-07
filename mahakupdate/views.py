@@ -143,15 +143,15 @@ def Updateall(request):
     print(now.hour)
     print(now.weekday())
     # بررسی اینکه آیا ساعت بین 1 تا 2 بامداد است
-    # if now.hour in work_time:
-    #     print(f' ساعت کاری: {now.hour}')
-    #     send_to_admin(f' ساعت کاری: {now.hour}')
-    send_to_admin(f' لغو: {now.hour}')
+    if now.hour in work_time:
+        print(f' ساعت کاری: {now.hour}')
+        send_to_admin(f' ساعت کاری: {now.hour}')
+    # send_to_admin(f' لغو: {now.hour}')
+        return redirect('/updatedb')
 
-    return redirect('/updatedb')
-    # else:
-    #     print(f' ساعت غیر  کاری: {now.hour}')
-    #     send_to_admin(f' ساعت غیر کاری: {now.hour}')
+    else:
+        print(f' ساعت غیر  کاری: {now.hour}')
+        send_to_admin(f' ساعت غیر کاری: {now.hour}')
 
     if now.hour == 1:
         # بررسی اینکه آیا امروز دوشنبه است (0: دوشنبه، 6: یکشنبه)
