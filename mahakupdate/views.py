@@ -2339,11 +2339,7 @@ def UpdateBank(request):
 
     # گرفتن تمامی داده‌ها از دیتابیس خارجی
     cursor.execute(
-        "SELECT [Code], [Name], [shobe], [sh_h], [type], [mogodi], [Tel], [Fax], [Comment], "
-        "[Code_M], [VoucherCode], [FirstAmount], [DetailUniqueCode], [EndDate], [SecurityCode], "
-        "[CardCode], [Shaba], [CurrCode], [CurrRate], [CreatedTime], [CreatedDate], [ModifiedTime], "
-        "[ModifiedDate], [UserCreated], [UserModified] "
-        "FROM Bank"
+        "SELECT [Code], [Name], [shobe], [sh_h], [type], [mogodi], [FirstAmount] FROM Bank"
     )
     mahak_data = cursor.fetchall()
 
@@ -2364,7 +2360,7 @@ def UpdateBank(request):
         sh_h = row[3] or ''
         type_h = row[4] or ''
         mogodi = Decimal(row[5] or '0.00')
-        firstamount = Decimal(row[11] or '0.00')
+        firstamount = Decimal(row[6] or '0.00')
 
         if code in current_banks:
             bank = current_banks[code]
