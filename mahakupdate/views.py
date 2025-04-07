@@ -3203,11 +3203,12 @@ def UpdateSanadConditions(request):
 def UpdateBedehiMoshtari(request):
     t0 = time.time()
     print('شروع آپدیت بدهی مشتری-------------------------------')
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
 
     try:
         with transaction.atomic():
             # محاسبه مجموع curramount بر اساس tafzili و moin
-            tafzili_sums = SanadDetail.objects.filter(moin=1, kol=103,is_active=True).values('tafzili', 'moin').annotate(total_curramount=Sum('curramount'))
+            tafzili_sums = SanadDetail.objects.filter(moin=1, kol=103,is_active=True,acc_year=acc_year).values('tafzili', 'moin').annotate(total_curramount=Sum('curramount'))
 
             # جمع‌آوری داده‌ها برای به‌روزرسانی
             data_to_create = []
