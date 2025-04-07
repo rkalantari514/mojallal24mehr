@@ -1693,13 +1693,34 @@ def UpdateSanadDetail(request):
         print('شروع به آپدیت تاریخ‌های میلادی')
         SanadDetail.objects.bulk_update(list(empty_date_sanads) + sanads_to_create, ['date'], batch_size=BATCH_SIZE)
 
+    # # حذف رکوردهای اضافی
+    # sanads_to_delete = []
+    # current_sanad_keys = {(sd.code, sd.radif) for sd in SanadDetail.objects.filter(acc_year=acc_year)}
+    #
+    # for key in current_sanad_keys:
+    #     if key not in existing_in_mahak:
+    #         sanads_to_delete.append(SanadDetail.objects.get(code=key[0], radif=key[1]).id)
+    #
+    # # حذف به صورت دسته‌ای
+    # if sanads_to_delete:
+    #     print('شروع به حذف')
+    #     for i in range(0, len(sanads_to_delete), BATCH_SIZE):
+    #         batch = sanads_to_delete[i:i + BATCH_SIZE]
+    #         print(f"حذف شناسه‌ها: {batch}")  # برای بررسی، شناسه‌های حذف را چاپ کنید
+    #         SanadDetail.objects.filter(id__in=batch).delete()
+    # else:
+    #     print("هیچ رکوردی برای حذف وجود ندارد.")
+    #
+
     # حذف رکوردهای اضافی
     sanads_to_delete = []
     current_sanad_keys = {(sd.code, sd.radif) for sd in SanadDetail.objects.filter(acc_year=acc_year)}
 
     for key in current_sanad_keys:
         if key not in existing_in_mahak:
-            sanads_to_delete.append(SanadDetail.objects.get(code=key[0], radif=key[1]).id)
+            sanads = SanadDetail.objects.filter(code=key[0], radif=key[1])
+            if sanads.exists():
+                sanads_to_delete.extend(sanad.id for sanad in sanads)
 
     # حذف به صورت دسته‌ای
     if sanads_to_delete:
