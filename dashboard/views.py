@@ -50,6 +50,7 @@ def TarazCal(fday, lday, data):
         baha_tamam_forosh_d = current_data.get((current_date, 500), 0)
         sayer_hazine_d = current_data.get((current_date, 501), 0)
         daramad_forosh = current_data.get((current_date, 400), 0)
+        print(fday,daramad_forosh)
         sayer_daramad_d = current_data.get((current_date, 401), 0)
         barghasht_az_forosh = current_data.get((current_date, 403), 0)  # منفی است
         khales_forosh_d = daramad_forosh + barghasht_az_forosh
@@ -612,6 +613,7 @@ def CreateReport(request):
         print(report.day)
 
         data = SanadDetail.objects.filter(
+            # acc_year=acc_year,
             is_active=True,
             date__range=(current_date, current_date)
         ).filter(
@@ -631,7 +633,6 @@ def CreateReport(request):
         report.asnad_pardakhtani = today_data['asnad_pardakhtani']
 
         reports_to_update.append(report)  # افزودن به لیست برای بروزرسانی در batch
-
     # آپدیت تمامی رکوردها به صورت bulk
     if reports_to_update:
         MasterReport.objects.bulk_update(reports_to_update, [
@@ -788,6 +789,7 @@ def CreateMonthlyReport(request):
         current_date_end = report.month_last_day
 
         data = SanadDetail.objects.filter(
+            acc_year=acc_year,
             is_active=True,
             date__range=(current_date_start, current_date_end)
         ).filter(
