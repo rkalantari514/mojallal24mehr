@@ -13,6 +13,7 @@ from django.db.models import Sum, F, DecimalField
 
 from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
+from dashboard.models import MasterInfo
 from dashboard.views import generate_calendar_data_cheque
 from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan, LoanDetil
 from jdatetime import date as jdate
@@ -593,6 +594,7 @@ def ChequesPayTotal(request, *args, **kwargs):
 
 
 def balance_sheet_kol(request):
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
     kol_codes = SanadDetail.objects.values('kol').distinct()
     balance_data = []
     total_bed = 0
@@ -602,9 +604,9 @@ def balance_sheet_kol(request):
     for kol in kol_codes:
         kol_code = kol['kol']
         kol_name = AccCoding.objects.filter(code=kol_code, level=1).first().name
-        bed_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code).aggregate(Sum('bed'))['bed__sum'] or 0
-        bes_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code).aggregate(Sum('bes'))['bes__sum'] or 0
-        curramount_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code).aggregate(Sum('curramount'))['curramount__sum'] or 0
+        bed_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code,acc_year=acc_year).aggregate(Sum('bed'))['bed__sum'] or 0
+        bes_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code,acc_year=acc_year).aggregate(Sum('bes'))['bes__sum'] or 0
+        curramount_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code,acc_year=acc_year).aggregate(Sum('curramount'))['curramount__sum'] or 0
         total_bed += bed_sum
         total_bes += bes_sum
         total_curramount += curramount_sum
@@ -647,6 +649,7 @@ def balance_sheet_kol(request):
     return render(request, 'balance_sheet.html', context)
 
 def balance_sheet_moin(request, kol_code):
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
     moin_codes = SanadDetail.objects.filter(kol=kol_code).values('moin').distinct()
     balance_data = []
     total_bed=0
@@ -662,12 +665,12 @@ def balance_sheet_moin(request, kol_code):
             par=AccCoding.objects.filter(code=kol_code, level=1).last()
             AccCoding.objects.create(code=moin_code, level=2, parent=par,name='تعیین نشده')
         moin_name = AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code).first().name
-        bed_sum = SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code).aggregate(Sum('bed'))[
+        bed_sum = SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code,acc_year=acc_year).aggregate(Sum('bed'))[
                       'bed__sum'] or 0
-        bes_sum = SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code).aggregate(Sum('bes'))[
+        bes_sum = SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code,acc_year=acc_year).aggregate(Sum('bes'))[
                       'bes__sum'] or 0
         curramount_sum = \
-        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code).aggregate(Sum('curramount'))[
+        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code,acc_year=acc_year).aggregate(Sum('curramount'))[
             'curramount__sum'] or 0
         total_bed += bed_sum
         total_bes += bes_sum
@@ -731,6 +734,7 @@ def balance_sheet_moin(request, kol_code):
     return render(request, 'balance_sheet.html', context)
 
 def balance_sheet_tafsili(request, kol_code, moin_code):
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
     tafsili_codes = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).values('tafzili').distinct()
     balance_data = []
     total_bed = 0
@@ -740,13 +744,13 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
         tafsili_code = tafsili['tafzili']
 
         bed_sum = \
-        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafsili_code).aggregate(
+        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafsili_code,acc_year=acc_year).aggregate(
             Sum('bed'))['bed__sum'] or 0
         bes_sum = \
-        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafsili_code).aggregate(
+        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafsili_code,acc_year=acc_year).aggregate(
             Sum('bes'))['bes__sum'] or 0
         curramount_sum = \
-        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafsili_code).aggregate(
+        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafsili_code,acc_year=acc_year).aggregate(
             Sum('curramount'))['curramount__sum'] or 0
 
 
@@ -799,7 +803,7 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
     level3 = []
 
     # فیلتر کردن داده‌ها
-    sanads = SanadDetail.objects.filter(kol=kol_code, moin=moin_code)
+    sanads = SanadDetail.objects.filter(kol=kol_code, moin=moin_code,acc_year=acc_year)
 
     # استفاده از مجموعه برای حذف تکراری‌ها و سپس تبدیل به لیست مرتب‌شده
     tafzili_set = sorted({s.tafzili for s in sanads})
@@ -838,8 +842,8 @@ def SanadTotal(request, *args, **kwargs):
     kol_code = kwargs['kol_code']
     moin_code = kwargs['moin_code']
     tafzili_code = kwargs['tafzili_code']
-
-    sanads=SanadDetail.objects.filter(kol=kol_code,moin=moin_code,tafzili=tafzili_code)
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    sanads=SanadDetail.objects.filter(kol=kol_code,moin=moin_code,tafzili=tafzili_code,acc_year =acc_year)
 
     level1 = []
     level2 = []
@@ -875,7 +879,7 @@ def SanadTotal(request, *args, **kwargs):
     level3 = []
 
     # فیلتر کردن داده‌ها
-    sanads2 = SanadDetail.objects.filter(kol=kol_code, moin=moin_code)
+    sanads2 = SanadDetail.objects.filter(kol=kol_code, moin=moin_code,acc_year =acc_year)
 
     # استفاده از مجموعه برای حذف تکراری‌ها و سپس تبدیل به لیست مرتب‌شده
     tafzili_set = sorted({s.tafzili for s in sanads2})
@@ -892,12 +896,12 @@ def SanadTotal(request, *args, **kwargs):
     level=4
 
     print(level,kol_code,moin_code,tafzili_code)
-    bed_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code, moin=moin_code, tafzili=tafzili_code).aggregate(Sum('bed'))[
+    bed_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code, moin=moin_code, tafzili=tafzili_code,acc_year =acc_year).aggregate(Sum('bed'))[
         'bed__sum']
-    bes_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code, moin=moin_code, tafzili=tafzili_code).aggregate(Sum('bes'))[
+    bes_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code, moin=moin_code, tafzili=tafzili_code,acc_year =acc_year).aggregate(Sum('bes'))[
         'bes__sum']
     curramount_sum = \
-    SanadDetail.objects.filter(is_active=True,kol=kol_code, moin=moin_code, tafzili=tafzili_code).aggregate(Sum('curramount'))[
+    SanadDetail.objects.filter(is_active=True,kol=kol_code, moin=moin_code, tafzili=tafzili_code,acc_year =acc_year).aggregate(Sum('curramount'))[
         'curramount__sum']
 
 
@@ -1277,7 +1281,7 @@ def HesabMoshtariDetail(request, tafsili):
 
     حساب_مشتری = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
     today = timezone.now().date()
-    asnad = SanadDetail.objects.filter(kol=103, moin=1, tafzili=tafsili).order_by('date', 'code', 'radif')
+    asnad = SanadDetail.objects.filter(kol=103, moin=1, tafzili=tafsili).order_by('acc_year','date', 'code', 'radif')
 
     chart_data = defaultdict(lambda: {'value': 0})
 
