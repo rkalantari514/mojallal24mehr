@@ -172,10 +172,10 @@ class ChequesRecieveAdmin(admin.ModelAdmin):
 
 @admin.register(MyCondition)
 class ConditionAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'kol', 'moin', 'tafzili', 'contain', 'equal_to', 'is_active', 'is_new')
-    list_filter = ('is_active',)  # امکان فیلتر کردن بر اساس وضعیت فعال بودن
+    list_display = ('__str__','acc_year','kol', 'moin', 'tafzili', 'contain', 'equal_to', 'is_active', 'is_new')
+    list_filter = ('is_active','acc_year',)  # امکان فیلتر کردن بر اساس وضعیت فعال بودن
     search_fields = ('kol', 'moin', 'tafzili')
-    list_editable = ['kol', 'moin', 'tafzili', 'contain', 'equal_to', 'is_active']
+    list_editable = ['kol', 'moin', 'tafzili', 'contain', 'equal_to', 'is_active','acc_year']
 
 
 from django.contrib import admin

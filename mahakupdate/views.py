@@ -3155,11 +3155,13 @@ def UpdateSanadConditions(request):
     for condition in conditions:
 
         # بررسی مقادیر
-        print(f"kol: {condition.kol}, moin: {condition.moin}, tafzili: {condition.tafzili}")
+        print(f"acc_year: {condition.acc_year},kol: {condition.kol}, moin: {condition.moin}, tafzili: {condition.tafzili}")
 
         # فیلتر کردن اسناد بر اساس kol، moin و tafzili
         sanad_details = SanadDetail.objects.all()
 
+        if condition.acc_year is not None and condition.acc_year != 0:
+            sanad_details = sanad_details.filter(acc_year=condition.acc_year)
         if condition.kol is not None and condition.kol != 0:
             sanad_details = sanad_details.filter(kol=condition.kol)
         if condition.moin is not None and condition.moin != 0:
@@ -3526,6 +3528,7 @@ def UpdateMyCondition(request):
     # پردازش داده‌ها و به‌روزرسانی/ایجاد مدل
     for index, row in df.iterrows():
         # دریافت مقادیر از ستون ها
+        acc_year = row['acc_year']
         kol = row['kol']
         moin = row['moin']
         tafzili = row['tafzili']
@@ -3541,6 +3544,7 @@ def UpdateMyCondition(request):
         MyCondition.objects.update_or_create(
             pk=index,  # استفاده از pk (شناسه) فایل اکسل برای آپدیت. فرض بر این است که شناسه در فایل اکسل موجود است
             defaults={
+                'acc_year': acc_year,
                 'kol': kol,
                 'moin': moin,
                 'tafzili': tafzili,

@@ -789,7 +789,7 @@ def CreateMonthlyReport(request):
         current_date_end = report.month_last_day
 
         data = SanadDetail.objects.filter(
-            acc_year=acc_year,
+            # acc_year=acc_year,
             is_active=True,
             date__range=(current_date_start, current_date_end)
         ).filter(

@@ -520,6 +520,7 @@ class SanadDetail(models.Model):
 from django.db import models
 
 class MyCondition(models.Model):
+    acc_year = models.IntegerField(default=0, blank=True, null=True, verbose_name='سال مالی')
     kol = models.IntegerField(default=0, blank=True, null=True, verbose_name='کل')
     moin = models.IntegerField(default=0, blank=True, null=True, verbose_name='معین')
     tafzili = models.IntegerField(default=0, blank=True, null=True, verbose_name='تفضیل')
