@@ -809,7 +809,7 @@ def ReportsDailySummary(request):
         UserLog.objects.create(user=user, page='خلاصه گزارش های روزانه')
 
     start_time = time.time()  # زمان شروع تابع
-    dailyr= MasterReport.objects.all()
+    dailyr= MasterReport.objects.all().order_by('-day')
 
 
 
