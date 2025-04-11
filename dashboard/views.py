@@ -1,29 +1,47 @@
 import logging
-
-from accounting.models import BedehiMoshtari
-
-logger = logging.getLogger(__name__)
-from custom_login.models import UserLog
-from mahakupdate.models import Factor, FactorDetaile, SanadDetail, Mtables, ChequesRecieve, ChequesPay, LoanDetil
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
-from .models import MasterInfo, MasterReport, MonthlyReport
-from django.utils import timezone
-from datetime import datetime
-from collections import defaultdict
-from datetime import timedelta, date
-from django.db.models import Sum, Q
-from django.shortcuts import render
 import time
 import jdatetime
 import pandas as pd
 import plotly.express as px
+from decimal import Decimal
 from dateutil.relativedelta import relativedelta
-
-import plotly.express as px
-import pandas as pd
-from django.shortcuts import render
+from datetime import datetime, timedelta, date
+from collections import defaultdict
+from django.utils import timezone
+from django.db.models import Sum, Q
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from accounting.models import BedehiMoshtari
+from custom_login.models import UserLog
+from mahakupdate.models import (
+    Factor, FactorDetaile, SanadDetail, Mtables,
+    ChequesRecieve, ChequesPay, LoanDetil
+)
+from .models import MasterInfo, MasterReport, MonthlyReport
 from khayyam import JalaliDate, JalaliDatetime
+
+logger = logging.getLogger(__name__)
+
+
+
+
+
+
+
+month_names_persian = {
+    1: 'فروردین',
+    2: 'اردیبهشت',
+    3: 'خرداد',
+    4: 'تیر',
+    5: 'مرداد',
+    6: 'شهریور',
+    7: 'مهر',
+    8: 'آبان',
+    9: 'آذر',
+    10: 'دی',
+    11: 'بهمن',
+    12: 'اسفند'
+}
 
 
 def TarazCal(fday, lday, data):
@@ -50,7 +68,6 @@ def TarazCal(fday, lday, data):
         baha_tamam_forosh_d = current_data.get((current_date, 500), 0)
         sayer_hazine_d = current_data.get((current_date, 501), 0)
         daramad_forosh = current_data.get((current_date, 400), 0)
-        print(fday,daramad_forosh)
         sayer_daramad_d = current_data.get((current_date, 401), 0)
         barghasht_az_forosh = current_data.get((current_date, 403), 0)  # منفی است
         khales_forosh_d = daramad_forosh + barghasht_az_forosh
@@ -101,7 +118,6 @@ def TarazCal(fday, lday, data):
     }
     return to_return
 
-
 def TarazCalFromReport(day):
     repo = MasterReport.objects.filter(day=day).last()
 
@@ -122,31 +138,6 @@ def TarazCalFromReport(day):
     # start_date = today - timedelta(days=114)
     # end_date = today - timedelta(days=107)
     # reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
-
-
-month_names_persian = {
-    1: 'فروردین',
-    2: 'اردیبهشت',
-    3: 'خرداد',
-    4: 'تیر',
-    5: 'مرداد',
-    6: 'شهریور',
-    7: 'مهر',
-    8: 'آبان',
-    9: 'آذر',
-    10: 'دی',
-    11: 'بهمن',
-    12: 'اسفند'
-}
-import time
-import jdatetime
-from dateutil.relativedelta import relativedelta
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-import pandas as pd
-import plotly.express as px
-from decimal import Decimal
-
 
 def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_data,loan_detail_data):
     # مشخص کردن اولین روز ماه
@@ -251,11 +242,6 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
 
     return days_in_month,max_cheque,month_cheque_data,month_loan_data
 
-
-
-
-
-
 @login_required(login_url='/login')
 def Home1(request, *args, **kwargs):
     user = request.user
@@ -328,9 +314,11 @@ def Home1(request, *args, **kwargs):
 
     # محاسبه داده‌ها
     today_data = TarazCal(today, today, data)
+    print(f"1.1: {time.time() - start_time:.2f} ثانیه")
     yesterday_data = TarazCal(yesterday, yesterday, data)
+    print(f"1.2: {time.time() - start_time:.2f} ثانیه")
     allday_data = TarazCal(start_date_gregorian, today, data)
-
+    print(f"1.3: {time.time() - start_time:.2f} ثانیه")
     # محاسبه داده‌ها برای 8 روز اخیر
     chart7_data = [TarazCal(today - timedelta(days=i), today - timedelta(days=i), data)['asnad_daryaftani'] for i in
                    range(8)]
@@ -534,7 +522,6 @@ def Home5(request):
     return render(request, 'homepage.html', context)
 
 
-from datetime import timedelta
 
 
 def CreateReport(request):
@@ -663,33 +650,7 @@ def CreateReport(request):
     return redirect('/updatedb')
 
 
-import time
-from datetime import datetime, timedelta
-import jdatetime
-from django.utils import timezone
-from django.shortcuts import render, redirect
-from django.db.models import Q, Sum
 
-import time
-from datetime import timedelta
-import jdatetime
-from django.utils import timezone
-from django.shortcuts import render, redirect
-from django.db.models import Q, Sum
-
-import time
-from datetime import timedelta
-import jdatetime
-from django.utils import timezone
-from django.shortcuts import render, redirect
-from django.db.models import Q, Sum
-
-import time
-from datetime import timedelta
-from django.db.models import Sum, Q
-from django.utils import timezone
-from django.shortcuts import redirect
-import jdatetime
 
 
 def get_last_day_of_jalali_month(year, month):
@@ -838,3 +799,33 @@ def CreateMonthlyReport(request):
     print(f"end_date: {end_date_gregorian}")
 
     return redirect('/updatedb')
+
+
+
+@login_required(login_url='/login')
+def ReportsDailySummary(request):
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='خلاصه گزارش های روزانه')
+
+    start_time = time.time()  # زمان شروع تابع
+    dailyr= MasterReport.objects.all()
+
+
+
+
+
+
+
+
+    total_time = time.time() - start_time  # محاسبه زمان اجرا
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+
+
+    context = {
+        'title': 'خلاصه گزارش های روزانه',
+        'user': user,
+        'dailyr': dailyr,
+    }
+
+    return render(request, 'reports_daily_summary.html', context)
