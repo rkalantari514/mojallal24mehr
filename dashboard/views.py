@@ -305,6 +305,7 @@ def Home1(request, *args, **kwargs):
 
     # فیلتر کردن داده‌ها
     data = SanadDetail.objects.filter(
+        acc_year=acc_year,
         is_active=True,
         date__range=(start_date_gregorian, today)
     ).filter(
@@ -849,7 +850,7 @@ def ReportsDailyDetile(request, *args, **kwargs):
     except ValueError:
         print('Invalid date format:', day)
 
-    kol=(400,500,401)
+    kol=(500, 400, 403, 101, 401, 501,200)
     sanads=SanadDetail.objects.filter(date=day_date,kol__in=kol)
 
     print(len(sanads))

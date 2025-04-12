@@ -57,35 +57,35 @@
                                             </th>
 
                                             <th class="card-text text-center" data-sortable="true"
-                                                data-field="khales_forosh"
-                                                data-sorter="numericSorter">خالص فروش
+                                                data-field="kol" data-filter-control="select"
+                                                data-sorter="numericSorter">کل
                                             </th>
                                             <th class="card-text text-center" data-sortable="true"
-                                                data-field="baha_tamam_forosh" data-sorter="numericSorter">
-                                                بهای تمام شده کالای فروش رفته
+                                                data-field="moin" data-filter-control="select"
+                                                data-sorter="numericSorter">معین
+                                            </th>
+                                            <th class="card-text text-center" data-sortable="true"
+                                                data-field="tafzili" data-filter-control="select"
+                                                data-sorter="numericSorter">تفضیلی
+                                            </th>
+
+
+                                            <th class="card-text text-center" data-sortable="true"
+                                                data-field="syscomment" data-sorter="numericSorter"
+                                            >شرح سند
                                             </th>
 
                                             <th class="card-text text-center" data-sortable="true"
-                                                data-field="sood_navizhe"
-                                                data-sorter="numericSorter">سود ناویژه
-                                            </th>
-
-                                            <th class="card-text text-center" data-sortable="true"
-                                                data-field="sayer_hazine" data-sorter="numericSorter"
-                                            >سایر هزینه ها
-                                            </th>
-
-                                            <th class="card-text text-center" data-sortable="true"
-                                                data-field="sayer_daramad"
+                                                data-field="bed"
                                                 data-sorter="numericSorter"
-                                                data-footer-formatter="priceFormatter">سایر درآمد ها
+                                                data-footer-formatter="priceFormatter">بدهکار
                                             </th>
 
                                             <th class="card-text text-center" data-sortable="true"
-                                                data-field="sood_vizhe"
+                                                data-field="bes"
                                                 data-sorter="numericSorter"
                                                 data-footer-formatter="priceFormatter"
-                                            >سود ویژه
+                                            >بستانکار
                                             </th>
 
 
@@ -95,17 +95,13 @@
                                         {% for s in sanads %}
                                             <tr>
                                                 <td class="card-text text-center">{{ s.date|to_jalali:'%Y/%m/%d'|slice:":4" }}</td>
-                                                <td class="card-text text-center">
-                                                    <a href="/reports/daily/detile/{{ s.day|date:'Y-m-d' }}" target="_blank">
-                                                        {{ s.date|to_jalali:'%Y/%m/%d' }}
-                                                    </a>
-                                                </td>
-
-                                                <td class="card-text text-center">{{ r.khales_forosh|floatformat:0 }}</td>
-                                                <td class="card-text text-center">{{ r.baha_tamam_forosh|floatformat:0 }}</td>
-                                                <td class="card-text text-center">{{ r.sood_navizhe|floatformat:0 }}</td>
-                                                <td class="card-text text-center">{{ r.sayer_hazine|floatformat:0 }}</td>
-                                                <td class="card-text text-center">{{ r.sayer_daramad|floatformat:0 }}</td>
+                                                <td class="card-text text-center">{{ s.date|to_jalali:'%Y/%m/%d' }}</td>
+                                                <td class="card-text text-center">{{ s.kol }}</td>
+                                                <td class="card-text text-center">{{ s.moin }}</td>
+                                                <td class="card-text text-center">{{ s.tafzili }}</td>
+                                                <td class="card-text text-center">{{ s.syscomment }}</td>
+                                                <td class="card-text text-center">{{ s.bed|floatformat:0 }}</td>
+                                                <td class="card-text text-center">{{ r.bes|floatformat:0 }}</td>
                                                 <td class="card-text text-center"
                                                     style='direction: ltr'>{{ r.sood_vizhe|floatformat:0 }}</td>
 
