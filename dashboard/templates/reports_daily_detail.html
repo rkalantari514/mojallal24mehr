@@ -82,6 +82,13 @@
                                                 data-footer-formatter="priceFormatter"
                                             >بستانکار
                                             </th>
+                                            <th class="card-text text-center" data-sortable="true"
+                                                data-field="is_active"
+                                                data-sorter="numericSorter"
+                                                data-footer-formatter="priceFormatter"
+                                                data-filter-control="select"
+                                            >فعال
+                                            </th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -95,6 +102,7 @@
                                                 <td class="card-text text-center">{{ s.syscomment }}</td>
                                                 <td class="card-text text-center">{{ s.bed|floatformat:0 }}</td>
                                                 <td class="card-text text-center">{{ s.bes|floatformat:0 }}</td>
+                                                <td class="card-text text-center">{{ s.is_active }}</td>
                                              </tr>
                                         {% endfor %}
                                         </tbody>
