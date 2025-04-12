@@ -39,7 +39,7 @@
                                            data-remember-order="true"
                                            data-sortable="true"
                                            data-show-search-clear-button="true"
-                                           data-sort-name="date"
+                                           data-sort-name="datef"
                                            data-sort-order="asc"
                                            data-filter-control="true"
                                            data-show-print="true"
@@ -55,7 +55,6 @@
                                                 data-field="datef"
                                                 data-filter-control="select" data-sorter="numericOnly">تاریخ
                                             </th>
-
                                             <th class="card-text text-center" data-sortable="true"
                                                 data-field="kol" data-filter-control="select"
                                                 data-sorter="numericSorter">کل
@@ -68,27 +67,21 @@
                                                 data-field="tafzili" data-filter-control="select"
                                                 data-sorter="numericSorter">تفضیلی
                                             </th>
-
-
                                             <th class="card-text text-center" data-sortable="true"
                                                 data-field="syscomment" data-sorter="numericSorter"
                                             >شرح سند
                                             </th>
-
                                             <th class="card-text text-center" data-sortable="true"
                                                 data-field="bed"
                                                 data-sorter="numericSorter"
                                                 data-footer-formatter="priceFormatter">بدهکار
                                             </th>
-
                                             <th class="card-text text-center" data-sortable="true"
                                                 data-field="bes"
                                                 data-sorter="numericSorter"
                                                 data-footer-formatter="priceFormatter"
                                             >بستانکار
                                             </th>
-
-
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -102,7 +95,7 @@
                                                 <td class="card-text text-center">{{ s.syscomment }}</td>
                                                 <td class="card-text text-center">{{ s.bed|floatformat:0 }}</td>
                                                 <td class="card-text text-center">{{ s.bes|floatformat:0 }}</td>
-                                                             </tr>
+                                             </tr>
                                         {% endfor %}
                                         </tbody>
                                     </table>
