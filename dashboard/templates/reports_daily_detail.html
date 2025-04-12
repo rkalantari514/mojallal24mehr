@@ -14,7 +14,7 @@
                         <div class="card-body">
                             <div class="table-responsive mt-15 ">
                                 <h6 class="card-title pb-0 border-0">گزارش روز <span id="total-mandah"
-                                                                                                  class="text-primary"></span>
+                                                                                     class="text-primary"></span>
                                     ریال </h6>
                                 <div class="table-responsive">
                                     <table id="table"
@@ -100,10 +100,19 @@
                                                 <td class="card-text text-center">{{ s.moin }}</td>
                                                 <td class="card-text text-center">{{ s.tafzili }}</td>
                                                 <td class="card-text text-center">{{ s.syscomment }}</td>
-                                                <td class="card-text text-center">{{ s.bed|floatformat:0 }}</td>
-                                                <td class="card-text text-center">{{ s.bes|floatformat:0 }}</td>
-                                                <td class="card-text text-center">{{ s.is_active }}</td>
-                                             </tr>
+                                                <td class="card-text text-center">{{ s.bed|floatformat:0|intcomma:False }}</td>
+                                                <td class="card-text text-center">{{ s.bes|floatformat:0|intcomma:False }}</td>
+                                                <td class="card-text text-center">
+                                                    {% if s.is_active %}
+                                                        <span class="text-success">
+                    <i class="fa  fa-check highlight-icon" aria-hidden="true"></i>
+                  </span>                                                    {% else %}
+                                                        <span class="text-danger">
+                    <i class="fa fa-asterisk highlight-icon" aria-hidden="true"></i>
+                  </span>                                                    {% endif %}
+
+                                                </td>
+                                            </tr>
                                         {% endfor %}
                                         </tbody>
                                     </table>
