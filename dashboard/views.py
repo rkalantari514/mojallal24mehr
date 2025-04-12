@@ -829,3 +829,40 @@ def ReportsDailySummary(request):
     }
 
     return render(request, 'reports_daily_summary.html', context)
+
+
+
+
+
+@login_required(login_url='/login')
+def ReportsDailyDetile(request, *args, **kwargs):
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='گزارش های روز')
+    start_time = time.time()  # زمان شروع تابع
+    day = kwargs['day']
+    try:
+        # فرض کنیم فرمت day در URL به شکل 'YYYY-MM-DD' است
+        day_date = datetime.strptime(day, '%Y-%m-%d').date()
+        print('Converted day to date:')
+        print(day_date)
+    except ValueError:
+        print('Invalid date format:', day)
+
+    kol=(400,500,401)
+    sanads=SanadDetail.objects.filter(date=day_date,kol__in=kol)
+
+    print(len(sanads))
+
+
+    total_time = time.time() - start_time  # محاسبه زمان اجرا
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+
+
+    context = {
+        'title': 'گزارش روز',
+        'user': user,
+        'sanads': sanads,
+    }
+
+    return render(request, 'reports_daily_detail.html', context)

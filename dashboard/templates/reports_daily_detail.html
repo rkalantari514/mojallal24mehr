@@ -13,7 +13,7 @@
                     <div class="card card-statistics h-100">
                         <div class="card-body">
                             <div class="table-responsive mt-15 ">
-                                <h6 class="card-title pb-0 border-0">خلاصه گزارش های روزانه <span id="total-mandah"
+                                <h6 class="card-title pb-0 border-0">گزارش روز <span id="total-mandah"
                                                                                                   class="text-primary"></span>
                                     ریال </h6>
                                 <div class="table-responsive">
@@ -92,12 +92,12 @@
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        {% for r in dailyr %}
+                                        {% for s in sanads %}
                                             <tr>
-                                                <td class="card-text text-center">{{ r.day|to_jalali:'%Y/%m/%d'|slice:":4" }}</td>
+                                                <td class="card-text text-center">{{ s.date|to_jalali:'%Y/%m/%d'|slice:":4" }}</td>
                                                 <td class="card-text text-center">
-                                                    <a href="/reports/daily/detile/{{ r.day|date:'Y-m-d' }}" target="_blank">
-                                                        {{ r.day|to_jalali:'%Y/%m/%d' }}
+                                                    <a href="/reports/daily/detile/{{ s.day|date:'Y-m-d' }}" target="_blank">
+                                                        {{ s.date|to_jalali:'%Y/%m/%d' }}
                                                     </a>
                                                 </td>
 
