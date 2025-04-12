@@ -850,7 +850,7 @@ def ReportsDailyDetile(request, *args, **kwargs):
     except ValueError:
         print('Invalid date format:', day)
 
-    kol=(500, 400, 403, 101, 401, 501,200)
+    kol=(500, 400, 403, 401, 501)
     sanads=SanadDetail.objects.filter(date=day_date,kol__in=kol)
 
     print(len(sanads))
