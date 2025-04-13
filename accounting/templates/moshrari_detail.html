@@ -274,12 +274,11 @@
                     <div class="card card-statistics h-100">
                         <div class="card-body col-12">
                             <h5 class="card-title pb-0 border-0 ">رفتار مالی مشتری</h5>
-                         <canvas id="myChart"></canvas>
+                            <canvas id="myChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
-
 
 
             <!-- ردیف جزئیات اسناد -->
@@ -289,8 +288,10 @@
                         <div class="card card-statistics h-100">
                             <div class="card-body">
                                 <div class="table-responsive mt-15 ">
-                                    <h6 class="card-title pb-0 border-0">مانده حساب {{ hesabmoshtari.person.name }} {{ hesabmoshtari.person.lname }} :</h6>
-                                     <h5 class="card-title pb-0 border-0"> <span id="total-mandah" class="text-primary"></span>
+                                    <h6 class="card-title pb-0 border-0">مانده
+                                        حساب {{ hesabmoshtari.person.name }} {{ hesabmoshtari.person.lname }} :</h6>
+                                    <h5 class="card-title pb-0 border-0"><span id="total-mandah"
+                                                                               class="text-primary"></span>
                                         ریال </h5>
                                     <div class="table-responsive">
                                         <table id="table"
@@ -351,10 +352,10 @@
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="mand1" data-footer-formatter="priceFormatter">مانده سند
                                                 </th>
-{#                                                <th class="card-text text-center" data-sortable="true"#}
-{#                                                    data-field="mandkol"#}
-{#                                                    data-filter-control="select">مانده کل#}
-{#                                                </th>#}
+                                                {#                                                <th class="card-text text-center" data-sortable="true"#}
+                                                {#                                                    data-field="mandkol"#}
+                                                {#                                                    data-filter-control="select">مانده کل#}
+                                                {#                                                </th>#}
 
                                             </tr>
                                             </thead>
@@ -364,13 +365,22 @@
                                                     <td class="card-text text-center">{{ s.code }}</td>
                                                     <td class="card-text text-center">{{ s.radif }}</td>
                                                     <td class="card-text text-center">{{ s.tarikh }}</td>
-{#                                                    <td class="card-text text-center ">{{ s.kind.0 }}</td>#}
+                                                    {#                                                    <td class="card-text text-center ">{{ s.kind.0 }}</td>#}
                                                     <td class="card-text text-center text-{{ s.kind.2 }}">{{ s.kind.1 }}</td>
-                                                     <td class="card-text text-center ">{{ s.syscomment }}</td>
+                                                    {#                                                     <td class="card-text text-center ">{{ s.syscomment }}</td>#}
+                                                    <td class="card-text text-center ">
+                                                        {% if s.syscomment %}
+                                                            {{ s.syscomment }}
+                                                        {% else %}
+                                                            {{ s.sharh }}
+                                                        {% endif %}
+                                                    </td>
+
                                                     <td class="card-text text-center">{{ s.bed|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ s.bes|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center" style="direction: ltr">{{ s.curramount|floatformat:0|intcomma:False }}</td>
-{#                                                    <td class="card-text text-center"></td>#}
+                                                    <td class="card-text text-center"
+                                                        style="direction: ltr">{{ s.curramount|floatformat:0|intcomma:False }}</td>
+                                                    {#                                                    <td class="card-text text-center"></td>#}
                                                 </tr>
                                             {% endfor %}
                                             </tbody>
@@ -401,7 +411,7 @@
 {% block myjs %}
 
     <!--  نمودار رفتار مالی مشتری -->
-<script>
+    <script>
         var labels = [
             {% for label in labels %}
                 '{{ label }}',
