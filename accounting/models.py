@@ -19,4 +19,5 @@ class BedehiMoshtari(models.Model):
         verbose_name_plural = 'بدهی مشتریان'
 
     def __str__(self):
-        return f"{self.tafzili}-{self.person.lname}"
+        return f"{self.tafzili}-"
+        # return f"{self.tafzili}-{self.person.lname}"

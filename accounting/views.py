@@ -18,10 +18,8 @@ from dashboard.views import generate_calendar_data_cheque
 from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan, LoanDetil
 from jdatetime import date as jdate
 from datetime import timedelta, date
-from django.shortcuts import render
-from django.db.models import Sum
 from khayyam import JalaliDate, JalaliDatetime
-
+from django.db.models import F
 def fix_persian_characters(value):
     return standardize(value)
 
@@ -1208,7 +1206,10 @@ def JariAshkhasMoshtarian(request):
     ]
     print(f"6: {time.time() - start_time:.2f} ثانیه")
 
-    loans=Loan.objects.all()
+    # loans=Loan.objects.all()
+    loans = Loan.objects.annotate(
+        per_taf=F('name_code') + 100000  # جمع مقدار با ۱۰۰۰۰۰۰
+    )
 
     context = {
         'title': 'حساب مشتریان',
@@ -1279,7 +1280,7 @@ def HesabMoshtariDetail(request, tafsili):
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page='حساب مشتری', code=0)
 
-    حساب_مشتری = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
+    hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
     today = timezone.now().date()
     asnad = SanadDetail.objects.filter(kol=103, moin=1, tafzili=tafsili).order_by('acc_year','date', 'code', 'radif')
 
@@ -1297,7 +1298,7 @@ def HesabMoshtariDetail(request, tafsili):
 
     context = {
         'title': 'حساب مشتری',
-        'hesabmoshtari': حساب_مشتری,
+        'hesabmoshtari': hesabmoshtari,
         'today': today,
         'asnad': asnad,
         'final_chart_data': [{'date': date, 'value': data['value']} for date, data in chart_data.items()],

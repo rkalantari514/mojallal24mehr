@@ -424,7 +424,7 @@ class Person(models.Model):
     mobile = models.CharField(max_length=150, verbose_name='موبایل')
     address = models.CharField(max_length=550, verbose_name='آدرس')
     comment = models.CharField(max_length=550, verbose_name='توضیحات')
-
+    # per_taf=models.IntegerField(default=0, verbose_name='کد تفصیلی فرد')
     # reminbg
 
     class Meta:
@@ -433,6 +433,8 @@ class Person(models.Model):
 
     def __str__(self):
         return f'{self.name}  {self.lname}'
+
+
 
 
 class WordCount(models.Model):
@@ -630,9 +632,12 @@ class ChequesRecieve(models.Model):
         )
         return (totals['total_bes'] or 0) - (totals['total_bed'] or 0)
     def person(self):
-        name=Person.objects.filter(code=self.per_code).last().name
-        family=Person.objects.filter(code=self.per_code).last().lname
-        return f'{name} {family}'
+        try:
+            name = Person.objects.filter(code=self.per_code).last().name
+            family = Person.objects.filter(code=self.per_code).last().lname
+            return f'{name} {family}'
+        except:
+            return '---'
 
 
 class Bank(models.Model):

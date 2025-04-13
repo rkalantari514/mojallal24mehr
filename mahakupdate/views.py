@@ -2526,10 +2526,10 @@ def Cheques_Recieve(request):
         'کشاورزي': 'keshavarzi.png',
         'گردشگري': 'gardeshgari.png'
     }
-
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
     # بارگذاری SanadDetail ها به یک دیکشنری
     sanad_details = SanadDetail.objects.filter(cheque_id__in=[row[1] for row in mahak_data], kol=101,
-                                               is_active=True).order_by('date', 'code', 'radif')
+                                               is_active=True,acc_year=acc_year).order_by('date', 'code', 'radif')
     sanad_dict = {}
     for sd in sanad_details:
         if sd.cheque_id not in sanad_dict:
@@ -2693,8 +2693,10 @@ def Cheque_Pay(request):
     cheques_to_update = []
     current_cheques = {cheque.id_mahak: cheque for cheque in ChequesPay.objects.all()}
     BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+
     sanad_details = SanadDetail.objects.filter(cheque_id__in=[row[1] for row in mahak_data], kol=200,
-                                               is_active=True).order_by('date', 'code',
+                                               is_active=True,acc_year=acc_year).order_by('date', 'code',
                                                                         'radif')
     sanad_dict = {}
     for sd in sanad_details:
@@ -3199,10 +3201,10 @@ def UpdateSanadConditions(request):
 
 
 def UpdateBedehiMoshtari(request):
+    BedehiMoshtari.objects.all().delete()
     t0 = time.time()
     print('شروع آپدیت بدهی مشتری-------------------------------')
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
-
     try:
         with transaction.atomic():
             # محاسبه مجموع curramount بر اساس tafzili و moin
@@ -3238,8 +3240,11 @@ def UpdateBedehiMoshtari(request):
                 if person:
                     # پیدا کردن وام‌های شخص
                     loans = Loan.objects.filter(person=person)
+                    print('len(loans)',len(loans))
                     loans_total = loans.aggregate(total_cost=Sum('cost'))['total_cost'] or 0
                     total_with_loans = loans_total + total_curramount
+                else:
+                    print('no person')
 
                 if tafzili_code in existing_entries:
                     entry = existing_entries[tafzili_code]
