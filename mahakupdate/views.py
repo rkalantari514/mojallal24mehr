@@ -3201,7 +3201,6 @@ def UpdateSanadConditions(request):
 
 
 def UpdateBedehiMoshtari(request):
-    BedehiMoshtari.objects.all().delete()
     t0 = time.time()
     print('شروع آپدیت بدهی مشتری-------------------------------')
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
@@ -3253,6 +3252,7 @@ def UpdateBedehiMoshtari(request):
                     entry.total_with_loans = total_with_loans
                     entry.loans_total = loans_total
                     entry.moin = moin_code
+                    entry.loans.set(loans)
                     data_to_update.append(entry)
                 else:
                     entry = BedehiMoshtari(
