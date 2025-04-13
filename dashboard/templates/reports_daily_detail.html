@@ -49,23 +49,27 @@
                                         <tr class="tr-class-1">
                                             <th class="card-text text-center" data-sortable="true"
                                                 data-field="year"
-                                                data-filter-control="select" >سال
+                                                data-filter-control="select">سال
                                             </th>
                                             <th class="card-text text-center" data-sortable="true"
                                                 data-field="datef"
-                                                data-filter-control="select" >تاریخ
+                                                data-filter-control="select">تاریخ
                                             </th>
                                             <th class="card-text text-center" data-sortable="true"
                                                 data-field="kol" data-filter-control="select"
-                                                >کل
+                                            >کل
+                                            </th>
+                                            <th class="card-text text-center" data-sortable="true"
+                                                data-field="kolname" data-filter-control="select"
+                                            >نام کل
                                             </th>
                                             <th class="card-text text-center" data-sortable="true"
                                                 data-field="moin" data-filter-control="select"
-                                                >معین
+                                            >معین
                                             </th>
                                             <th class="card-text text-center" data-sortable="true"
                                                 data-field="tafzili" data-filter-control="select"
-                                                >تفضیلی
+                                            >تفضیلی
                                             </th>
                                             <th class="card-text text-center" data-sortable="true"
                                                 data-field="syscomment"
@@ -84,8 +88,6 @@
                                             </th>
                                             <th class="card-text text-center" data-sortable="true"
                                                 data-field="is_active"
-
-                                                data-footer-formatter="priceFormatter"
                                                 data-filter-control="select"
                                             >فعال
                                             </th>
@@ -97,19 +99,20 @@
                                                 <td class="card-text text-center">{{ s.date|to_jalali:'%Y/%m/%d'|slice:":4" }}</td>
                                                 <td class="card-text text-center">{{ s.date|to_jalali:'%Y/%m/%d' }}</td>
                                                 <td class="card-text text-center">{{ s.kol }}</td>
+                                                <td class="card-text text-center">{{ s.acc_name }}</td> <!-- ستون جدید -->
                                                 <td class="card-text text-center">{{ s.moin }}</td>
                                                 <td class="card-text text-center">{{ s.tafzili }}</td>
                                                 <td class="card-text text-center">{{ s.syscomment }}</td>
                                                 <td class="card-text text-center">{{ s.bed|floatformat:0|intcomma:False }}</td>
-                                                <td class="card-text text-center">{{ s.bes|floatformat:0|intcomma:False }}</td>
+                                                <td class="card-text text-center">{{ s.bes|floatformat:0|intcomma }}</td>
                                                 <td class="card-text text-center">
                                                     {% if s.is_active %}
-                                                        <span class="text-success">
-                    <i class="fa  fa-check icon" aria-hidden="true"></i>
-                  </span>                                                    {% else %}
-                                                        <span class="text-danger">
-                    <i class="fa fa-asterisk icon" aria-hidden="true"></i>
-                  </span>                                                    {% endif %}
+                                                        <span class="text-success"><i class="fa  fa-check icon"
+                                                                                      aria-hidden="true"></i></span>
+                                                    {% else %}
+                                                        <span class="text-danger"><i class="fa fa-asterisk icon"
+                                                                                     aria-hidden="true"></i></span>
+                                                    {% endif %}
 
                                                 </td>
                                             </tr>

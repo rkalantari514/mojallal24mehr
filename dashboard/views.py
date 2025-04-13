@@ -15,11 +15,11 @@ from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
 from mahakupdate.models import (
     Factor, FactorDetaile, SanadDetail, Mtables,
-    ChequesRecieve, ChequesPay, LoanDetil
+    ChequesRecieve, ChequesPay, LoanDetil, AccCoding
 )
 from .models import MasterInfo, MasterReport, MonthlyReport
 from khayyam import JalaliDate, JalaliDatetime
-
+from django.db.models import OuterRef, Subquery
 logger = logging.getLogger(__name__)
 
 
@@ -851,7 +851,15 @@ def ReportsDailyDetile(request, *args, **kwargs):
         print('Invalid date format:', day)
 
     kol=(500, 400, 403, 401, 501)
-    sanads=SanadDetail.objects.filter(date=day_date,kol__in=kol)
+    # sanads=SanadDetail.objects.filter(date=day_date,kol__in=kol)
+
+    sanads = SanadDetail.objects.filter(date=day_date, kol__in=kol).annotate(
+        acc_name=Subquery(
+            AccCoding.objects.filter(code=OuterRef('kol')).values('name')[:1]
+        )
+    )
+
+
 
     print(len(sanads))
 
