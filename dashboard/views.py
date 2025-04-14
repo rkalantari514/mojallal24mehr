@@ -43,6 +43,33 @@ month_names_persian = {
     12: 'اسفند'
 }
 
+def TarazCalFromReport(day):
+    repo = MasterReport.objects.filter(day=day).last()
+
+    if repo is None:
+        # اگر گزارشی پیدا نشد، یک مقدار پیش‌فرض برگردانید یا خطا هندل کنید
+        return {
+            'khales_forosh': 0,
+            'baha_tamam_forosh': 0,
+            'sayer_hazine': 0,
+            'sayer_daramad': 0,
+            'sood_navizhe': 0,
+            'sood_vizhe': 0,
+            'asnad_daryaftani': 0,
+            'asnad_pardakhtani': 0,
+        }
+
+    to_return = {
+        'khales_forosh': repo.khales_forosh,
+        'baha_tamam_forosh': repo.baha_tamam_forosh,
+        'sayer_hazine': repo.sayer_hazine,
+        'sayer_daramad': repo.sayer_daramad,
+        'sood_navizhe': repo.sood_navizhe,
+        'sood_vizhe': repo.sood_vizhe,
+        'asnad_daryaftani': repo.asnad_daryaftani,
+        'asnad_pardakhtani': repo.asnad_pardakhtani,  # جمع مقادیر asnad_pardakhtani
+    }
+    return to_return
 
 def TarazCal(fday, lday, data):
     # ایجاد لیستی از تمام روزهای بین fday و lday
@@ -118,26 +145,6 @@ def TarazCal(fday, lday, data):
     }
     return to_return
 
-def TarazCalFromReport(day):
-    repo = MasterReport.objects.filter(day=day).last()
-
-    to_return = {
-        'khales_forosh': repo.khales_forosh,
-        'baha_tamam_forosh': repo.baha_tamam_forosh,
-        'sayer_hazine': repo.sayer_hazine,
-        'sayer_daramad': repo.sayer_daramad,
-        'sood_navizhe': repo.sood_navizhe,
-        'sood_vizhe': repo.sood_vizhe,
-        'asnad_daryaftani': repo.daryaftani,
-        'asnad_pardakhtani': repo.asnad_pardakhtani,  # جمع مقادیر asnad_pardakhtani
-    }
-    return to_return
-
-    # reports = MasterReport.objects.order_by('-day')[:8]
-    # دریافت گزارش‌ها
-    # start_date = today - timedelta(days=114)
-    # end_date = today - timedelta(days=107)
-    # reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
 
 def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_data,loan_detail_data):
     # مشخص کردن اولین روز ماه
@@ -314,9 +321,11 @@ def Home1(request, *args, **kwargs):
     print(f"1: {time.time() - start_time:.2f} ثانیه")
 
     # محاسبه داده‌ها
-    today_data = TarazCal(today, today, data)
+    # today_data = TarazCal(today, today, data)
+    today_data = TarazCalFromReport(today)
     print(f"1.1: {time.time() - start_time:.2f} ثانیه")
-    yesterday_data = TarazCal(yesterday, yesterday, data)
+    # yesterday_data = TarazCal(yesterday, yesterday, data)
+    yesterday_data = TarazCalFromReport(yesterday)
     print(f"1.2: {time.time() - start_time:.2f} ثانیه")
     allday_data = TarazCal(start_date_gregorian, today, data)
     print(f"1.3: {time.time() - start_time:.2f} ثانیه")
