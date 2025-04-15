@@ -1,4 +1,3 @@
-from django.conf import settings
 from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
 from dashboard.models import MasterInfo
@@ -6,7 +5,6 @@ from dashboard.views import CreateReport, CreateMonthlyReport
 from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category, Sanad, SanadDetail, AccCoding, ChequesPay, \
     Bank, Loan, LoanDetil
 from .models import FactorDetaile
-import pandas as pd
 from django.contrib.auth.decorators import login_required
 from .models import Kala, Storagek
 from .models import Factor
@@ -23,15 +21,11 @@ from decimal import Decimal, InvalidOperation
 import jdatetime
 from .models import ChequesRecieve, Mtables
 from .models import MyCondition, SanadDetail
-import time
-from django.shortcuts import redirect
 from django.db import transaction
-from django.db.models import Sum
 import pyodbc
 from django.http import JsonResponse
-from django.shortcuts import render
-import os
-
+import pyodbc
+from django.http import JsonResponse
 # sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
 
 
@@ -94,6 +88,49 @@ def get_databases(request):
         return JsonResponse({'error': str(e)}, status=500)
 
     # صفحه عملیات آپدیت
+
+
+
+
+import os
+import pyodbc
+from django.http import JsonResponse
+
+def BackupFromMahak(request, dbname):
+    try:
+        conn = connect_to_mahak()
+        conn.autocommit = True  # اطمینان از اجرای دستور خارج از تراکنش
+        cursor = conn.cursor()
+
+        # مسیر ذخیره‌سازی بک‌آپ
+        backup_dir = os.path.join(os.getcwd(), "temp")
+        if not os.path.exists(backup_dir):
+            os.makedirs(backup_dir)  # ایجاد پوشه در صورت عدم وجود
+
+        backup_path = os.path.join(backup_dir, f"{dbname}_backup.bak")
+
+        # اجرای دستور بک‌آپ در SQL Server
+        backup_query = f"""
+        BACKUP DATABASE [{dbname}]
+        TO DISK = '{backup_path}'
+        WITH FORMAT, INIT, NAME = '{dbname} Backup', SKIP, NOREWIND, NOUNLOAD, STATS = 10;
+        """
+
+        cursor.execute(backup_query)
+        cursor.close()
+        conn.close()
+
+        return JsonResponse({'message': f'Backup for {dbname} created successfully!', 'backup_path': backup_path})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+
+
+
+
+
 
 
 @login_required(login_url='/login')
