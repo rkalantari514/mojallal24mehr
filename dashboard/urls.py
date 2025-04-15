@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CreateReport, Home1, CreateMonthlyReport, ReportsDailySummary, ReportsDailyDetile
+from .views import CreateReport, Home1, CreateMonthlyReport, ReportsDailySummary, ReportsDailyDetile, CreateTotalReport
 
 urlpatterns = [
     path('', Home1,name="home1"),
@@ -10,6 +10,7 @@ urlpatterns = [
 
 
 
+    path('create_total_report', CreateTotalReport,name="create-total-report"),
     path('createreport', CreateReport,name="create-report"),
     path('create_monthly_report', CreateMonthlyReport,name="create-monthly-report"),
 

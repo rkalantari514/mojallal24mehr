@@ -145,6 +145,44 @@ def TarazCal(fday, lday, data):
     }
     return to_return
 
+def TarazCal1day(day, data):
+
+    # فیلتر کردن داده‌ها برای تمام روزها در یک بار
+    current_data = defaultdict(int)
+    for item in data:
+        current_data[(item['date'], item['kol'])] = item['total_amount']
+
+    asnad_daryaftan = []  # لیست برای ذخیره مقادیر asnad_daryaftan
+    asnad_pardakhtan = []  # لیست برای ذخیره مقادیر asnad_pardakhtan
+
+    baha_tamam_forosh = current_data.get((day, 500), 0)
+    sayer_hazine = current_data.get((day, 501), 0)
+    daramad_forosh = current_data.get((day, 400), 0)
+    sayer_daramad = current_data.get((day, 401), 0)
+    barghasht_az_forosh = current_data.get((day, 403), 0)  # منفی است
+    khales_forosh = daramad_forosh + barghasht_az_forosh
+    asnad_daryaftani = current_data.get((day, 101), 0)  # محاسبه asnad_daryaftani
+    asnad_pardakhtani = current_data.get((day, 200), 0)  # محاسبه asnad_pardakhtani
+
+    # محاسبه مجموع روزانه
+    sood_navizhe = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh
+    sood_vizhe = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh + sayer_daramad + sayer_hazine
+
+    # ذخیره مقدار asnad_daryaftani با علامت منفی
+    asnad_daryaftan.append(-asnad_daryaftani)
+    asnad_pardakhtan.append(asnad_pardakhtani)
+
+    to_return = {
+        'khales_forosh': khales_forosh / 10000000,
+        'baha_tamam_forosh': baha_tamam_forosh / -10000000,
+        'sayer_hazine': sayer_hazine / -10000000,
+        'sayer_daramad': sayer_daramad / 10000000,
+        'sood_navizhe': sood_navizhe / 10000000,
+        'sood_vizhe': sood_vizhe / 10000000,
+        'asnad_daryaftani': sum(asnad_daryaftan) / 10000000,  # جمع مقادیر asnad_daryaftani
+        'asnad_pardakhtani': sum(asnad_pardakhtan) / 10000000,  # جمع مقادیر asnad_pardakhtani
+    }
+    return to_return
 
 def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_data,loan_detail_data):
     # مشخص کردن اولین روز ماه
@@ -533,6 +571,109 @@ def Home5(request):
 
 
 
+from django.db.models import Sum, Min, Max, Avg, F, ExpressionWrapper, FloatField
+
+from django.db.models import Sum
+
+def CreateTotalReport(request):
+    start_time = time.time()  # زمان شروع ویو
+    report = MasterInfo.objects.all()
+
+    for repo in report:
+        acc_year = repo.acc_year
+
+        # محاسبه تعداد روزهای فعال
+        active_day = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=400, curramount__gt=0).count()
+
+        # ایجاد لیست سود ناویژه برای تمام رکوردها
+        sanad_details = SanadDetail.objects.filter(acc_year=acc_year, is_active=True)
+        sood_navizhe_list = []
+        sood_vizhe_list = []
+
+        for sanad in sanad_details:
+            daramad_forosh = sanad.curramount if sanad.kol == 400 else 0
+            baha_tamam_forosh = sanad.curramount if sanad.kol == 500 else 0
+            barghasht_az_forosh = sanad.curramount if sanad.kol == 403 else 0
+            sayer_daramad = sanad.curramount if sanad.kol == 401 else 0
+            sayer_hazine = sanad.curramount if sanad.kol == 501 else 0
+
+            # محاسبه سود ناویژه
+            sood_navizhe = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh
+            sood_navizhe_list.append(sood_navizhe)
+
+            # محاسبه سود ویژه
+            sood_vizhe = sood_navizhe + sayer_daramad + sayer_hazine
+            sood_vizhe_list.append(sood_vizhe)
+
+        # محاسبه حداقل، حداکثر، میانگین و مجموع سود ناویژه
+        repo.sood_navizhe_min = min(sood_navizhe_list) if sood_navizhe_list else 0
+        repo.sood_navizhe_max = max(sood_navizhe_list) if sood_navizhe_list else 0
+        repo.sood_navizhe_ave = sum(sood_navizhe_list) / len(sood_navizhe_list) if sood_navizhe_list else 0
+        repo.sood_navizhe_total = sum(sood_navizhe_list)
+
+        # محاسبه حداقل، حداکثر، میانگین و مجموع سود ویژه
+        repo.sood_vizhe_min = min(sood_vizhe_list) if sood_vizhe_list else 0
+        repo.sood_vizhe_max = max(sood_vizhe_list) if sood_vizhe_list else 0
+        repo.sood_vizhe_ave = sum(sood_vizhe_list) / len(sood_vizhe_list) if sood_vizhe_list else 0
+        repo.sood_vizhe_total = sum(sood_vizhe_list)
+
+        # محاسبه میانگین سایر هزینه‌ها و درآمدها
+        sayer_hazine_total = sum([sanad.curramount for sanad in sanad_details if sanad.kol == 501])
+        sayer_daramad_total = sum([sanad.curramount for sanad in sanad_details if sanad.kol == 401])
+
+        repo.sayer_hazine_ave = sayer_hazine_total / active_day * -1 if active_day else 0
+        repo.sayer_daramad_ave = sayer_daramad_total / active_day if active_day else 0
+
+        repo.save()
+
+    total_time = time.time() - start_time  # محاسبه زمان اجرا
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+
+    return redirect('/updatedb')
+
+
+
+
+
+
+
+
+
+
+
+def CreateTotalReport9(request):
+    start_time = time.time()  # زمان شروع ویو
+    report=MasterInfo.objects.all()
+
+    for repo in report:
+        acc_year=repo.acc_year
+        active_day=SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=400,curramount__gt=0).count()
+
+        daramad_forosh = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=400).aggregate(total_curramount=Sum('curramount') or 0)['total_curramount']
+        baha_tamam_forosh = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=500).aggregate(total_curramount=Sum('curramount') or 0)['total_curramount']
+        sayer_hazine = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=501).aggregate(total_curramount=Sum('curramount') or 0)['total_curramount']
+        sayer_daramad = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=401).aggregate(total_curramount=Sum('curramount') or 0)['total_curramount']
+        barghasht_az_forosh = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=403).aggregate(total_curramount=Sum('curramount') or 0)['total_curramount']
+
+        repo.sayer_hazine_ave = sayer_hazine/active_day
+        repo.sayer_daramad_ave =sayer_daramad/active_day
+        repo.sood_navizhe_min =0
+        repo.sood_navizhe_max =0
+        repo.sood_navizhe_ave =0
+        repo.sood_navizhe_total =daramad_forosh + barghasht_az_forosh + baha_tamam_forosh
+        repo.sood_vizhe_min =0
+        repo.sood_vizhe_max =0
+        repo.sood_vizhe_ave =0
+        repo.sood_vizhe_total = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh + sayer_daramad + sayer_hazine
+
+        repo.save()
+
+        total_time = time.time() - start_time  # محاسبه زمان اجرا
+        print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+
+
+    return redirect('/updatedb')
+
 
 def CreateReport(request):
     start_time = time.time()  # زمان شروع ویو
@@ -612,13 +753,14 @@ def CreateReport(request):
         data = SanadDetail.objects.filter(
             # acc_year=acc_year,
             is_active=True,
-            date__range=(current_date, current_date)
+            date= current_date
         ).filter(
             Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101) | Q(kol=401) | Q(kol=501)| Q(kol=200)
         ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
 
         # محاسبه داده‌ها برای روزهای مختلف
-        today_data = TarazCal(current_date, current_date, data)
+        # today_data = TarazCal(current_date, current_date, data)
+        today_data = TarazCal1day(current_date, data)
 
         report.khales_forosh = today_data['khales_forosh']
         report.baha_tamam_forosh = today_data['baha_tamam_forosh']
