@@ -1,7 +1,7 @@
 from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
 from dashboard.models import MasterInfo
-from dashboard.views import CreateReport, CreateMonthlyReport
+from dashboard.views import CreateReport, CreateMonthlyReport, CreateTotalReport
 from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category, Sanad, SanadDetail, AccCoding, ChequesPay, \
     Bank, Loan, LoanDetil
 from .models import FactorDetaile
