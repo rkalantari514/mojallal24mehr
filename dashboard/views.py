@@ -632,7 +632,7 @@ def CreateTotalReport(request):
                 sood_vizhe = sood_navizhe + Decimal(repo.sayer_daramad_ave) - Decimal(repo.sayer_hazine_ave)
                 sood_vizhe_list.append(sood_vizhe)
 
-        sood_navizhe_list_positive = [value for value in sood_navizhe_list if value > 0]
+        sood_navizhe_list_positive = [value for value in sood_navizhe_list if value > 1]
 
         print('sood_navizhe_list:',sood_navizhe_list)
 
@@ -642,7 +642,7 @@ def CreateTotalReport(request):
         repo.sood_navizhe_ave = sum(sood_navizhe_list) / active_day if active_day else 0
         repo.sood_navizhe_total = sum(sood_navizhe_list)
 
-        sood_vizhe_list_positive = [value for value in sood_vizhe_list if value > 0]
+        sood_vizhe_list_positive = [value for value in sood_vizhe_list if value > 1]
 
         # محاسبه حداقل، حداکثر، میانگین و مجموع سود ویژه
         repo.sood_vizhe_min = min(sood_vizhe_list_positive) if sood_vizhe_list_positive else 0
