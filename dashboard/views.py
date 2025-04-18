@@ -163,7 +163,7 @@ def TarazCal1day(day, data,acc_year2):
 
     # محاسبه مجموع روزانه
     sood_navizhe = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh
-    sood_vizhe = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh - m_info.sayer_hazine_ave + m_info.sayer_daramad_ave
+    sood_vizhe = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh - m_info.sayer_hazine_ave*10000000 + m_info.sayer_daramad_ave*10000000
 
     # ذخیره مقدار asnad_daryaftani با علامت منفی
     asnad_daryaftan.append(-asnad_daryaftani)
@@ -286,6 +286,7 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
 
 @login_required(login_url='/login')
 def Home1(request, *args, **kwargs):
+    minfo=MasterInfo.objects.filter(is_active=True).last()
     user = request.user
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page='داشبورد 1')
@@ -482,6 +483,7 @@ def Home1(request, *args, **kwargs):
     context = {
         'title': 'داشبورد مدیریتی',
         'user': user,
+        'minfo': minfo,
         # 'is_dark_mode': user.is_dark_mode,
 
         'last_update_time': last_update_time,
