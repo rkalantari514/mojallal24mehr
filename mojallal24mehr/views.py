@@ -30,9 +30,13 @@ def header(request, *args, **kwargs):
 def sidebar(request, *args, **kwargs):
     category_tree = get_category_tree()
     user = request.user
+    last_update_time = MasterInfo.objects.filter(is_active=True).last().last_update_time
+
     context = {
         'is_dark_mode': user.is_dark_mode,
         'category_tree': category_tree,
+        'last_update_time': last_update_time,
+
     }
     return render(request, 'shared/Sidebar.html', context)
 
