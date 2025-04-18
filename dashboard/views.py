@@ -1,29 +1,23 @@
 import logging
-import time
 import jdatetime
-import pandas as pd
-import plotly.express as px
-from decimal import Decimal
-from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta, date
 from collections import defaultdict
 from django.utils import timezone
-from django.db.models import Sum, Q
+from django.db.models import  Q
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
-from mahakupdate.models import (
-    Factor, FactorDetaile, SanadDetail, Mtables,
-    ChequesRecieve, ChequesPay, LoanDetil, AccCoding
-)
 from .models import MasterInfo, MasterReport, MonthlyReport
-from khayyam import JalaliDate, JalaliDatetime
+from khayyam import JalaliDate
 from django.db.models import OuterRef, Subquery
 logger = logging.getLogger(__name__)
 
 
-
+from mahakupdate.models import (
+    Factor, FactorDetaile, SanadDetail, Mtables,
+    ChequesRecieve, ChequesPay, LoanDetil, AccCoding
+)
 
 
 
@@ -145,8 +139,8 @@ def TarazCal(fday, lday, data):
     }
     return to_return
 
-def TarazCal1day(day, data):
-
+def TarazCal1day(day, data,acc_year2):
+    m_info=MasterInfo.objects.filter(acc_year=acc_year2).last()
     # فیلتر کردن داده‌ها برای تمام روزها در یک بار
     current_data = defaultdict(int)
     for item in data:
@@ -156,17 +150,20 @@ def TarazCal1day(day, data):
     asnad_pardakhtan = []  # لیست برای ذخیره مقادیر asnad_pardakhtan
 
     baha_tamam_forosh = current_data.get((day, 500), 0)
-    sayer_hazine = current_data.get((day, 501), 0)
+    # sayer_hazine = current_data.get((day, 501), 0)
     daramad_forosh = current_data.get((day, 400), 0)
-    sayer_daramad = current_data.get((day, 401), 0)
+    # sayer_daramad = current_data.get((day, 401), 0)
     barghasht_az_forosh = current_data.get((day, 403), 0)  # منفی است
     khales_forosh = daramad_forosh + barghasht_az_forosh
     asnad_daryaftani = current_data.get((day, 101), 0)  # محاسبه asnad_daryaftani
     asnad_pardakhtani = current_data.get((day, 200), 0)  # محاسبه asnad_pardakhtani
 
+
+
+
     # محاسبه مجموع روزانه
     sood_navizhe = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh
-    sood_vizhe = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh + sayer_daramad + sayer_hazine
+    sood_vizhe = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh - m_info.sayer_hazine_ave + m_info.sayer_daramad_ave
 
     # ذخیره مقدار asnad_daryaftani با علامت منفی
     asnad_daryaftan.append(-asnad_daryaftani)
@@ -175,8 +172,8 @@ def TarazCal1day(day, data):
     to_return = {
         'khales_forosh': khales_forosh / 10000000,
         'baha_tamam_forosh': baha_tamam_forosh / -10000000,
-        'sayer_hazine': sayer_hazine / -10000000,
-        'sayer_daramad': sayer_daramad / 10000000,
+        'sayer_hazine': m_info.sayer_hazine_ave,
+        'sayer_daramad': m_info.sayer_daramad_ave,
         'sood_navizhe': sood_navizhe / 10000000,
         'sood_vizhe': sood_vizhe / 10000000,
         'asnad_daryaftani': sum(asnad_daryaftan) / 10000000,  # جمع مقادیر asnad_daryaftani
@@ -592,6 +589,8 @@ def CreateTotalReport(request):
         unique_dates400 = set(dates400)
         active_day = len(unique_dates400)
 
+        repo.active_day=active_day
+
         print('active_day=', active_day)
 
         sanad_details = SanadDetail.objects.filter(acc_year=acc_year, is_active=True)
@@ -628,7 +627,7 @@ def CreateTotalReport(request):
             if daramad_forosh > 0:
                 sood_navizhe = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh
                 sood_navizhe_list.append(sood_navizhe)
-                sood_vizhe = sood_navizhe + Decimal(repo.sayer_daramad_ave) + Decimal(repo.sayer_hazine_ave)
+                sood_vizhe = sood_navizhe + Decimal(repo.sayer_daramad_ave) - Decimal(repo.sayer_hazine_ave)
                 sood_vizhe_list.append(sood_vizhe)
 
         sood_navizhe_list_positive = [value for value in sood_navizhe_list if value > 0]
@@ -755,8 +754,8 @@ def CreateReport(request):
     print('current_time.hour')
     print(current_time.hour)
     # بررسی اینکه آیا ساعت 1 بامداد است یا خیر
-    if current_time.hour != 1:
-        report_days = report_days.order_by('-day')[:10]
+    # if current_time.hour != 1:
+    #     report_days = report_days.order_by('-day')[:10]
 
     # لیست برای به‌روزرسانی
     reports_to_update = []
@@ -765,18 +764,21 @@ def CreateReport(request):
     for report in report_days:
         current_date = report.day
         print(report.day)
-
+        if not SanadDetail.objects.filter(date=current_date):
+            continue
+        acc_year2=SanadDetail.objects.filter(date= current_date).last().acc_year
         data = SanadDetail.objects.filter(
             # acc_year=acc_year,
             is_active=True,
             date= current_date
         ).filter(
-            Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101) | Q(kol=401) | Q(kol=501)| Q(kol=200)
+            # Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101) | Q(kol=401) | Q(kol=501)| Q(kol=200)
+            Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101) | Q(kol=200)
         ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
 
         # محاسبه داده‌ها برای روزهای مختلف
         # today_data = TarazCal(current_date, current_date, data)
-        today_data = TarazCal1day(current_date, data)
+        today_data = TarazCal1day(current_date, data,acc_year2)
 
         report.khales_forosh = today_data['khales_forosh']
         report.baha_tamam_forosh = today_data['baha_tamam_forosh']

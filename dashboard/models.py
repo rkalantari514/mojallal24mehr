@@ -28,6 +28,9 @@ class MasterInfo(models.Model):
     last_report_time=models.DateTimeField(blank=True, null=True,verbose_name='زمان آخرین ارسال گزاش')
     last_update_time = models.DateTimeField(default=timezone.now, verbose_name='زمان آخرین آپدیت')
 
+    active_day=models.IntegerField(default=0,blank=True, null=True,verbose_name='روز فعال')
+
+
     sayer_hazine_ave = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='متوسط سایر هزینه ها')
     sayer_daramad_ave = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='متوسط  سایر درآمد ها')
 
