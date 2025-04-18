@@ -979,7 +979,6 @@ def ReportsDailySummary(request):
     user = request.user
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page='خلاصه گزارش های روزانه')
-
     start_time = time.time()  # زمان شروع تابع
     dailyr= MasterReport.objects.all().order_by('-day')
 
@@ -1038,11 +1037,16 @@ def ReportsDailyDetile(request, *args, **kwargs):
     total_time = time.time() - start_time  # محاسبه زمان اجرا
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
 
+    day_report = MasterReport.objects.filter(day=day_date).last()
+    minfo=MasterInfo.objects.filter(is_active=True).last()
 
     context = {
         'title': 'گزارش روز',
         'user': user,
+        'day_date': day_date,
+        'minfo': minfo,
         'sanads': sanads,
+        'day_report': day_report,
     }
 
     return render(request, 'reports_daily_detail.html', context)

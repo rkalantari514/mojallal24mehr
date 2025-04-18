@@ -5,7 +5,103 @@
     {% load jalali_tags %}
 
     <div class="content-wrapper">
+<div class="page-title">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <h4 class="mb-0"> گزارش جزئیات روز {{ day_date|date:"l"}} - {{ day_date| to_jalali:'%Y/%m/%d'}} </h4>
+                            </div>
+                            <div class="col-sm-6">
+                                <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right ">
+                                    <li class="breadcrumb-item"><a href="/" class="default-color">خانه</a></li>
+                                    <li class="breadcrumb-item active">گزارش جزئیات روز </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
 
+
+    <div class="row">
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+          <div class="card card-statistics h-100">
+            <div class="card-body">
+              <div class="clearfix">
+                <div class="float-left">
+                  <span class="text-primary">
+                    <i class="fa fa-shopping-cart highlight-icon" aria-hidden="true"></i>
+                  </span>
+                </div>
+                <div class="float-right text-right">
+                  <p class="card-text text-dark">خالص فروش</p>
+                  <h4>{{ day_report.khales_forosh|floatformat:0|intcomma:False }}</h4>
+                </div>
+              </div>
+              <p class="text-muted pt-3 mb-0 mt-2 border-top">
+{#                <i class="fa fa-exclamation-circle mr-1" aria-hidden="true"></i> رشد 81٪ کمتر#}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+          <div class="card card-statistics h-100">
+            <div class="card-body">
+              <div class="clearfix">
+                <div class="float-left">
+                  <span class="text-warning">
+                    <i class="fa fa fa-shopping-bag highlight-icon" aria-hidden="true"></i>
+                  </span>
+                </div>
+                <div class="float-right text-right">
+                  <p class="card-text text-dark">بهای تمام شده فروش رفته</p>
+                  <h4>{{ day_report.baha_tamam_forosh|floatformat:0|intcomma:False }}</h4>
+                </div>
+              </div>
+              <p class="text-muted pt-3 mb-0 mt-2 border-top">
+{#                <i class="fa fa-bookmark-o mr-1" aria-hidden="true"></i> مجموع فروش#}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+          <div class="card card-statistics h-100">
+            <div class="card-body">
+              <div class="clearfix">
+                <div class="float-left">
+                  <span class="text-danger">
+                    <i class="fa fa-bar-chart-o highlight-icon" aria-hidden="true"></i>
+                  </span>
+                </div>
+                <div class="float-right text-right">
+                  <p class="card-text text-dark">سود ناویژه</p>
+                  <h4>{{ day_report.sood_navizhe|floatformat:0|intcomma:False }}</h4>
+                </div>
+              </div>
+              <p class="text-muted pt-3 mb-0 mt-2 border-top">
+                <i class="fa fa-calendar mr-1" aria-hidden="true"></i> میانگین {{ minfo.sood_navizhe_ave|floatformat:0|intcomma:False }}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+          <div class="card card-statistics h-100">
+            <div class="card-body">
+              <div class="clearfix">
+                <div class="float-left">
+                  <span class="text-success">
+                    <i class="fa fa-dollar highlight-icon" aria-hidden="true"></i>
+                  </span>
+                </div>
+                <div class="float-right text-right">
+                  <p class="card-text text-dark">سود ویژه</p>
+                  <h4>{{ day_report.sood_vizhe|floatformat:0|intcomma:False }}</h4>
+                </div>
+              </div>
+              <p class="text-muted pt-3 mb-0 mt-2 border-top">
+                <i class="fa fa-calendar mr-1" aria-hidden="true"></i> میانگین {{ minfo.sood_vizhe_ave|floatformat:0|intcomma:False }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
         <div class="row">
             <div class="col-md-12 mb-30">
