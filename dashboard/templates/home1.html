@@ -172,15 +172,15 @@
                         <div class="row">
                             <div class="col-6 col-sm-4 mt-15 text-center">
                                 <b>متوسط روز های فعال</b>
-                                <h4>{{ allday_data.ave_sood_navizhe|floatformat:0 }}</h4>
+                                <h4>{{ minfo.sood_navizhe_ave|floatformat:0 }}</h4>
                             </div>
                             <div class="col-6 col-sm-4 mt-15 text-center">
                                 <b>کمترین روزانه</b>
-                                <h4>{{ allday_data.min_sood_navizhe|floatformat:0 }}</h4>
+                                <h4>{{ minfo.sood_navizhe_min|floatformat:0 }}</h4>
                             </div>
                             <div class="col-12 col-sm-4 mt-15 text-center">
                                 <b>بیشترین روزانه</b>
-                                <h4>{{ allday_data.max_sood_navizhe|floatformat:0 }}</h4>
+                                <h4>{{ minfo.sood_navizhe_max|floatformat:0 }}</h4>
                             </div>
                         </div>
                     </div>
@@ -208,8 +208,8 @@
                             </div>
                             <div class="col-4 col-sm-4 mb-15 text-center">
                                 <div class="counter counter-small">
-                                    <h4 class="timer text-danger" data-to="{{ allday_data.sood_vizhe }}"
-                                        data-speed="5000">{{ allday_data.sood_vizhe }}</h4>
+                                    <h4 class="timer text-danger" data-to="{{ minfo.sood_vizhe_total }}"
+                                        data-speed="5000">{{ minfo.sood_vizhe_total }}</h4>
                                     <label class="text-capitalize mt-0">ازابتدای سال مالی</label>
                                 </div>
                             </div>
@@ -277,15 +277,15 @@
                         <div class="row">
                             <div class="col-6 col-sm-4 mt-15 text-center">
                                 <b>متوسط روز های فعال</b>
-                                <h4>{{ allday_data.ave_sood_vizhe|floatformat:0 }}</h4>
+                                <h4>{{ minfo.sood_vizhe_ave|floatformat:0 }}</h4>
                             </div>
                             <div class="col-6 col-sm-4 mt-15 text-center">
                                 <b>کمترین روزانه</b>
-                                <h4>{{ allday_data.min_sood_vizhe|floatformat:0 }}</h4>
+                                <h4>{{ minfo.sood_vizhe_min|floatformat:0 }}</h4>
                             </div>
                             <div class="col-12 col-sm-4 mt-15 text-center">
                                 <b>بیشترین روزانه</b>
-                                <h4>{{ allday_data.max_sood_vizhe|floatformat:0 }}</h4>
+                                <h4>{{ minfo.sood_vizhe_max|floatformat:0 }}</h4>
                             </div>
                         </div>
                     </div>
