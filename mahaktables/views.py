@@ -167,3 +167,72 @@ def get_table_columns(cursor, table_name):
     cursor.execute(f"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='{table_name}'")
     return [col[0] for col in cursor.fetchall()]
 
+
+import csv
+import os
+import pyodbc
+from django.http import HttpResponse
+from django.apps import apps
+
+
+def export_all_tables(request):
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+
+    # دریافت لیست جداول
+    cursor.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE'")
+    tables = [table[0] for table in cursor.fetchall()]
+
+    for table_name in tables:
+        try:
+            export_table_to_csv(cursor, table_name)
+        except Exception as e:
+            print(f"❌ خطا در ذخیره جدول {table_name}: {e}")
+
+    cursor.close()
+    conn.close()
+    return HttpResponse("✅ همه جداول ذخیره شدند!")
+
+import os
+import csv
+from django.conf import settings  # دریافت مسیر پروژه
+
+# مسیر پوشه temp را مشخص کنید
+TEMP_DIR = os.path.join(settings.BASE_DIR, "temp")
+
+# ایجاد پوشه temp در صورت نبودن
+if not os.path.exists(TEMP_DIR):
+    os.makedirs(TEMP_DIR)
+
+# نام دیتابیس را دریافت کنیم تا پوشه مخصوص آن ساخته شود
+def get_database_name():
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    cursor.execute("SELECT DB_NAME()")
+    database_name = cursor.fetchone()[0]
+    cursor.close()
+    conn.close()
+    return database_name
+
+def export_table_to_csv(cursor, table_name):
+    # دریافت نام دیتابیس و ایجاد مسیر ذخیره
+    database_name = get_database_name()
+    database_dir = os.path.join(TEMP_DIR, database_name)
+
+    # ایجاد پوشه دیتابیس در صورت نبودن
+    if not os.path.exists(database_dir):
+        os.makedirs(database_dir)
+
+    # مسیر ذخیره فایل در داخل پوشه دیتابیس
+    file_path = os.path.join(database_dir, f"{table_name}.csv")
+
+    cursor.execute(f"SELECT * FROM {table_name}")
+    rows = cursor.fetchall()
+    columns = [desc[0] for desc in cursor.description]
+
+    with open(file_path, "w", newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(columns)  # ذخیره نام ستون‌ها
+        writer.writerows(rows)  # ذخیره داده‌های جدول
+
+    print(f"✅ جدول {table_name} ذخیره شد در مسیر: {file_path}")
