@@ -800,6 +800,10 @@ def UpdatePerson(request):
             Person.objects.bulk_create(persons_to_create)
 
         if persons_to_update:
+            print(f"✅ آپدیت‌شدن {len(persons_to_update)} رکورد:")
+            for p in persons_to_update:
+                print(f"🔄 {p.code} → per_taf: {p.per_taf}")
+
             Person.objects.bulk_update(persons_to_update, [
                 'grpcode', 'name', 'lname', 'tel1', 'tel2', 'fax', 'mobile', 'address', 'comment', 'per_taf'
             ])
