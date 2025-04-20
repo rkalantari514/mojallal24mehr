@@ -1029,7 +1029,7 @@ def BedehkaranMoshtarian(request, state):
         total_curramount = tafzili_sum['total_curramount']
 
         # پیدا کردن فرد مربوط به tafzili_code
-        person = Person.objects.filter(code=tafzili_code).first()
+        person = Person.objects.filter(per_taf=tafzili_code).first()
         person_data = {
             'tafzili': tafzili_code,
             'total_curramount': total_curramount,
