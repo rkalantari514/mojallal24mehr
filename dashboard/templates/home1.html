@@ -702,7 +702,7 @@
                                                              {% for l in day.today_loans %}
 <tr>
 <td>{{ l.loan_code }}</td>
-<td><a href='/acc/jariashkhas/moshtari/{{ l.loan.person.code }}' target='_blank'>
+<td><a href='/acc/jariashkhas/moshtari/{{ l.loan.person.per_taf }}' target='_blank'>
                                                          {{ l.loan.person.name }}{{ l.loan.person.lname }}</a></td>
 <td>{{ l.cost|floatformat:0|intcomma:False }}</td>
 </tr>
