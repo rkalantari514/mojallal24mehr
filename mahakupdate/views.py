@@ -3342,20 +3342,7 @@ def UpdateBedehiMoshtari(request):
                 tafzili_code = tafzili_sum['tafzili']
                 moin_code = tafzili_sum['moin']
                 total_curramount = tafzili_sum['total_curramount']
-
-                # پیدا کردن فرد مربوط به tafzili_code
-                if str(tafzili_code).startswith("10000"):
-                    tafzili_code2 = int(str(tafzili_code)[5:])
-                elif str(tafzili_code).startswith("1000"):
-                    tafzili_code2 = int(str(tafzili_code)[4:])
-                elif str(tafzili_code).startswith("100"):
-                    tafzili_code2 = int(str(tafzili_code)[3:])
-                elif str(tafzili_code).startswith("10"):
-                    tafzili_code2 = int(str(tafzili_code)[2:])
-                else:
-                    tafzili_code2 = int(str(tafzili_code)[1:])
-                print(tafzili_code,tafzili_code2)
-                person = Person.objects.filter(per_taf=tafzili_code2).first()
+                person = Person.objects.filter(per_taf=tafzili_code).first()
                 loans = []
                 loans_total = 0
                 total_with_loans = 0
