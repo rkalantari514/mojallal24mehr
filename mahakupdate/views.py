@@ -737,12 +737,6 @@ def UpdatePerson(request):
     cursor.execute("SELECT AccDetailCode, AccountCode FROM AccDetailsCollection WHERE AccDetailsTypesID = 1")
     acc_details_mapping = {int(row[0]): row[1] for row in cursor.fetchall()}  # تبدیل به int برای اطمینان
 
-    # 🔹 بررسی ویژه‌ی کد 38840 هنگام مقداردهی دیکشنری
-    if 38840 in acc_details_mapping:
-        print(f"✅ کد 38840 در acc_details_mapping یافت شد → مقدار: {acc_details_mapping[38840]}")
-    else:
-        print(f"❌ کد 38840 در acc_details_mapping نیست!")
-
     # 🔹 دریافت داده‌های افراد (PerInf)
     cursor.execute("SELECT * FROM PerInf")
     mahakt_data = cursor.fetchall()
@@ -753,24 +747,11 @@ def UpdatePerson(request):
 
     current_persons = {person.code: person for person in Person.objects.iterator()}
 
-    print(f"🔍 کدهای موجود در current_persons: {list(current_persons.keys())[:10]}")
 
     for row in mahakt_data:
         code = int(row[0])  # تبدیل به عدد برای سازگاری
-
-        # 🔹 بررسی مقدار `code` هنگام پردازش `PerInf`
-        if code == 38840:
-            print(f"🔄 کد 38840 در حال پردازش → مقدار اولیه در PerInf: {row}")
-
-        # 🔹 بررسی مقدار `per_taf` قبل از تنظیم در `defaults`
-        if code == 38840:
-            print(f"🔍 مقدار `per_taf` قبل از ذخیره → per_taf: {acc_details_mapping.get(38840, 0)}")
-
         # 🔹 بررسی قبل از تبدیل به int
         per_taf_value = int(acc_details_mapping.get(code, 0)) if acc_details_mapping.get(code, 0) else 0
-        if code == 38840:
-            print(f"🔄 مقدار `per_taf` نهایی برای {code}: {per_taf_value}")
-
         defaults = {
             'grpcode': row[3],
             'name': row[1],
@@ -783,10 +764,6 @@ def UpdatePerson(request):
             'comment': row[12],
             'per_taf': per_taf_value
         }
-
-        if code == 38840:
-            print(f"🔎 مقدار `defaults` قبل از ذخیره در دیتابیس → {defaults}")
-
         if code in current_persons:
             person = current_persons[code]
             if any(getattr(person, attr) != value for attr, value in defaults.items()):
@@ -796,18 +773,12 @@ def UpdatePerson(request):
         else:
             persons_to_create.append(Person(code=code, **defaults))
 
-    print(f"🔎 تعداد `persons_to_update`: {len(persons_to_update)}")
 
     with transaction.atomic():
         if persons_to_create:
             Person.objects.bulk_create(persons_to_create)
 
         if persons_to_update:
-            print(f"✅ آپدیت‌شدن {len(persons_to_update)} رکورد:")
-            for p in persons_to_update:
-                if p.code == 38840:
-                    print(f"🔄 مقدار `per_taf` قبل از `bulk_update` برای 38840 → {p.per_taf}")
-
             Person.objects.bulk_update(persons_to_update, [
                 'grpcode', 'name', 'lname', 'tel1', 'tel2', 'fax', 'mobile', 'address', 'comment', 'per_taf'
             ])
@@ -835,11 +806,6 @@ def UpdatePerson(request):
     table.row_count = row_count
     table.cloumn_count = column_count
     table.save()
-
-    # 🔹 بررسی مقدار `per_taf` پس از آپدیت در دیتابیس
-    updated_person = Person.objects.filter(code=38840).values('code', 'per_taf').first()
-    print(f"🔎 مقدار `per_taf` پس از آپدیت برای 38840 → {updated_person}")
-
     return redirect('/updatedb')
 
 
