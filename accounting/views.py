@@ -1206,10 +1206,10 @@ def JariAshkhasMoshtarian(request):
     ]
     print(f"6: {time.time() - start_time:.2f} ثانیه")
 
-    # loans=Loan.objects.all()
-    loans = Loan.objects.annotate(
-        per_taf=F('name_code') + 100000  # جمع مقدار با ۱۰۰۰۰۰۰
-    )
+    loans=Loan.objects.all()
+    # loans = Loan.objects.annotate(
+    #     per_taf5=F('name_code') + 100000  # جمع مقدار با ۱۰۰۰۰۰۰
+    # )
 
     context = {
         'title': 'حساب مشتریان',
