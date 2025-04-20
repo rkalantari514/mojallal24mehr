@@ -756,6 +756,8 @@ def UpdatePerson(request):
 
     current_persons = {person.code: person for person in Person.objects.iterator()}
 
+    print(f"🔍 کدهای موجود در current_persons: {list(current_persons.keys())[:10]}")
+
     for row in mahakt_data:
         code = int(row[0])  # تبدیل به عدد برای سازگاری
 
@@ -786,6 +788,8 @@ def UpdatePerson(request):
             'per_taf': per_taf_value
         }
 
+        print(f"🔍 مقدار `defaults` برای {code}: {defaults}")
+
         if code in current_persons:
             person = current_persons[code]
             if any(getattr(person, attr) != value for attr, value in defaults.items()):
@@ -794,6 +798,8 @@ def UpdatePerson(request):
                 persons_to_update.append(person)
         else:
             persons_to_create.append(Person(code=code, **defaults))
+
+    print(f"🔎 تعداد `persons_to_update`: {len(persons_to_update)}")
 
     with transaction.atomic():
         if persons_to_create:
