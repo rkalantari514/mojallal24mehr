@@ -424,7 +424,7 @@ class Person(models.Model):
     mobile = models.CharField(max_length=150, verbose_name='موبایل')
     address = models.CharField(max_length=550, verbose_name='آدرس')
     comment = models.CharField(max_length=550, verbose_name='توضیحات')
-    # per_taf=models.IntegerField(default=0, verbose_name='کد تفصیلی فرد')
+    per_taf=models.IntegerField(default=0, verbose_name='کد تفصیلی فرد')
     # reminbg
 
     class Meta:
