@@ -580,11 +580,7 @@ def ChequesPayTotal(request, *args, **kwargs):
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
-    return render(request, 'cheques-pay-total.html', context)
-
-
-
-
+    return render(request, 'cheques-pay-total.html', context)@login_required(login_url='/login')
 
 
 
@@ -925,78 +921,12 @@ def SanadTotal(request, *args, **kwargs):
 
 
 
-from django.shortcuts import render
-from django.db.models import Sum
 
-from django.shortcuts import render
-from django.db.models import Sum
-
-from django.shortcuts import render
-from django.db.models import Sum
 import locale
 
 # تنظیم محلی برای جداسازی اعداد با کاما
 locale.setlocale(locale.LC_ALL, 'fa_IR.UTF-8')
 
-# def BedehkaranMoshtarian(request):
-#     # محاسبه مجموع curramount بر اساس tafzili
-#     # tafzili_sums = SanadDetail.objects.filter(moin=1, kol=103).values('tafzili').annotate(total_curramount=Sum('curramount')).filter(total_curramount__lt=0)
-#     tafzili_sums = SanadDetail.objects.filter(moin=1, kol=103).values('tafzili').annotate(total_curramount=Sum('curramount'))
-#
-#     # جمع‌آوری داده‌ها برای نمایش در قالب جدول
-#     report_data = []
-#     total_negative_amount = 0
-#
-#     for tafzili_sum in tafzili_sums:
-#         tafzili_code = tafzili_sum['tafzili']
-#         total_curramount = tafzili_sum['total_curramount']
-#         total_negative_amount += total_curramount
-#
-#         # پیدا کردن فرد مربوط به tafzili_code
-#         person = Person.objects.filter(code=tafzili_code).first()
-#         person_data = {
-#             'tafzili': tafzili_code,
-#             'total_curramount': total_curramount,
-#             'name': '',
-#             'lname': '',
-#             'loans': [],
-#             'sum_amount': 0
-#         }
-#
-#         if person:
-#             person_data['name'] = person.name
-#             person_data['lname'] = person.lname
-#
-#             # پیدا کردن وام‌های شخص
-#             loans = Loan.objects.filter(person=person)
-#             if loans.exists():
-#                 person_data['loans'] = [
-#                     {
-#                         'code': loan.code,
-#                         'tarikh': loan.tarikh,
-#                         'cost': loan.cost
-#                     }
-#                     for loan in loans
-#                 ]
-#                 person_data['sum_amount'] = sum(loan['cost'] for loan in person_data['loans'])
-#             else:
-#                 person_data['loans'] = 'NO_LOAN'
-#         else:
-#             person_data['person_not_found'] = True
-#
-#         person_data['total_with_loans'] = person_data['sum_amount'] + total_curramount
-#         report_data.append(person_data)
-#
-#     context = {
-#         'report_data': report_data,
-#         'total_negative_amount': locale.format_string("%d", total_negative_amount, grouping=True)
-#     }
-#     return render(request, 'bedehkaran_moshtarian.html', context)
-
-
-
-from django.shortcuts import render
-from django.db.models import Sum
 import locale
 
 # تنظیم محلی برای جداسازی اعداد با کاما
@@ -1307,3 +1237,29 @@ def HesabMoshtariDetail(request, tafsili):
     }
 
     return render(request, 'moshrari_detail.html', context)
+
+
+
+
+
+
+@login_required(login_url='/login')
+def LoanTotal(request, *args, **kwargs):
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='کل اقساط', code=0)
+
+    start_time = time.time()  # زمان شروع تابع
+
+    loans=LoanDetil.objects.filter(complete_percent__lt=1)
+
+    context = {
+        'title': 'کل اقساط',
+        'user': user,
+        'loans': loans,
+
+    }
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+
+    return render(request, 'loan-total.html', context)
