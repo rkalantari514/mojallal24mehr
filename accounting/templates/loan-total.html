@@ -243,9 +243,11 @@
                                             <tbody>
                                             {% for l in loans %}
                                                     <tr>
-                                                        <td><img src='{% static logo_path %}' class='small-logo'></td>
-                                                        <td class="card-text text-center">{{ l.loan.person.name }}</td>
                                                         <td class="card-text text-center">{{ l.loan.person }}</td>
+                                                        <td class="card-text text-center">{{ l.tarikh }}</td>
+                                                        <td class="card-text text-center">{{ l.cost }}</td>
+                                                        <td class="card-text text-center">{{ l.complete_percent }}</td>
+
 {#                                                        <td class="card-text text-center">{{ t.year }}</td>#}
 {#                                                        <td class="card-text text-center">{{ t.month }}</td>#}
 {#                                                        <td class="card-text text-center">{{ t.person }}</td>#}
