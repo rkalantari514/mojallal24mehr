@@ -723,20 +723,30 @@ def UpdateKala(request):
 
     return redirect('/updatedb')
 
+
 def UpdatePerson(request):
     send_to_admin('شروع آپدیت افراد')
     t0 = time.time()
-    print('شروع آپدیت افراد--------------------------------------------')
+    print('🚀 شروع آپدیت افراد --------------------------------------------')
 
     conn = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
 
-    # دریافت داده‌های AccDetailsCollection و ساخت دیکشنری
+    # 🔹 دریافت داده‌های AccDetailsCollection و ساخت دیکشنری
     cursor.execute("SELECT AccDetailCode, AccountCode FROM AccDetailsCollection WHERE AccDetailsTypesID = 1")
-    acc_details_mapping = {row[0]: row[1] for row in cursor.fetchall()}
+    acc_details_mapping = {int(row[0]): row[1] for row in cursor.fetchall()}  # تبدیل به int برای اطمینان
 
-    # دریافت داده‌های افراد (PerInf)
+    # 🔹 نمایش محتویات دیکشنری
+    print("🔍 محتویات acc_details_mapping:")
+    for key, value in acc_details_mapping.items():
+        print(f"AccDetailCode: {key} → AccountCode: {value}")
+
+    # 🔹 بررسی نوع داده‌های کلیدها
+    if acc_details_mapping:
+        print("✅ نوع داده اولین کلید دیکشنری:", type(list(acc_details_mapping.keys())[0]))
+
+    # 🔹 دریافت داده‌های افراد (PerInf)
     cursor.execute("SELECT * FROM PerInf")
     mahakt_data = cursor.fetchall()
     existing_in_mahak = {row[0] for row in mahakt_data}
@@ -747,7 +757,14 @@ def UpdatePerson(request):
     current_persons = {person.code: person for person in Person.objects.iterator()}
 
     for row in mahakt_data:
-        code = row[0]
+        code = int(row[0])  # تبدیل به عدد برای سازگاری
+
+        # 🔹 بررسی وجود code در دیکشنری
+        if code in acc_details_mapping:
+            print(f"✅ کد {code} پیدا شد: {acc_details_mapping[code]}")
+        else:
+            print(f"❌ کد {code} در دیکشنری نیست!")
+
         defaults = {
             'grpcode': row[3],
             'name': row[1],
@@ -786,9 +803,9 @@ def UpdatePerson(request):
     db_time = t1 - t0
     update_time = tend - t1
 
-    print(f"زمان کل: {total_time:.2f} ثانیه")
-    print(f" اتصال به دیتابیس:{db_time:.2f} ثانیه")
-    print(f" زمان آپدیت جدول:{update_time:.2f} ثانیه")
+    print(f"🕒 زمان کل: {total_time:.2f} ثانیه")
+    print(f"🔗 اتصال به دیتابیس: {db_time:.2f} ثانیه")
+    print(f"🔄 زمان آپدیت جدول: {update_time:.2f} ثانیه")
 
     cursor.execute("SELECT COUNT(*) FROM PerInf")
     row_count = cursor.fetchone()[0]
@@ -804,10 +821,6 @@ def UpdatePerson(request):
     table.save()
 
     return redirect('/updatedb')
-
-
-
-
 
 
 def UpdatePerson2(request):
