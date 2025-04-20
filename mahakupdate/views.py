@@ -742,7 +742,7 @@ def UpdatePerson(request):
     for key, value in acc_details_mapping.items():
         print(f"AccDetailCode: {key} → AccountCode: {value}")
 
-    # 🔹 بررسی نوع داده‌های کلیدها
+    # 🔹 بررسی نوع داده‌های کلیدهای دیکشنری
     if acc_details_mapping:
         print("✅ نوع داده اولین کلید دیکشنری:", type(list(acc_details_mapping.keys())[0]))
 
@@ -765,6 +765,14 @@ def UpdatePerson(request):
         else:
             print(f"❌ کد {code} در دیکشنری نیست!")
 
+        # 🔹 بررسی مقدار دریافت‌شده از دیکشنری
+        raw_value = acc_details_mapping.get(code, 0)
+        print(f"🔍 مقدار دریافت‌شده برای {code}: {raw_value}, نوع داده: {type(raw_value)}")
+
+        # 🔹 بررسی قبل از تبدیل به int
+        per_taf_value = int(raw_value) if raw_value else 0
+        print(f"🔄 مقدار `per_taf` نهایی برای {code}: {per_taf_value}")
+
         defaults = {
             'grpcode': row[3],
             'name': row[1],
@@ -775,7 +783,7 @@ def UpdatePerson(request):
             'mobile': row[9],
             'address': row[10],
             'comment': row[12],
-            'per_taf': acc_details_mapping.get(code, 0)  # مقدار per_taf از دیکشنری
+            'per_taf': per_taf_value
         }
 
         if code in current_persons:
