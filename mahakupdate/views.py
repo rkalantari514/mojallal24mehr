@@ -3355,7 +3355,7 @@ def UpdateBedehiMoshtari(request):
                 else:
                     tafzili_code2 = int(str(tafzili_code)[1:])
                 print(tafzili_code,tafzili_code2)
-                person = Person.objects.filter(code=tafzili_code2).first()
+                person = Person.objects.filter(per_taf=tafzili_code2).first()
                 loans = []
                 loans_total = 0
                 total_with_loans = 0
