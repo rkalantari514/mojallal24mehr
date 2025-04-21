@@ -101,8 +101,8 @@
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark">---------</p>
-                                    <h4>{{ total_data.tmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>
+                                    <p class="card-text text-dark">جمع اقساط معوق</p>
+                                    <h4>{{ total_delaycost|floatformat:3|intcomma:False }} میلیارد تومان</h4>
                                 </div>
                             </div>
                         </div>
@@ -118,47 +118,47 @@
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark"> ----------- </p>
-                                    <h4>{{ total_data.pastmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>
+                                    <p class="card-text text-dark"> خواب تعویق </p>
+                                    <h4>{{ total_mtday|floatformat:0|intcomma:False }} میلیارد تومان روز</h4>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <div class="clearfix">
-                                <div class="float-left icon-box bg-success rounded-circle">
-    <span class="text-white">
-    <i class="fa fa-hourglass-start highlight-icon" aria-hidden="true"></i>
-    </span>
-                                </div>
-                                <div class="float-right text-right">
-                                    <p class="card-text text-dark"> --------------- </p>
-                                    <h4>{{ total_data.postmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <div class="clearfix">
-                                <div class="float-left icon-box bg-info rounded-circle">
-    <span class="text-white">
-    <i class="fa fa-percent highlight-icon" aria-hidden="true"></i>
-    </span>
-                                </div>
-                                <div class="float-right text-right">
-                                    <p class="card-text text-dark"> ------------------- </p>
-                                    <h4>{{ total_data.ceque_ratio|floatformat:2 }}%</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+{#                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">#}
+{#                    <div class="card card-statistics h-100">#}
+{#                        <div class="card-body">#}
+{#                            <div class="clearfix">#}
+{#                                <div class="float-left icon-box bg-success rounded-circle">#}
+{#    <span class="text-white">#}
+{#    <i class="fa fa-hourglass-start highlight-icon" aria-hidden="true"></i>#}
+{#    </span>#}
+{#                                </div>#}
+{#                                <div class="float-right text-right">#}
+{#                                    <p class="card-text text-dark"> --------------- </p>#}
+{#                                    <h4>{{ total_data.postmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">#}
+{#                    <div class="card card-statistics h-100">#}
+{#                        <div class="card-body">#}
+{#                            <div class="clearfix">#}
+{#                                <div class="float-left icon-box bg-info rounded-circle">#}
+{#    <span class="text-white">#}
+{#    <i class="fa fa-percent highlight-icon" aria-hidden="true"></i>#}
+{#    </span>#}
+{#                                </div>#}
+{#                                <div class="float-right text-right">#}
+{#                                    <p class="card-text text-dark"> ------------------- </p>#}
+{#                                    <h4>{{ total_data.ceque_ratio|floatformat:2 }}%</h4>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
             </div>
 
 
@@ -225,12 +225,15 @@
                                                     data-field="date" data-filter-control="select">تاریخ
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true" data-field="cost"
+                                                    data-sorter="numericOnly"
                                                 >مبلغ قسط
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
+                                                    data-sorter="numericOnly"
                                                     data-field="persent" data-filter-control="select">درصد تکمیل
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
+                                                    data-sorter="numericOnly"
                                                     data-field="delaycost" data-footer-formatter="priceFormatter"
                                                 >مبلغ معوق
                                                 </th>
@@ -238,7 +241,7 @@
                                                     data-field="condiition" data-filter-control="select">وضعیت
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-field="delay"
+                                                    data-field="delay" data-sorter="numericOnly"
                                                     data-filter-control="select">تاخیر
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"

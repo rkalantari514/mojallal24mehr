@@ -605,8 +605,8 @@ def balance_sheet_kol(request):
         bes_sum = SanadDetail.objects.filter(is_active=True, kol=kol_code, acc_year=acc_year).aggregate(Sum('bes'))[
                       'bes__sum'] or 0
         curramount_sum = \
-        SanadDetail.objects.filter(is_active=True, kol=kol_code, acc_year=acc_year).aggregate(Sum('curramount'))[
-            'curramount__sum'] or 0
+            SanadDetail.objects.filter(is_active=True, kol=kol_code, acc_year=acc_year).aggregate(Sum('curramount'))[
+                'curramount__sum'] or 0
         total_bed += bed_sum
         total_bes += bes_sum
         total_curramount += curramount_sum
@@ -1049,8 +1049,8 @@ def JariAshkhasMoshtarian(request):
 
     # 8 وام دار - کمبود وام
     table1.append(-(
-                BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0, total_with_loans__lt=0).aggregate(
-                    total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0) / 10000000)
+            BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0, total_with_loans__lt=0).aggregate(
+                total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0) / 10000000)
     today = date.today()
 
     # 9 قسط عقب افتاده
@@ -1118,8 +1118,8 @@ def JariAshkhasMoshtarian(request):
         })
     print(f"5: {time.time() - start_time:.2f} ثانیه")
     no_loan = \
-    BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))[
-        'total_mandeh'] or 0
+        BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))[
+            'total_mandeh'] or 0
     loan_gap = BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0, total_with_loans__lt=0).aggregate(
         total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0
 
@@ -1250,6 +1250,7 @@ def HesabMoshtariDetail(request, tafsili):
 
 from django.utils import timezone
 from django.db.models import Value, CharField, IntegerField, F, ExpressionWrapper, DurationField
+from django.db.models import Value, CharField, IntegerField, F, ExpressionWrapper, DecimalField, Sum, Count
 
 
 @login_required(login_url='/login')
@@ -1269,12 +1270,12 @@ def LoanTotal(request, *args, **kwargs):
         delay_days=(ExpressionWrapper(F("date") - today, output_field=IntegerField())) / -86400000000,
         mtday=(ExpressionWrapper(
             (F("delay_days") * F("cost") * (1 - F("complete_percent"))),
-            output_field=DecimalField(max_digits=15, decimal_places=0))/1000000
-        ),
+            output_field=DecimalField(max_digits=15, decimal_places=0)) / 10000000
+               ),
         delaycost=(ExpressionWrapper(
             (F("cost") * (1 - F("complete_percent"))),
             output_field=DecimalField(max_digits=15, decimal_places=0))
-               )
+        )
 
     )
 
@@ -1295,10 +1296,20 @@ def LoanTotal(request, *args, **kwargs):
     # final_loans = loans.union(loans_today, loans_future)
     # final_loans = loans.union(loans_today)
 
+    # محاسبه تعداد وام‌ها، مجموع delay_days و مجموع mtday
+    loan_stats = loans.aggregate(
+        total_count=Count("id"),
+        total_delaycost=Sum("delaycost") / 10000000000,
+        total_mtday=Sum("mtday")/1000
+    )
+
     context = {
-        'title': 'کل اقساط',
+        'title': 'اقساط معوق',
         'user': user,
         'loans': loans,
+        "total_count": loan_stats["total_count"],
+        "total_delaycost": loan_stats["total_delaycost"],
+        "total_mtday": loan_stats["total_mtday"],
 
     }
 
