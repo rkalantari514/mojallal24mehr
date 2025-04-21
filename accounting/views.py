@@ -1,4 +1,4 @@
-#جدید
+# جدید
 # جدیدتر
 import re
 from django.contrib.auth.decorators import login_required
@@ -20,6 +20,8 @@ from jdatetime import date as jdate
 from datetime import timedelta, date
 from khayyam import JalaliDate, JalaliDatetime
 from django.db.models import F
+
+
 def fix_persian_characters(value):
     return standardize(value)
 
@@ -78,13 +80,13 @@ def TarazKol(request, *args, **kwargs):
         kol_level = kol_info[1]  # سطح کل
 
         table_moin.append({
-            'kol_num': moin['kol'],     # شماره کل
-            'kol_name': kol_name,       # نام کل
-            'moin': moin['moin'],       # شماره معین
-            'name': name,               # نام معین
-            'level': level,             # سطح معین
-            'total_bed': total_bed,     # مجموع بدهکار
-            'total_bes': total_bes,     # مجموع بستانکار
+            'kol_num': moin['kol'],  # شماره کل
+            'kol_name': kol_name,  # نام کل
+            'moin': moin['moin'],  # شماره معین
+            'name': name,  # نام معین
+            'level': level,  # سطح معین
+            'total_bed': total_bed,  # مجموع بدهکار
+            'total_bes': total_bes,  # مجموع بستانکار
             'total_curramount': total_curramount,  # مجموع مانده
         })
 
@@ -99,6 +101,7 @@ def TarazKol(request, *args, **kwargs):
     }
 
     return render(request, 'taraz_kol.html', context)
+
 
 def extract_first_words(text):
     # الگوی جستجو برای پیدا کردن اولین کلمات قبل از اولین پرانتز
@@ -141,9 +144,11 @@ def ChequesRecieveTotal(request, *args, **kwargs):
 
         loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
 
-        days_in_month, max_cheque, month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year,
-                                                                                     cheque_recive_data,
-                                                                                     cheque_pay_data, loan_detail_data)
+        days_in_month, max_cheque, month_cheque_data, month_loan_data = generate_calendar_data_cheque(current_month,
+                                                                                                      current_year,
+                                                                                                      cheque_recive_data,
+                                                                                                      cheque_pay_data,
+                                                                                                      loan_detail_data)
 
         context = {
             # for calendar
@@ -187,8 +192,8 @@ def ChequesRecieveTotal(request, *args, **kwargs):
     )
 
     past_cheques_sum = \
-    ChequesRecieve.objects.filter(cheque_date__lte=today).aggregate(total_mandeh=Sum('total_mandeh'))[
-        'total_mandeh'] or 0
+        ChequesRecieve.objects.filter(cheque_date__lte=today).aggregate(total_mandeh=Sum('total_mandeh'))[
+            'total_mandeh'] or 0
     post_cheques_sum = ChequesRecieve.objects.filter(cheque_date__gt=today).aggregate(total_mandeh=Sum('total_mandeh'))[
                            'total_mandeh'] or 0
     tmandeh = -cheques_data['total_mandeh_sum'] / 10000000  # تبدیل به میلیون
@@ -220,11 +225,11 @@ def ChequesRecieveTotal(request, *args, **kwargs):
     last_day_of_current_year_jalali = jdate(current_jalali_year, 12, 29).togregorian()
 
     cheques_before_current_year = \
-    ChequesRecieve.objects.filter(cheque_date__lt=first_day_of_current_year_jalali).aggregate(
-        total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+        ChequesRecieve.objects.filter(cheque_date__lt=first_day_of_current_year_jalali).aggregate(
+            total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
     cheques_after_current_year = \
-    ChequesRecieve.objects.filter(cheque_date__gt=last_day_of_current_year_jalali).aggregate(
-        total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+        ChequesRecieve.objects.filter(cheque_date__gt=last_day_of_current_year_jalali).aggregate(
+            total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
     print(f"4: {time.time() - start_time:.2f} ثانیه")
 
     monthly_data = []
@@ -314,21 +319,21 @@ def ChequesRecieveTotal(request, *args, **kwargs):
 
     loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
 
-    days_in_month, max_cheque, month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year,
-                                                                                 cheque_recive_data,
-                                                                                 cheque_pay_data, loan_detail_data)
+    days_in_month, max_cheque, month_cheque_data, month_loan_data = generate_calendar_data_cheque(current_month,
+                                                                                                  current_year,
+                                                                                                  cheque_recive_data,
+                                                                                                  cheque_pay_data,
+                                                                                                  loan_detail_data)
 
     print(f"8: {time.time() - start_time:.2f} ثانیه")
 
-
-        # آماده‌سازی context برای رندر
+    # آماده‌سازی context برای رندر
     context = {
         'title': 'چکهای دریافتی',
         'user': user,
         'total_data': total_data,
         'chartmahanedata': chart_data,
         'table1': table1,
-
 
         # for calendar
         'month_name': month_name,
@@ -343,7 +348,6 @@ def ChequesRecieveTotal(request, *args, **kwargs):
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
     return render(request, 'cheques-recieve-total.html', context)
-
 
 
 @login_required(login_url='/login')
@@ -379,9 +383,11 @@ def ChequesPayTotal(request, *args, **kwargs):
 
         loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
 
-        days_in_month, max_cheque, month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year,
-                                                                                     cheque_recive_data,
-                                                                                     cheque_pay_data, loan_detail_data)
+        days_in_month, max_cheque, month_cheque_data, month_loan_data = generate_calendar_data_cheque(current_month,
+                                                                                                      current_year,
+                                                                                                      cheque_recive_data,
+                                                                                                      cheque_pay_data,
+                                                                                                      loan_detail_data)
 
         context = {
             # for calendar
@@ -425,8 +431,8 @@ def ChequesPayTotal(request, *args, **kwargs):
     )
 
     past_cheques_sum = \
-    ChequesPay.objects.filter(cheque_date__lte=today).aggregate(total_mandeh=Sum('total_mandeh'))[
-        'total_mandeh'] or 0
+        ChequesPay.objects.filter(cheque_date__lte=today).aggregate(total_mandeh=Sum('total_mandeh'))[
+            'total_mandeh'] or 0
     post_cheques_sum = ChequesPay.objects.filter(cheque_date__gt=today).aggregate(total_mandeh=Sum('total_mandeh'))[
                            'total_mandeh'] or 0
     tmandeh = cheques_data['total_mandeh_sum'] / 10000000  # تبدیل به میلیون
@@ -458,11 +464,11 @@ def ChequesPayTotal(request, *args, **kwargs):
     last_day_of_current_year_jalali = jdate(current_jalali_year, 12, 29).togregorian()
 
     cheques_before_current_year = \
-    ChequesPay.objects.filter(cheque_date__lt=first_day_of_current_year_jalali).aggregate(
-        total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+        ChequesPay.objects.filter(cheque_date__lt=first_day_of_current_year_jalali).aggregate(
+            total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
     cheques_after_current_year = \
-    ChequesPay.objects.filter(cheque_date__gt=last_day_of_current_year_jalali).aggregate(
-        total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+        ChequesPay.objects.filter(cheque_date__gt=last_day_of_current_year_jalali).aggregate(
+            total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
     print(f"4: {time.time() - start_time:.2f} ثانیه")
 
     monthly_data = []
@@ -552,21 +558,21 @@ def ChequesPayTotal(request, *args, **kwargs):
 
     loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
 
-    days_in_month, max_cheque, month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year,
-                                                                                 cheque_recive_data,
-                                                                                 cheque_pay_data, loan_detail_data)
+    days_in_month, max_cheque, month_cheque_data, month_loan_data = generate_calendar_data_cheque(current_month,
+                                                                                                  current_year,
+                                                                                                  cheque_recive_data,
+                                                                                                  cheque_pay_data,
+                                                                                                  loan_detail_data)
 
     print(f"8: {time.time() - start_time:.2f} ثانیه")
 
-
-        # آماده‌سازی context برای رندر
+    # آماده‌سازی context برای رندر
     context = {
         'title': 'چکهای پرداختنی',
         'user': user,
         'total_data': total_data,
         'chartmahanedata': chart_data,
         'table1': table1,
-
 
         # for calendar
         'month_name': month_name,
@@ -580,11 +586,7 @@ def ChequesPayTotal(request, *args, **kwargs):
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
-    return render(request, 'cheques-pay-total.html', context)@login_required(login_url='/login')
-
-
-
-
+    return render(request, 'cheques-pay-total.html', context) @ login_required(login_url='/login')
 
 
 def balance_sheet_kol(request):
@@ -598,9 +600,13 @@ def balance_sheet_kol(request):
     for kol in kol_codes:
         kol_code = kol['kol']
         kol_name = AccCoding.objects.filter(code=kol_code, level=1).first().name
-        bed_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code,acc_year=acc_year).aggregate(Sum('bed'))['bed__sum'] or 0
-        bes_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code,acc_year=acc_year).aggregate(Sum('bes'))['bes__sum'] or 0
-        curramount_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code,acc_year=acc_year).aggregate(Sum('curramount'))['curramount__sum'] or 0
+        bed_sum = SanadDetail.objects.filter(is_active=True, kol=kol_code, acc_year=acc_year).aggregate(Sum('bed'))[
+                      'bed__sum'] or 0
+        bes_sum = SanadDetail.objects.filter(is_active=True, kol=kol_code, acc_year=acc_year).aggregate(Sum('bes'))[
+                      'bes__sum'] or 0
+        curramount_sum = \
+        SanadDetail.objects.filter(is_active=True, kol=kol_code, acc_year=acc_year).aggregate(Sum('curramount'))[
+            'curramount__sum'] or 0
         total_bed += bed_sum
         total_bes += bes_sum
         total_curramount += curramount_sum
@@ -613,59 +619,61 @@ def balance_sheet_kol(request):
 
         })
 
-    level1=[]
-    level2=[]
-    level3=[]
+    level1 = []
+    level2 = []
+    level3 = []
     for l in AccCoding.objects.filter(level=1).order_by('code'):
         # filtercount=SanadDetail.objects.filter(is_active=False,kol=l.code).count()
-        print(l.code,l.name)
+        print(l.code, l.name)
         level1.append(
             {
-               'code':l.code,
-               'name':l.name,
-               # 'filtercount':filtercount,
+                'code': l.code,
+                'name': l.name,
+                # 'filtercount':filtercount,
 
             }
         )
 
-
-
     context = {
         'balance_data': balance_data,
         'level': 1,
-        'level1':level1,
-        'level2':level2,
-        'level3':level3,
+        'level1': level1,
+        'level2': level2,
+        'level3': level3,
         'total_bed': total_bed,
         'total_bes': total_bes,
         'total_curramount': total_curramount,
     }
     return render(request, 'balance_sheet.html', context)
 
+
 def balance_sheet_moin(request, kol_code):
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
     moin_codes = SanadDetail.objects.filter(kol=kol_code).values('moin').distinct()
     balance_data = []
-    total_bed=0
-    total_bes=0
-    total_curramount=0
+    total_bed = 0
+    total_bes = 0
+    total_curramount = 0
 
     for moin in moin_codes:
         moin_code = moin['moin']
-        moin_name=None
+        moin_name = None
         if AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code):
             moin_name = AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code).first().name
         if not moin_name:
-            par=AccCoding.objects.filter(code=kol_code, level=1).last()
-            AccCoding.objects.create(code=moin_code, level=2, parent=par,name='تعیین نشده')
+            par = AccCoding.objects.filter(code=kol_code, level=1).last()
+            AccCoding.objects.create(code=moin_code, level=2, parent=par, name='تعیین نشده')
         moin_name = AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code).first().name
-        bed_sum = SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code,acc_year=acc_year).aggregate(Sum('bed'))[
+        bed_sum = SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, acc_year=acc_year).aggregate(
+            Sum('bed'))[
                       'bed__sum'] or 0
-        bes_sum = SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code,acc_year=acc_year).aggregate(Sum('bes'))[
+        bes_sum = SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, acc_year=acc_year).aggregate(
+            Sum('bes'))[
                       'bes__sum'] or 0
         curramount_sum = \
-        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code,acc_year=acc_year).aggregate(Sum('curramount'))[
-            'curramount__sum'] or 0
+            SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, acc_year=acc_year).aggregate(
+                Sum('curramount'))[
+                'curramount__sum'] or 0
         total_bed += bed_sum
         total_bes += bes_sum
         total_curramount += curramount_sum
@@ -677,7 +685,7 @@ def balance_sheet_moin(request, kol_code):
             'bes_sum': bes_sum,
             'curramount_sum': curramount_sum,
         })
-    kol_name=AccCoding.objects.filter(level=1,code=kol_code).last().name
+    kol_name = AccCoding.objects.filter(level=1, code=kol_code).last().name
     # kol_code=AccCoding.objects.filter(level=1,code=kol_code).last().code
     level1 = []
     level2 = []
@@ -692,7 +700,7 @@ def balance_sheet_moin(request, kol_code):
             }
         )
 
-    for l in AccCoding.objects.filter(level=2,parent__code=kol_code).order_by('code'):
+    for l in AccCoding.objects.filter(level=2, parent__code=kol_code).order_by('code'):
         print(l.code, l.name)
         level2.append(
             {
@@ -701,9 +709,6 @@ def balance_sheet_moin(request, kol_code):
 
             }
         )
-
-
-
 
     context = {
         'balance_data': balance_data,
@@ -719,13 +724,13 @@ def balance_sheet_moin(request, kol_code):
         'level1': level1,
         'level2': level2,
         'level3': level3,
-        'total_bed':total_bed,
-        'total_bes':total_bes,
-        'total_curramount':total_curramount,
-
+        'total_bed': total_bed,
+        'total_bes': total_bes,
+        'total_curramount': total_curramount,
 
     }
     return render(request, 'balance_sheet.html', context)
+
 
 def balance_sheet_tafsili(request, kol_code, moin_code):
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
@@ -738,16 +743,17 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
         tafsili_code = tafsili['tafzili']
 
         bed_sum = \
-        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafsili_code,acc_year=acc_year).aggregate(
-            Sum('bed'))['bed__sum'] or 0
+            SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafsili_code,
+                                       acc_year=acc_year).aggregate(
+                Sum('bed'))['bed__sum'] or 0
         bes_sum = \
-        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafsili_code,acc_year=acc_year).aggregate(
-            Sum('bes'))['bes__sum'] or 0
+            SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafsili_code,
+                                       acc_year=acc_year).aggregate(
+                Sum('bes'))['bes__sum'] or 0
         curramount_sum = \
-        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafsili_code,acc_year=acc_year).aggregate(
-            Sum('curramount'))['curramount__sum'] or 0
-
-
+            SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafsili_code,
+                                       acc_year=acc_year).aggregate(
+                Sum('curramount'))['curramount__sum'] or 0
 
         total_bed += bed_sum
         total_bes += bes_sum
@@ -758,7 +764,6 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
             'bes_sum': bes_sum,
             'curramount_sum': curramount_sum,
         })
-
 
     kol_name = AccCoding.objects.filter(level=1, code=kol_code).last().name
     # kol_code=AccCoding.objects.filter(level=1,code=kol_code).last().code
@@ -783,7 +788,6 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
             }
         )
 
-
     # فعلا خالی است
     for l in AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code).order_by('code'):
         print(l.code, l.name)
@@ -797,7 +801,7 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
     level3 = []
 
     # فیلتر کردن داده‌ها
-    sanads = SanadDetail.objects.filter(kol=kol_code, moin=moin_code,acc_year=acc_year)
+    sanads = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, acc_year=acc_year)
 
     # استفاده از مجموعه برای حذف تکراری‌ها و سپس تبدیل به لیست مرتب‌شده
     tafzili_set = sorted({s.tafzili for s in sanads})
@@ -815,8 +819,8 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
     context = {
         'balance_data': balance_data,
         'level': 3,
-        'moin_code':moin_code,
-        'kol_code':kol_code,
+        'moin_code': moin_code,
+        'kol_code': kol_code,
         'level_name': 'تفضیلی',
         'parent_code': moin_code,
         'parent_name': AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code).first().name,
@@ -832,12 +836,13 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
     }
     return render(request, 'balance_sheet.html', context)
 
+
 def SanadTotal(request, *args, **kwargs):
     kol_code = kwargs['kol_code']
     moin_code = kwargs['moin_code']
     tafzili_code = kwargs['tafzili_code']
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
-    sanads=SanadDetail.objects.filter(kol=kol_code,moin=moin_code,tafzili=tafzili_code,acc_year =acc_year)
+    sanads = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafzili_code, acc_year=acc_year)
 
     level1 = []
     level2 = []
@@ -873,7 +878,7 @@ def SanadTotal(request, *args, **kwargs):
     level3 = []
 
     # فیلتر کردن داده‌ها
-    sanads2 = SanadDetail.objects.filter(kol=kol_code, moin=moin_code,acc_year =acc_year)
+    sanads2 = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, acc_year=acc_year)
 
     # استفاده از مجموعه برای حذف تکراری‌ها و سپس تبدیل به لیست مرتب‌شده
     tafzili_set = sorted({s.tafzili for s in sanads2})
@@ -887,25 +892,26 @@ def SanadTotal(request, *args, **kwargs):
             }
         )
 
-    level=4
+    level = 4
 
-    print(level,kol_code,moin_code,tafzili_code)
-    bed_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code, moin=moin_code, tafzili=tafzili_code,acc_year =acc_year).aggregate(Sum('bed'))[
+    print(level, kol_code, moin_code, tafzili_code)
+    bed_sum = SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafzili_code,
+                                         acc_year=acc_year).aggregate(Sum('bed'))[
         'bed__sum']
-    bes_sum = SanadDetail.objects.filter(is_active=True,kol=kol_code, moin=moin_code, tafzili=tafzili_code,acc_year =acc_year).aggregate(Sum('bes'))[
+    bes_sum = SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafzili_code,
+                                         acc_year=acc_year).aggregate(Sum('bes'))[
         'bes__sum']
     curramount_sum = \
-    SanadDetail.objects.filter(is_active=True,kol=kol_code, moin=moin_code, tafzili=tafzili_code,acc_year =acc_year).aggregate(Sum('curramount'))[
-        'curramount__sum']
+        SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafzili_code,
+                                   acc_year=acc_year).aggregate(Sum('curramount'))[
+            'curramount__sum']
 
-
-
-    context={
-        'level':level,
-        'sanads':sanads,
-        'kol_code':int(kol_code),
-        'moin_code':int(moin_code),
-        'tafzili_code':int(tafzili_code),
+    context = {
+        'level': level,
+        'sanads': sanads,
+        'kol_code': int(kol_code),
+        'moin_code': int(moin_code),
+        'tafzili_code': int(tafzili_code),
         'level1': level1,
         'level2': level2,
         'level3': level3,
@@ -915,13 +921,9 @@ def SanadTotal(request, *args, **kwargs):
 
     }
 
-
-
     return render(request, 'sanad_total.html', context)
 
 
-
-
 import locale
 
 # تنظیم محلی برای جداسازی اعداد با کاما
@@ -945,10 +947,12 @@ import locale
 
 # تنظیم محلی برای جداسازی اعداد با کاما
 locale.setlocale(locale.LC_ALL, 'fa_IR.UTF-8')
+
 
 def BedehkaranMoshtarian(request, state):
     # محاسبه مجموع curramount بر اساس tafzili
-    tafzili_sums = SanadDetail.objects.filter(moin=1, kol=103).values('tafzili').annotate(total_curramount=Sum('curramount'))
+    tafzili_sums = SanadDetail.objects.filter(moin=1, kol=103).values('tafzili').annotate(
+        total_curramount=Sum('curramount'))
 
     # جمع‌آوری داده‌ها برای نمایش در قالب جدول
     report_data = []
@@ -997,11 +1001,13 @@ def BedehkaranMoshtarian(request, state):
 
         # اعمال شرایط بر اساس state
         if (state == '1' and total_curramount > 0) or \
-           (state == '2' and total_curramount == 0 and person_data['sum_amount'] == 0) or \
-           (state == '3' and total_curramount == 0 and person_data['sum_amount'] > 0) or \
-           (state == '4' and total_curramount < 0 and person_data['sum_amount'] == 0) or \
-           (state == '5' and total_curramount < 0 and person_data['sum_amount'] > 0 and person_data['total_with_loans'] > 0) or \
-           (state == '6' and total_curramount < 0 and person_data['sum_amount'] > 0 and person_data['total_with_loans'] < 0):
+                (state == '2' and total_curramount == 0 and person_data['sum_amount'] == 0) or \
+                (state == '3' and total_curramount == 0 and person_data['sum_amount'] > 0) or \
+                (state == '4' and total_curramount < 0 and person_data['sum_amount'] == 0) or \
+                (state == '5' and total_curramount < 0 and person_data['sum_amount'] > 0 and person_data[
+                    'total_with_loans'] > 0) or \
+                (state == '6' and total_curramount < 0 and person_data['sum_amount'] > 0 and person_data[
+                    'total_with_loans'] < 0):
             total_amount += person_data['total_with_loans']
             report_data.append(person_data)
 
@@ -1010,7 +1016,6 @@ def BedehkaranMoshtarian(request, state):
         'total_amount': locale.format_string("%d", total_amount, grouping=True)
     }
     return render(request, 'bedehkaran_moshtarian.html', context)
-
 
 
 def JariAshkhasMoshtarian(request):
@@ -1031,17 +1036,21 @@ def JariAshkhasMoshtarian(request):
 
     table1 = []
     for f in filters:
-        total_mandeh = BedehiMoshtari.objects.filter(**f['filter']).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+        total_mandeh = BedehiMoshtari.objects.filter(**f['filter']).aggregate(total_mandeh=Sum('total_mandeh'))[
+                           'total_mandeh'] or 0
         if f['negate']:
             total_mandeh = -total_mandeh
-        table1.append(total_mandeh/10000000)
+        table1.append(total_mandeh / 10000000)
     # 6 مانده کل
-    table1.append((BedehiMoshtari.objects.aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0 )/ 10000000)
+    table1.append((BedehiMoshtari.objects.aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0) / 10000000)
     # 7 وام دار بی حساب
-    table1.append((BedehiMoshtari.objects.filter(total_mandeh=0,loans_total__gt=0).aggregate(loans_total=Sum('loans_total'))['loans_total'] or 0 )/ 10000000)
+    table1.append((BedehiMoshtari.objects.filter(total_mandeh=0, loans_total__gt=0).aggregate(
+        loans_total=Sum('loans_total'))['loans_total'] or 0) / 10000000)
 
     # 8 وام دار - کمبود وام
-    table1.append(-(BedehiMoshtari.objects.filter(total_mandeh__lt=0,loans_total__gt=0,total_with_loans__lt=0).aggregate(total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0 )/ 10000000)
+    table1.append(-(
+                BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0, total_with_loans__lt=0).aggregate(
+                    total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0) / 10000000)
     today = date.today()
 
     # 9 قسط عقب افتاده
@@ -1076,8 +1085,6 @@ def JariAshkhasMoshtarian(request):
     # 10 اقساط امروز به بعد
     table1.append(final_result)
 
-
-
     # تقویم اقساط و بدهی ها
     # تبدیل تاریخ امروز به شمسی
     today_jalali = jdate.fromgregorian(date=today)
@@ -1110,33 +1117,34 @@ def JariAshkhasMoshtarian(request):
             'total_count': float(total_loans_month) / 10000000
         })
     print(f"5: {time.time() - start_time:.2f} ثانیه")
-    no_loan=BedehiMoshtari.objects.filter(total_mandeh__lt=0,loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
-    loan_gap=BedehiMoshtari.objects.filter(total_mandeh__lt=0,loans_total__gt=0,total_with_loans__lt=0).aggregate(total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0
+    no_loan = \
+    BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))[
+        'total_mandeh'] or 0
+    loan_gap = BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0, total_with_loans__lt=0).aggregate(
+        total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0
 
-    loan_before_current_year =LoanDetil.objects.filter(
+    loan_before_current_year = LoanDetil.objects.filter(
         date__lt=first_day_of_current_year_jalali,
         complete_percent__lt=1
     ).aggregate(
-            cost=Sum('cost'))['cost'] or 0
+        cost=Sum('cost'))['cost'] or 0
 
-    loan_after_current_year =LoanDetil.objects.filter(
+    loan_after_current_year = LoanDetil.objects.filter(
         date__gt=last_day_of_current_year_jalali,
         complete_percent__lt=1
     ).aggregate(
-            cost=Sum('cost'))['cost'] or 0
-
-
+        cost=Sum('cost'))['cost'] or 0
 
     chart_data = [
-        {'month_name': 'بدون وام', 'total_count': float(no_loan) *-1 / 10000000},
-        {'month_name': 'کمبود وام', 'total_count': float(loan_gap) *-1 / 10000000},
-        {'month_name': 'معوق سال های قبل', 'total_count': float(loan_after_current_year)  / 10000000},
+        {'month_name': 'بدون وام', 'total_count': float(no_loan) * -1 / 10000000},
+        {'month_name': 'کمبود وام', 'total_count': float(loan_gap) * -1 / 10000000},
+        {'month_name': 'معوق سال های قبل', 'total_count': float(loan_after_current_year) / 10000000},
         *monthly_data,
         {'month_name': 'سال های بعد', 'total_count': float(loan_after_current_year) / 10000000},
     ]
     print(f"6: {time.time() - start_time:.2f} ثانیه")
 
-    loans=Loan.objects.all()
+    loans = Loan.objects.all()
     # loans = Loan.objects.annotate(
     #     per_taf5=F('name_code') + 100000  # جمع مقدار با ۱۰۰۰۰۰۰
     # )
@@ -1154,10 +1162,10 @@ def JariAshkhasMoshtarian(request):
     return render(request, 'jari_ashkhas_moshtarian.html', context)
 
 
-
 from django.db.models import F, Func
 
 from django.db.models import F, Func
+
 
 def JariAshkhasMoshtarianDetail(request, filter_id):
     filters = {
@@ -1167,7 +1175,7 @@ def JariAshkhasMoshtarianDetail(request, filter_id):
         '4': {'total_mandeh__lt': 0},
         '5': {'total_mandeh__lt': 0, 'loans_total__gt': 0},
         '6': {'total_mandeh__lt': 0, 'loans_total': 0},
-        '7': {'total_mandeh__lt': 0, 'loans_total__gt': 0 , 'total_with_loans__lt' : 0},
+        '7': {'total_mandeh__lt': 0, 'loans_total__gt': 0, 'total_with_loans__lt': 0},
         '8': {'total_mandeh': 0, 'loans_total__gt': 0},
     }
 
@@ -1184,7 +1192,8 @@ def JariAshkhasMoshtarianDetail(request, filter_id):
     }
 
     filter_criteria = filters.get(str(filter_id), {})
-    items = BedehiMoshtari.objects.filter(**filter_criteria).annotate(abs_total_mandeh=Func(F('total_mandeh'), function='ABS')).order_by('-abs_total_mandeh')
+    items = BedehiMoshtari.objects.filter(**filter_criteria).annotate(
+        abs_total_mandeh=Func(F('total_mandeh'), function='ABS')).order_by('-abs_total_mandeh')
 
     context = {
         'title': f'جزئیات حساب مشتریان - {filter_labels.get(str(filter_id), "فیلتر نامشخص")}',
@@ -1193,6 +1202,7 @@ def JariAshkhasMoshtarianDetail(request, filter_id):
 
     return render(request, 'jari_ashkhas_moshtarian_detail.html', context)
 
+
 import datetime
 from django.utils import timezone
 import datetime
@@ -1201,10 +1211,9 @@ from django.utils import timezone
 from django.utils import timezone
 from collections import defaultdict
 import datetime
+
 
 @login_required(login_url='/login')
-
-
 def HesabMoshtariDetail(request, tafsili):
     user = request.user
     if user.mobile_number != '09151006447':
@@ -1212,7 +1221,7 @@ def HesabMoshtariDetail(request, tafsili):
 
     hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
     today = timezone.now().date()
-    asnad = SanadDetail.objects.filter(kol=103, moin=1, tafzili=tafsili).order_by('acc_year','date', 'code', 'radif')
+    asnad = SanadDetail.objects.filter(kol=103, moin=1, tafzili=tafsili).order_by('acc_year', 'date', 'code', 'radif')
 
     chart_data = defaultdict(lambda: {'value': 0})
 
@@ -1239,8 +1248,8 @@ def HesabMoshtariDetail(request, tafsili):
     return render(request, 'moshrari_detail.html', context)
 
 
-
-
+from django.utils import timezone
+from django.db.models import Value, CharField, IntegerField, F, ExpressionWrapper, DurationField
 
 
 @login_required(login_url='/login')
@@ -1251,7 +1260,40 @@ def LoanTotal(request, *args, **kwargs):
 
     start_time = time.time()  # زمان شروع تابع
 
-    loans=LoanDetil.objects.filter(complete_percent__lt=1)
+    today = timezone.now().date()
+
+    loans = LoanDetil.objects.filter(complete_percent__lt=1, date__lt=today).annotate(
+        category_en=Value("Overdue", CharField()),
+        category_fa=Value("معوق", CharField()),
+        # delay_days=ExpressionWrapper(today - F("date"), output_field=DurationField()),
+        delay_days=(ExpressionWrapper(F("date") - today, output_field=IntegerField())) / -86400000000,
+        mtday=(ExpressionWrapper(
+            (F("delay_days") * F("cost") * (1 - F("complete_percent"))),
+            output_field=DecimalField(max_digits=15, decimal_places=0))/1000000
+        ),
+        delaycost=(ExpressionWrapper(
+            (F("cost") * (1 - F("complete_percent"))),
+            output_field=DecimalField(max_digits=15, decimal_places=0))
+               )
+
+    )
+
+    # loans_today = LoanDetil.objects.filter(complete_percent__lt=1, date=today).annotate(
+    #     category_en=Value("Today", CharField()),
+    #     category_fa=Value("امروز", CharField()),
+    #     delay_days=Value(0, IntegerField()),
+    #     mtday=Value(0, FloatField())
+    # )
+    #
+    # loans_future = LoanDetil.objects.filter(complete_percent__lt=1, date__gt=today).annotate(
+    #     category_en=Value("Future", CharField()),
+    #     category_fa=Value("آینده", CharField()),
+    #     delay_days=Value(0, IntegerField()),
+    #     mtday=Value(0, FloatField())
+    # )
+
+    # final_loans = loans.union(loans_today, loans_future)
+    # final_loans = loans.union(loans_today)
 
     context = {
         'title': 'کل اقساط',

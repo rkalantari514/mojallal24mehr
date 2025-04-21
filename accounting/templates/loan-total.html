@@ -75,23 +75,18 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="d-block">
-                            <h4 class="card-title text-facebook pb-0 border-0">گزارش اقساط مشتریان<span
-                                    class="badge badge-pill badge-success">1</span></h4>
-                     </div>
+                        <h4 class="card-title text-facebook pb-0 border-0">گزارش اقساط معوق</h4>
+                    </div>
 
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
                         <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
-                        <li class="breadcrumb-item active">چک های پرداختی</li>
+                        <li class="breadcrumb-item active">گزارش اقساط معوق</li>
 
                     </ol>
                 </div>
             </div>
-
-
-
-
 
 
             <!-- ردیف اول خلاصه ها -->
@@ -167,16 +162,18 @@
             </div>
 
 
-                    <!-- ردیف موجودی انبار و تقویم -->
+            <!-- ردیف موجودی انبار و تقویم -->
             <div class="row">
                 <div class="col-md-12 mb-30">
                     <div class="col-xl-12 mb-30">
                         <div class="card card-statistics h-100">
                             <div class="card-body">
                                 <div class="table-responsive mt-15 ">
-                                    <h6 class="card-title pb-0 border-0">کل اقساط: <span id="total-mandah" class="text-primary"></span> ریال </h6>
+                                    <h6 class="card-title pb-0 border-0">خواب تعویق: <span id="total-mandah"
+                                                                                           class="text-primary"></span>
+                                        میلیون تومان روز </h6>
 
-                                      <div class="table-responsive">
+                                    <div class="table-responsive">
                                         <table id="table"
                                                class="table-striped"
                                                data-toggle="table"
@@ -195,68 +192,90 @@
                                                data-pagination="true"
                                                data-show-columns-search="true"
                                                data-show-footer="true"
-                                               data-page-size="10"
+                                               data-page-size="50"
                                                data-remember-order="true"
                                                data-sortable="true"
                                                data-show-search-clear-button="true"
-                                               data-sort-name="date"
-                                               data-sort-order="asc"
+                                               data-sort-name="mtday"
+                                               data-sort-order="desc"
                                                data-filter-control="true"
                                                data-show-print="true"
                                                data-export-data-type="all"
                                                data-export-types='["excel"]'>
                                             <thead>
                                             <tr class="tr-class-1">
-                                                <th></th>
-                                                <th class="card-text text-center" data-sortable="true" data-field="bank"
-                                                    data-filter-control="select">بانک
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="tafsily"
+                                                        {#                                                    data-filter-control="select"#}
+                                                    data-filter-control="input"
+                                                >کد تفصیلی
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-field="shone" data-filter-control="select">شعبه
+                                                    data-field="percode"
+                                                        {#                                                    data-filter-control="select"#}
+                                                    data-filter-control="input"
+                                                >کد فرد
                                                 </th>
-                                                <th class="card-text text-center" data-sortable="true" data-field="year"
-                                                    data-filter-control="select">سال
-                                                </th>
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-field="month" data-filter-control="select">ماه
-                                                </th>
-{#                                                <th class="card-text text-center" data-sortable="true"#}
-{#                                                    data-field="person" data-filter-control="select">طرف حساب#}
-{#                                                </th>#}
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-field="name">شناسه چک
-                                                </th>
-                                                <th class="card-text text-center" data-sortable="true" data-field="date"
-                                                    data-filter-control="select">تاریخ چک
+                                                <th class="card-text text-center" data-sortable="true" data-field="fard"
+                                                        {#                                                    data-filter-control="select"#}
+                                                    data-filter-control="input"
+                                                >فرد
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-field="cat_kala" data-filter-control="select">نوع
+                                                    data-field="date" data-filter-control="select">تاریخ
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true" data-field="cost"
+                                                >مبلغ قسط
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-field="sales" data-filter-control="select">وضعیت
+                                                    data-field="persent" data-filter-control="select">درصد تکمیل
                                                 </th>
-                                                <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter" data-field="mandah">مانده
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="delaycost" data-footer-formatter="priceFormatter"
+                                                >مبلغ معوق
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="condiition" data-filter-control="select">وضعیت
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="delay"
+                                                    data-filter-control="select">تاخیر
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-sorter="numericOnly" data-footer-formatter="priceFormatter"
+                                                    data-field="mtday">خواب تعویق (میلیون تومان روز)
                                                 </th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             {% for l in loans %}
-                                                    <tr>
-                                                        <td class="card-text text-center">{{ l.loan.person }}</td>
-                                                        <td class="card-text text-center">{{ l.tarikh }}</td>
-                                                        <td class="card-text text-center">{{ l.cost }}</td>
-                                                        <td class="card-text text-center">{{ l.complete_percent }}</td>
-
-{#                                                        <td class="card-text text-center">{{ t.year }}</td>#}
-{#                                                        <td class="card-text text-center">{{ t.month }}</td>#}
-{#                                                        <td class="card-text text-center">{{ t.person }}</td>#}
-{#                                                        <td class="card-text text-center">{{ t.id }}</td>#}
-{#                                                        <td class="card-text text-center">{{ t.date|to_jalali:'%Y/%m/%d' }}</td>#}
-{#                                                        <td class="card-text text-center">{{ t.com }}</td>#}
-{#                                                        <td class="card-text text-center">{{ t.status }}</td>#}
-{#                                                        <td class="card-text text-center">{{ t.mandeh|floatformat:0|intcomma:False }}</td>#}
-                                                    </tr>
+                                                <tr>
+                                                    <td class="card-text text-center">
+                                                        <a href="/acc/jariashkhas/moshtari/{{ l.loan.person.per_taf }}"
+                                                           target="_blank">
+                                                            {{ l.loan.person.per_taf }}
+                                                        </a>
+                                                    </td>
+                                                    <td class="card-text text-center">
+                                                        <a href="/acc/jariashkhas/moshtari/{{ l.loan.person.per_taf }}"
+                                                           target="_blank">
+                                                            {{ l.loan.person.code }}
+                                                        </a>
+                                                    </td>
+                                                    <td class="card-text text-center">
+                                                        <a href="/acc/jariashkhas/moshtari/{{ l.loan.person.per_taf }}"
+                                                           target="_blank">
+                                                            {{ l.loan.person }}
+                                                        </a>
+                                                    </td>
+                                                    <td class="card-text text-center">{{ l.tarikh }}</td>
+                                                    <td class="card-text text-center">{{ l.cost|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ l.complete_percent|floatformat:2 }}</td>
+                                                    <td class="card-text text-center">{{ l.delaycost|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ l.category_fa }}</td>
+                                                    <td class="card-text text-center">{{ l.delay_days }} </td>
+                                                    <td class="card-text text-center">{{ l.mtday|floatformat:0|intcomma:False }} </td>
+                                                </tr>
                                             {% endfor %}
                                             </tbody>
                                         </table>
@@ -269,12 +288,6 @@
                     </div>
                 </div>
             </div>
-
-
-
-
-
-
 
 
         </div>
@@ -305,38 +318,38 @@
     <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
 
 
-<script>
-    var $table = $('#table');
-    var totalMandah = 0; // متغیر برای ذخیره مجموع مانده
+    <script>
+        var $table = $('#table');
+        var totalMandah = 0; // متغیر برای ذخیره مجموع مانده
 
-    $(function () {
-        $table.bootstrapTable();
-        updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده هنگام بارگذاری جدول
-    });
+        $(function () {
+            $table.bootstrapTable();
+            updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده هنگام بارگذاری جدول
+        });
 
-    function priceFormatter(data) {
-        var field = this.field;
-        console.log("Data received for priceFormatter:", data);
-        var result = data.map(function (row) {
-            var valueString = row[field].replace(/,/g, ''); // حذف کاماها
-            var value = parseFloat(valueString);
-            console.log("Processing row:", row);
-            console.log("Parsed value:", value);
-            return isNaN(value) ? 0 : value;
-        }).reduce(function (sum, i) {
-            console.log("Current sum:", sum);
-            return sum + i;
-        }, 0);
-        console.log("Final result for priceFormatter:", result);
-        totalMandah = result; // ذخیره مجموع مانده
-        updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده
-        return result.toLocaleString('fa-IR'); // نمایش با کاما به صورت 3 تا 3 تا
-    }
+        function priceFormatter(data) {
+            var field = this.field;
+            console.log("Data received for priceFormatter:", data);
+            var result = data.map(function (row) {
+                var valueString = row[field].replace(/,/g, ''); // حذف کاماها
+                var value = parseFloat(valueString);
+                console.log("Processing row:", row);
+                console.log("Parsed value:", value);
+                return isNaN(value) ? 0 : value;
+            }).reduce(function (sum, i) {
+                console.log("Current sum:", sum);
+                return sum + i;
+            }, 0);
+            console.log("Final result for priceFormatter:", result);
+            totalMandah = result; // ذخیره مجموع مانده
+            updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده
+            return result.toLocaleString('fa-IR'); // نمایش با کاما به صورت 3 تا 3 تا
+        }
 
-    function updateTotalMandah() {
-        $('#total-mandah').text(totalMandah.toLocaleString('fa-IR'));
-    }
-</script>
+        function updateTotalMandah() {
+            $('#total-mandah').text(totalMandah.toLocaleString('fa-IR'));
+        }
+    </script>
 
 
 
