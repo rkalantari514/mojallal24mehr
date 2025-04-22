@@ -3396,21 +3396,17 @@ def UpdateBedehiMoshtari(request):
     except Exception as e:
         print(f"خطا در به‌روزرسانی بدهی مشتری: {e}")
 
+
+
+
     # محاسبه زمان اجرای کل
     tend = time.time()
     total_time = tend - t0
     print(f"زمان کل: {total_time:.2f} ثانیه")
 
-    return redirect('/updatedb')
+    return redirect('/acc/loan_total')
 
 
-from django.db.models import Sum
-from django.shortcuts import redirect
-import time
-
-from django.db.models import Sum
-from django.shortcuts import redirect
-import time
 from django.shortcuts import render, redirect
 from django.db.models import F, Sum, ExpressionWrapper, FloatField
 

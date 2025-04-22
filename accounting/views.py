@@ -13,7 +13,7 @@ from django.db.models import Sum, F, DecimalField
 
 from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
-from dashboard.models import MasterInfo
+from dashboard.models import MasterInfo, MasterReport
 from dashboard.views import generate_calendar_data_cheque
 from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan, LoanDetil
 from jdatetime import date as jdate
@@ -1302,6 +1302,15 @@ def LoanTotal(request, *args, **kwargs):
         total_delaycost=Sum("delaycost") / 10000000000,
         total_mtday=Sum("mtday")/1000
     )
+
+    day_report=MasterReport.objects.filter(day=today).last()
+
+    if day_report and (day_report.total_delaycost != loan_stats["total_delaycost"] or day_report.total_mtday != loan_stats["total_mtday"]):
+        day_report.total_delaycost = loan_stats["total_delaycost"]
+        day_report.total_mtday = loan_stats["total_mtday"]
+        day_report.save()
+
+
 
     context = {
         'title': 'اقساط معوق',

@@ -71,6 +71,13 @@ class MasterReport(models.Model):
     asnad_pardakhtani = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='اسناد پرداختنی')
     # daramad_forosh = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='درآمد از فروش')
 
+
+    total_delaycost = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='کل اقساط معوق')
+    total_mtday = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='خواب تعویق')
+
+
+
+
     class Meta:
         verbose_name = 'گزارش کلی'
         verbose_name_plural = 'گزارش‌های کلی'
