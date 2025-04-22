@@ -46,6 +46,9 @@ class MasterInfo(models.Model):
 
 
 
+    asnad_daryaftani = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='اسناد دریافتنی')
+    asnad_pardakhtani = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='اسناد پرداختنی')
+
 
     class Meta:
         verbose_name = 'تنظیمات سایت'

@@ -363,8 +363,6 @@ def Home1(request, *args, **kwargs):
     # yesterday_data = TarazCal(yesterday, yesterday, data)
     yesterday_data = TarazCalFromReport(yesterday)
     print(f"1.2: {time.time() - start_time:.2f} ثانیه")
-    allday_data = TarazCal(start_date_gregorian, today, data)
-    print(f"1.3: {time.time() - start_time:.2f} ثانیه")
     # محاسبه داده‌ها برای 8 روز اخیر
     chart7_data = [TarazCal(today - timedelta(days=i), today - timedelta(days=i), data)['asnad_daryaftani'] for i in
                    range(8)]
@@ -489,7 +487,6 @@ def Home1(request, *args, **kwargs):
         'last_update_time': last_update_time,
         'today_data': today_data,
         'yesterday_data': yesterday_data,
-        'allday_data': allday_data,
         'r_chequ_data': r_chequ_data,
         'p_chequ_data': p_chequ_data,
 
@@ -606,6 +603,10 @@ def CreateTotalReport(request):
             10000000)
         sayer_daramad_total = sum([Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 401]) / Decimal(
             10000000)
+        repo.asnad_daryaftani = -sum([Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 101]) / Decimal(
+            10000000)
+        repo.asnad_pardakhtani = sum([Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 200]) / Decimal(
+                    10000000)
 
         repo.sayer_hazine_ave = sayer_hazine_total / active_day * -1 if active_day else 0
         repo.sayer_daramad_ave = sayer_daramad_total / active_day if active_day else 0
