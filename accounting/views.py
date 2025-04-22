@@ -1257,7 +1257,7 @@ from django.db.models import Value, CharField, IntegerField, F, ExpressionWrappe
 def LoanTotal(request, *args, **kwargs):
     user = request.user
     if user.mobile_number != '09151006447':
-        UserLog.objects.create(user=user, page='کل اقساط', code=0)
+        UserLog.objects.create(user=user, page=' اقساط معوق', code=0)
 
     start_time = time.time()  # زمان شروع تابع
 
@@ -1316,3 +1316,29 @@ def LoanTotal(request, *args, **kwargs):
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
     return render(request, 'loan-total.html', context)
+
+# برای api
+from django.http import JsonResponse
+
+from django.http import JsonResponse
+from django.db.models import ExpressionWrapper, F, IntegerField, Sum
+from django.utils import timezone
+
+def loan_summary_api(request):
+    today = timezone.now().date()
+
+    loans = LoanDetil.objects.filter(complete_percent__lt=1, date__lt=today).annotate(
+        delay_days=(ExpressionWrapper(F("date") - today, output_field=IntegerField())) / -86400000000,
+        mtday=(ExpressionWrapper((F("delay_days") * F("cost") * (1 - F("complete_percent"))), output_field=IntegerField())) / 10000000,
+        delaycost=(ExpressionWrapper((F("cost") * (1 - F("complete_percent"))), output_field=IntegerField()))
+    )
+
+    loan_stats = loans.aggregate(
+        total_delaycost=Sum("delaycost") / 10000000000,
+        total_mtday=Sum("mtday") / 1000
+    )
+
+    return JsonResponse({
+        "total_delaycost": loan_stats["total_delaycost"],
+        "total_mtday": loan_stats["total_mtday"],
+    })

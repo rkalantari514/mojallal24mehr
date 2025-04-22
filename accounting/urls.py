@@ -3,7 +3,7 @@ from django.shortcuts import redirect
 
 from accounting.views import TarazKol, ChequesRecieveTotal, balance_sheet_kol, balance_sheet_moin, \
     balance_sheet_tafsili, SanadTotal, ChequesPayTotal, BedehkaranMoshtarian, JariAshkhasMoshtarian, \
-    JariAshkhasMoshtarianDetail, HesabMoshtariDetail, LoanTotal
+    JariAshkhasMoshtarianDetail, HesabMoshtariDetail, LoanTotal, loan_summary_api
 
 urlpatterns = [
     path('acc/loan_total', LoanTotal, name='loan-total'),
@@ -28,4 +28,14 @@ urlpatterns = [
          name='balance_sheet_tafsili'),
     path('sanad_total/<kol_code>/<moin_code>/<tafzili_code>/', SanadTotal,
          name='sanad_total'),
+
+
+
+
+
+
+# for api
+    path('api/loan-summary/', loan_summary_api, name='loan_summary'),
+
 ]
+
