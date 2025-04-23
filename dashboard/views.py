@@ -12,7 +12,7 @@ from .models import MasterInfo, MasterReport, MonthlyReport
 from khayyam import JalaliDate
 from django.db.models import OuterRef, Subquery
 logger = logging.getLogger(__name__)
-
+from django.http import JsonResponse
 
 from mahakupdate.models import (
     Factor, FactorDetaile, SanadDetail, Mtables,
@@ -181,13 +181,15 @@ def TarazCal1day(day, data,acc_year2):
     }
     return to_return
 
-def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_data,loan_detail_data):
+def generate_calendar_data_cheque2(month, year, cheque_recive_data,cheque_pay_data,loan_detail_data):
     # مشخص کردن اولین روز ماه
+    start_time2 = time.time()  # زمان شروع تابع
+
     first_day_of_month = jdatetime.date(year, month, 1)
 
     # روز شروع ماه (شنبه = 0, یکشنبه = 1, ...)
     start_day_of_week = first_day_of_month.weekday()
-
+    print(f"61: {time.time() - start_time2:.2f} ثانیه")
     # برای بدست آوردن آخرین روز ماه شمسی
     lday = first_day_of_month + jdatetime.timedelta(days=30)
     if lday.month != month:
@@ -196,10 +198,15 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
             lday = first_day_of_month + jdatetime.timedelta(days=28)
     last_day_of_month = lday
     # تولید ماتریس روزهای ماه
+    print(f"62: {time.time() - start_time2:.2f} ثانیه")
     days_in_month = []
     max_cheque = 0
     week = [None] * start_day_of_week  # اضافه کردن روزهای خالی
+    print(f"63: {time.time() - start_time2:.2f} ثانیه")
+
     for i in range((last_day_of_month - first_day_of_month).days + 1):
+        print(f"64: {time.time() - start_time2:.2f} ثانیه")
+
         current_day = first_day_of_month + jdatetime.timedelta(days=i)
         recive = sum (item.total_mandeh for item in cheque_recive_data if item.cheque_date == current_day) /10000000
         pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date == current_day )/10000000
@@ -235,6 +242,7 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
     # اضافه کردن هفته‌ای که کمتر از 7 روز است
     if len(week) > 0:
         days_in_month.append(week + [None] * (7 - len(week)))
+    print(f"65: {time.time() - start_time2:.2f} ثانیه")
 
     past_recive = sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date < first_day_of_month) / 10000000
     post_recive= sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date > last_day_of_month) / 10000000
@@ -243,6 +251,7 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
     past_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date < first_day_of_month) / 10000000
     post_pay= sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date > last_day_of_month) / 10000000
     this_month_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date >= first_day_of_month and item.cheque_date <= last_day_of_month) / 10000000
+    print(f"66: {time.time() - start_time2:.2f} ثانیه")
 
 
     month_cheque_data={
@@ -255,6 +264,7 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
     }
 
 
+    print(f"67: {time.time() - start_time2:.2f} ثانیه")
 
     total_bedehkar=BedehiMoshtari.objects.filter(total_mandeh__lt=0).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
     not_loan=BedehiMoshtari.objects.filter(total_mandeh__lt=0,loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
@@ -265,11 +275,13 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
                     item.date < first_day_of_month) / Decimal(10000000)
     post_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
                           item.date > last_day_of_month) / Decimal(10000000)
+    print(f"68: {time.time() - start_time2:.2f} ثانیه")
 
     # تبدیل به float
     not_loan = float(not_loan)
     loan_gap = float(loan_gap)
     total_bedehkar = float(total_bedehkar)
+    print(f"69: {time.time() - start_time2:.2f} ثانیه")
 
     month_loan_data={
         'not_loan': -1.0/10000000.0 * not_loan,
@@ -283,9 +295,344 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
 
 
     return days_in_month,max_cheque,month_cheque_data,month_loan_data
+def generate_calendar_data_cheque(month, year, cheque_recive_data, cheque_pay_data, loan_detail_data):
+    start_time2 = time.time()  # زمان شروع تابع
 
+    # مشخص کردن اولین و آخرین روز ماه
+    first_day_of_month = jdatetime.date(year, month, 1)
+    lday = first_day_of_month + jdatetime.timedelta(days=30)
+    if lday.month != month:
+        lday = first_day_of_month + jdatetime.timedelta(days=29)
+        if lday.month != month:
+            lday = first_day_of_month + jdatetime.timedelta(days=28)
+    last_day_of_month = lday
+    start_day_of_week = first_day_of_month.weekday()
+    print(f"61: {time.time() - start_time2:.2f} ثانیه")
+
+    days_in_month = []
+    max_cheque = 0
+    week = [None] * start_day_of_week
+    print(f"62: {time.time() - start_time2:.2f} ثانیه")
+
+    # تبدیل لیست داده‌ها به دیکشنری برای افزایش سرعت دسترسی
+    cheque_recive_dict = {item.cheque_date: item.total_mandeh for item in cheque_recive_data}
+    cheque_pay_dict = {item.cheque_date: item.total_mandeh for item in cheque_pay_data}
+    loan_detail_dict = {item.date: item for item in loan_detail_data}
+    print(f"63: {time.time() - start_time2:.2f} ثانیه")
+
+    for i in range((last_day_of_month - first_day_of_month).days + 1):
+        print(f"64: {time.time() - start_time2:.2f} ثانیه")
+
+        current_day = first_day_of_month + jdatetime.timedelta(days=i)
+        current_day_gregorian = current_day.togregorian().isoformat()
+
+        # محاسبات مربوط به چک‌های دریافتی و پرداختی
+        recive = cheque_recive_dict.get(current_day, 0) / 10000000
+        pay = cheque_pay_dict.get(current_day, 0) / 10000000
+        max_cheque = max(max_cheque, abs(recive), abs(pay))
+
+        # دریافت جزئیات چک‌ها و وام‌ها
+        today_recive_cheque = cheque_recive_data.filter(cheque_date=current_day_gregorian).order_by('-cost')
+        today_pay_cheque = cheque_pay_data.filter(cheque_date=current_day_gregorian).order_by('-cost')
+        loans = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
+                    item.date == current_day) / Decimal(10000000)
+        today_loans = loan_detail_data.filter(date=current_day_gregorian).order_by('-cost')
+
+        day_info = {
+            'jyear': current_day.year,
+            'jmonth': current_day.month,
+            'jday': current_day.day,
+            'recive': -1 * recive,
+            'pay': pay,
+            'today_recive_cheque': today_recive_cheque,
+            'today_pay_cheque': today_pay_cheque,
+            'today_loans': today_loans,
+            'loans': loans,
+        }
+        week.append(day_info)
+
+        if len(week) == 7 or current_day == last_day_of_month:
+            days_in_month.append(week)
+            week = []
+
+    if len(week) > 0:
+        days_in_month.append(week + [None] * (7 - len(week)))
+    print(f"65: {time.time() - start_time2:.2f} ثانیه")
+
+    # محاسبات چک‌های ماه گذشته و آینده
+    past_recive = sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date < first_day_of_month) / 10000000
+    post_recive = sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date > last_day_of_month) / 10000000
+    this_month_recive = sum(item.total_mandeh for item in cheque_recive_data if first_day_of_month <= item.cheque_date <= last_day_of_month) / 10000000
+
+    past_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date < first_day_of_month) / 10000000
+    post_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date > last_day_of_month) / 10000000
+    this_month_pay = sum(item.total_mandeh for item in cheque_pay_data if first_day_of_month <= item.cheque_date <= last_day_of_month) / 10000000
+    print(f"66: {time.time() - start_time2:.2f} ثانیه")
+
+    month_cheque_data = {
+        'past_recive': past_recive * -1,
+        'post_recive': post_recive * -1,
+        'this_month_recive': this_month_recive * -1,
+        'past_pay': past_pay,
+        'post_pay': post_pay,
+        'this_month_pay': this_month_pay,
+    }
+    print(f"67: {time.time() - start_time2:.2f} ثانیه")
+
+    # محاسبات وام‌ها
+    total_bedehkar = BedehiMoshtari.objects.filter(total_mandeh__lt=0).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+    not_loan = BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
+    loan_gap = BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0, total_with_loans__lt=0).aggregate(total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0
+    this_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if first_day_of_month <= item.date <= last_day_of_month) / Decimal(10000000)
+    past_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if item.date < first_day_of_month) / Decimal(10000000)
+    post_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if item.date > last_day_of_month) / Decimal(10000000)
+    print(f"68: {time.time() - start_time2:.2f} ثانیه")
+
+    not_loan = float(not_loan)
+    loan_gap = float(loan_gap)
+    total_bedehkar = float(total_bedehkar)
+    print(f"69: {time.time() - start_time2:.2f} ثانیه")
+
+    month_loan_data = {
+        'not_loan': -1.0 / 10000000.0 * not_loan,
+        'loan_gap': -1.0 / 10000000.0 * loan_gap,
+        'this_month_loan': this_month_loan,
+        'past_month_loan': past_month_loan,
+        'post_month_loan': post_month_loan,
+        'total_bedehkar': -1 / 10000000 * total_bedehkar,
+    }
+
+    return days_in_month, max_cheque, month_cheque_data, month_loan_data
+
+
+def generate_calendar_data_chequesider1(month, year, cheque_recive_data, cheque_pay_data, loan_detail_data):
+    start_time = time.time()  # زمان شروع تابع
+
+    # مشخص کردن اولین و آخرین روز ماه
+    first_day_of_month = jdatetime.date(year, month, 1)
+    lday = first_day_of_month + jdatetime.timedelta(days=30)
+    if lday.month != month:
+        lday = first_day_of_month + jdatetime.timedelta(days=29)
+        if lday.month != month:
+            lday = first_day_of_month + jdatetime.timedelta(days=28)
+    last_day_of_month = lday
+    start_day_of_week = first_day_of_month.weekday()
+
+    # تبدیل لیست داده‌ها به دیکشنری برای افزایش سرعت دسترسی
+    cheque_recive_dict = {item.cheque_date: item.total_mandeh for item in cheque_recive_data}
+    cheque_pay_dict = {item.cheque_date: item.total_mandeh for item in cheque_pay_data}
+    loan_detail_dict = {item.date: item for item in loan_detail_data}
+
+    # ليست ديتاهاي ماه
+    days_in_month = []
+    week = [None] * start_day_of_week
+    max_cheque = 0
+
+    # بارگذاری چک‌ها و وام‌ها
+    today_recive_cheques = {}
+    today_pay_cheques = {}
+    today_loans = {}
+
+    for current_day in (first_day_of_month + jdatetime.timedelta(days=i) for i in range((last_day_of_month - first_day_of_month).days + 1)):
+        current_day_gregorian = current_day.togregorian().isoformat()
+
+        # محاسبات مربوط به چک‌های دریافتی و پرداختی
+        recive = cheque_recive_dict.get(current_day, 0) / 10000000
+        pay = cheque_pay_dict.get(current_day, 0) / 10000000
+        max_cheque = max(max_cheque, abs(recive), abs(pay))
+
+        # دریافت جزئیات چک‌ها و وام‌ها
+        today_recive_cheque = today_recive_cheques.setdefault(current_day_gregorian, cheque_recive_data.filter(cheque_date=current_day_gregorian).order_by('-cost'))
+        today_pay_cheque = today_pay_cheques.setdefault(current_day_gregorian, cheque_pay_data.filter(cheque_date=current_day_gregorian).order_by('-cost'))
+        loans = today_loans.setdefault(current_day_gregorian, sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if item.date == current_day) / Decimal(10000000))
+
+        day_info = {
+            'jyear': current_day.year,
+            'jmonth': current_day.month,
+            'jday': current_day.day,
+            'recive': -1 * recive,
+            'pay': pay,
+            'today_recive_cheque': today_recive_cheque,
+            'today_pay_cheque': today_pay_cheque,
+            'today_loans': today_loans,
+            'loans': loans,
+        }
+        week.append(day_info)
+
+        if len(week) == 7 or current_day == last_day_of_month:
+            days_in_month.append(week)
+            week = []
+
+    if len(week) > 0:
+        days_in_month.append(week + [None] * (7 - len(week)))
+
+    # محاسبات چک‌های ماه گذشته و آینده
+    past_recive = sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date < first_day_of_month) / 10000000
+    post_recive = sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date > last_day_of_month) / 10000000
+    this_month_recive = sum(item.total_mandeh for item in cheque_recive_data if first_day_of_month <= item.cheque_date <= last_day_of_month) / 10000000
+
+    past_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date < first_day_of_month) / 10000000
+    post_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date > last_day_of_month) / 10000000
+    this_month_pay = sum(item.total_mandeh for item in cheque_pay_data if first_day_of_month <= item.cheque_date <= last_day_of_month) / 10000000
+
+    month_cheque_data = {
+        'past_recive': past_recive * -1,
+        'post_recive': post_recive * -1,
+        'this_month_recive': this_month_recive * -1,
+        'past_pay': past_pay,
+        'post_pay': post_pay,
+        'this_month_pay': this_month_pay,
+    }
+
+    # محاسبات وام‌ها
+    total_bedehkar = float(BedehiMoshtari.objects.filter(total_mandeh__lt=0).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0)
+    not_loan = float(BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0)
+    loan_gap = float(BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0, total_with_loans__lt=0).aggregate(total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0)
+    this_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if first_day_of_month <= item.date <= last_day_of_month) / Decimal(10000000)
+    past_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if item.date < first_day_of_month) / Decimal(10000000)
+    post_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if item.date > last_day_of_month) / Decimal(10000000)
+
+    month_loan_data = {
+        'not_loan': -1.0 / 10000000.0 * not_loan,
+        'loan_gap': -1.0 / 10000000.0 * loan_gap,
+        'this_month_loan': this_month_loan,
+        'past_month_loan': past_month_loan,
+        'post_month_loan': post_month_loan,
+        'total_bedehkar': -1 / 10000000 * total_bedehkar,
+    }
+
+    print(f"Total execution time: {time.time() - start_time:.2f} seconds")
+    return days_in_month, max_cheque, month_cheque_data, month_loan_data
+
+
+def generate_calendar_data_chequesider2(month, year, cheque_recive_data, cheque_pay_data, loan_detail_data):
+    start_time = time.time()  # زمان شروع تابع
+
+    # مشخص کردن اولین و آخرین روز ماه
+    first_day_of_month = jdatetime.date(year, month, 1)
+    last_day_of_month = first_day_of_month + jdatetime.timedelta(days=30)
+    while last_day_of_month.month != month:
+        last_day_of_month -= jdatetime.timedelta(days=1)
+    start_day_of_week = first_day_of_month.weekday()
+
+    # تبدیل لیست داده‌ها به دیکشنری برای افزایش سرعت دسترسی
+    cheque_recive_dict = {item.cheque_date: item.total_mandeh for item in cheque_recive_data}
+    cheque_pay_dict = {item.cheque_date: item.total_mandeh for item in cheque_pay_data}
+
+    loan_dates = {item.date: item for item in loan_detail_data}
+
+    days_in_month = []
+    week = [None] * start_day_of_week
+    max_cheque = 0
+
+    cheque_recive_data_gregorian = {item.cheque_date.togregorian().isoformat(): item for item in cheque_recive_data}
+    cheque_pay_data_gregorian = {item.cheque_date.togregorian().isoformat(): item for item in cheque_pay_data}
+
+    loans_by_date = {}
+    for item in loan_detail_data:
+        loan_date = item.date.togregorian().isoformat()
+        if loan_date not in loans_by_date:
+            loans_by_date[loan_date] = []
+        loans_by_date[loan_date].append(item)
+
+    for i in range((last_day_of_month - first_day_of_month).days + 1):
+        current_day = first_day_of_month + jdatetime.timedelta(days=i)
+        current_day_gregorian = current_day.togregorian().isoformat()
+
+        # محاسبات مربوط به چک‌های دریافتی و پرداختی
+        recive = cheque_recive_dict.get(current_day, 0) / 10000000
+        pay = cheque_pay_dict.get(current_day, 0) / 10000000
+        max_cheque = max(max_cheque, abs(recive), abs(pay))
+
+        # بدست آوردن جزئیات چک‌ها و وام‌ها
+        today_recive_cheque = cheque_recive_data_gregorian.get(current_day_gregorian, None)
+        today_pay_cheque = cheque_pay_data_gregorian.get(current_day_gregorian, None)
+
+        loans_today = loans_by_date.get(current_day_gregorian, [])
+        loans = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loans_today) / Decimal(
+            10000000)
+
+        day_info = {
+            'jyear': current_day.year,
+            'jmonth': current_day.month,
+            'jday': current_day.day,
+            'recive': -1 * recive,
+            'pay': pay,
+            'today_recive_cheque': today_recive_cheque,
+            'today_pay_cheque': today_pay_cheque,
+            'today_loans': loans_today,
+            'loans': loans,
+        }
+        week.append(day_info)
+
+        if len(week) == 7 or current_day == last_day_of_month:
+            days_in_month.append(week)
+            week = []
+
+    if len(week) > 0:
+        days_in_month.append(week + [None] * (7 - len(week)))
+
+        # محاسبات چک‌های ماه گذشته و آینده
+    past_recive = sum(
+        item.total_mandeh for item in cheque_recive_data if item.cheque_date < first_day_of_month) / 10000000
+    post_recive = sum(
+        item.total_mandeh for item in cheque_recive_data if item.cheque_date > last_day_of_month) / 10000000
+    this_month_recive = sum(item.total_mandeh for item in cheque_recive_data if
+                            first_day_of_month <= item.cheque_date <= last_day_of_month) / 10000000
+
+    past_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date < first_day_of_month) / 10000000
+    post_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date > last_day_of_month) / 10000000
+    this_month_pay = sum(item.total_mandeh for item in cheque_pay_data if
+                         first_day_of_month <= item.cheque_date <= last_day_of_month) / 10000000
+
+    month_cheque_data = {
+        'past_recive': past_recive * -1,
+        'post_recive': post_recive * -1,
+        'this_month_recive': this_month_recive * -1,
+        'past_pay': past_pay,
+        'post_pay': post_pay,
+        'this_month_pay': this_month_pay,
+    }
+
+    # محاسبات وام‌ها
+    total_bedehkar = BedehiMoshtari.objects.filter(total_mandeh__lt=0).aggregate(total_mandeh=Sum('total_mandeh'))[
+                         'total_mandeh'] or 0
+    not_loan = \
+    BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))[
+        'total_mandeh'] or 0
+    loan_gap = BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0, total_with_loans__lt=0).aggregate(
+        total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0
+
+    this_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
+                          first_day_of_month <= item.date <= last_day_of_month) / Decimal(10000000)
+    past_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
+                          item.date < first_day_of_month) / Decimal(10000000)
+    post_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
+                          item.date > last_day_of_month) / Decimal(10000000)
+
+    month_loan_data = {
+        'not_loan': -1.0 / 10000000.0 * float(not_loan),
+        'loan_gap': -1.0 / 10000000.0 * float(loan_gap),
+        'this_month_loan': this_month_loan,
+        'past_month_loan': past_month_loan,
+        'post_month_loan': post_month_loan,
+        'total_bedehkar': -1 / 10000000 * float(total_bedehkar),
+    }
+
+    print(f"Total execution time: {time.time() - start_time:.2f} seconds")
+    return days_in_month, max_cheque, month_cheque_data, month_loan_data
 @login_required(login_url='/login')
 def Home1(request, *args, **kwargs):
+    user_agent = request.META['HTTP_USER_AGENT']
+    # if 'Mobile' in user_agent or 'Tablet' in user_agent:
+    is_not_mobile = True
+    print('user_agent:')
+    print(user_agent)
+    if 'Mobile' in user_agent:
+        is_not_mobile=False
+    print('is_not_mobile:')
+    print(is_not_mobile)
+
     minfo=MasterInfo.objects.filter(is_active=True).last()
     user = request.user
     if user.mobile_number != '09151006447':
@@ -364,8 +711,8 @@ def Home1(request, *args, **kwargs):
     yesterday_data = TarazCalFromReport(yesterday)
     print(f"1.2: {time.time() - start_time:.2f} ثانیه")
     # محاسبه داده‌ها برای 8 روز اخیر
-    chart7_data = [TarazCal(today - timedelta(days=i), today - timedelta(days=i), data)['asnad_daryaftani'] for i in
-                   range(8)]
+    # chart7_data = [TarazCal(today - timedelta(days=i), today - timedelta(days=i), data)['asnad_daryaftani'] for i in
+    #                range(8)]
     print(f"2: {time.time() - start_time:.2f} ثانیه")
 
     # دریافت اطلاعات چک‌های دریافتی
@@ -472,9 +819,10 @@ def Home1(request, *args, **kwargs):
 
     loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
 
-
-    days_in_month,max_cheque,month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year, cheque_recive_data,cheque_pay_data,loan_detail_data)
-
+    if is_not_mobile:
+        days_in_month,max_cheque,month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year, cheque_recive_data,cheque_pay_data,loan_detail_data)
+    else:
+        days_in_month, max_cheque, month_cheque_data, month_loan_data=None,None,None,None
 
     print(f"13: {time.time() - start_time:.2f} ثانیه")
 
@@ -498,7 +846,7 @@ def Home1(request, *args, **kwargs):
         'chart2_data': chart2_data,
         'chart4_data': chart4_data,
         'chart5_data': chart5_data,
-        'chart7_data': chart7_data,
+        # 'chart7_data': chart7_data,
         #for calendar
         'month_name': month_name,
         'year': current_year,
