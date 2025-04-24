@@ -237,6 +237,10 @@
                                                     data-field="delaycost" data-footer-formatter="priceFormatter"
                                                 >مبلغ معوق
                                                 </th>
+
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="from_last_daryaft" >روز از آخرین پرداختی
+                                                </th>
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="condiition" data-filter-control="select">وضعیت
                                                 </th>
@@ -275,6 +279,7 @@
                                                     <td class="card-text text-center">{{ l.cost|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ l.complete_percent|floatformat:2 }}</td>
                                                     <td class="card-text text-center">{{ l.delaycost|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ l.from_last_daryaft }}</td>
                                                     <td class="card-text text-center">{{ l.category_fa }}</td>
                                                     <td class="card-text text-center">{{ l.delay_days }} </td>
                                                     <td class="card-text text-center">{{ l.mtday|floatformat:0|intcomma:False }} </td>

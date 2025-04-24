@@ -1263,10 +1263,15 @@ def LoanTotal(request, *args, **kwargs):
 
     today = timezone.now().date()
 
+
+
+    from django.db.models import Subquery
+
+    from django.db.models import OuterRef, Subquery
+
     loans = LoanDetil.objects.filter(complete_percent__lt=1, date__lt=today).annotate(
         category_en=Value("Overdue", CharField()),
         category_fa=Value("معوق", CharField()),
-        # delay_days=ExpressionWrapper(today - F("date"), output_field=DurationField()),
         delay_days=(ExpressionWrapper(F("date") - today, output_field=IntegerField())) / -86400000000,
         mtday=(ExpressionWrapper(
             (F("delay_days") * F("cost") * (1 - F("complete_percent"))),
@@ -1275,9 +1280,27 @@ def LoanTotal(request, *args, **kwargs):
         delaycost=(ExpressionWrapper(
             (F("cost") * (1 - F("complete_percent"))),
             output_field=DecimalField(max_digits=15, decimal_places=0))
+        ),
+        from_last_daryaft=Subquery(
+            BedehiMoshtari.objects.filter(person=OuterRef("loan__person")).values('from_last_daryaft')[:1]
         )
-
     )
+
+    # loans = LoanDetil.objects.filter(complete_percent__lt=1, date__lt=today).annotate(
+    #     category_en=Value("Overdue", CharField()),
+    #     category_fa=Value("معوق", CharField()),
+    #     # delay_days=ExpressionWrapper(today - F("date"), output_field=DurationField()),
+    #     delay_days=(ExpressionWrapper(F("date") - today, output_field=IntegerField())) / -86400000000,
+    #     mtday=(ExpressionWrapper(
+    #         (F("delay_days") * F("cost") * (1 - F("complete_percent"))),
+    #         output_field=DecimalField(max_digits=15, decimal_places=0)) / 10000000
+    #            ),
+    #     delaycost=(ExpressionWrapper(
+    #         (F("cost") * (1 - F("complete_percent"))),
+    #         output_field=DecimalField(max_digits=15, decimal_places=0))
+    #     )
+    #
+    # )
 
     # loans_today = LoanDetil.objects.filter(complete_percent__lt=1, date=today).annotate(
     #     category_en=Value("Today", CharField()),
