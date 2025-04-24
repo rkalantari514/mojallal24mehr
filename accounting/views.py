@@ -1144,10 +1144,12 @@ def JariAshkhasMoshtarian(request):
     ]
     print(f"6: {time.time() - start_time:.2f} ثانیه")
 
-    loans = Loan.objects.all()
-    # loans = Loan.objects.annotate(
-    #     per_taf5=F('name_code') + 100000  # جمع مقدار با ۱۰۰۰۰۰۰
-    # )
+    # loans = Loan.objects.all()
+    loans = Loan.objects.annotate(
+        from_last_daryaft=Subquery(
+            BedehiMoshtari.objects.filter(person=OuterRef("person")).values('from_last_daryaft')[:1]
+        )
+    )
 
     context = {
         'title': 'حساب مشتریان',
@@ -1251,6 +1253,7 @@ def HesabMoshtariDetail(request, tafsili):
 from django.utils import timezone
 from django.db.models import Value, CharField, IntegerField, F, ExpressionWrapper, DurationField
 from django.db.models import Value, CharField, IntegerField, F, ExpressionWrapper, DecimalField, Sum, Count
+from django.db.models import OuterRef, Subquery
 
 
 @login_required(login_url='/login')
@@ -1265,9 +1268,7 @@ def LoanTotal(request, *args, **kwargs):
 
 
 
-    from django.db.models import Subquery
 
-    from django.db.models import OuterRef, Subquery
 
     loans = LoanDetil.objects.filter(complete_percent__lt=1, date__lt=today).annotate(
         category_en=Value("Overdue", CharField()),

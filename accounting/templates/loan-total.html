@@ -3,7 +3,7 @@
 {% load static %}
 {% block content %}
     {% load jalali_tags %}
-
+{% load custom_filters %}
     <style>
         .circle-progress .in .text {
             position: absolute;
@@ -277,9 +277,9 @@
                                                     </td>
                                                     <td class="card-text text-center">{{ l.tarikh }}</td>
                                                     <td class="card-text text-center">{{ l.cost|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center">{{ l.complete_percent|floatformat:2 }}</td>
+                                                    <td class="card-text text-center">{{ l.complete_percent|percentage }}%</td>
                                                     <td class="card-text text-center">{{ l.delaycost|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center">{{ l.from_last_daryaft }}</td>
+                                                    <td class="card-text text-center">{{ l.from_last_daryaft|default_if_none:'' }}</td>
                                                     <td class="card-text text-center">{{ l.category_fa }}</td>
                                                     <td class="card-text text-center">{{ l.delay_days }} </td>
                                                     <td class="card-text text-center">{{ l.mtday|floatformat:0|intcomma:False }} </td>

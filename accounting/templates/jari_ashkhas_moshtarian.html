@@ -388,12 +388,17 @@
                                                     data-filter-control="input" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter">مانده معوق
                                                 </th>
-
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="from_last_daryaft"
+                                                    data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">روز از آخرین پرداختی
+                                                </th>
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="actualcost"
                                                     data-filter-control="input" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter">مانده واقعی
                                                 </th>
+
 
                                             </tr>
                                             </thead>
@@ -418,6 +423,7 @@
                                                     <td class="card-text text-center">{{ l.cost|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ l.loan_mandeh|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ l.delayed_loan|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ l.from_last_daryaft|default_if_none:'' }}</td>
                                                     <td class="card-text text-center">{{ l.actual_loan_mandeh|floatformat:0|intcomma:False }}</td>
                                                 </tr>
                                             {% endfor %}
