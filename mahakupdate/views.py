@@ -3678,7 +3678,7 @@ def UpdateBedehiMoshtari(request):
 
         # محاسبه فاصله از آخرین دریافت
         print("شروع محاسبه فاصله از آخرین دریافت...")
-        for entry in BedehiMoshtari.objects.filter(moin=1, kol=103):
+        for entry in BedehiMoshtari.objects.filter(moin=1):  # حذف kol
             last_daryaft = SanadDetail.objects.filter(
                 moin=1, kol=103, tafzili=entry.tafzili, is_active=True, sharh__icontains='دريافت', curramount__gt=0
             ).order_by('-date').values_list('date', flat=True).first()
