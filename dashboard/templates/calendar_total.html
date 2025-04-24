@@ -1,12 +1,95 @@
-
-
+{% extends 'shared/_MainLayout.html' %}
 {% load humanize %}
 {% load static %}
+{% block content %}
+
+    <style>
+        .datetime-small {
+            font-size: 1.2em; /* کوچک‌تر کردن فونت تاریخ و ساعت */
+            margin-right: 10px; /* فاصله بین عنوان و تاریخ/ساعت */
+            vertical-align: middle; /* تنظیم تراز عمودی */
+        }
+
+        .text-facebook {
+            display: inline; /* نمایش عنوان در یک خط */
+        }
+
+    </style>
+    <style>
+        .calendar-table .fc-day-top {
+            position: relative; /* برای قرار دادن فرزندان */
+            padding: 5px; /* کمی فاصله برای زیبایی */
+        }
+
+        .calendar-table .fc-day-number {
+            font-weight: bold;
+            display: block;
+            margin: 0;
+            padding: 0; /* لغو حاشیه */
+            text-align: left; /* تراز چپ */
+        }
+
+        .calendar-table .fc-recive-number,
+        .calendar-table .fc-pay-number,
+        .calendar-table .fc-loan-number {
+            font-size: 1.2rem; /* اندازه متن */
+            display: block; /* تقسیم نمایش به سطرهای جدید */
+        }
+
+        .calendar-table .fc-recive-number {
+            color: #007bff; /* رنگ سبد خرید */
+            text-align: right; /* تراز راست برای شماره دریافتی */
+        }
+
+        .calendar-table .fc-pay-number {
+            color: #df0808; /* رنگ  */
+            text-align: right; /* تراز راست برای شماره پرداختی */
+        }
+
+        .calendar-table .fc-loan-number {
+            color: #3b5998; /* رنگ  */
+            text-align: right; /* تراز راست برای شماره پرداختی */
+        }
+
+        .calendar-table th {
+            border: 1px solid #fdd49a;
+            background-color: transparent !important; /* حذف رنگ پس‌زمینه */
+        }
+    </style>
+    <style>
+        .small-logo {
+            width: 20px; /* تنظیم اندازه کوچک لوگو */
+            height: auto;
+        }
+    </style>
+
+
+    <div class="content-wrapper">
+
+        <!--ردیف تایتل-->
+        <div class="page-title">
+            <div class="row">
+                <div class="col-sm-9">
+                    <h3 class="mb-0 text-facebook d-inline">تقویم عملکرد چک ها و اقساط</h3>
+                </div>
+                <div class="col-sm-3">
+                    <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
+                        <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
+                        <li class="breadcrumb-item active">تقویم</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
 
 
 
 
 
+
+        <div class="row">
+
+            <!-- تقویم چک ها -->
+            <div id="calendarf" class="col-md-8 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body">
                         <div class="text-center mb-4">
@@ -254,22 +337,26 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 
 
 
 
+{% endblock %}
 
 
 
-
-
-
+{% block jscal %}
     <script>
 
         $(document).ready(function () {
             var currentYear = {{ year }};
             var currentMonth = {{ month }};
-            var url = `/calendar`;
+            var url = '/calendar';
 
             console.log("Initial setup");
             console.log("Current Year: " + currentYear);
@@ -323,53 +410,54 @@
 
 
     </script>
-{#{% for week in days_in_month %}#}
-{#<tr>#}
-{#    {% for day in week %} {% if day %}#}
-{#    <td>#}
-{#        <div class="fc-day-top">#}
-{#            <span class="fc-day-number"><h5>{{ day.jday }}</h5></span>#}
-{#            <span class="fc-recive-number">{{ day.recive|floatformat:0|intcomma:False }}</span>#}
-{#            <div class="progress mb-3" data-toggle="popover" data-html="true" data-original-title="لیست  چکهای دریافتی" data-content="<table class='table'><thead><tr><th>شناسه چک</th><th>مبلغ</th><th>توضیحات</th></tr></thead><tbody>{% for cheque in day.today_recive_cheque %}<tr><td>{{ cheque.cheque_id }}</td><td>{{ cheque.cost|floatformat:0|intcomma:False }}</td><td>{{ cheque.description }}</td></tr>{% endfor %}</tbody></table>">#}
-{#                <div class="progress-bar progress-bar-striped bg-primary" role="progressbar" style="width: {% widthratio day.recive max_cheque 100 %}%" aria-valuenow="{{ day.recive }}" aria-valuemin="0" aria-valuemax="{{ max_cheque }}"></div>#}
-{#            </div>#}
-{#            <span class="fc-pay-number">{{ day.pay|floatformat:0|intcomma:False }}</span>#}
-{#            <div class="progress mb-3" data-toggle="popover" data-html="true" data-original-title="لیست  چکهای پرداختی برای تاریخ {{ day.today_pay_cheque.last.cheque_tarik }}" data-content="<table class='table center-aligned-table mb-0'><thead><tr><th></th><th>بانک</th><th>مبلغ</th></tr></thead><tbody>{% for cheque in day.today_pay_cheque %}{% with 'images/bank/'|add:cheque.bank.bank_name|add:'.png' as logo_path %}<tr><td><img src='{% static logo_path %}' class='small-logo'></td><td>{{ cheque.bank.name }}</td><td>{{ cheque.cost|floatformat:0|intcomma:False }}</td></tr>{% endwith %}{% endfor %}</tbody></table>">#}
-{#                <div class="progress-bar progress-bar-striped bg-danger" role="progressbar" style="width: {% widthratio day.pay max_cheque 100 %}%" aria-valuenow="{{ day.pay }}" aria-valuemin="0" aria-valuemax="{{ max_cheque }}"></div>#}
-{#            </div>#}
-{#        </div>#}
-{#    </td>#}
-{#    {% else %}#}
-{#    <td></td>#}
-{#    {% endif %}#}
-{#    {% endfor %}#}
-{#</tr>#}
-{#{% endfor %}#}
+    {#برای تقویم#}
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="popover"]').popover({
+                trigger: 'click',  // تنظیم برای فعال‌سازی فقط با کلیک
+                placement: 'top',
+                html: true
+            });
 
-{#<style>#}
-{#.small-logo {#}
-{#    width: 20px;  /* تنظیم اندازه کوچک لوگو */#}
-{#    height: auto;#}
-{#}#}
-{#</style>#}
-
-{#          برای پاپ آپ#}
-<script>
-$(document).ready(function(){
-    $('[data-toggle="popover"]').popover({
-        trigger: 'click',  // تنظیم برای فعال‌سازی فقط با کلیک
-        placement: 'top',
-        html: true
-    });
-
-    // بستن Popover زمانی که در جای دیگری کلیک شود
-    $(document).on('click', function(e) {
-        $('[data-toggle="popover"]').each(function () {
-            // اگر روی عنصر Popover کلیک نشده باشد
-            if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
-                $(this).popover('hide');
-            }
+            // بستن Popover زمانی که در جای دیگری کلیک شود
+            $(document).on('click', function (e) {
+                $('[data-toggle="popover"]').each(function () {
+                    // اگر روی عنصر Popover کلیک نشده باشد
+                    if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+                        $(this).popover('hide');
+                    }
+                });
+            });
         });
-    });
-});
-</script>
+    </script>
+
+{% endblock %}
+
+
+
+
+
+{% block myjs %}
+    <!-- نمایش تاریخ و ساعت-->
+    <script>
+        function updateDateTime() {
+            const now = new Date();
+            const days = ["یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه"];
+            const dayName = days[now.getDay()];
+            const date = now.toLocaleDateString('fa-IR');
+            const time = now.toLocaleTimeString('fa-IR');
+
+            document.getElementById("datetime").innerHTML = `${dayName}، ${date}، ${time}`;
+        }
+
+        // به روز رسانی هر ثانیه
+        setInterval(updateDateTime, 1000);
+
+        // نمایش اولیه
+        updateDateTime();
+    </script>
+
+
+{% endblock %}
+
+

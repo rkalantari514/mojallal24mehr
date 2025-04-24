@@ -623,15 +623,6 @@ def generate_calendar_data_chequesider2(month, year, cheque_recive_data, cheque_
     return days_in_month, max_cheque, month_cheque_data, month_loan_data
 @login_required(login_url='/login')
 def Home1(request, *args, **kwargs):
-    user_agent = request.META['HTTP_USER_AGENT']
-    # if 'Mobile' in user_agent or 'Tablet' in user_agent:
-    is_not_mobile = True
-    print('user_agent:')
-    print(user_agent)
-    if 'Mobile' in user_agent:
-        is_not_mobile=False
-    print('is_not_mobile:')
-    print(is_not_mobile)
 
     minfo=MasterInfo.objects.filter(is_active=True).last()
     user = request.user
@@ -639,53 +630,6 @@ def Home1(request, *args, **kwargs):
         UserLog.objects.create(user=user, page='داشبورد 1')
 
     start_time = time.time()  # زمان شروع تابع
-
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        # تکمیل تقویم
-
-        month = request.GET.get('month', None)
-        year = request.GET.get('year', None)
-        print("Query params - Year:", year, "Month:", month)
-
-        if month is not None and year is not None:
-            current_month = int(month)
-            current_year = int(year)
-        else:
-            today_jalali = JalaliDate.today()
-            current_year = today_jalali.year
-            current_month = today_jalali.month
-        print(f"12: {time.time() - start_time:.2f} ثانیه")
-        months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
-        month_name = months[current_month - 1]
-        print("**Current Year:", current_year, "Current Month:", current_month)
-
-        cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
-        cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
-
-        loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
-
-        days_in_month, max_cheque, month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year,
-                                                                                     cheque_recive_data,
-                                                                                     cheque_pay_data, loan_detail_data)
-
-        context = {
-                # for calendar
-                'month_name': month_name,
-                'year': current_year,
-                'month': current_month,
-                'days_in_month': days_in_month,
-                'max_cheque': max_cheque,
-                'month_cheque_data': month_cheque_data,
-                'month_loan_data': month_loan_data,
-
-            }
-
-        total_time = time.time() - start_time  # محاسبه زمان اجرا
-        print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
-        return render(request, 'partial_calendar.html', context)
-
-
-
     today = date.today()
     yesterday = today - timedelta(days=1)
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
@@ -693,26 +637,12 @@ def Home1(request, *args, **kwargs):
     start_date_gregorian = start_date_jalali.togregorian()  # تبدیل به میلادی
     last_update_time = Mtables.objects.filter(name='Sanad_detail').last().last_update_time
 
-    # فیلتر کردن داده‌ها
-    data = SanadDetail.objects.filter(
-        acc_year=acc_year,
-        is_active=True,
-        date__range=(start_date_gregorian, today)
-    ).filter(
-        Q(kol__in=[500, 400, 403, 101, 401, 501,200])
-    ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
-    print(f"1: {time.time() - start_time:.2f} ثانیه")
-
     # محاسبه داده‌ها
-    # today_data = TarazCal(today, today, data)
     today_data = TarazCalFromReport(today)
     print(f"1.1: {time.time() - start_time:.2f} ثانیه")
-    # yesterday_data = TarazCal(yesterday, yesterday, data)
     yesterday_data = TarazCalFromReport(yesterday)
     print(f"1.2: {time.time() - start_time:.2f} ثانیه")
-    # محاسبه داده‌ها برای 8 روز اخیر
-    # chart7_data = [TarazCal(today - timedelta(days=i), today - timedelta(days=i), data)['asnad_daryaftani'] for i in
-    #                range(8)]
+
     print(f"2: {time.time() - start_time:.2f} ثانیه")
 
     # دریافت اطلاعات چک‌های دریافتی
@@ -741,9 +671,6 @@ def Home1(request, *args, **kwargs):
     print(f"5: {time.time() - start_time:.2f} ثانیه")
 
     # دریافت گزارش‌ها
-    start_date = today - timedelta(days=114)
-    end_date = today - timedelta(days=107)
-    dayly_reports = MasterReport.objects.filter(day__range=[start_date, end_date]).order_by('-day')
     dayly_reports = MasterReport.objects.order_by('-day')[:7][::-1]
     print(f"6: {time.time() - start_time:.2f} ثانیه")
 
@@ -793,11 +720,86 @@ def Home1(request, *args, **kwargs):
         'total_hazineh': [report.baha_tamam_forosh + report.sayer_hazine for report in monthly_reports],
         'sood_vizhe': [report.sood_vizhe for report in monthly_reports],
     }
-
     print(f"11: {time.time() - start_time:.2f} ثانیه")
 
-    #تکمیل تقویم
 
+
+    context = {
+        'title': 'داشبورد مدیریتی',
+        'user': user,
+        'minfo': minfo,
+
+        'last_update_time': last_update_time,
+        'today_data': today_data,
+        'yesterday_data': yesterday_data,
+        'r_chequ_data': r_chequ_data,
+        'p_chequ_data': p_chequ_data,
+
+
+
+
+
+        'chart1_data': chart1_data,
+        'chart2_data': chart2_data,
+        'chart4_data': chart4_data,
+        'chart5_data': chart5_data,
+
+    }
+
+    total_time = time.time() - start_time  # محاسبه زمان اجرا
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+    return render(request, 'home1.html', context)
+
+@login_required(login_url='/login')
+def CalendarTotal(request, *args, **kwargs):
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='تقویم')
+    start_time = time.time()  # زمان شروع تابع
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        print('آمد اینجا')
+        # تکمیل تقویم
+        month = request.GET.get('month', None)
+        year = request.GET.get('year', None)
+        print("Query params - Year:", year, "Month:", month)
+        if month is not None and year is not None:
+            current_month = int(month)
+            current_year = int(year)
+        else:
+            today_jalali = JalaliDate.today()
+            current_year = today_jalali.year
+            current_month = today_jalali.month
+        print(f"12: {time.time() - start_time:.2f} ثانیه")
+        months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+        month_name = months[current_month - 1]
+        print("**Current Year:", current_year, "Current Month:", current_month)
+
+        cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
+        cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
+
+        loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
+
+        days_in_month, max_cheque, month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year,
+                                                                                     cheque_recive_data,
+                                                                                     cheque_pay_data, loan_detail_data)
+        context = {
+                # for calendar
+                'month_name': month_name,
+                'year': current_year,
+                'month': current_month,
+                'days_in_month': days_in_month,
+                'max_cheque': max_cheque,
+                'month_cheque_data': month_cheque_data,
+                'month_loan_data': month_loan_data,
+
+            }
+
+        total_time = time.time() - start_time  # محاسبه زمان اجرا
+        print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+        return render(request, 'partial_calendar.html', context)
+
+
+    #تکمیل تقویم
     month = request.GET.get('month', None)
     year = request.GET.get('year', None)
     print("Query params - Year:", year, "Month:", month)
@@ -819,34 +821,14 @@ def Home1(request, *args, **kwargs):
 
     loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
 
-    if is_not_mobile:
-        days_in_month,max_cheque,month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year, cheque_recive_data,cheque_pay_data,loan_detail_data)
-    else:
-        days_in_month, max_cheque, month_cheque_data, month_loan_data=None,None,None,None
+    days_in_month,max_cheque,month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year, cheque_recive_data,cheque_pay_data,loan_detail_data)
 
     print(f"13: {time.time() - start_time:.2f} ثانیه")
 
     context = {
-        'title': 'داشبورد مدیریتی',
+        'title': 'تقویم',
         'user': user,
-        'minfo': minfo,
-        # 'is_dark_mode': user.is_dark_mode,
 
-        'last_update_time': last_update_time,
-        'today_data': today_data,
-        'yesterday_data': yesterday_data,
-        'r_chequ_data': r_chequ_data,
-        'p_chequ_data': p_chequ_data,
-
-
-
-
-
-        'chart1_data': chart1_data,
-        'chart2_data': chart2_data,
-        'chart4_data': chart4_data,
-        'chart5_data': chart5_data,
-        # 'chart7_data': chart7_data,
         #for calendar
         'month_name': month_name,
         'year': current_year,
@@ -857,13 +839,10 @@ def Home1(request, *args, **kwargs):
         'month_loan_data': month_loan_data,
 
     }
-
     total_time = time.time() - start_time  # محاسبه زمان اجرا
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
 
-    # if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-    #     return render(request, 'partial_calendar.html', context)
-    return render(request, 'home1.html', context)
+    return render(request, 'calendar_total.html', context)
 
 
 def Home5(request):
