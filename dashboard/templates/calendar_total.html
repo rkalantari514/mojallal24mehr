@@ -82,76 +82,74 @@
         </div>
 
 
+        <div id="calendarf">
 
+            <div class="row">
 
-
-
-        <div class="row">
-
-            <!-- تقویم چک ها -->
-            <div id="calendarf" class="col-md-8 mb-30">
-                <div class="card card-statistics h-100">
-                    <div class="card-body">
-                        <div class="text-center mb-4">
-                            <h2>{{ month_name }} ماه {{ year }}</h2>
-                        </div>
+                <!-- تقویم چک ها -->
+                <div class="col-md-8 mb-30">
+                    <div class="card card-statistics h-100">
                         <div class="card-body">
-                            <h5 class="mb-15 pb-0 border-0 card-title">بدهکاران و اقساط</h5>
-                            <div class="table-responsive">
-                                <table class="table center-aligned-table mb-10 text-center ">
-                                    <thead>
-                                    <tr class="text-dark">
-                                        <th></th>
-                                        <th></th>
-                                        <th>کل بدهی</th>
-                                        <th>بدون وام</th>
-                                        <th>کسری وام</th>
-                                        <th>اقساط ماه های قبل</th>
-                                        <th>{{ month_name }} ماه {{ year }}</th>
-                                        <th>اقساط ماه های بعد</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-
-                                    <tr>
-                                        <td><i class="fa fa-download text-facebook fa-2x"></i></td>
-                                        <td><h5 class="text-facebook">مشتریان</h5></td>
-                                        <td>
-                                            <a href="/acc/jariashkhas/moshtarian/detaile/4"
-                                               target="_blank">
-                                                <h5 class="text-linkedin">{{ month_loan_data.total_bedehkar|floatformat:0|intcomma:False }}</h5>
-                                            </a>
-                                        </td>
-
-                                        <td>
-                                            <a href="/acc/jariashkhas/moshtarian/detaile/6"
-                                               target="_blank">
-                                                <h5 class="text-danger">{{ month_loan_data.not_loan|floatformat:0|intcomma:False }}</h5>
-                                            </a>
-                                        </td>
-                                        <td>
-                                            <a href="/acc/jariashkhas/moshtarian/detaile/7"
-                                               target="_blank">
-                                                <h5 class="text-danger">{{ month_loan_data.loan_gap|floatformat:0|intcomma:False }}</h5>
-                                            </a>
-                                        </td>
-
-                                        <td>
-                                            <h5 class="text-danger">{{ month_loan_data.past_month_loan|floatformat:0|intcomma:False }}</h5>
-                                        </td>
-
-                                        <td>
-                                            <h5 class="text-dark">{{ month_loan_data.this_month_loan|floatformat:0|intcomma:False }}</h5>
-                                        </td>
-
-                                        <td>
-                                            <h5 class="text-success">{{ month_loan_data.post_month_loan|floatformat:0|intcomma:False }}</h5>
-                                        </td>
-                                    </tr>
-
-                                    </tbody>
-                                </table>
+                            <div class="text-center mb-4">
+                                <h2>{{ month_name }} ماه {{ year }}</h2>
                             </div>
+                            <div class="card-body">
+                                <h5 class="mb-15 pb-0 border-0 card-title">بدهکاران و اقساط</h5>
+                                <div class="table-responsive">
+                                    <table class="table center-aligned-table mb-10 text-center ">
+                                        <thead>
+                                        <tr class="text-dark">
+                                            <th></th>
+                                            <th></th>
+                                            <th>کل بدهی</th>
+                                            <th>بدون وام</th>
+                                            <th>کسری وام</th>
+                                            <th>اقساط ماه های قبل</th>
+                                            <th>{{ month_name }} ماه {{ year }}</th>
+                                            <th>اقساط ماه های بعد</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+
+                                        <tr>
+                                            <td><i class="fa fa-download text-facebook fa-2x"></i></td>
+                                            <td><h5 class="text-facebook">مشتریان</h5></td>
+                                            <td>
+                                                <a href="/acc/jariashkhas/moshtarian/detaile/4"
+                                                   target="_blank">
+                                                    <h5 class="text-linkedin">{{ month_loan_data.total_bedehkar|floatformat:0|intcomma:False }}</h5>
+                                                </a>
+                                            </td>
+
+                                            <td>
+                                                <a href="/acc/jariashkhas/moshtarian/detaile/6"
+                                                   target="_blank">
+                                                    <h5 class="text-danger">{{ month_loan_data.not_loan|floatformat:0|intcomma:False }}</h5>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="/acc/jariashkhas/moshtarian/detaile/7"
+                                                   target="_blank">
+                                                    <h5 class="text-danger">{{ month_loan_data.loan_gap|floatformat:0|intcomma:False }}</h5>
+                                                </a>
+                                            </td>
+
+                                            <td>
+                                                <h5 class="text-danger">{{ month_loan_data.past_month_loan|floatformat:0|intcomma:False }}</h5>
+                                            </td>
+
+                                            <td>
+                                                <h5 class="text-dark">{{ month_loan_data.this_month_loan|floatformat:0|intcomma:False }}</h5>
+                                            </td>
+
+                                            <td>
+                                                <h5 class="text-success">{{ month_loan_data.post_month_loan|floatformat:0|intcomma:False }}</h5>
+                                            </td>
+                                        </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
 
                         </div>
@@ -340,6 +338,7 @@
                 </div>
             </div>
         </div>
+    </div>
 
     </div>
 

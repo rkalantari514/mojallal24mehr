@@ -7,68 +7,72 @@
 
 
 
-                <div class="card card-statistics h-100">
-                    <div class="card-body">
-                        <div class="text-center mb-4">
-                            <h2>{{ month_name }} ماه {{ year }}</h2>
-                        </div>
+            <div class="row">
+
+                <!-- تقویم چک ها -->
+                <div class="col-md-8 mb-30">
+                    <div class="card card-statistics h-100">
                         <div class="card-body">
-                            <h5 class="mb-15 pb-0 border-0 card-title">بدهکاران و اقساط</h5>
-                            <div class="table-responsive">
-                                <table class="table center-aligned-table mb-10 text-center ">
-                                    <thead>
-                                    <tr class="text-dark">
-                                        <th></th>
-                                        <th></th>
-                                        <th>کل بدهی</th>
-                                        <th>بدون وام</th>
-                                        <th>کسری وام</th>
-                                        <th>اقساط ماه های قبل</th>
-                                        <th>{{ month_name }} ماه {{ year }}</th>
-                                        <th>اقساط ماه های بعد</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-
-                                    <tr>
-                                        <td><i class="fa fa-download text-facebook fa-2x"></i></td>
-                                        <td><h5 class="text-facebook">مشتریان</h5></td>
-                                        <td>
-                                            <a href="/acc/jariashkhas/moshtarian/detaile/4"
-                                               target="_blank">
-                                                <h5 class="text-linkedin">{{ month_loan_data.total_bedehkar|floatformat:0|intcomma:False }}</h5>
-                                            </a>
-                                        </td>
-
-                                        <td>
-                                            <a href="/acc/jariashkhas/moshtarian/detaile/6"
-                                               target="_blank">
-                                                <h5 class="text-danger">{{ month_loan_data.not_loan|floatformat:0|intcomma:False }}</h5>
-                                            </a>
-                                        </td>
-                                        <td>
-                                            <a href="/acc/jariashkhas/moshtarian/detaile/7"
-                                               target="_blank">
-                                                <h5 class="text-danger">{{ month_loan_data.loan_gap|floatformat:0|intcomma:False }}</h5>
-                                            </a>
-                                        </td>
-
-                                        <td>
-                                            <h5 class="text-danger">{{ month_loan_data.past_month_loan|floatformat:0|intcomma:False }}</h5>
-                                        </td>
-
-                                        <td>
-                                            <h5 class="text-dark">{{ month_loan_data.this_month_loan|floatformat:0|intcomma:False }}</h5>
-                                        </td>
-
-                                        <td>
-                                            <h5 class="text-success">{{ month_loan_data.post_month_loan|floatformat:0|intcomma:False }}</h5>
-                                        </td>
-                                    </tr>
-
-                                    </tbody>
-                                </table>
+                            <div class="text-center mb-4">
+                                <h2>{{ month_name }} ماه {{ year }}</h2>
                             </div>
+                            <div class="card-body">
+                                <h5 class="mb-15 pb-0 border-0 card-title">بدهکاران و اقساط</h5>
+                                <div class="table-responsive">
+                                    <table class="table center-aligned-table mb-10 text-center ">
+                                        <thead>
+                                        <tr class="text-dark">
+                                            <th></th>
+                                            <th></th>
+                                            <th>کل بدهی</th>
+                                            <th>بدون وام</th>
+                                            <th>کسری وام</th>
+                                            <th>اقساط ماه های قبل</th>
+                                            <th>{{ month_name }} ماه {{ year }}</th>
+                                            <th>اقساط ماه های بعد</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+
+                                        <tr>
+                                            <td><i class="fa fa-download text-facebook fa-2x"></i></td>
+                                            <td><h5 class="text-facebook">مشتریان</h5></td>
+                                            <td>
+                                                <a href="/acc/jariashkhas/moshtarian/detaile/4"
+                                                   target="_blank">
+                                                    <h5 class="text-linkedin">{{ month_loan_data.total_bedehkar|floatformat:0|intcomma:False }}</h5>
+                                                </a>
+                                            </td>
+
+                                            <td>
+                                                <a href="/acc/jariashkhas/moshtarian/detaile/6"
+                                                   target="_blank">
+                                                    <h5 class="text-danger">{{ month_loan_data.not_loan|floatformat:0|intcomma:False }}</h5>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="/acc/jariashkhas/moshtarian/detaile/7"
+                                                   target="_blank">
+                                                    <h5 class="text-danger">{{ month_loan_data.loan_gap|floatformat:0|intcomma:False }}</h5>
+                                                </a>
+                                            </td>
+
+                                            <td>
+                                                <h5 class="text-danger">{{ month_loan_data.past_month_loan|floatformat:0|intcomma:False }}</h5>
+                                            </td>
+
+                                            <td>
+                                                <h5 class="text-dark">{{ month_loan_data.this_month_loan|floatformat:0|intcomma:False }}</h5>
+                                            </td>
+
+                                            <td>
+                                                <h5 class="text-success">{{ month_loan_data.post_month_loan|floatformat:0|intcomma:False }}</h5>
+                                            </td>
+                                        </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
 
                         </div>
@@ -254,6 +258,8 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
 
 
 
@@ -323,35 +329,7 @@
 
 
     </script>
-{#{% for week in days_in_month %}#}
-{#<tr>#}
-{#    {% for day in week %} {% if day %}#}
-{#    <td>#}
-{#        <div class="fc-day-top">#}
-{#            <span class="fc-day-number"><h5>{{ day.jday }}</h5></span>#}
-{#            <span class="fc-recive-number">{{ day.recive|floatformat:0|intcomma:False }}</span>#}
-{#            <div class="progress mb-3" data-toggle="popover" data-html="true" data-original-title="لیست  چکهای دریافتی" data-content="<table class='table'><thead><tr><th>شناسه چک</th><th>مبلغ</th><th>توضیحات</th></tr></thead><tbody>{% for cheque in day.today_recive_cheque %}<tr><td>{{ cheque.cheque_id }}</td><td>{{ cheque.cost|floatformat:0|intcomma:False }}</td><td>{{ cheque.description }}</td></tr>{% endfor %}</tbody></table>">#}
-{#                <div class="progress-bar progress-bar-striped bg-primary" role="progressbar" style="width: {% widthratio day.recive max_cheque 100 %}%" aria-valuenow="{{ day.recive }}" aria-valuemin="0" aria-valuemax="{{ max_cheque }}"></div>#}
-{#            </div>#}
-{#            <span class="fc-pay-number">{{ day.pay|floatformat:0|intcomma:False }}</span>#}
-{#            <div class="progress mb-3" data-toggle="popover" data-html="true" data-original-title="لیست  چکهای پرداختی برای تاریخ {{ day.today_pay_cheque.last.cheque_tarik }}" data-content="<table class='table center-aligned-table mb-0'><thead><tr><th></th><th>بانک</th><th>مبلغ</th></tr></thead><tbody>{% for cheque in day.today_pay_cheque %}{% with 'images/bank/'|add:cheque.bank.bank_name|add:'.png' as logo_path %}<tr><td><img src='{% static logo_path %}' class='small-logo'></td><td>{{ cheque.bank.name }}</td><td>{{ cheque.cost|floatformat:0|intcomma:False }}</td></tr>{% endwith %}{% endfor %}</tbody></table>">#}
-{#                <div class="progress-bar progress-bar-striped bg-danger" role="progressbar" style="width: {% widthratio day.pay max_cheque 100 %}%" aria-valuenow="{{ day.pay }}" aria-valuemin="0" aria-valuemax="{{ max_cheque }}"></div>#}
-{#            </div>#}
-{#        </div>#}
-{#    </td>#}
-{#    {% else %}#}
-{#    <td></td>#}
-{#    {% endif %}#}
-{#    {% endfor %}#}
-{#</tr>#}
-{#{% endfor %}#}
 
-{#<style>#}
-{#.small-logo {#}
-{#    width: 20px;  /* تنظیم اندازه کوچک لوگو */#}
-{#    height: auto;#}
-{#}#}
-{#</style>#}
 
 {#          برای پاپ آپ#}
 <script>
