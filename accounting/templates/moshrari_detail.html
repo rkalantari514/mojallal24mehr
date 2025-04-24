@@ -240,8 +240,7 @@
                 <div class="col-md-12 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="card-body col-12">
-                            <h5 class="card-title pb-0 border-0 ">رفتار مالی مشتری</h5>
-                            <canvas id="myChart"></canvas>
+                            <h5 class="card-title pb-0 border-0 ">پیگیری اقساط</h5>
                         </div>
                     </div>
                 </div>
@@ -376,67 +375,6 @@
 
 
 {% block myjs %}
-
-    <!--  نمودار رفتار مالی مشتری -->
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-
-    var labels = [
-        {% for label in labels %}
-            '{{ label }}',
-        {% endfor %}
-    ];
-
-    var dataValues = [
-        {% for value in data_values %}
-            {{ value }},
-        {% endfor %}
-    ];
-console.log(labels);
-console.log(dataValues);
-    var data = {
-        labels: labels,
-        datasets: [{
-            label: 'مقدار تجمعی',
-            data: dataValues,
-            fill: false,
-            borderColor: 'rgba(75, 192, 192, 1)',
-            tension: 0.1
-        }]
-    };
-
-var options = {
-    scales: {
-        x: {
-            type: 'time',
-            time: {
-                unit: 'day',
-                displayFormats: {
-                    day: 'YYYY-MM-DD'
-                }
-            },
-            title: {
-                display: true,
-                text: 'تاریخ'
-            }
-        },
-        y: {
-            beginAtZero: true,
-            title: {
-                display: true,
-                text: 'مقدار'
-            }
-        }
-    }
-};
-
-    var myChart = new Chart(document.getElementById("myChart"), {
-        type: 'line',
-        data: data,
-        options: options
-    });
-</script>
 
 
 {% endblock %}
