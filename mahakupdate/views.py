@@ -3609,29 +3609,23 @@ def UpdateBedehiMoshtari(request):
 
     # دریافت سال مالی آخر
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
-    print(f"سال مالی: {acc_year} | زمان: {time.time() - t0:.2f} ثانیه")
-
     try:
         with transaction.atomic():
             # دریافت مجموع بدهی‌ها و اطلاعات مرتبط
-            print('شروع دریافت tafzili_sums...')
             tafzili_sums = SanadDetail.objects.filter(
                 moin=1, kol=103, is_active=True, acc_year=acc_year
             ).values('tafzili', 'moin').annotate(total_curramount=Sum('curramount'))
-            print(f"تعداد tafzili_sums دریافت شده: {len(tafzili_sums)} | زمان: {time.time() - t0:.2f} ثانیه")
 
             existing_entries = {
                 entry.tafzili: entry
                 for entry in BedehiMoshtari.objects.prefetch_related('loans').select_related('person')
             }
-            print(f"تعداد existing_entries دریافت شده: {len(existing_entries)} | زمان: {time.time() - t0:.2f} ثانیه")
 
             data_to_create = []
             data_to_update = []
 
             for tafzili_sum in tafzili_sums:
                 tafzili_code = tafzili_sum['tafzili']
-                print(f"در حال پردازش tafzili_code: {tafzili_code} | زمان: {time.time() - t0:.2f} ثانیه")
                 moin_code = tafzili_sum['moin']
                 total_curramount = tafzili_sum['total_curramount']
                 person = Person.objects.filter(per_taf=tafzili_code).first()
