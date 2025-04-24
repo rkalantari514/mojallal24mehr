@@ -3601,7 +3601,9 @@ def UpdateBedehiMoshtari3(request):
 
     print(f"زمان کل: {time.time() - t0:.2f} ثانیه")
     return redirect('/acc/loan_total')
-
+from django.db.models import Max
+from django.utils import timezone
+import time
 
 def UpdateBedehiMoshtari(request):
     t0 = time.time()
@@ -3678,12 +3680,31 @@ def UpdateBedehiMoshtari(request):
 
         # محاسبه فاصله از آخرین دریافت
         print("شروع محاسبه فاصله از آخرین دریافت...")
-        for entry in BedehiMoshtari.objects.filter(moin=1):  # حذف kol
-            last_daryaft = SanadDetail.objects.filter(
-                moin=1, kol=103, tafzili=entry.tafzili, is_active=True, sharh__icontains='دريافت', curramount__gt=0
-            ).order_by('-date').values_list('date', flat=True).first()
-            entry.from_last_daryaft = (timezone.now().date() - last_daryaft).days if last_daryaft else None
-            entry.save()
+        current_date = timezone.now().date()
+
+        # دریافت tafzili‌های مورد نیاز به همراه تاریخ آخرین دریافت
+        latest_dates = SanadDetail.objects.filter(
+            moin=1, kol=103, is_active=True, sharh__icontains='دريافت', curramount__gt=0
+        ).values('tafzili').annotate(last_date=Max('date'))
+
+        # ایجاد یک دیکشنری برای نگه‌داری آخرین تاریخ‌ها
+        last_date_dict = {item['tafzili']: item['last_date'] for item in latest_dates}
+
+        # دریافت تمامی ورودی‌های BedehiMoshtari
+        bedehi_entries = BedehiMoshtari.objects.filter(moin=1).prefetch_related('loans')
+
+        # به‌روزرسانی داده‌ها
+        for entry in bedehi_entries:
+            print(entry.tafzili)
+            last_daryaft = last_date_dict.get(entry.tafzili)
+            entry.from_last_daryaft = (current_date - last_daryaft).days if last_daryaft else None
+
+            # استفاده از bulk_update برای ذخیره‌سازی دسته‌ای به‌جای save() تکی
+        BedehiMoshtari.objects.bulk_update(
+            bedehi_entries,
+            ['from_last_daryaft']
+        )
+
         print(f"محاسبه فاصله از آخرین دریافت پایان یافت | زمان: {time.time() - t0:.2f} ثانیه")
 
     except Exception as e:
