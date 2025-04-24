@@ -130,46 +130,13 @@
                                 </div>
                                 <div class="float-right text-right">
                                     <p class="card-text text-dark"> آخرین پرداختی </p>
-                                    <h4> روز {{ hesabmoshtari.from_last_daryaft|floatformat:0|intcomma:False }} قبل </h4>
+                                    <h4> قبل {{ hesabmoshtari.from_last_daryaft|floatformat:0|intcomma:False }} روز </h4>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <div class="clearfix">
-                                <div class="float-left icon-box bg-success rounded-circle">
-    <span class="text-white">
-    <i class="fa fa-hourglass-start highlight-icon" aria-hidden="true"></i>
-    </span>
-                                </div>
-                                <div class="float-right text-right">
-                                    <p class="card-text text-dark"> چک های فردا به بعد </p>
-                                    <h4>{{ total_data.postmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <div class="clearfix">
-                                <div class="float-left icon-box bg-info rounded-circle">
-    <span class="text-white">
-    <i class="fa fa-percent highlight-icon" aria-hidden="true"></i>
-    </span>
-                                </div>
-                                <div class="float-right text-right">
-                                    <p class="card-text text-dark"> نسبت مجموع چکها به در آمد از فروش </p>
-                                    <h4>{{ total_data.ceque_ratio|floatformat:2 }}%</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
             </div>
 
             <!-- ردیف خلاصه و جزئیات وام ها -->
