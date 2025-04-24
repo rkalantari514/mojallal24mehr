@@ -411,57 +411,65 @@
 {% block myjs %}
 
     <!--  نمودار رفتار مالی مشتری -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        var labels = [
-            {% for label in labels %}
-                '{{ label }}',
-            {% endfor %}
-        ];
 
-        var dataValues = [
-            {% for value in data_values %}
-                {{ value }},
-            {% endfor %}
-        ];
+    var labels = [
+        {% for label in labels %}
+            '{{ label }}',
+        {% endfor %}
+    ];
 
-        var data = {
-            labels: labels,
-            datasets: [{
-                label: 'مقدار',
-                data: dataValues,
-                fill: false,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                tension: 0.1 // برای ایجاد انحنای خط
-            }]
-        };
+    var dataValues = [
+        {% for value in data_values %}
+            {{ value }},
+        {% endfor %}
+    ];
+console.log(labels);
+console.log(dataValues);
+    var data = {
+        labels: labels,
+        datasets: [{
+            label: 'مقدار تجمعی',
+            data: dataValues,
+            fill: false,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            tension: 0.1
+        }]
+    };
 
-        var options = {
-            scales: {
-                x: {
-                    type: 'time', // نوع محور زمان
-                    time: {
-                        tooltipFormat: 'll', // فرمت tooltip
-                        displayFormats: {
-                            day: 'YYYY-MM-DD', // فرمت نمایش روزها
-                        }
-                    },
-                    title: {
-                        display: true,
-                        text: 'تاریخ'
-                    }
-                },
-                y: {
-                    beginAtZero: false
+var options = {
+    scales: {
+        x: {
+            type: 'time',
+            time: {
+                unit: 'day',
+                displayFormats: {
+                    day: 'YYYY-MM-DD'
                 }
+            },
+            title: {
+                display: true,
+                text: 'تاریخ'
             }
-        };
+        },
+        y: {
+            beginAtZero: true,
+            title: {
+                display: true,
+                text: 'مقدار'
+            }
+        }
+    }
+};
 
-        var myChart = new Chart(document.getElementById("myChart"), {
-            type: 'line', // نوع نمودار
-            data: data,
-            options: options
-        });
-    </script>
+    var myChart = new Chart(document.getElementById("myChart"), {
+        type: 'line',
+        data: data,
+        options: options
+    });
+</script>
 
 
 {% endblock %}

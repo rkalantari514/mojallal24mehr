@@ -1216,7 +1216,7 @@ import datetime
 
 
 @login_required(login_url='/login')
-def HesabMoshtariDetail(request, tafsili):
+def HesabMoshtariDetail1(request, tafsili):
     user = request.user
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page='حساب مشتری', code=0)
@@ -1243,12 +1243,52 @@ def HesabMoshtariDetail(request, tafsili):
         'today': today,
         'asnad': asnad,
         'final_chart_data': [{'date': date, 'value': data['value']} for date, data in chart_data.items()],
+
         'labels': labels,
         'data_values': data_values,
     }
 
     return render(request, 'moshrari_detail.html', context)
 
+from datetime import timedelta
+
+from datetime import timedelta
+
+def HesabMoshtariDetail(request, tafsili):
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='حساب مشتری', code=tafsili)
+
+    hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
+    today = timezone.now().date()
+    asnad = SanadDetail.objects.filter(kol=103, moin=1, tafzili=tafsili).order_by('date')
+
+    # تعیین تاریخ شروع (اولین تاریخ موجود) و پایان (امروز)
+    start_date = asnad.first().date if asnad.exists() else today
+    end_date = today
+
+    # ایجاد محور X شامل تمامی روزها
+    date_range = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 1)]
+
+    # جمع‌آوری داده‌ها برای هر روز
+    chart_data = defaultdict(int)  # مقدار پیش‌فرض صفر
+    for item in asnad:
+        chart_data[item.date] += item.curramount if item.curramount else 0
+
+    # آماده‌سازی داده‌های محور X و Y
+    labels = [date.strftime('%Y-%m-%d') for date in date_range]  # تمامی تاریخ‌ها
+    data_values = [chart_data[date] for date in date_range]  # مقادیر مرتبط با تاریخ‌ها
+
+    context = {
+        'title': 'حساب مشتری',
+        'hesabmoshtari': hesabmoshtari,
+        'today': today,
+        'asnad': asnad,
+        'labels': labels,
+        'data_values': data_values,
+    }
+
+    return render(request, 'moshrari_detail.html', context)
 
 from django.utils import timezone
 from django.db.models import Value, CharField, IntegerField, F, ExpressionWrapper, DurationField
