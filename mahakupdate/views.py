@@ -3324,7 +3324,7 @@ def UpdateSanadConditions(request):
 
 
 
-def UpdateBedehiMoshtari(request):
+def UpdateBedehiMoshtari1(request):
     t0 = time.time()
     print('شروع آپدیت بدهی مشتری-------------------------------')
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
@@ -3343,6 +3343,19 @@ def UpdateBedehiMoshtari(request):
                 moin_code = tafzili_sum['moin']
                 total_curramount = tafzili_sum['total_curramount']
                 person = Person.objects.filter(per_taf=tafzili_code).first()
+                from_last_daryaft=None
+                print('-----------------')
+                print(f"1: {time.time() - t0:.2f} ثانیه")
+                tafzili_sums2=SanadDetail.objects.filter(moin=1, kol=103,tafzili=tafzili_code,is_active=True).order_by('-date')
+
+                for i in tafzili_sums2:
+                    if 'دريافت' in i.sharh and i.curramount>0:
+                        last_daryaft= i.date
+                        today = timezone.now().date()  # تاریخ امروز
+                        from_last_daryaft = (today - last_daryaft).days
+                    break
+                print(f"1: {time.time() - t0:.2f} ثانیه")
+
                 loans = []
                 loans_total = 0
                 total_with_loans = 0
@@ -3363,6 +3376,7 @@ def UpdateBedehiMoshtari(request):
                     entry.total_with_loans = total_with_loans
                     entry.loans_total = loans_total
                     entry.moin = moin_code
+                    entry.from_last_daryaft = from_last_daryaft
                     entry.loans.set(loans)
                     data_to_update.append(entry)
                 else:
@@ -3372,7 +3386,8 @@ def UpdateBedehiMoshtari(request):
                         total_mandeh=total_curramount,
                         total_with_loans=total_with_loans,
                         loans_total=loans_total,
-                        moin=moin_code
+                        moin=moin_code,
+                        from_last_daryaft = from_last_daryaft
                     )
                     entry.save()
                     entry.loans.set(loans)  # تنظیم وام‌ها
@@ -3380,7 +3395,7 @@ def UpdateBedehiMoshtari(request):
 
             # Bulk update existing entries
             if data_to_update:
-                BedehiMoshtari.objects.bulk_update(data_to_update, ['person', 'total_mandeh', 'total_with_loans', 'loans_total', 'moin'])
+                BedehiMoshtari.objects.bulk_update(data_to_update, ['person', 'total_mandeh', 'total_with_loans', 'loans_total', 'moin','from_last_daryaft'])
 
             # شناسایی رکوردهای حذف‌شده
             ids_in_external_db = {entry.tafzili for entry in data_to_create + data_to_update}
@@ -3406,6 +3421,186 @@ def UpdateBedehiMoshtari(request):
 
     return redirect('/acc/loan_total')
 
+def UpdateBedehiMoshtari2(request):
+    t0 = time.time()
+    print('شروع آپدیت بدهی مشتری-------------------------------')
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    try:
+        with transaction.atomic():
+            tafzili_sums = SanadDetail.objects.filter(
+                moin=1, kol=103, is_active=True, acc_year=acc_year
+            ).values('tafzili', 'moin').annotate(total_curramount=Sum('curramount'))
+            print('tafzili_sums.count()',tafzili_sums.count())
+            data_to_create = []
+            data_to_update = []
+            existing_entries = {
+                entry.tafzili: entry
+                for entry in BedehiMoshtari.objects.prefetch_related('loans').select_related('person')
+            }
+
+            for tafzili_sum in tafzili_sums:
+                tafzili_code = tafzili_sum['tafzili']
+                print(tafzili_code)
+                moin_code = tafzili_sum['moin']
+                total_curramount = tafzili_sum['total_curramount']
+                person = Person.objects.filter(per_taf=tafzili_code).first()
+
+                from_last_daryaft = None
+                tafzili_sums2 = SanadDetail.objects.filter(
+                    moin=1, kol=103, tafzili=tafzili_code, is_active=True, sharh__icontains='دريافت', curramount__gt=0
+                ).order_by('-date').first()
+                if tafzili_sums2:
+                    last_daryaft = tafzili_sums2.date
+                    today = timezone.now().date()  # تاریخ امروز
+                    from_last_daryaft = (today - last_daryaft).days
+
+                loans = []
+                loans_total = 0
+                total_with_loans = 0
+
+                if person:
+                    loans = Loan.objects.filter(person=person)
+                    loans_total = loans.aggregate(total_cost=Sum('cost'))['total_cost'] or 0
+                    total_with_loans = loans_total + total_curramount
+
+                if tafzili_code in existing_entries:
+                    entry = existing_entries[tafzili_code]
+                    entry.person = person
+                    entry.total_mandeh = total_curramount
+                    entry.total_with_loans = total_with_loans
+                    entry.loans_total = loans_total
+                    entry.moin = moin_code
+                    entry.from_last_daryaft = from_last_daryaft
+                    entry.loans.set(loans)
+                    data_to_update.append(entry)
+                else:
+                    entry = BedehiMoshtari(
+                        tafzili=tafzili_code,
+                        person=person,
+                        total_mandeh=total_curramount,
+                        total_with_loans=total_with_loans,
+                        loans_total=loans_total,
+                        moin=moin_code,
+                        from_last_daryaft=from_last_daryaft
+                    )
+                    data_to_create.append(entry)
+
+            if data_to_update:
+                BedehiMoshtari.objects.bulk_update(
+                    data_to_update,
+                    ['person', 'total_mandeh', 'total_with_loans', 'loans_total', 'moin', 'from_last_daryaft']
+                )
+
+            if data_to_create:
+                BedehiMoshtari.objects.bulk_create(data_to_create)
+
+            ids_in_external_db = {entry.tafzili for entry in data_to_create + data_to_update}
+            ids_in_django_db = set(existing_entries.keys())
+            ids_to_delete = ids_in_django_db - ids_in_external_db
+
+            if ids_to_delete:
+                BedehiMoshtari.objects.filter(tafzili__in=ids_to_delete).delete()
+                print(f"رکوردهای حذف‌شده: {len(ids_to_delete)} رکورد حذف شد.")
+            else:
+                print("هیچ رکوردی برای حذف یافت نشد.")
+
+    except Exception as e:
+        print(f"خطا در به‌روزرسانی بدهی مشتری: {e}")
+
+    tend = time.time()
+    total_time = tend - t0
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+
+    return redirect('/acc/loan_total')
+
+
+def UpdateBedehiMoshtari(request):
+    t0 = time.time()
+    print('شروع آپدیت بدهی مشتری-------------------------------')
+
+    # دریافت سال مالی آخر
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+
+    try:
+        with transaction.atomic():
+            # دریافت مجموع بدهی‌ها و اطلاعات مرتبط
+            tafzili_sums = SanadDetail.objects.filter(
+                moin=1, kol=103, is_active=True, acc_year=acc_year
+            ).values('tafzili', 'moin').annotate(total_curramount=Sum('curramount'))
+
+            existing_entries = {
+                entry.tafzili: entry
+                for entry in BedehiMoshtari.objects.prefetch_related('loans').select_related('person')
+            }
+
+            data_to_create = []
+            data_to_update = []
+
+            for tafzili_sum in tafzili_sums:
+                tafzili_code = tafzili_sum['tafzili']
+                print(tafzili_code)
+                moin_code = tafzili_sum['moin']
+                total_curramount = tafzili_sum['total_curramount']
+                person = Person.objects.filter(per_taf=tafzili_code).first()
+
+                # محاسبه فاصله از آخرین دریافت
+                last_daryaft = SanadDetail.objects.filter(
+                    moin=1, kol=103, tafzili=tafzili_code, is_active=True, sharh__icontains='دريافت', curramount__gt=0
+                ).order_by('-date').values_list('date', flat=True).first()
+
+                from_last_daryaft = (timezone.now().date() - last_daryaft).days if last_daryaft else None
+
+                loans = []
+                loans_total = Loan.objects.filter(person=person).aggregate(total_cost=Sum('cost'))[
+                                  'total_cost'] or 0 if person else 0
+                total_with_loans = loans_total + total_curramount
+
+                entry = existing_entries.get(tafzili_code)
+                if entry:
+                    entry.person = person
+                    entry.total_mandeh = total_curramount
+                    entry.total_with_loans = total_with_loans
+                    entry.loans_total = loans_total
+                    entry.moin = moin_code
+                    entry.from_last_daryaft = from_last_daryaft
+                    data_to_update.append(entry)
+                else:
+                    entry = BedehiMoshtari(
+                        tafzili=tafzili_code,
+                        person=person,
+                        total_mandeh=total_curramount,
+                        total_with_loans=total_with_loans,
+                        loans_total=loans_total,
+                        moin=moin_code,
+                        from_last_daryaft=from_last_daryaft
+                    )
+                    data_to_create.append(entry)
+
+                    # به‌روزرسانی و ایجاد داده‌ها
+            if data_to_update:
+                BedehiMoshtari.objects.bulk_update(
+                    data_to_update,
+                    ['person', 'total_mandeh', 'total_with_loans', 'loans_total', 'moin', 'from_last_daryaft']
+                )
+            if data_to_create:
+                BedehiMoshtari.objects.bulk_create(data_to_create)
+
+                # حذف رکوردهای قدیمی
+            ids_in_external_db = {entry.tafzili for entry in data_to_create + data_to_update}
+            ids_in_django_db = set(existing_entries.keys())
+            ids_to_delete = ids_in_django_db - ids_in_external_db
+
+            if ids_to_delete:
+                BedehiMoshtari.objects.filter(tafzili__in=ids_to_delete).delete()
+                print(f"رکوردهای حذف‌شده: {len(ids_to_delete)} رکورد حذف شد.")
+            else:
+                print("هیچ رکوردی برای حذف یافت نشد.")
+
+    except Exception as e:
+        print(f"خطا در به‌روزرسانی بدهی مشتری: {e}")
+
+    print(f"زمان کل: {time.time() - t0:.2f} ثانیه")
+    return redirect('/acc/loan_total')
 
 from django.shortcuts import render, redirect
 from django.db.models import F, Sum, ExpressionWrapper, FloatField

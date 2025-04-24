@@ -487,6 +487,8 @@ class SanadDetail(models.Model):
                                  verbose_name="شناسه چک")  # یا مقدار max_length مناسب
     is_active = models.BooleanField(default=True, verbose_name='فعال است')
 
+
+
     class Meta:
         unique_together = (('acc_year','code', 'radif'),)  # تعریف کلید یگانه
         verbose_name = 'جزئیات سند'
@@ -498,6 +500,9 @@ class SanadDetail(models.Model):
     def kind(self):
         kin = []
         k = self.sharh.split('(')[0].strip()  # جدا کردن متن قبل از اولین پرانتز باز و حذف فاصله‌های اضافی
+        print('k',k)
+        if not k:
+            k=self.sharh
         kin.append(k)
 
         # تعریف یک دیکشنری برای شرایط
@@ -509,7 +514,8 @@ class SanadDetail(models.Model):
             'پرداخت کننده به ازاي چک دريافتي در دريافت': ['دریافت/چک', 'success'],
             'تخفيف فاکتور فروش': ['تخفیف', 'flickr'],
             'شخص بستانکار در حواله حساب': ['برگشت؟', 'flickr'],
-            'خريدار در برگشت از فروش': ['برگشت', 'flickr']
+            'خريدار در برگشت از فروش': ['برگشت', 'flickr'],
+            'بستن حساب هاي دارائي': ['اختتامیه', 'primary']
         }
 
         # بررسی وجود مقدار در دیکشنری

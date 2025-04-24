@@ -223,7 +223,7 @@ class LoanDetilAdmin(admin.ModelAdmin):
 
 @admin.register(BedehiMoshtari)
 class BedehiMoshtariAdmin(admin.ModelAdmin):
-    list_display = ('moin','tafzili','person', 'total_mandeh','loans_total', 'total_with_loans')
+    list_display = ('moin','tafzili','person', 'total_mandeh','loans_total', 'total_with_loans','from_last_daryaft')
     search_fields = ('tafzili',)
     # list_filter = ('person',)
 

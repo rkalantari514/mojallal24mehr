@@ -14,6 +14,8 @@ class BedehiMoshtari(models.Model):
     loans=models.ManyToManyField(Loan, blank=True)
     loans_total=models.DecimalField(max_digits=30, decimal_places=10, null=True, verbose_name='مجموع  وام ها')
     total_with_loans=models.DecimalField(max_digits=30, decimal_places=10, null=True, verbose_name='برآیند بدهی با وام')
+    from_last_daryaft=models.IntegerField(default=None,blank=True, null=True, verbose_name='از آخری دریافت')
+
     class Meta:
         verbose_name = 'بدهی مشتری'
         verbose_name_plural = 'بدهی مشتریان'
