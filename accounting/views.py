@@ -1268,7 +1268,7 @@ def HesabMoshtariDetail(request, tafsili):
     hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
 
     if hesabmoshtari:
-        full_name = hesabmoshtari.person
+        full_name = f'{hesabmoshtari.person.name} {hesabmoshtari.person.lname}'
         # حذف کاراکترهای اضافی بعد از اولین کاراکتر انگلیسی، خط تیره، $ یا کلمه "قسط"
         cleaned_name = re.split(r"[a-zA-Z-$]|قسط", full_name, maxsplit=1)[0].strip()
         # مقدار نهایی به عنوان m_name
