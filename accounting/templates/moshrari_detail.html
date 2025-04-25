@@ -243,14 +243,16 @@
               <table class="table center-aligned-table mb-0">
                 <thead>
                   <tr class="text-dark">
-                    <th>Order No</th>
-                    <th>Product Name</th>
-                    <th>Purchased On</th>
-                    <th>Shipping Status</th>
-                    <th>Payment Method</th>
-                    <th>Payment Status</th>
+                    <th>ردیف</th>
+                    <th>اقدم کننده</th>
+                    <th>نوع</th>
+                    <th>زمان</th>
+                    <th>سطح</th>
+                    <th>پیام اصلی</th>
+                    <th>پیام تکمیلی</th>
+                    <th>تلفن</th>
                     <th></th>
-                    <th></th>
+
                   </tr>
                 </thead>
                 <tbody>
@@ -258,14 +260,14 @@
                       <tr>
                       <td>{{ forloop.counter }}</td>
                     <td><img class="img-fluid avatar-small" src={{ t.created_by.avatar.url }} alt=""></td>
-                    <td>{{ t.track_kind.kine_name }}</td>
+                    <td>{{ t.track_kind.kind_name }}</td>
                     <td>{{ t.created_at }}</td>
                     <td>{{ t.sample_sms.level }}</td>
                     <td>{{ t.sample_sms.text }}</td>
                     <td>{{ t.sample_sms.message }}</td>
                     <td>{{ t.sample_sms.phone_number }}</td>
-                    <td><label class="badge badge-success">Approved</label></td>
-                    <td><a href="#" class="btn btn-outline-success btn-sm">View Order</a></td>
+{#                    <td><label class="badge badge-success">Approved</label></td>#}
+{#                    <td><a href="#" class="btn btn-outline-success btn-sm">View Order</a></td>#}
                     <td><a href="#" class="btn btn-outline-warning btn-sm">Cancel</a></td>
                   </tr>
                 {% endfor %}
