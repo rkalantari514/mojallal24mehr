@@ -16,7 +16,7 @@ from custom_login.models import UserLog
 from dashboard.models import MasterInfo, MasterReport
 from dashboard.views import generate_calendar_data_cheque
 from loantracker.forms import SMSTrackingForm
-from loantracker.models import TrackKinde
+from loantracker.models import TrackKinde, Tracking
 from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan, LoanDetil
 from jdatetime import date as jdate
 from datetime import timedelta, date
@@ -1331,6 +1331,8 @@ def HesabMoshtariDetail(request, tafsili):
     else:
         form = SMSTrackingForm(customer=hesabmoshtari)  # نمایش فرم خالی
 
+    tracking=Tracking.objects.filter(customer=hesabmoshtari).order_by('-id')
+
     context = {
         'title': 'حساب مشتری',
         'hesabmoshtari': hesabmoshtari,
@@ -1338,6 +1340,7 @@ def HesabMoshtariDetail(request, tafsili):
         'asnad': asnad,
         'm_name': m_name,
         'form': form,  # ارسال فرم به قالب
+        'tracking': tracking,  # ارسال فرم به قالب
     }
 
     return render(request, 'moshrari_detail.html', context)
