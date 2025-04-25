@@ -1253,6 +1253,7 @@ def HesabMoshtariDetail1(request, tafsili):
 from datetime import timedelta
 
 from datetime import timedelta
+import re
 
 from datetime import timedelta
 
@@ -1265,10 +1266,12 @@ def HesabMoshtariDetail(request, tafsili):
     asnad = SanadDetail.objects.filter(kol=103, moin=1, tafzili=tafsili).order_by('date')
 
     hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
+
     if hesabmoshtari:
-        full_name = f'{hesabmoshtari.person.name} {hesabmoshtari.person.lname}'
-        # حذف کاراکترهای اضافی بعد از اولین کاراکتر انگلیسی یا خط تیره
-        cleaned_name = re.split(r"[a-zA-Z-]", full_name, maxsplit=1)[0].strip()
+        full_name = hesabmoshtari.person
+        # حذف کاراکترهای اضافی بعد از اولین کاراکتر انگلیسی، خط تیره، $ یا کلمه "قسط"
+        cleaned_name = re.split(r"[a-zA-Z-$]|قسط", full_name, maxsplit=1)[0].strip()
+        # مقدار نهایی به عنوان m_name
         m_name = cleaned_name
         print(m_name)
 
