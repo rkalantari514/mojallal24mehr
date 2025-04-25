@@ -2,8 +2,8 @@
 {% load humanize %}
 {% load static %}
 {% block content %}
-{% load jalali_tags %}
-{% load custom_filters %}
+    {% load jalali_tags %}
+    {% load custom_filters %}
 
     <div class="content-wrapper">
 
@@ -171,116 +171,118 @@
             </div>
 
 
+            <!-- ردیف پیگیری اقساط -->
+            <div class="row">
+                <div class="col-xl-4 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="p-4 text-center bg-success">
+                            <h5 class="mb-60 text-white">{{ m_name }} </h5>
+                            {#                <div class="btn-group info-drop">#}
+                            {#                  <button type="button" class="dropdown-toggle-split text-white" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="ti-more"></i></button>#}
+                            {#                  <div class="dropdown-menu">#}
+                            {#                    <a class="dropdown-item" href="#"><i class="text-primary ti-files"></i> اضافه کردن کار</a>#}
+                            {#                    <a class="dropdown-item" href="#"><i class="text-dark ti-pencil-alt"></i> ویرایش مشخصات</a>#}
+                            {#                    <a class="dropdown-item" href="#"><i class="text-success ti-user"></i> نمایش مشخصات</a>#}
+                            {#                    <a class="dropdown-item" href="#"><i class="text-secondary ti-info"></i> اطلاعات تماس</a>#}
+                            {#                  </div>#}
+                            {#                </div>#}
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="avatar-top">
+                                <img class="img-fluid w-25 rounded-circle " src="{% static 'images/noimage.png' %}"
+                                     alt="">
+                            </div>
+                            <p class="mt-30">{{ hesabmoshtari.person.address }}</p>
+                            <p class="mt-10">-</p>
+
+                            <div class="social-icons color-icon mt-20">
+                                <ul>
+                                    {% if gh in hesabmoshtari.person %}
+                                        <li class="social-rss"><a href="#"><i class="fa fa-rss"></i></a></li>
+                                    {% endif %}
+                                    {#                    <li class="social-facebook"><a href="#"><i class="fa fa-facebook"></i></a></li>#}
+                                    {#                    <li class="social-twitter"><a href="#"><i class="fa fa-twitter"></i></a></li>#}
+                                    {#                    <li class="social-github"><a href="#"><i class="fa fa-github"></i></a></li>#}
+                                    {#                    <li class="social-youtube"><a href="#"><i class="fa fa-youtube"></i></a></li>#}
+                                    {#                    <li class="social-instagram"><a href="#"><i class="fa fa-instagram"></i></a></li>#}
+                                </ul>
+                            </div>
+                            <form method="POST">
+                                {% csrf_token %}
+                                {{ form.as_p }}
+                                <button type="submit" name="action" value="send_sms" class="btn btn-primary">ارسال پیامک
+                                </button>
+                            </form>
 
 
-                    <!-- ردیف پیگیری اقساط -->
-                                    <div class="row">
-        <div class="col-xl-4 mb-30">
-          <div class="card card-statistics h-100">
-            <div class="p-4 text-center bg-success">
-               <h5 class="mb-60 text-white">{{ m_name }} </h5>
-{#                <div class="btn-group info-drop">#}
-{#                  <button type="button" class="dropdown-toggle-split text-white" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="ti-more"></i></button>#}
-{#                  <div class="dropdown-menu">#}
-{#                    <a class="dropdown-item" href="#"><i class="text-primary ti-files"></i> اضافه کردن کار</a>#}
-{#                    <a class="dropdown-item" href="#"><i class="text-dark ti-pencil-alt"></i> ویرایش مشخصات</a>#}
-{#                    <a class="dropdown-item" href="#"><i class="text-success ti-user"></i> نمایش مشخصات</a>#}
-{#                    <a class="dropdown-item" href="#"><i class="text-secondary ti-info"></i> اطلاعات تماس</a>#}
-{#                  </div>#}
-{#                </div>#}
-            </div>
-            <div class="card-body text-center">
-              <div class="avatar-top">
-                <img class="img-fluid w-25 rounded-circle " src="{% static 'images/noimage.png' %}" alt="">
-               </div>
-               <p class="mt-30">{{ hesabmoshtari.person.address }}</p>
-               <p class="mt-10">-</p>
-
-                <div class="social-icons color-icon mt-20">
-                  <ul>
-                      {% if gh in hesabmoshtari.person %}
-                    <li class="social-rss"><a href="#"><i class="fa fa-rss"></i></a></li>
-                      {% endif %}
-{#                    <li class="social-facebook"><a href="#"><i class="fa fa-facebook"></i></a></li>#}
-{#                    <li class="social-twitter"><a href="#"><i class="fa fa-twitter"></i></a></li>#}
-{#                    <li class="social-github"><a href="#"><i class="fa fa-github"></i></a></li>#}
-{#                    <li class="social-youtube"><a href="#"><i class="fa fa-youtube"></i></a></li>#}
-{#                    <li class="social-instagram"><a href="#"><i class="fa fa-instagram"></i></a></li>#}
-                  </ul>
+                            {#               <div class="divider mt-20"></div>#}
+                            {#               <div class="row">#}
+                            {#                  <div class="col-6 col-sm-4 mt-30">#}
+                            {#                     <b>پروژه</b>#}
+                            {#                     <h4 class="text-success mt-10">09</h4>#}
+                            {#                  </div>#}
+                            {#                  <div class="col-6 col-sm-4 mt-30">#}
+                            {#                    <b>پیام ها </b>#}
+                            {#                     <h4 class="text-danger mt-10">255</h4>#}
+                            {#                  </div>#}
+                            {#                  <div class="col-12 col-sm-4 mt-30">#}
+                            {#                    <b>نمایش ها</b>#}
+                            {#                     <h4 class="text-warning mt-10">608</h4>#}
+                            {#                  </div>#}
+                            {#                </div>#}
+                        </div>
+                    </div>
                 </div>
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" name="action" value="send_sms" class="btn btn-primary">ارسال پیامک</button>
-</form>
 
+                <div class="col-xl-8 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <h5 class="card-title pb-0 border-0">آخرین پیگیری ها </h5>
+                            <div class="table-responsive scrollbar max-h-500">
+                                <div class="table-responsive">
 
-{#               <div class="divider mt-20"></div>#}
-{#               <div class="row">#}
-{#                  <div class="col-6 col-sm-4 mt-30">#}
-{#                     <b>پروژه</b>#}
-{#                     <h4 class="text-success mt-10">09</h4>#}
-{#                  </div>#}
-{#                  <div class="col-6 col-sm-4 mt-30">#}
-{#                    <b>پیام ها </b>#}
-{#                     <h4 class="text-danger mt-10">255</h4>#}
-{#                  </div>#}
-{#                  <div class="col-12 col-sm-4 mt-30">#}
-{#                    <b>نمایش ها</b>#}
-{#                     <h4 class="text-warning mt-10">608</h4>#}
-{#                  </div>#}
-{#                </div>#}
-             </div>
-          </div>
-        </div>
+                                    <table class="table center-aligned-table mb-0">
+                                        <thead>
+                                        <tr class="text-dark">
+                                            <th>ردیف</th>
+                                            <th>اقدم کننده</th>
+                                            <th>نوع</th>
+                                            <th>زمان</th>
+                                            <th>سطح</th>
+                                            <th>پیام اصلی</th>
+                                            <th>پیام تکمیلی</th>
+                                            <th>تلفن</th>
+                                            <th></th>
 
-                                        <div class="col-xl-8 mb-30">
-           <div class="card card-statistics h-100">
-           <div class="card-body">
-             <h5 class="card-title pb-0 border-0">آخرین پیگیری ها </h5>
-<div class="table-responsive scrollbar max-h-500">
-{#<div class="table-responsive scrollbar max-h-380">#}
-{#              <div class="table-responsive">#}
-              <table class="table center-aligned-table mb-0">
-                <thead>
-                  <tr class="text-dark">
-                    <th>ردیف</th>
-                    <th>اقدم کننده</th>
-                    <th>نوع</th>
-                    <th>زمان</th>
-                    <th>سطح</th>
-                    <th>پیام اصلی</th>
-                    <th>پیام تکمیلی</th>
-                    <th>تلفن</th>
-                    <th></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for t in tracking %}
+                                            <tr>
+                                                <td>{{ forloop.counter }}</td>
+                                                <td><img class="img-fluid avatar-small"
+                                                         src={{ t.created_by.avatar.url }} alt=""></td>
+                                                <td>{{ t.track_kind.kind_name }}</td>
+                                                <td>{{ t.created_at }}</td>
+                                                <td>{{ t.sample_sms.level }}</td>
+                                                <td>{{ t.sample_sms.text }}</td>
+                                                <td>{{ t.message }}</td>
+                                                <td>{{ t.phone_number }}</td>
+                                                {#                    <td><label class="badge badge-success">Approved</label></td>#}
+                                                {#                    <td><a href="#" class="btn btn-outline-success btn-sm">View Order</a></td>#}
+                                                <td><a href="#" class="btn btn-outline-warning btn-sm">Cancel</a></td>
+                                            </tr>
+                                        {% endfor %}
 
-                  </tr>
-                </thead>
-                <tbody>
-                      {% for t in tracking %}
-                      <tr>
-                      <td>{{ forloop.counter }}</td>
-                    <td><img class="img-fluid avatar-small" src={{ t.created_by.avatar.url }} alt=""></td>
-                    <td>{{ t.track_kind.kind_name }}</td>
-                    <td>{{ t.created_at }}</td>
-                    <td>{{ t.sample_sms.level }}</td>
-                    <td>{{ t.sample_sms.text }}</td>
-                    <td>{{ t.message }}</td>
-                    <td>{{ t.phone_number }}</td>
-{#                    <td><label class="badge badge-success">Approved</label></td>#}
-{#                    <td><a href="#" class="btn btn-outline-success btn-sm">View Order</a></td>#}
-                    <td><a href="#" class="btn btn-outline-warning btn-sm">Cancel</a></td>
-                  </tr>
-                {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                </tbody>
-              </table>
+                </div>
             </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
 
             <div class="row">
                 <div class="col-md-12 mb-30">
