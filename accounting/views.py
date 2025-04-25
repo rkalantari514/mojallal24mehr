@@ -1336,6 +1336,7 @@ def HesabMoshtariDetail(request, tafsili):
     context = {
         'title': 'حساب مشتری',
         'hesabmoshtari': hesabmoshtari,
+        'user': user,
         'today': today,
         'asnad': asnad,
         'm_name': m_name,
