@@ -1304,7 +1304,7 @@ def HesabMoshtariDetail(request, tafsili):
                     test_message = f"{phone_number}: {message_to_send}"
 
                     # ارسال پیامک
-                    response = send_to_admin(test_message)
+                    response = send_to_admin1(test_message)
 
                     if response and response.status_code == 200:
                         # پیدا کردن نوع پیگیری "پیامک"
