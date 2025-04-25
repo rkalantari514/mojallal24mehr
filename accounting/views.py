@@ -16,6 +16,7 @@ from custom_login.models import UserLog
 from dashboard.models import MasterInfo, MasterReport
 from dashboard.views import generate_calendar_data_cheque
 from loantracker.forms import SMSTrackingForm
+from loantracker.models import TrackKinde
 from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan, LoanDetil
 from jdatetime import date as jdate
 from datetime import timedelta, date
@@ -1300,22 +1301,35 @@ def HesabMoshtariDetail(request, tafsili):
                     if message:
                         message_to_send += f"\n{message}"
 
-                    # ارسال پیامک و دریافت پاسخ
                     test_message = f"{phone_number}: {message_to_send}"
-                    response = send_to_admin1(test_message)  # استفاده از تابع
+
+                    # ارسال پیامک
+                    response = send_to_admin(test_message)
 
                     if response and response.status_code == 200:
-                        # ذخیره اطلاعات فرم در مدل Tracking
-                        tracking = form.save(commit=False)
-                        tracking.customer = hesabmoshtari
-                        tracking.created_by = user if user.is_authenticated else None
-                        tracking.save()
+                        # پیدا کردن نوع پیگیری "پیامک"
+                        try:
+                            track_kind = TrackKinde.objects.get(kind_name="پیامک")
+                        except TrackKinde.DoesNotExist:
+                            track_kind = None
+                            form.add_error(None, "نوع پیگیری 'پیامک' در سیستم وجود ندارد.")
+
+                        if track_kind:
+                            tracking = form.save(commit=False)
+                            tracking.customer = hesabmoshtari
+                            tracking.created_by = user if user.is_authenticated else None
+                            tracking.track_kind = track_kind  # مقدار نوع پیگیری
+                            tracking.save()
+
+                        return redirect(f'/acc/jariashkhas/moshtari/{tafsili}')  # هدایت به صفحه مناسب
+
                     else:
                         form.add_error('phone_number', "ارسال پیامک موفقیت‌آمیز نبود. لطفاً دوباره تلاش کنید.")
 
-                    return redirect(f'/acc/jariashkhas/moshtari/{tafsili}')  # به صفحه مناسب هدایت کنید
+        elif action == 'other_action':  # عملیات دیگر
+            pass
     else:
-        form = SMSTrackingForm(customer=hesabmoshtari)  # فرم خالی برای نمایش اولیه
+        form = SMSTrackingForm(customer=hesabmoshtari)  # نمایش فرم خالی
 
     context = {
         'title': 'حساب مشتری',
