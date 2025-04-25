@@ -191,20 +191,28 @@
             </div>
             <div class="card-body text-center">
               <div class="avatar-top">
-                <img class="img-fluid w-25 rounded-circle " src="{% static 'images/yassmojalal.png' %}" alt="">
+                <img class="img-fluid w-25 rounded-circle " src="{% static 'images/noimage.png' %}" alt="">
                </div>
-               <p class="mt-30">خیابان بهشتی بهشتی 11, غرب 36602</p>
-               <p class="mt-10">michael@webmin.com</p>
-                <div class="social-icons color-icon mt-20">
-                  <ul>
-                    <li class="social-rss"><a href="#"><i class="fa fa-rss"></i></a></li>
-                    <li class="social-facebook"><a href="#"><i class="fa fa-facebook"></i></a></li>
-                    <li class="social-twitter"><a href="#"><i class="fa fa-twitter"></i></a></li>
-                    <li class="social-github"><a href="#"><i class="fa fa-github"></i></a></li>
-                    <li class="social-youtube"><a href="#"><i class="fa fa-youtube"></i></a></li>
-                    <li class="social-instagram"><a href="#"><i class="fa fa-instagram"></i></a></li>
-                  </ul>
-                </div>
+               <p class="mt-30">{{ hesabmoshtari.person.address }}</p>
+               <p class="mt-10">-</p>
+
+{#                <div class="social-icons color-icon mt-20">#}
+{#                  <ul>#}
+{#                    <li class="social-rss"><a href="#"><i class="fa fa-rss"></i></a></li>#}
+{#                    <li class="social-facebook"><a href="#"><i class="fa fa-facebook"></i></a></li>#}
+{#                    <li class="social-twitter"><a href="#"><i class="fa fa-twitter"></i></a></li>#}
+{#                    <li class="social-github"><a href="#"><i class="fa fa-github"></i></a></li>#}
+{#                    <li class="social-youtube"><a href="#"><i class="fa fa-youtube"></i></a></li>#}
+{#                    <li class="social-instagram"><a href="#"><i class="fa fa-instagram"></i></a></li>#}
+{#                  </ul>#}
+{#                </div>#}
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">ارسال پیامک</button>
+</form>
+
+
                <div class="divider mt-20"></div>
                <div class="row">
                   <div class="col-6 col-sm-4 mt-30">

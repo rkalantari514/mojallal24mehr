@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     # 'django_apscheduler',
     'custom_login',
     'accounting',
+    'loantracker',
 
 ]
 

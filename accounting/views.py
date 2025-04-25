@@ -15,6 +15,7 @@ from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
 from dashboard.models import MasterInfo, MasterReport
 from dashboard.views import generate_calendar_data_cheque
+from loantracker.forms import SMSTrackingForm
 from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan, LoanDetil
 from jdatetime import date as jdate
 from datetime import timedelta, date
@@ -1257,6 +1258,10 @@ import re
 
 from datetime import timedelta
 
+from django.shortcuts import render, redirect
+
+
+@login_required(login_url='/login')
 def HesabMoshtariDetail(request, tafsili):
     user = request.user
     if user.mobile_number != '09151006447':
@@ -1266,14 +1271,24 @@ def HesabMoshtariDetail(request, tafsili):
     asnad = SanadDetail.objects.filter(kol=103, moin=1, tafzili=tafsili).order_by('date')
 
     hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
+    m_name = None
 
     if hesabmoshtari:
         full_name = f'{hesabmoshtari.person.name} {hesabmoshtari.person.lname}'
-        # حذف کاراکترهای اضافی بعد از اولین کاراکتر انگلیسی، خط تیره، $ یا کلمه "قسط"
         cleaned_name = re.split(r"[a-zA-Z-$]|قسط", full_name, maxsplit=1)[0].strip()
-        # مقدار نهایی به عنوان m_name
         m_name = cleaned_name
-        print(m_name)
+
+    # ایجاد فرم پیگیری
+    if request.method == 'POST':
+        form = SMSTrackingForm(request.POST, customer=hesabmoshtari)
+        if form.is_valid():
+            tracking = form.save(commit=False)
+            tracking.customer = hesabmoshtari
+            tracking.created_by = user if user.is_authenticated else None
+            tracking.save()
+            return redirect('some-view')  # به صفحه مناسب هدایت کنید
+    else:
+        form = SMSTrackingForm(customer=hesabmoshtari)
 
     context = {
         'title': 'حساب مشتری',
@@ -1281,8 +1296,7 @@ def HesabMoshtariDetail(request, tafsili):
         'today': today,
         'asnad': asnad,
         'm_name': m_name,
-
-
+        'form': form,  # ارسال فرم به قالب
     }
 
     return render(request, 'moshrari_detail.html', context)
