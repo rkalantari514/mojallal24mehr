@@ -22,6 +22,8 @@ from datetime import timedelta, date
 from khayyam import JalaliDate, JalaliDatetime
 from django.db.models import F
 
+from mahakupdate.sendtogap import send_to_admin1
+
 
 def fix_persian_characters(value):
     return standardize(value)
@@ -1278,17 +1280,42 @@ def HesabMoshtariDetail(request, tafsili):
         cleaned_name = re.split(r"[a-zA-Z-$]|قسط", full_name, maxsplit=1)[0].strip()
         m_name = cleaned_name
 
-    # ایجاد فرم پیگیری
     if request.method == 'POST':
-        form = SMSTrackingForm(request.POST, customer=hesabmoshtari)
-        if form.is_valid():
-            tracking = form.save(commit=False)
-            tracking.customer = hesabmoshtari
-            tracking.created_by = user if user.is_authenticated else None
-            tracking.save()
-            return redirect('some-view')  # به صفحه مناسب هدایت کنید
+        action = request.POST.get('action')  # دریافت نام دکمه کلیک شده
+
+        if action == 'send_sms':  # عملیات ارسال پیامک
+            form = SMSTrackingForm(request.POST, customer=hesabmoshtari)
+            if form.is_valid():
+                phone_number = form.cleaned_data.get('phone_number')  # دریافت شماره تلفن از فرم
+                sample_sms = form.cleaned_data.get('sample_sms')  # دریافت پیامک نمونه از فرم
+                message = form.cleaned_data.get('message')  # دریافت متن پیامک واردشده توسط کاربر
+
+                if not sample_sms and not message:
+                    form.add_error('message', "حداقل یکی از فیلدهای متن پیامک یا پیامک نمونه باید مقدار داشته باشد.")
+                else:
+                    # ترکیب پیامک
+                    message_to_send = ""
+                    if sample_sms:
+                        message_to_send += sample_sms.text
+                    if message:
+                        message_to_send += f"\n{message}"
+
+                    # ارسال پیامک و دریافت پاسخ
+                    test_message = f"{phone_number}: {message_to_send}"
+                    response = send_to_admin1(test_message)  # استفاده از تابع
+
+                    if response and response.status_code == 200:
+                        # ذخیره اطلاعات فرم در مدل Tracking
+                        tracking = form.save(commit=False)
+                        tracking.customer = hesabmoshtari
+                        tracking.created_by = user if user.is_authenticated else None
+                        tracking.save()
+                    else:
+                        form.add_error('phone_number', "ارسال پیامک موفقیت‌آمیز نبود. لطفاً دوباره تلاش کنید.")
+
+                    return redirect(f'/acc/jariashkhas/moshtari/{tafsili}')  # به صفحه مناسب هدایت کنید
     else:
-        form = SMSTrackingForm(customer=hesabmoshtari)
+        form = SMSTrackingForm(customer=hesabmoshtari)  # فرم خالی برای نمایش اولیه
 
     context = {
         'title': 'حساب مشتری',

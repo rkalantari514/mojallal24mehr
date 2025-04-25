@@ -65,7 +65,7 @@
                                 </div>
                                 <div class="float-right text-right">
                                     <p class="card-text text-dark"> آخرین پرداختی </p>
-                                    <h4> روز {{ hesabmoshtari.from_last_daryaft|floatformat:0|intcomma:False }} قبل </h4>
+                                    <h4> {{ hesabmoshtari.from_last_daryaft|floatformat:0|intcomma:False }} روز قبل</h4>
                                 </div>
                             </div>
                         </div>
@@ -209,7 +209,7 @@
 <form method="POST">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">ارسال پیامک</button>
+    <button type="submit" name="action" value="send_sms" class="btn btn-primary">ارسال پیامک</button>
 </form>
 
 

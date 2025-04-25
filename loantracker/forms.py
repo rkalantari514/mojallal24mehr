@@ -14,8 +14,10 @@ class SMSTrackingForm(forms.ModelForm):
         label="شماره تلفن",
         widget=forms.Select(attrs={
             'placeholder': 'شماره تلفن مشتری',
-            'class': 'selectpicker form-control',
-            'data-live-search': "true",
+            # 'class': 'selectpicker form-control',
+            'class': 'custom-select my-1 mr-sm-2',
+
+            # 'data-live-search': "true",
             'id': 'id_phone_number'
         })
     )
@@ -26,8 +28,9 @@ class SMSTrackingForm(forms.ModelForm):
         label="پیامک اصلی",
         widget=forms.Select(attrs={
             'placeholder': 'انتخاب پیامک نمونه',
-            'class': 'selectpicker form-control',
-            'data-live-search': "true",
+            # 'class': 'selectpicker form-control',
+            'class': 'custom-select my-1 mr-sm-2',
+            # 'data-live-search': "true",
             'id': 'id_sample_sms'
         })
     )
@@ -35,7 +38,7 @@ class SMSTrackingForm(forms.ModelForm):
         required=False,
         label="ادامه پیامک",
         widget=forms.Textarea(attrs={
-            'placeholder': 'متن پیامک خود را اینجا وارد کنید...',
+            'placeholder': 'متن پیامک تکمیلی را اینجا وارد کنید...',
             'class': 'form-control',
             'rows': 4,
             'id': 'id_message'

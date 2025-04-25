@@ -28,7 +28,7 @@ class SampleSMS(models.Model):
         verbose_name_plural = "پیامک‌های نمونه"
 
     def __str__(self):
-        return f"{self.text[:50]} - سطح: {self.level}"  # نمایش متن پیامک و سطح آن
+        return f"{self.level} : {self.text[:150]} "  # نمایش متن پیامک و سطح آن
 
 from django.db import models
 from django.conf import settings
