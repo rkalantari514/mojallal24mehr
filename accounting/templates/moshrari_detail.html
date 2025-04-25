@@ -2,73 +2,8 @@
 {% load humanize %}
 {% load static %}
 {% block content %}
-    {% load jalali_tags %}
-    {% load custom_filters %}
-
-    <style>
-        .circle-progress .in .text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-        }
-
-        .circle-progress .in .value {
-            font-size: 20px; /* تنظیم اندازه متن */
-        }
-
-        .category-btn {
-            width: 125px; /* عرض دکمه‌ها را تنظیم می‌کند */
-            margin-bottom: 10px; /* فاصله بین خطوط را تنظیم می‌کند */
-        }
-
-
-    </style>
-    <style>
-        .calendar-table .fc-day-top {
-            position: relative; /* برای قرار دادن فرزندان */
-            padding: 5px; /* کمی فاصله برای زیبایی */
-        }
-
-        .calendar-table .fc-day-number {
-            font-weight: bold;
-            display: block;
-            margin: 0;
-            padding: 0; /* لغو حاشیه */
-            text-align: left; /* تراز چپ */
-        }
-
-        .calendar-table .fc-recive-number,
-        .calendar-table .fc-pay-number {
-            font-size: 1.2rem; /* اندازه متن */
-            display: block; /* تقسیم نمایش به سطرهای جدید */
-        }
-
-        .calendar-table .fc-recive-number {
-            color: #007bff; /* رنگ سبد خرید */
-            text-align: right; /* تراز راست برای شماره دریافتی */
-        }
-
-        .calendar-table .fc-pay-number {
-            color: #df0808; /* رنگ  */
-            text-align: right; /* تراز راست برای شماره پرداختی */
-        }
-
-        .calendar-table th {
-            border: 1px solid #fdd49a;
-            background-color: transparent !important; /* حذف رنگ پس‌زمینه */
-        }
-    </style>
-    <style>
-        .small-logo {
-            width: 20px; /* تنظیم اندازه کوچک لوگو */
-            height: auto;
-        }
-    </style>
-
-
-
+{% load jalali_tags %}
+{% load custom_filters %}
 
     <div class="content-wrapper">
 
@@ -235,7 +170,61 @@
                 </div>
             </div>
 
-            <!-- ردیف نمودار گردش حساب -->
+
+
+
+                    <!-- ردیف پیگیری اقساط -->
+                                    <div class="row">
+        <div class="col-xl-4 mb-30">
+          <div class="card card-statistics h-100">
+            <div class="p-4 text-center bg-warning">
+               <h5 class="mb-60 text-white">{{ m_name }} </h5>
+                <div class="btn-group info-drop">
+                  <button type="button" class="dropdown-toggle-split text-white" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="ti-more"></i></button>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#"><i class="text-primary ti-files"></i> اضافه کردن کار</a>
+                    <a class="dropdown-item" href="#"><i class="text-dark ti-pencil-alt"></i> ویرایش مشخصات</a>
+                    <a class="dropdown-item" href="#"><i class="text-success ti-user"></i> نمایش مشخصات</a>
+                    <a class="dropdown-item" href="#"><i class="text-secondary ti-info"></i> اطلاعات تماس</a>
+                  </div>
+                </div>
+            </div>
+            <div class="card-body text-center">
+              <div class="avatar-top">
+                <img class="img-fluid w-25 rounded-circle " src="images/team/12.jpg" alt="">
+               </div>
+               <p class="mt-30">خیابان بهشتی بهشتی 11, غرب 36602</p>
+               <p class="mt-10">michael@webmin.com</p>
+                <div class="social-icons color-icon mt-20">
+                  <ul>
+                    <li class="social-rss"><a href="#"><i class="fa fa-rss"></i></a></li>
+                    <li class="social-facebook"><a href="#"><i class="fa fa-facebook"></i></a></li>
+                    <li class="social-twitter"><a href="#"><i class="fa fa-twitter"></i></a></li>
+                    <li class="social-github"><a href="#"><i class="fa fa-github"></i></a></li>
+                    <li class="social-youtube"><a href="#"><i class="fa fa-youtube"></i></a></li>
+                    <li class="social-instagram"><a href="#"><i class="fa fa-instagram"></i></a></li>
+                  </ul>
+                </div>
+               <div class="divider mt-20"></div>
+               <div class="row">
+                  <div class="col-6 col-sm-4 mt-30">
+                     <b>پروژه</b>
+                     <h4 class="text-success mt-10">09</h4>
+                  </div>
+                  <div class="col-6 col-sm-4 mt-30">
+                    <b>پیام ها </b>
+                     <h4 class="text-danger mt-10">255</h4>
+                  </div>
+                  <div class="col-12 col-sm-4 mt-30">
+                    <b>نمایش ها</b>
+                     <h4 class="text-warning mt-10">608</h4>
+                  </div>
+                </div>
+             </div>
+          </div>
+        </div>
+      </div>
+
             <div class="row">
                 <div class="col-md-12 mb-30">
                     <div class="card card-statistics h-100">

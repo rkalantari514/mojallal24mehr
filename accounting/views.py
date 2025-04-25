@@ -1261,19 +1261,24 @@ def HesabMoshtariDetail(request, tafsili):
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page='حساب مشتری', code=0)
 
-    hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
     today = timezone.now().date()
     asnad = SanadDetail.objects.filter(kol=103, moin=1, tafzili=tafsili).order_by('date')
 
-
-
-
+    hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
+    if hesabmoshtari:
+        full_name = f'{hesabmoshtari.person.name} {hesabmoshtari.person.lname}'
+        # حذف کاراکترهای اضافی بعد از اولین کاراکتر انگلیسی یا خط تیره
+        cleaned_name = re.split(r"[a-zA-Z-]", full_name, maxsplit=1)[0].strip()
+        m_name = cleaned_name
+        print(m_name)
 
     context = {
         'title': 'حساب مشتری',
         'hesabmoshtari': hesabmoshtari,
         'today': today,
         'asnad': asnad,
+        'm_name': m_name,
+
 
     }
 

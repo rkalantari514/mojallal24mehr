@@ -500,7 +500,6 @@ class SanadDetail(models.Model):
     def kind(self):
         kin = []
         k = self.sharh.split('(')[0].strip()  # جدا کردن متن قبل از اولین پرانتز باز و حذف فاصله‌های اضافی
-        print('k',k)
         if not k:
             k=self.sharh
         kin.append(k)
