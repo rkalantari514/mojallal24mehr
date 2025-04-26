@@ -22,6 +22,8 @@ class TrackKinde(models.Model):
 class SampleSMS(models.Model):
     level = models.CharField(blank=True, null=True,max_length=50, verbose_name="سطح پیامک")  # فیلد جدید برای سطح پیامک
     text = models.TextField(blank=True, null=True,verbose_name="متن پیامک")
+    is_active = models.BooleanField(default=True, verbose_name='فعال است')
+
 
     class Meta:
         verbose_name = "پیامک نمونه"
@@ -46,7 +48,8 @@ class Tracking(models.Model):
     customer = models.ForeignKey(BedehiMoshtari, on_delete=models.CASCADE, verbose_name="مشتری")
     track_kind = models.ForeignKey(TrackKinde, on_delete=models.CASCADE, verbose_name="نوع پیگیری")
     next_reminder_date = models.DateField(blank=True, null=True, verbose_name="زمان یادآور پیگیری بعدی")
-    message = models.TextField(blank=True, null=True, verbose_name="متن پیام ارسالی")
+    message = models.TextField(blank=True, null=True, verbose_name="پیام تکمیلی")
+    message_to_send = models.TextField(blank=True, null=True, verbose_name="متن پیام ارسالی")
     call_duration = models.IntegerField(blank=True, null=True, verbose_name="مدت زمان تماس تلفنی (ثانیه)")
     phone_number = models.CharField(blank=True, null=True,max_length=150, verbose_name="شماره تلفن")
     sample_sms = models.ForeignKey(

@@ -162,8 +162,12 @@
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark"> اقساط عقب افتاده </p>
-                                    <h4>{{ table1.9|floatformat:0|intcomma:False }} میلیون تومان</h4>
+                                    <p class="card-text text-dark"> اقساط معوق </p>
+                                    <h4>
+                                        <a href="/acc/loan_total" target="_blank">
+                                            {{ table1.9|floatformat:0|intcomma:False }} میلیون تومان
+                                        </a>
+                                    </h4>
                                 </div>
                             </div>
                         </div>
@@ -315,8 +319,9 @@
                         <div class="card card-statistics h-100">
                             <div class="card-body">
                                 <div class="table-responsive mt-15 ">
-                                    <h6 class="card-title pb-0 border-0">جمع کل مانده واقعی اقساط: <span id="total-mandah"
-                                                                                       class="text-primary"></span>
+                                    <h6 class="card-title pb-0 border-0">جمع کل مانده واقعی اقساط: <span
+                                            id="total-mandah"
+                                            class="text-primary"></span>
                                         ریال </h6>
                                     <div class="table-responsive">
                                         <table id="table"
@@ -413,7 +418,7 @@
                                                         </a>
                                                     </td>
                                                     <td class="card-text text-center">
-                                                        <a href="/acc/jariashkhas/moshtari/{{ l.per_taf }}"
+                                                        <a href="/acc/jariashkhas/moshtari/{{ l.person.per_taf }}"
                                                            target="_blank">
                                                             {{ l.person.name }} {{ l.person.lname }}
                                                         </a>

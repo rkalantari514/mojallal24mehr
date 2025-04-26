@@ -23,7 +23,7 @@ class SMSTrackingForm(forms.ModelForm):
     )
 
     sample_sms = forms.ModelChoiceField(
-        queryset=SampleSMS.objects.all(),
+        queryset=SampleSMS.objects.filter(is_active=True),
         required=False,
         label="پیامک اصلی",
         widget=forms.Select(attrs={

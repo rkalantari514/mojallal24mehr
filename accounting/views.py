@@ -1317,6 +1317,7 @@ def HesabMoshtariDetail(request, tafsili):
                         if track_kind:
                             tracking = form.save(commit=False)
                             tracking.customer = hesabmoshtari
+                            tracking.message_to_send = message_to_send
                             tracking.created_by = user if user.is_authenticated else None
                             tracking.track_kind = track_kind  # مقدار نوع پیگیری
                             tracking.save()

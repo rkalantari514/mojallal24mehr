@@ -249,10 +249,9 @@
                                             <th>نوع</th>
                                             <th>زمان</th>
                                             <th>سطح</th>
-                                            <th>پیام اصلی</th>
-                                            <th>پیام تکمیلی</th>
+                                            <th>پیام ارسالی</th>
                                             <th>تلفن</th>
-                                            <th></th>
+{#                                            <th></th>#}
 
                                         </tr>
                                         </thead>
@@ -262,15 +261,16 @@
                                                 <td>{{ forloop.counter }}</td>
                                                 <td><img class="img-fluid avatar-small"
                                                          src={{ t.created_by.avatar.url }} alt=""></td>
-                                                <td>{{ t.track_kind.kind_name }}</td>
+                                                <td>
+                                                    <i class="fa {{ t.track_kind.kind_icon }} text-{{ t.track_kind.kind_color }}"></i>
+                                                </td>
                                                 <td>{{ t.created_at }}</td>
                                                 <td>{{ t.sample_sms.level }}</td>
-                                                <td>{{ t.sample_sms.text }}</td>
-                                                <td>{{ t.message }}</td>
+                                                <td>{{ t.message_to_send }}</td>
                                                 <td>{{ t.phone_number }}</td>
                                                 {#                    <td><label class="badge badge-success">Approved</label></td>#}
                                                 {#                    <td><a href="#" class="btn btn-outline-success btn-sm">View Order</a></td>#}
-                                                <td><a href="#" class="btn btn-outline-warning btn-sm">Cancel</a></td>
+{#                                                <td><a href="#" class="btn btn-outline-warning btn-sm">Cancel</a></td>#}
                                             </tr>
                                         {% endfor %}
 
@@ -284,15 +284,7 @@
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-12 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body col-12">
-                            <h5 class="card-title pb-0 border-0 ">پیگیری اقساط</h5>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
 
 
             <!-- ردیف جزئیات اسناد -->

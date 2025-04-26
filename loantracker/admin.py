@@ -39,6 +39,7 @@ from .models import SampleSMS
 
 @admin.register(SampleSMS)
 class SampleSMSAdmin(admin.ModelAdmin):
-    list_display = ('text', 'level')  # نمایش متن پیامک و سطح پیامک
+    list_display = ('__str__','text', 'level','is_active')  # نمایش متن پیامک و سطح پیامک
+    list_editable = ['text', 'level','is_active']
 
 
