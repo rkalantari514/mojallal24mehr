@@ -68,3 +68,45 @@ def log_out(request):
 
 
 
+from django.shortcuts import render
+from .models import CustomUser, UserLog
+from collections import Counter
+
+from django.shortcuts import render
+from .models import CustomUser, UserLog
+from collections import Counter
+
+def dashboard_view(request):
+    # پیدا کردن کاربران با نام خانوادگی شامل "وارسته"
+    varaste_users = CustomUser.objects.filter(last_name__icontains="وارسته")
+
+    # جمع‌آوری اطلاعات بازدید برای کاربران
+    user_logs = UserLog.objects.filter(user__in=varaste_users)
+    user_visit_counts = Counter([log.user for log in user_logs])
+
+    # محاسبه مجموع بازدیدها
+    total_visits = sum(user_visit_counts.values())
+
+    # ایجاد داده‌ها برای نمایش در جدول
+    table_data = [
+        {
+            "user": f"{user.first_name} {user.last_name}",
+            "mobile": user.mobile_number,
+            "visits": user_visit_counts.get(user, 0),
+            "percentage": round((user_visit_counts.get(user, 0) / total_visits) * 100, 2) if total_visits > 0 else 0
+        }
+        for user in varaste_users
+    ]
+
+    # ایجاد داده‌ها برای نمودار دایره‌ای
+    pie_chart_data = [
+        {"name": f"{user.first_name} {user.last_name}", "value": user_visit_counts.get(user, 0)}
+        for user in varaste_users
+    ]
+
+    context = {
+        "table_data": table_data,
+        "pie_chart_data": pie_chart_data,
+        "total_visits": total_visits
+    }
+    return render(request, 'dashboard.html', context)
