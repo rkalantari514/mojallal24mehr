@@ -466,7 +466,7 @@ def ChequesPayTotal(request, *args, **kwargs):
         table1.append({
             'id': chequ.cheque_id,
             'status': chequ.status,
-            'person':f'{chequ.name} {chequ.lname}',
+            'person':f'{chequ.person.name} {chequ.person.lname}',
             'com': extract_first_words(com),
             'mandeh': chequ.total_mandeh,
             'date': chequ.cheque_date,
