@@ -590,9 +590,10 @@ def ChequesPayTotal(request, *args, **kwargs):
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
-    return render(request, 'cheques-pay-total.html', context) @ login_required(login_url='/login')
+    return render(request, 'cheques-pay-total.html', context)
 
 
+@ login_required(login_url='/login')
 def balance_sheet_kol(request):
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
     kol_codes = SanadDetail.objects.values('kol').distinct()
