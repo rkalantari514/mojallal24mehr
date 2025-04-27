@@ -181,7 +181,7 @@ def TarazCal1day(day, data,acc_year2):
     }
     return to_return
 
-def generate_calendar_data_cheque2(month, year, cheque_recive_data,cheque_pay_data,loan_detail_data):
+def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_data,loan_detail_data):
     # مشخص کردن اولین روز ماه
     start_time2 = time.time()  # زمان شروع تابع
 
@@ -206,11 +206,11 @@ def generate_calendar_data_cheque2(month, year, cheque_recive_data,cheque_pay_da
 
     for i in range((last_day_of_month - first_day_of_month).days + 1):
         print(f"64: {time.time() - start_time2:.2f} ثانیه")
-
         current_day = first_day_of_month + jdatetime.timedelta(days=i)
         recive = sum (item.total_mandeh for item in cheque_recive_data if item.cheque_date == current_day) /10000000
         pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date == current_day )/10000000
         max_cheque = max(max_cheque, abs(recive), abs(pay))
+        print(current_day,pay)
         # تبدیل تاریخ شمسی به میلادی
         current_day_gregorian = current_day.togregorian().isoformat()
         today_recive_cheque = cheque_recive_data.filter(cheque_date=current_day_gregorian).order_by('-cost')
@@ -295,7 +295,7 @@ def generate_calendar_data_cheque2(month, year, cheque_recive_data,cheque_pay_da
 
 
     return days_in_month,max_cheque,month_cheque_data,month_loan_data
-def generate_calendar_data_cheque(month, year, cheque_recive_data, cheque_pay_data, loan_detail_data):
+def generate_calendar_data_cheque44444(month, year, cheque_recive_data, cheque_pay_data, loan_detail_data):
     start_time2 = time.time()  # زمان شروع تابع
 
     # مشخص کردن اولین و آخرین روز ماه
