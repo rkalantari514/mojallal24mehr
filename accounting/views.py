@@ -1195,9 +1195,6 @@ def LoanTotal(request, *args, **kwargs):
     today = timezone.now().date()
 
 
-
-
-
     loans = LoanDetil.objects.filter(complete_percent__lt=1, date__lt=today).annotate(
         category_en=Value("Overdue", CharField()),
         category_fa=Value("معوق", CharField()),
@@ -1245,6 +1242,17 @@ def LoanTotal(request, *args, **kwargs):
     #     mtday=Value(0, FloatField())
     # )
 
+    # loans_soon = LoanDetil.objects.filter(complete_percent__gt=0, date__lte=today).annotate(
+    #     category_en=Value("Soon", CharField()),
+    #     category_fa=Value("تعجیل", CharField()),
+    #     delay_days=Value(0, output_field=IntegerField()),
+    #     mtday=Value(0, output_field=IntegerField()),
+    #     delaycost=Value(0, output_field=IntegerField()),
+    #     from_last_daryaft=Value(0.0, output_field=FloatField()),
+    #
+    # )
+
+    # final_loans = loans.union(loans_soon)
     # final_loans = loans.union(loans_today, loans_future)
     # final_loans = loans.union(loans_today)
 
@@ -1265,7 +1273,7 @@ def LoanTotal(request, *args, **kwargs):
 
 
     context = {
-        'title': 'اقساط معوق',
+        'title': 'اقساط ',
         'user': user,
         'loans': loans,
         "total_count": loan_stats["total_count"],
