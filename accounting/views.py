@@ -362,52 +362,6 @@ def ChequesPayTotal(request, *args, **kwargs):
         UserLog.objects.create(user=user, page='چک های پرداختی', code=0)
 
     start_time = time.time()  # زمان شروع تابع
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-
-        # تکمیل تقویم
-
-        month = request.GET.get('month', None)
-        year = request.GET.get('year', None)
-        print("Query params - Year:", year, "Month:", month)
-
-        if month is not None and year is not None:
-            current_month = int(month)
-            current_year = int(year)
-        else:
-            today_jalali = JalaliDate.today()
-            current_year = today_jalali.year
-            current_month = today_jalali.month
-
-        months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
-        month_name = months[current_month - 1]
-        print("Current Year:", current_year, "Current Month:", current_month)
-
-        cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
-        cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
-
-        loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
-
-        days_in_month, max_cheque, month_cheque_data, month_loan_data = generate_calendar_data_cheque(current_month,
-                                                                                                      current_year,
-                                                                                                      cheque_recive_data,
-                                                                                                      cheque_pay_data,
-                                                                                                      loan_detail_data)
-
-        context = {
-            # for calendar
-            'month_name': month_name,
-            'year': current_year,
-            'month': current_month,
-            'days_in_month': days_in_month,
-            'max_cheque': max_cheque,
-            'month_cheque_data': month_cheque_data,
-            'month_loan_data': month_loan_data,
-
-        }
-
-        print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
-
-        return render(request, 'partial_calendar_cheque_pay.html', context)
 
     # گام اول: استخراج تاریخ و ماه
     today = date.today()
@@ -498,26 +452,12 @@ def ChequesPayTotal(request, *args, **kwargs):
         *monthly_data,
         {'month_name': 'سالهای بعد', 'total_count': float(cheques_after_current_year) / 10000000},
     ]
-    print(f"6: {time.time() - start_time:.2f} ثانیه")
-
-    # مرحله اول: دریافت کدهای منحصر به فرد per_code
-    # per_codes = chequespay.values_list('per_code', flat=True).distinct()
-    # print("Unique per_codes from ChequesRecieve:", per_codes)
-
-    # بارگذاری اطلاعات شخص بر اساس per_code
-    # persons = Person.objects.filter(code__in=per_codes)
-
-    # بارگذاری دیکشنری با کلیدهای به عنوان رشته
-    # persons_map = {str(person.code): f"{person.name} {person.lname}" for person in persons}
-    # print("Loaded Persons Map:", persons_map)
 
     # آماده‌سازی داده‌ها برای جدول
     table1 = []
     for chequ in chequespay:
         com = chequ.last_sanad_detaile.syscomment if chequ.last_sanad_detaile else ''
 
-        # دسترسی به نام و نام خانوادگی شخص از دیکشنری
-        # person = persons_map.get(str(chequ.per_code), '')  # ساختار به صورت رشته
 
         # Split تاریخ به سال، ماه و روز
         year, month, day = chequ.cheque_tarik.split('/')
@@ -532,7 +472,6 @@ def ChequesPayTotal(request, *args, **kwargs):
             'bank_logo': chequ.bank.bank_logo,
             'bank_name': chequ.bank.bank_name,
             'bank_branch': chequ.bank.name,
-            # 'person': fix_persian_characters(person),  # Person نام و نام خانوادگی
             'year': year,
             'month': month,
         })
@@ -545,28 +484,7 @@ def ChequesPayTotal(request, *args, **kwargs):
     year = request.GET.get('year', None)
     print("Query params - Year:", year, "Month:", month)
 
-    if month is not None and year is not None:
-        current_month = int(month)
-        current_year = int(year)
-    else:
-        today_jalali = JalaliDate.today()
-        current_year = today_jalali.year
-        current_month = today_jalali.month
 
-    months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
-    month_name = months[current_month - 1]
-    print("Current Year:", current_year, "Current Month:", current_month)
-
-    cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
-    cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
-
-    loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
-
-    days_in_month, max_cheque, month_cheque_data, month_loan_data = generate_calendar_data_cheque(current_month,
-                                                                                                  current_year,
-                                                                                                  cheque_recive_data,
-                                                                                                  cheque_pay_data,
-                                                                                                  loan_detail_data)
 
     print(f"8: {time.time() - start_time:.2f} ثانیه")
 
@@ -578,14 +496,7 @@ def ChequesPayTotal(request, *args, **kwargs):
         'chartmahanedata': chart_data,
         'table1': table1,
 
-        # for calendar
-        'month_name': month_name,
-        'year': current_year,
-        'month': current_month,
-        'days_in_month': days_in_month,
-        'max_cheque': max_cheque,
-        'month_cheque_data': month_cheque_data,
-        'month_loan_data': month_loan_data,
+
     }
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
