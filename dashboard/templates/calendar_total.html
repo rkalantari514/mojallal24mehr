@@ -207,31 +207,31 @@
                             <span>{{ month_name }} {{ year }}</span>
                             <button id="next-month" class="btn btn-secondary">&gt;</button>
                         </div>
-                        <div class="table-responsive">
+                            <div class="table-responsive">
 
-                            <table class="table table-bordered calendar-table">
-                                <thead class="thead-light">
-                                <tr class="text-center">
-                                    <th>شنبه</th>
-                                    <th>یکشنبه</th>
-                                    <th>دوشنبه</th>
-                                    <th>سه‌شنبه</th>
-                                    <th>چهارشنبه</th>
-                                    <th>پنج‌شنبه</th>
-                                    <th>جمعه</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for week in days_in_month %}
-                                    <tr>
-                                        {% for day in week %} {% if day %}
-                                            <td>
-                                                <div class="fc-day-top">
-                                                    <span class="fc-day-number"><h5>{{ day.jday }}</h5></span>
-                                                    <span class="fc-loan-number">{{ day.loans|floatformat:0|intcomma:False }}</span>
-                                                    <div class="progress mb-3" data-toggle="popover" data-html="true"
-                                                         data-original-title="لیست  اقساط برای تاریخ {{ day.today_loans.last.tarikh }}"
-                                                         data-content="
+                        <table class="table table-bordered calendar-table">
+                            <thead class="thead-light">
+                            <tr class="text-center">
+                                <th>شنبه</th>
+                                <th>یکشنبه</th>
+                                <th>دوشنبه</th>
+                                <th>سه‌شنبه</th>
+                                <th>چهارشنبه</th>
+                                <th>پنج‌شنبه</th>
+                                <th>جمعه</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for week in days_in_month %}
+                                <tr>
+                                    {% for day in week %} {% if day %}
+                                        <td>
+                                            <div class="fc-day-top">
+                                                <span class="fc-day-number"><h5>{{ day.jday }}</h5></span>
+                                                <span class="fc-loan-number">{{ day.loans|floatformat:0|intcomma:False }}</span>
+                                                <div class="progress mb-3" data-toggle="popover" data-html="true"
+                                                     data-original-title="لیست  اقساط برای تاریخ {{ day.today_loans.last.tarikh }}"
+                                                     data-content="
                                                      <table class='table center-aligned-table mb-0'>
                                                      <thead>
                                                      <tr>
@@ -251,17 +251,17 @@
 {% endfor %}
 </tbody>
 </table>">
-                                                        <div class="progress-bar progress-bar-striped bg-facebook"
-                                                             role="progressbar"
-                                                             style="width: {% widthratio day.loans max_cheque 100 %}%"
-                                                             aria-valuenow="{{ day.loans }}" aria-valuemin="0"
-                                                             aria-valuemax="{{ max_cheque }}"></div>
-                                                    </div>
-                                                    <span class="fc-recive-number">{{ day.recive|floatformat:0|intcomma:False }}</span>
-                                                    <div class="progress mb-3" data-toggle="popover" data-html="true"
-                                                         data-original-title="لیست  چکهای دریافتی برای تاریخ {{ day.today_recive_cheque.last.cheque_tarik }}"
+                                                    <div class="progress-bar progress-bar-striped bg-facebook"
+                                                         role="progressbar"
+                                                         style="width: {% widthratio day.loans max_cheque 100 %}%"
+                                                         aria-valuenow="{{ day.loans }}" aria-valuemin="0"
+                                                         aria-valuemax="{{ max_cheque }}"></div>
+                                                </div>
+                                                <span class="fc-recive-number">{{ day.recive|floatformat:0|intcomma:False }}</span>
+                                                <div class="progress mb-3" data-toggle="popover" data-html="true"
+                                                     data-original-title="لیست  چکهای دریافتی برای تاریخ {{ day.today_recive_cheque.last.cheque_tarik }}"
 
-                                                         data-content="
+                                                     data-content="
                                                      <table class='table'>
                                                      <thead>
                                                      <tr>
@@ -287,20 +287,21 @@
 </tbody>
 </table>">
 
-                                                        <div class="progress-bar progress-bar-striped bg-primary"
-                                                             role="progressbar"
-                                                             style="width: {% widthratio day.recive max_cheque 100 %}%"
-                                                             aria-valuenow="{{ day.recive }}" aria-valuemin="0"
-                                                             aria-valuemax="{{ max_cheque }}"></div>
-                                                    </div>
-                                                    <span class="fc-pay-number">{{ day.pay|floatformat:0|intcomma:False }}</span>
-                                                    <div class="progress mb-3" data-toggle="popover" data-html="true"
-                                                         data-original-title="لیست  چکهای پرداختی برای تاریخ {{ day.today_pay_cheque.last.cheque_tarik }}"
-                                                         data-content="
+                                                    <div class="progress-bar progress-bar-striped bg-primary"
+                                                         role="progressbar"
+                                                         style="width: {% widthratio day.recive max_cheque 100 %}%"
+                                                         aria-valuenow="{{ day.recive }}" aria-valuemin="0"
+                                                         aria-valuemax="{{ max_cheque }}"></div>
+                                                </div>
+                                                <span class="fc-pay-number">{{ day.pay|floatformat:0|intcomma:False }}</span>
+                                                <div class="progress mb-3" data-toggle="popover" data-html="true"
+                                                     data-original-title="لیست  چکهای پرداختی برای تاریخ {{ day.today_pay_cheque.last.cheque_tarik }}"
+                                                     data-content="
                                                      <table class='table center-aligned-table mb-0'>
                                                      <thead>
                                                      <tr>
                                                      <th></th>
+                                                     <th>طرف حساب</th>
                                                      <th>بانک</th>
                                                      <th>مبلغ</th>
                                                      </tr>
@@ -310,6 +311,7 @@
 {% with 'images/bank/'|add:cheque.bank.bank_logo as logo_path %}
 <tr>
 <td><img src='{% static logo_path %}' class='small-logo'></td>
+<td>{{ cheque.person.name }} {{ cheque.person.lname }}</td>
 <td>{{ cheque.bank.name }}</td>
 <td>{{ cheque.cost|floatformat:0|intcomma:False }}</td>
 </tr>
@@ -317,26 +319,26 @@
 {% endfor %}
 </tbody>
 </table>">
-                                                        <div class="progress-bar progress-bar-striped bg-danger"
-                                                             role="progressbar"
-                                                             style="width: {% widthratio day.pay max_cheque 100 %}%"
-                                                             aria-valuenow="{{ day.pay }}" aria-valuemin="0"
-                                                             aria-valuemax="{{ max_cheque }}"></div>
-                                                    </div>
-
+                                                    <div class="progress-bar progress-bar-striped bg-danger"
+                                                         role="progressbar"
+                                                         style="width: {% widthratio day.pay max_cheque 100 %}%"
+                                                         aria-valuenow="{{ day.pay }}" aria-valuemin="0"
+                                                         aria-valuemax="{{ max_cheque }}"></div>
                                                 </div>
-                                            </td>
-                                        {% else %}
-                                            <td></td>
-                                        {% endif %}
-                                        {% endfor %}
-                                    </tr>
-                                {% endfor %}
+
+                                            </div>
+                                        </td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
 
 
-                                </tbody>
-                            </table>
-                        </div>
+                            </tbody>
+                        </table>
+                    </div>
                     </div>
                 </div>
             </div>

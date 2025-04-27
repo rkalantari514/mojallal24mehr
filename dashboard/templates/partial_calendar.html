@@ -234,7 +234,7 @@
 {% with 'images/bank/'|add:cheque.bank.bank_logo as logo_path %}
 <tr>
 <td><img src='{% static logo_path %}' class='small-logo'></td>
-<td>{{ cheque.bank.name }}</td>
+<td>{{ cheque.person.name }} {{ cheque.person.lname }}</td>
 <td>{{ cheque.bank.name }}</td>
 <td>{{ cheque.cost|floatformat:0|intcomma:False }}</td>
 </tr>
