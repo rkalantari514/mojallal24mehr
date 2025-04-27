@@ -2876,14 +2876,14 @@ def Cheque_Pay(request):
 
         # یافتن بانک مرتبط با استفاده از bank_code
         bank = bank_dict.get(bank_code, None)
-
+        person=Person.opject.filter(code=per_code)
         # بررسی وجود چک در پایگاه داده Django
         if id_mahak in current_cheques:
             cheque = current_cheques[id_mahak]
             # بررسی تغییرات
             if (cheque.cheque_id != cheque_id_str or cheque.cheque_row != cheque_row or
                     cheque.issuance_tarik != issuance_tarik or cheque.cheque_tarik != cheque_tarik or
-                    cheque.cost != cost or cheque.bank_code != bank_code or
+                    cheque.cost != cost or cheque.bank_code != bank_code or cheque.person != person or
                     cheque.description != description or cheque.status != status or
                     cheque.firstperiod != first_period or cheque.cheque_id_counter != cheque_id_counter or
                     cheque.total_mandeh != total_mandeh or cheque.last_sanad_detaile != last_sanad or
@@ -2895,6 +2895,7 @@ def Cheque_Pay(request):
                 cheque.cost = cost
                 cheque.bank_code = bank_code
                 cheque.bank = bank  # تنظیم بانک مرتبط
+                cheque.person = person  # تنظیم بانک مرتبط
                 cheque.description = description
                 cheque.status = status
                 cheque.firstperiod = first_period
@@ -2910,7 +2911,7 @@ def Cheque_Pay(request):
                 id_mahak=id_mahak, cheque_id=cheque_id_str, cheque_row=cheque_row,
                 issuance_tarik=issuance_tarik, cheque_tarik=cheque_tarik,
                 issuance_date=issuance_date, cheque_date=cheque_date,
-                cost=cost, bank_code=bank_code, bank=bank, description=description,
+                cost=cost, bank_code=bank_code, bank=bank,person=person, description=description,
                 status=status, firstperiod=first_period,
                 cheque_id_counter=cheque_id_counter,
                 per_code=per_code, recieve_status=recieve_status,
@@ -2928,7 +2929,7 @@ def Cheque_Pay(request):
         ChequesPay.objects.bulk_update(
             cheques_to_update,
             ['cheque_id', 'cheque_row', 'issuance_tarik', 'cheque_tarik',
-             'cost', 'bank_code', 'bank', 'description', 'status', 'firstperiod',
+             'cost', 'bank_code', 'bank','person', 'description', 'status', 'firstperiod',
              'cheque_id_counter', 'per_code', 'recieve_status',
              'total_mandeh', 'last_sanad_detaile'],
             batch_size=BATCH_SIZE

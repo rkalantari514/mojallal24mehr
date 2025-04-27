@@ -682,6 +682,7 @@ class ChequesPay(models.Model):
     firstperiod=models.BooleanField(verbose_name='چک اول دوره')
     cheque_id_counter=models.IntegerField(verbose_name="تعداد آی دی چک")
     per_code = models.CharField(max_length=50, verbose_name="کد شخص")
+    person=models.ForeignKey(Person, on_delete=models.SET_NULL, blank=True, null=True)
     recieve_status=models.IntegerField(verbose_name="وضعیت دریافت")
     total_mandeh = models.DecimalField(max_digits=30, decimal_places=10, null=True, verbose_name='مانده کل چک')
     last_sanad_detaile = models.ForeignKey(SanadDetail, on_delete=models.SET_NULL, blank=True, null=True)
