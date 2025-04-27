@@ -2876,7 +2876,7 @@ def Cheque_Pay(request):
 
         # یافتن بانک مرتبط با استفاده از bank_code
         bank = bank_dict.get(bank_code, None)
-        person=Person.opject.filter(code=per_code)
+        person=Person.opject.filter(code=per_code).las()
         # بررسی وجود چک در پایگاه داده Django
         if id_mahak in current_cheques:
             cheque = current_cheques[id_mahak]
