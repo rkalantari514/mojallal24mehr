@@ -2,7 +2,7 @@
 {% load humanize %}
 {% load static %}
 {% block content %}
-
+{% load custom_filters %}
     <style>
         .datetime-small {
             font-size: 1.2em; /* کوچک‌تر کردن فونت تاریخ و ساعت */
@@ -237,6 +237,7 @@
                                                      <tr>
                                                      <th>کد قسط</th>
                                                      <th>فرد</th>
+                                                     <th>پرداخت شده</th>
                                                      <th>مبلغ</th>
                                                      </tr>
                                                      </thead>
@@ -246,6 +247,7 @@
 <td>{{ l.loan_code }}</td>
 <td><a href='/acc/jariashkhas/moshtari/{{ l.loan.person.per_taf }}' target='_blank'>
                                                          {{ l.loan.person.name }}{{ l.loan.person.lname }}</a></td>
+<td>{{ l.complete_percent|percentage }}%</td>
 <td>{{ l.cost|floatformat:0|intcomma:False }}</td>
 </tr>
 {% endfor %}
