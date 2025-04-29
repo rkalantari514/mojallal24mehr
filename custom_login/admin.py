@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CustomUser, UserLog
+from .models import CustomUser, UserLog, CustomGroup
 
 
 @admin.register(CustomUser)
@@ -24,13 +24,40 @@ from .models import MyPage
 class MyPageAdmin(admin.ModelAdmin):
     list_display = ('name', 'v_name', 'p_url')  # ستون‌های نمایش
     search_fields = ('name', 'v_name')  # قابلیت جستجو
-    filter_horizontal = ('allowed_groups',)  # حذف این خط چون از فرم چک‌باکس استفاده می‌کنیم
+    # filter_horizontal = ('allowed_groups',)  # حذف این خط چون از فرم چک‌باکس استفاده می‌کنیم
 
-    formfield_overrides = {
-        'allowed_groups': {'widget': CheckboxSelectMultiple},  # تغییر به چک‌باکس
-    }
+    # formfield_overrides = {
+    #     'allowed_groups': {'widget': CheckboxSelectMultiple},  # تغییر به چک‌باکس
+    # }
+
+
+
+
+
+from django.contrib import admin
+from django.contrib.auth.models import Group
+
+
+
+
+from django.contrib import admin
+from .models import CustomGroup
+
+@admin.register(CustomGroup)
+class CustomGroupAdmin(admin.ModelAdmin):
+    list_display = ('name', 'persian_name', 'get_allowed_pages','default_page')
+
+    def get_allowed_pages(self, obj):
+        return ", ".join([page.name for page in obj.allowed_pages.all()])
+    get_allowed_pages.short_description = 'صفحات مجاز'
+
+    filter_horizontal = ('allowed_pages',)  # استفاده از چک‌باکس برای انتخاب صفحات
+
+
+
 
 
 
 
 admin.site.register(UserLog, UserLogAdmin)
+admin.site.unregister(Group)

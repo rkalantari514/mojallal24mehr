@@ -625,10 +625,9 @@ def generate_calendar_data_chequesider2(month, year, cheque_recive_data, cheque_
 @login_required(login_url='/login')
 def Home1(request, *args, **kwargs):
     name='داشبورد 1'
-    page_permision(request, name)
-
-
-
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
     minfo=MasterInfo.objects.filter(is_active=True).last()
     user = request.user
     if user.mobile_number != '09151006447':
@@ -757,6 +756,10 @@ def Home1(request, *args, **kwargs):
 
 @login_required(login_url='/login')
 def CalendarTotal(request, *args, **kwargs):
+    name = 'تقویم'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
     user = request.user
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page='تقویم')
@@ -1309,6 +1312,10 @@ def CreateMonthlyReport(request):
 
 @login_required(login_url='/login')
 def ReportsDailySummary(request):
+    name = 'گزارش های روزانه کلی'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
     user = request.user
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page='خلاصه گزارش های روزانه')
@@ -1340,6 +1347,10 @@ def ReportsDailySummary(request):
 
 @login_required(login_url='/login')
 def ReportsDailyDetile(request, *args, **kwargs):
+    name = 'گزارش روز'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
     user = request.user
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page='گزارش های روز')
@@ -1352,17 +1363,12 @@ def ReportsDailyDetile(request, *args, **kwargs):
         print(day_date)
     except ValueError:
         print('Invalid date format:', day)
-
     kol=(500, 400, 403, 401, 501)
-    # sanads=SanadDetail.objects.filter(date=day_date,kol__in=kol)
-
     sanads = SanadDetail.objects.filter(date=day_date, kol__in=kol).annotate(
         acc_name=Subquery(
             AccCoding.objects.filter(code=OuterRef('kol')).values('name')[:1]
         )
     )
-
-
 
     print(len(sanads))
 

@@ -231,6 +231,7 @@ JALALI_DATE_DEFAULTS = {
 
 
 
+AUTH_GROUP_MODEL = 'custom_login.CustomGroup'
 
 
 USE_THOUSAND_SEPARATOR = True

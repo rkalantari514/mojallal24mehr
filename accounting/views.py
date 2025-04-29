@@ -13,6 +13,7 @@ from django.db.models import Sum, F, DecimalField
 
 from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
+from custom_login.views import page_permision
 from dashboard.models import MasterInfo, MasterReport
 from dashboard.views import generate_calendar_data_cheque
 from loantracker.forms import SMSTrackingForm
@@ -117,6 +118,10 @@ def extract_first_words(text):
 
 @login_required(login_url='/login')
 def ChequesRecieveTotal(request, *args, **kwargs):
+    name = 'چک های دریافتی'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
     from django.db.models import Sum  # این خط را به ابتدای تابع منتقل کنید
     user = request.user
     if user.mobile_number != '09151006447':
@@ -274,6 +279,10 @@ def ChequesRecieveTotal(request, *args, **kwargs):
 
 @login_required(login_url='/login')
 def ChequesPayTotal(request, *args, **kwargs):
+    name = 'چکهای پرداختی'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
     from django.db.models import Sum  # این خط را به ابتدای تابع منتقل کنید
     user = request.user
     if user.mobile_number != '09151006447':
@@ -425,6 +434,10 @@ def ChequesPayTotal(request, *args, **kwargs):
 
 @ login_required(login_url='/login')
 def balance_sheet_kol(request):
+    name = 'تراز آزمایشی | کل'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
     kol_codes = SanadDetail.objects.values('kol').distinct()
     balance_data = []
@@ -483,6 +496,10 @@ def balance_sheet_kol(request):
 
 
 def balance_sheet_moin(request, kol_code):
+    name = 'تراز آزمایشی | معین'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
     moin_codes = SanadDetail.objects.filter(kol=kol_code).values('moin').distinct()
     balance_data = []
@@ -568,6 +585,10 @@ def balance_sheet_moin(request, kol_code):
 
 
 def balance_sheet_tafsili(request, kol_code, moin_code):
+    name = 'تراز آزمایشی | تفصیلی'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
     tafsili_codes = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).values('tafzili').distinct()
     balance_data = []
@@ -673,6 +694,10 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
 
 
 def SanadTotal(request, *args, **kwargs):
+    name = 'کل اسناد'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
     kol_code = kwargs['kol_code']
     moin_code = kwargs['moin_code']
     tafzili_code = kwargs['tafzili_code']
@@ -854,6 +879,10 @@ def BedehkaranMoshtarian(request, state):
 
 
 def JariAshkhasMoshtarian(request):
+    name = 'حساب مشتریان'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
     user = request.user
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page='حساب مشتریان', code=0)
@@ -1097,6 +1126,10 @@ from django.shortcuts import render, redirect
 
 @login_required(login_url='/login')
 def HesabMoshtariDetail(request, tafsili):
+    name = 'جزئیات حساب مشتری'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
     user = request.user
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page='حساب مشتری', code=0)
@@ -1186,6 +1219,10 @@ from django.db.models import OuterRef, Subquery
 
 @login_required(login_url='/login')
 def LoanTotal(request, *args, **kwargs):
+    name = 'اقساط معوق'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
     user = request.user
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page=' اقساط معوق', code=0)

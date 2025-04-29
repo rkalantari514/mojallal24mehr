@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm, ForgotPasswordForm
-from .models import CustomUser, MyPage
+from .models import CustomUser, MyPage, CustomGroup
 import random
 
 def login_view(request):
@@ -117,22 +117,63 @@ def dashboard_view(request):
 from django.http import Http404  # برای هدایت به صفحه 404
 
 
+from django.http import Http404
+
+from django.http import Http404
+
+from django.shortcuts import redirect
+
+from django.shortcuts import redirect
+
+from django.shortcuts import redirect, resolve_url
+from django.http import Http404
+
+from django.shortcuts import redirect, resolve_url
+from django.http import Http404
+
+from django.shortcuts import resolve_url, redirect
+
+from django.shortcuts import redirect, resolve_url
+from django.http import Http404
+
+from django.shortcuts import redirect, resolve_url
+from django.http import Http404
+
 def page_permision(request, name):
     v_name = request.resolver_match.view_name  # تشخیص خودکار نام ویو
 
-    # به‌روزرسانی یا ایجاد صفحه
+    # به‌روزرسانی یا ایجاد صفحه با استفاده از نام به‌جای p_url
     page, created = MyPage.objects.update_or_create(
-        v_name=v_name,  # شرط برای پیدا کردن رکورد
+        name=name,  # استفاده از name به‌عنوان شاخص کلیدی
         defaults={
-            'name': name,  # فیلدهایی که باید آپدیت شوند
-            'p_url': request.path  # مسیر صفحه
+            'v_name': v_name,
+            'p_url': request.path  # همچنان ذخیره p_url برای اطلاعات اضافی
         }
     )
 
     # بررسی دسترسی کاربر
     if not request.user.is_superuser:  # اگر کاربر superuser نیست
-        user_groups = request.user.groups.all()  # گروه‌های کاربر
-        allowed_groups = page.allowed_groups.all()  # گروه‌های مجاز صفحه
+        user_groups = set(request.user.groups.values_list('name', flat=True))  # گرفتن نام گروه‌ها به جای اشیاء
+        allowed_groups = set(CustomGroup.objects.filter(allowed_pages=page).values_list('name', flat=True))  # گرفتن نام گروه‌ها
 
-        if not user_groups.intersection(allowed_groups):  # اگر گروه مشترکی وجود ندارد
-            raise Http404("شما اجازه دسترسی به این صفحه را ندارید.")  # هدایت به صفحه 404
+        print('page:', page)
+        print('user_groups:', user_groups)
+        print('allowed_groups:', allowed_groups)
+
+        # بررسی اشتراک گروه‌ها
+        if not user_groups.intersection(allowed_groups):  # اگر اشتراک وجود نداشت
+            print('اشتراک وجود ندارد')
+            default_page = (
+                CustomGroup.objects.filter(id__in=request.user.groups.values_list('id', flat=True))
+                .exclude(default_page__isnull=True)
+                .first()
+            )
+
+            if default_page and default_page.default_page and default_page.default_page.p_url:  # بررسی وجود صفحه پیش‌فرض
+                print('Redirecting to:', default_page.default_page.p_url)
+                return redirect(default_page.default_page.p_url)  # هدایت به صفحه پیش‌فرض
+
+            raise Http404("شما اجازه دسترسی به این صفحه را ندارید.")
+
+    # اگر کاربر مجاز بود، ادامه دهید
+    # return None

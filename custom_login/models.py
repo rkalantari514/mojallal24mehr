@@ -108,12 +108,12 @@ class MyPage(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, verbose_name='نام')
     v_name = models.CharField(max_length=255, blank=True, null=True, verbose_name='نام ویو')
     p_url = models.CharField(max_length=255, blank=True, null=True, verbose_name='صفحات سایت')
-    allowed_groups = models.ManyToManyField(
-        Group,
-        blank=True,
-        related_name='allowed_pages',
-        verbose_name='گروه‌های مجاز'
-    )
+    # allowed_groups = models.ManyToManyField(
+    #     Group,
+    #     blank=True,
+    #     related_name='allowed_pages',
+    #     verbose_name='گروه‌های مجاز'
+    # )
 
     class Meta:
         verbose_name = 'صفحه سایت'
@@ -122,3 +122,33 @@ class MyPage(models.Model):
     def __str__(self):
         return self.name
 
+
+
+
+from django.contrib.auth.models import Group
+from django.db import models
+
+from django.contrib.auth.models import Group
+from django.db import models
+
+# افزودن فیلد نام فارسی و صفحات مجاز به مدل Group
+class CustomGroup(Group):
+    persian_name = models.CharField(max_length=255, blank=True, null=True, verbose_name='نام فارسی')
+    allowed_pages = models.ManyToManyField(
+        MyPage,
+        blank=True,
+        related_name='allowed_groups',
+        verbose_name='صفحات مجاز'
+    )
+    default_page = models.ForeignKey(
+        MyPage,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='default_for_groups',
+        verbose_name='صفحه پیش‌فرض'
+    )
+
+    class Meta:
+        verbose_name = 'گروه کاربری'
+        verbose_name_plural = 'گروه‌های کاربری'

@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from custom_login.models import UserLog
+from custom_login.views import page_permision
 from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek, Kala
 from persianutils import standardize
 from django.db.models import Max, Subquery
@@ -100,6 +101,10 @@ def load_categories_level3(request):
 
 @login_required(login_url='/login')
 def TotalKala(request, *args, **kwargs):
+    name = 'موجودی کالاها'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
     start_time = time.time()  # زمان شروع تابع
     user=request.user
     if user.mobile_number != '09151006447':
@@ -538,6 +543,10 @@ def DetailKala(request, *args, **kwargs):
 
 @login_required(login_url='/login')
 def CategoryDetail(request, *args, **kwargs):
+    name = 'دسته بندی کالاها'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
     start_time = time.time()  # زمان شروع تابع
     user=request.user
 

@@ -8,7 +8,6 @@ urlpatterns = [
     path('reports/daily/summary', ReportsDailySummary, name="reports-daily-summary"),
     path('reports/daily/detile/<day>', ReportsDailyDetile, name="reports-daily-summary"),
 
-# /reports/daily/summary           /reports/daily/detail (گزارش جزئی روزانه)
 
 
 
