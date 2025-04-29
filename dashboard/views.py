@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
+from custom_login.views import page_permision
 from .models import MasterInfo, MasterReport, MonthlyReport
 from khayyam import JalaliDate
 from django.db.models import OuterRef, Subquery
@@ -623,6 +624,10 @@ def generate_calendar_data_chequesider2(month, year, cheque_recive_data, cheque_
     return days_in_month, max_cheque, month_cheque_data, month_loan_data
 @login_required(login_url='/login')
 def Home1(request, *args, **kwargs):
+    name='داشبورد 1'
+    page_permision(request, name)
+
+
 
     minfo=MasterInfo.objects.filter(is_active=True).last()
     user = request.user

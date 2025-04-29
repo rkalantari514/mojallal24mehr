@@ -1,3 +1,5 @@
+from operator import is_not
+
 from django.contrib.auth import logout
 from mahakupdate.sendtogap import send_to_managers, send_to_admin
 from django.utils import timezone
@@ -5,7 +7,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm, ForgotPasswordForm
-from .models import CustomUser
+from .models import CustomUser, MyPage
 import random
 
 def login_view(request):
@@ -110,3 +112,27 @@ def dashboard_view(request):
         "total_visits": total_visits
     }
     return render(request, 'dashboard.html', context)
+
+
+from django.http import Http404  # برای هدایت به صفحه 404
+
+
+def page_permision(request, name):
+    v_name = request.resolver_match.view_name  # تشخیص خودکار نام ویو
+
+    # به‌روزرسانی یا ایجاد صفحه
+    page, created = MyPage.objects.update_or_create(
+        v_name=v_name,  # شرط برای پیدا کردن رکورد
+        defaults={
+            'name': name,  # فیلدهایی که باید آپدیت شوند
+            'p_url': request.path  # مسیر صفحه
+        }
+    )
+
+    # بررسی دسترسی کاربر
+    if not request.user.is_superuser:  # اگر کاربر superuser نیست
+        user_groups = request.user.groups.all()  # گروه‌های کاربر
+        allowed_groups = page.allowed_groups.all()  # گروه‌های مجاز صفحه
+
+        if not user_groups.intersection(allowed_groups):  # اگر گروه مشترکی وجود ندارد
+            raise Http404("شما اجازه دسترسی به این صفحه را ندارید.")  # هدایت به صفحه 404

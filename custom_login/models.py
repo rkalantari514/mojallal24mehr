@@ -100,3 +100,25 @@ class UserLog(models.Model):
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name}'
+
+
+from django.contrib.auth.models import Group  # برای دسترسی به مدل Group
+
+class MyPage(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True, verbose_name='نام')
+    v_name = models.CharField(max_length=255, blank=True, null=True, verbose_name='نام ویو')
+    p_url = models.CharField(max_length=255, blank=True, null=True, verbose_name='صفحات سایت')
+    allowed_groups = models.ManyToManyField(
+        Group,
+        blank=True,
+        related_name='allowed_pages',
+        verbose_name='گروه‌های مجاز'
+    )
+
+    class Meta:
+        verbose_name = 'صفحه سایت'
+        verbose_name_plural = 'صفحات سایت'
+
+    def __str__(self):
+        return self.name
+

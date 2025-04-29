@@ -16,6 +16,21 @@ class UserLogAdmin(admin.ModelAdmin):
     class Meta:
         model = UserLog
 
+from django.contrib import admin
+from django.forms import CheckboxSelectMultiple
+from .models import MyPage
+
+@admin.register(MyPage)
+class MyPageAdmin(admin.ModelAdmin):
+    list_display = ('name', 'v_name', 'p_url')  # ستون‌های نمایش
+    search_fields = ('name', 'v_name')  # قابلیت جستجو
+    filter_horizontal = ('allowed_groups',)  # حذف این خط چون از فرم چک‌باکس استفاده می‌کنیم
+
+    formfield_overrides = {
+        'allowed_groups': {'widget': CheckboxSelectMultiple},  # تغییر به چک‌باکس
+    }
+
+
 
 
 admin.site.register(UserLog, UserLogAdmin)
