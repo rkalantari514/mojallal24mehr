@@ -24,7 +24,7 @@ from datetime import timedelta, date
 from khayyam import JalaliDate, JalaliDatetime
 from django.db.models import F
 
-from mahakupdate.sendtogap import send_to_admin1
+from mahakupdate.sendtogap import send_to_admin1, send_sms
 
 
 def fix_persian_characters(value):
@@ -1169,6 +1169,9 @@ def HesabMoshtariDetail(request, tafsili):
 
                     # ارسال پیامک
                     response = send_to_admin1(test_message)
+
+
+                    send_sms(user.mobile_number, test_message)
 
                     if response and response.status_code == 200:
                         # پیدا کردن نوع پیگیری "پیامک"

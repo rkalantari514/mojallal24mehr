@@ -1,6 +1,9 @@
 import requests
 import time
 
+from mojallal24mehr.settings import ip_panel_token
+
+
 def send_to_admin(data):
     try:
         myparams = {
@@ -70,3 +73,70 @@ def send_to_managers(mobiles,data):
             print(f'can not send to gap to:{m}')
 
         time.sleep(3)  # برنامه به مدت 5 ثانیه متوقف می‌شود
+
+
+import requests
+
+
+
+# def send_sms(phone_number, message):
+#     url = "https://api2.ippanel.com/api/v1/sms/send"
+#     headers = {
+#         "Authorization": f"Bearer {ip_panel_token}",
+#         "Content-Type": "application/json"
+#     }
+#     data = {
+#         "recipient": phone_number,
+#         "message": message,
+#         "sender": "3000505"
+#     }
+#
+#     response = requests.post(url, json=data, headers=headers)
+#
+#     # بررسی وضعیت درخواست
+#     if response.status_code != 200:
+#         print(f"Error: {response.status_code}, Response: {response.text}")
+#         return None
+#
+#     try:
+#         return response.json()
+#     except requests.exceptions.JSONDecodeError:
+#         print("Error: Invalid JSON response received from API")
+#         return None
+
+
+
+
+
+import requests
+
+import requests
+
+def send_sms(phone_number, message):
+    url = "https://api2.ippanel.com/api/v1/sms/send/webservice/single"
+    headers = {
+        "accept": "application/json",
+        "apikey": ip_panel_token,  # فقط مقدار API Key، بدون "Bearer"
+        "Content-Type": "application/json"
+    }
+    data = {
+        "recipient": [phone_number],
+        "sender": "+983000505",
+        "message": message
+    }
+
+    response = requests.post(url, json=data, headers=headers)
+
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Error: {response.status_code}, Response: {response.text}")
+        return None
+
+
+
+
+
+
+
+
