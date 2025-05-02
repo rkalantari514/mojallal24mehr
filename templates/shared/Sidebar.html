@@ -118,13 +118,14 @@
                         {#                    <li><a href="/acc/1/1/1">تراز آزمایشی </a></li>#}
                         <li><a href="/acc/cheques_recieve_total">چک های دریافتی</a></li>
                     {% endif %}
-                    {% if "categor_ydetail" in allowed_view %}
+                    {% if "cheques-pay-total" in allowed_view %}
                         <li><a href="/acc/cheques_pay_total">چک های پرداختنی</a></li>
                     {% endif %}
-                    {% if "categor_ydetail" in allowed_view %}
+                
+                    {% if "jari-ashkhas-moshtarian" in allowed_view %}
                         <li><a href="/acc/jariashkhas/moshtarian/total">حساب مشتریان</a></li>
                     {% endif %}
-                    {% if "categor_ydetail" in allowed_view %}
+                    {% if "loan-total" in allowed_view %}
                         <li><a href="/acc/loan_total">اقساط معوق</a></li>
                     {% endif %}
                 </ul>
