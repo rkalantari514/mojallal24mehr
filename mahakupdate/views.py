@@ -2881,8 +2881,8 @@ def Cheque_Pay(request):
         if id_mahak in current_cheques:
             cheque = current_cheques[id_mahak]
             # بررسی تغییرات
-            if (cheque.cheque_id != cheque_id_str or cheque.cheque_row != cheque_row or
-                    cheque.issuance_tarik != issuance_tarik or cheque.cheque_tarik != cheque_tarik or
+            if (cheque.cheque_id != cheque_id_str or cheque.cheque_row != cheque_row or cheque.cheque_date != cheque_date or
+                    cheque.issuance_tarik != issuance_tarik or cheque.issuance_date != issuance_date or cheque.cheque_tarik != cheque_tarik or
                     cheque.cost != cost or cheque.bank_code != bank_code or cheque.person != person or
                     cheque.description != description or cheque.status != status or
                     cheque.firstperiod != first_period or cheque.cheque_id_counter != cheque_id_counter or
@@ -2891,7 +2891,9 @@ def Cheque_Pay(request):
                 cheque.cheque_id = cheque_id_str
                 cheque.cheque_row = cheque_row
                 cheque.issuance_tarik = issuance_tarik  # نگهداری تاریخ شمسی
+                cheque.issuance_date = issuance_date  # نگهداری تاریخ شمسی
                 cheque.cheque_tarik = cheque_tarik  # نگهداری تاریخ شمسی
+                cheque.cheque_date = cheque_date
                 cheque.cost = cost
                 cheque.bank_code = bank_code
                 cheque.bank = bank  # تنظیم بانک مرتبط
@@ -2908,9 +2910,8 @@ def Cheque_Pay(request):
         else:
             # ایجاد چک جدید
             cheques_to_create.append(ChequesPay(
-                id_mahak=id_mahak, cheque_id=cheque_id_str, cheque_row=cheque_row,
-                issuance_tarik=issuance_tarik, cheque_tarik=cheque_tarik,
-                issuance_date=issuance_date, cheque_date=cheque_date,
+                id_mahak=id_mahak, cheque_id=cheque_id_str, cheque_row=cheque_row,cheque_date = cheque_date,
+                issuance_tarik=issuance_tarik, cheque_tarik=cheque_tarik, issuance_date=issuance_date,
                 cost=cost, bank_code=bank_code, bank=bank,person=person, description=description,
                 status=status, firstperiod=first_period,
                 cheque_id_counter=cheque_id_counter,
@@ -2928,9 +2929,9 @@ def Cheque_Pay(request):
         print('شروع به آپدیت چک‌های موجود')
         ChequesPay.objects.bulk_update(
             cheques_to_update,
-            ['cheque_id', 'cheque_row', 'issuance_tarik', 'cheque_tarik',
+            ['cheque_id', 'cheque_row', 'issuance_tarik', 'cheque_tarik','issuance_date',
              'cost', 'bank_code', 'bank','person', 'description', 'status', 'firstperiod',
-             'cheque_id_counter', 'per_code', 'recieve_status',
+             'cheque_id_counter', 'per_code', 'recieve_status','cheque_date',
              'total_mandeh', 'last_sanad_detaile'],
             batch_size=BATCH_SIZE
         )
