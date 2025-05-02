@@ -141,12 +141,11 @@ from django.http import Http404
 
 def page_permision(request, name):
     v_name = request.resolver_match.view_name  # تشخیص خودکار نام ویو
-
     # به‌روزرسانی یا ایجاد صفحه با استفاده از نام به‌جای p_url
     page, created = MyPage.objects.update_or_create(
-        name=name,  # استفاده از name به‌عنوان شاخص کلیدی
+        v_name= v_name,
         defaults={
-            'v_name': v_name,
+            'name': name,
             'p_url': request.path  # همچنان ذخیره p_url برای اطلاعات اضافی
         }
     )

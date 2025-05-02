@@ -6,7 +6,7 @@ urlpatterns = [
     path('', Home1,name="home1"),
     path('calendar', CalendarTotal,name="calendar-total"),
     path('reports/daily/summary', ReportsDailySummary, name="reports-daily-summary"),
-    path('reports/daily/detile/<day>', ReportsDailyDetile, name="reports-daily-summary"),
+    path('reports/daily/detile/<day>', ReportsDailyDetile, name="reports-daily-detile"),
 
 
 
