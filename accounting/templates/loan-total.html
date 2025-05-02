@@ -3,7 +3,7 @@
 {% load static %}
 {% block content %}
     {% load jalali_tags %}
-{% load custom_filters %}
+    {% load custom_filters %}
     <style>
         .circle-progress .in .text {
             position: absolute;
@@ -75,14 +75,25 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="d-block">
-                        <h4 class="card-title text-facebook pb-0 border-0">گزارش اقساط معوق</h4>
+                        {% if status == 'overdue' %}
+                            <h4 class="card-title text-facebook pb-0 border-0">گزارش اقساط معوق</h4>
+                        {% endif %}
+                        {% if status == 'soon' %}
+                            <h4 class="card-title text-facebook pb-0 border-0">گزارش اقساط دارای تعجیل</h4>
+                        {% endif %}
                     </div>
 
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
                         <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
-                        <li class="breadcrumb-item active">گزارش اقساط معوق</li>
+                        {% if status == 'overdue' %}
+                            <li class="breadcrumb-item active">گزارش اقساط معوق</li>
+                        {% endif %}
+                        {% if status == 'soon' %}
+                            <li class="breadcrumb-item active">گزارش اقساط دارای تعجیل</li>
+                        {% endif %}
+
 
                     </ol>
                 </div>
@@ -101,7 +112,14 @@
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark">جمع اقساط معوق</p>
+                                    {% if status == 'overdue' %}
+                                        <p class="card-text text-dark">جمع اقساط معوق</p>
+                                    {% endif %}
+                                    {% if status == 'soon' %}
+                                        <p class="card-text text-dark">جمع اقساط دارای تعجیل</p>
+                                    {% endif %}
+
+
                                     <h4>{{ total_delaycost|floatformat:3|intcomma:False }} میلیارد تومان</h4>
                                 </div>
                             </div>
@@ -118,47 +136,54 @@
     </span>
                                 </div>
                                 <div class="float-right text-right">
-                                    <p class="card-text text-dark"> خواب تعویق </p>
+                                    {% if status == 'overdue' %}
+                                        <p class="card-text text-dark"> خواب تعویق </p>
+                                    {% endif %}
+                                    {% if status == 'soon' %}
+                                        <p class="card-text text-dark"> معادل تعجیل </p>
+                                    {% endif %}
+
+
                                     <h4>{{ total_mtday|floatformat:0|intcomma:False }} میلیارد تومان روز</h4>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-{#                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">#}
-{#                    <div class="card card-statistics h-100">#}
-{#                        <div class="card-body">#}
-{#                            <div class="clearfix">#}
-{#                                <div class="float-left icon-box bg-success rounded-circle">#}
-{#    <span class="text-white">#}
-{#    <i class="fa fa-hourglass-start highlight-icon" aria-hidden="true"></i>#}
-{#    </span>#}
-{#                                </div>#}
-{#                                <div class="float-right text-right">#}
-{#                                    <p class="card-text text-dark"> --------------- </p>#}
-{#                                    <h4>{{ total_data.postmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{#                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">#}
-{#                    <div class="card card-statistics h-100">#}
-{#                        <div class="card-body">#}
-{#                            <div class="clearfix">#}
-{#                                <div class="float-left icon-box bg-info rounded-circle">#}
-{#    <span class="text-white">#}
-{#    <i class="fa fa-percent highlight-icon" aria-hidden="true"></i>#}
-{#    </span>#}
-{#                                </div>#}
-{#                                <div class="float-right text-right">#}
-{#                                    <p class="card-text text-dark"> ------------------- </p>#}
-{#                                    <h4>{{ total_data.ceque_ratio|floatformat:2 }}%</h4>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
+                {#                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">#}
+                {#                    <div class="card card-statistics h-100">#}
+                {#                        <div class="card-body">#}
+                {#                            <div class="clearfix">#}
+                {#                                <div class="float-left icon-box bg-success rounded-circle">#}
+                {#    <span class="text-white">#}
+                {#    <i class="fa fa-hourglass-start highlight-icon" aria-hidden="true"></i>#}
+                {#    </span>#}
+                {#                                </div>#}
+                {#                                <div class="float-right text-right">#}
+                {#                                    <p class="card-text text-dark"> --------------- </p>#}
+                {#                                    <h4>{{ total_data.postmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>#}
+                {#                                </div>#}
+                {#                            </div>#}
+                {#                        </div>#}
+                {#                    </div>#}
+                {#                </div>#}
+                {#                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">#}
+                {#                    <div class="card card-statistics h-100">#}
+                {#                        <div class="card-body">#}
+                {#                            <div class="clearfix">#}
+                {#                                <div class="float-left icon-box bg-info rounded-circle">#}
+                {#    <span class="text-white">#}
+                {#    <i class="fa fa-percent highlight-icon" aria-hidden="true"></i>#}
+                {#    </span>#}
+                {#                                </div>#}
+                {#                                <div class="float-right text-right">#}
+                {#                                    <p class="card-text text-dark"> ------------------- </p>#}
+                {#                                    <h4>{{ total_data.ceque_ratio|floatformat:2 }}%</h4>#}
+                {#                                </div>#}
+                {#                            </div>#}
+                {#                        </div>#}
+                {#                    </div>#}
+                {#                </div>#}
             </div>
 
 
@@ -169,9 +194,19 @@
                         <div class="card card-statistics h-100">
                             <div class="card-body">
                                 <div class="table-responsive mt-15 ">
+                                    {% if status == 'overdue' %}
                                     <h6 class="card-title pb-0 border-0">خواب تعویق: <span id="total-mandah"
                                                                                            class="text-primary"></span>
                                         میلیون تومان روز </h6>
+                                {% endif %}
+                                    {% if status == 'soon' %}
+                                        <h6 class="card-title pb-0 border-0">معادل تعجیل: <span id="total-mandah"
+                                                                                                class="text-primary"></span>
+                                            میلیون تومان روز </h6>
+                                    {% endif %}
+
+
+
 
                                     <div class="table-responsive">
                                         <table id="table"
@@ -235,22 +270,52 @@
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-sorter="numericOnly"
                                                     data-field="delaycost" data-footer-formatter="priceFormatter"
-                                                >مبلغ معوق
+                                                >
+                                                    {% if status == 'overdue' %}
+                                        مبلغ معوق
+                                    {% endif %}
+                                    {% if status == 'soon' %}
+                                        مبلغ تعجیل
+                                    {% endif %}
                                                 </th>
 
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-field="from_last_daryaft" >روز از آخرین پرداختی
+                                                    data-field="from_last_daryaft">روز از آخرین پرداختی
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="condiition" data-filter-control="select">وضعیت
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="delay" data-sorter="numericOnly"
-                                                    data-filter-control="select">تاخیر
+                                                    data-filter-control="select">
+                                                    {% if status == 'overdue' %}
+                                        تاخیر
+                                    {% endif %}
+                                    {% if status == 'soon' %}
+                                        تعجیل
+                                    {% endif %}
+
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-sorter="numericOnly" data-footer-formatter="priceFormatter"
-                                                    data-field="mtday">خواب تعویق (میلیون تومان روز)
+                                                    data-field="mtday">
+
+
+                                                    {% if status == 'overdue' %}
+خواب تعویق (میلیون تومان روز)
+                                                    {% endif %}
+                                    {% if status == 'soon' %}
+معادل تعجیل (میلیون تومان روز)
+                                    {% endif %}
+
+
+
+
+
+
+
+
+
                                                 </th>
                                             </tr>
                                             </thead>

@@ -8,7 +8,7 @@ from accounting.views import (
 
 urlpatterns = [
     # Loan-related paths
-    path('acc/loan_total', LoanTotal, name='loan-total'),
+    path('acc/loan_total/<str:status>/', LoanTotal, name='loan-total'),
     path('api/loan-summary/', loan_summary_api, name='loan_summary'),
 
     # Jari Ashkhas Moshtarian paths

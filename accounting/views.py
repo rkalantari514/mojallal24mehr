@@ -1132,7 +1132,7 @@ def HesabMoshtariDetail(request, tafsili):
         return result
     user = request.user
     if user.mobile_number != '09151006447':
-        UserLog.objects.create(user=user, page='حساب مشتری', code=0)
+        UserLog.objects.create(user=user, page='حساب مشتری', code=tafsili)
 
     today = timezone.now().date()
     asnad = SanadDetail.objects.filter(kol=103, moin=1, tafzili=tafsili).order_by('date')
@@ -1218,7 +1218,7 @@ from django.db.models import OuterRef, Subquery
 
 
 @login_required(login_url='/login')
-def LoanTotal(request, *args, **kwargs):
+def LoanTotal(request, status,*args, **kwargs):
     name = 'اقساط معوق'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
@@ -1231,23 +1231,46 @@ def LoanTotal(request, *args, **kwargs):
 
     today = timezone.now().date()
 
-
-    loans = LoanDetil.objects.filter(complete_percent__lt=1, date__lt=today).annotate(
-        category_en=Value("Overdue", CharField()),
-        category_fa=Value("معوق", CharField()),
-        delay_days=(ExpressionWrapper(F("date") - today, output_field=IntegerField())) / -86400000000,
-        mtday=(ExpressionWrapper(
-            (F("delay_days") * F("cost") * (1 - F("complete_percent"))),
-            output_field=DecimalField(max_digits=15, decimal_places=0)) / 10000000
-               ),
-        delaycost=(ExpressionWrapper(
-            (F("cost") * (1 - F("complete_percent"))),
-            output_field=DecimalField(max_digits=15, decimal_places=0))
-        ),
-        from_last_daryaft=Subquery(
-            BedehiMoshtari.objects.filter(person=OuterRef("loan__person")).values('from_last_daryaft')[:1]
+    if status=='overdue':
+        title = 'گزارش اقساط معوق'
+        loans = LoanDetil.objects.filter(complete_percent__lt=1, date__lt=today).annotate(
+            category_en=Value("Overdue", CharField()),
+            category_fa=Value("معوق", CharField()),
+            delay_days=(ExpressionWrapper(F("date") - today, output_field=IntegerField())) / -86400000000,
+            mtday=(ExpressionWrapper(
+                (F("delay_days") * F("cost") * (1 - F("complete_percent"))),
+                output_field=DecimalField(max_digits=15, decimal_places=0)) / 10000000
+                   ),
+            delaycost=(ExpressionWrapper(
+                (F("cost") * (1 - F("complete_percent"))),
+                output_field=DecimalField(max_digits=15, decimal_places=0))
+            ),
+            from_last_daryaft=Subquery(
+                BedehiMoshtari.objects.filter(person=OuterRef("loan__person")).values('from_last_daryaft')[:1]
+            )
         )
-    )
+
+    if status=='soon':
+        title='گزارش اقساط دارای تعجیل'
+        loans = LoanDetil.objects.filter(complete_percent__gt=0, date__gte=today).annotate(
+            category_en=Value("Soon", CharField()),
+            category_fa=Value("تعجیل", CharField()),
+            delay_days=(ExpressionWrapper(F("date") - today, output_field=IntegerField())) / 86400000000,
+            mtday=(ExpressionWrapper(
+                (F("delay_days") * F("cost") * (1 - F("complete_percent"))),
+                output_field=DecimalField(max_digits=15, decimal_places=0)) / 10000000
+                   ),
+            delaycost=(ExpressionWrapper(
+                (F("cost") * (1 - F("complete_percent"))),
+                output_field=DecimalField(max_digits=15, decimal_places=0))
+            ),
+            from_last_daryaft=Subquery(
+                BedehiMoshtari.objects.filter(person=OuterRef("loan__person")).values('from_last_daryaft')[:1]
+            )
+        )
+
+
+
 
     # loans = LoanDetil.objects.filter(complete_percent__lt=1, date__lt=today).annotate(
     #     category_en=Value("Overdue", CharField()),
@@ -1310,12 +1333,13 @@ def LoanTotal(request, *args, **kwargs):
 
 
     context = {
-        'title': 'اقساط ',
+        'title': title,
         'user': user,
         'loans': loans,
         "total_count": loan_stats["total_count"],
         "total_delaycost": loan_stats["total_delaycost"],
         "total_mtday": loan_stats["total_mtday"],
+        'status': status,
 
     }
 
