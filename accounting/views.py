@@ -1242,7 +1242,7 @@ def HesabMoshtariDetail(request, tafsili):
     tracking = Tracking.objects.filter(customer=hesabmoshtari).order_by('-id')
     for t in tracking:
         try:
-            if t.message_id and t.status_code < 2:
+            if t.message_id and t.status_code != 2 and t.status_code != 3 and t.status_code != 4:
                 status_code = check_sms_status(t.message_id)
                 if status_code is not None:  # فقط اگر مقدار معتبر باشد، ذخیره شود
                     t.status_code = status_code

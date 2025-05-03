@@ -184,6 +184,8 @@ def check_sms_status(message_id):
 
         if "data" in data and "deliveries" in data["data"]:
             status_code = data["data"]["deliveries"][0]["status"]
+            print('status_code')
+            print(status_code)
 
             if isinstance(status_code, int):  # بررسی اینکه مقدار عددی است
                 return status_code
