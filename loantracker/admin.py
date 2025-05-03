@@ -24,10 +24,12 @@ class TrackingAdmin(admin.ModelAdmin):
         'customer',
         'track_kind',
         'next_reminder_date',
-        'call_duration'
+        'call_duration',
+        'message_id',
+        'status_code'
     )
     search_fields = ('customer__person', 'track_kind__kind_name',)
-    list_filter = ('created_at', 'track_kind', 'customer',)
+    list_filter = ('created_at', 'track_kind', 'customer','status_code',)
 
     # اضافه کردن فیلدهای فقط خواندنی
     readonly_fields = ('created_at',)

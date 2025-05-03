@@ -48,6 +48,7 @@ class MasterInfo(models.Model):
 
     asnad_daryaftani = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='اسناد دریافتنی')
     asnad_pardakhtani = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='اسناد پرداختنی')
+    ip_panel_token= models.CharField(max_length=255, null=True,verbose_name='توکن پیامک')
 
 
     class Meta:

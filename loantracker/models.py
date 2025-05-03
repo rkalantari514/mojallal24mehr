@@ -36,6 +36,20 @@ from django.db import models
 from django.conf import settings
 from datetime import datetime
 
+STATUS_DETAILS = {
+    2: {"status": "Delivered ✅", "persian": "رسیده به گوشی", "color": "text-success", "icon": "fa-check"},
+    4: {"status": "Discarded ❌", "persian": "رد شد", "color": "text-danger", "icon": "fa-times"},
+    1: {"status": "Pending ⏳", "persian": "در انتظار ارسال", "color": "text-warning", "icon": "fa-clock"},
+    3: {"status": "Failed ❌", "persian": "ناموفق", "color": "text-danger", "icon": "fa-exclamation-triangle"},
+    0: {"status": "Sent 🚀", "persian": "ارسال شد", "color": "text-info", "icon": "fa-paper-plane"}
+}
+
+
+
+
+
+
+
 class Tracking(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ و ساعت انجام")
     created_by = models.ForeignKey(
@@ -59,6 +73,10 @@ class Tracking(models.Model):
         blank=True,
         verbose_name="پیامک نمونه"
     )
+    message_id = models.CharField(blank=True, null=True, max_length=50, verbose_name="شناسه پیامک")
+    status_code = models.IntegerField(blank=True, null=True, verbose_name="کد وضعیت پیامک")
+
+
     class Meta:
         verbose_name = "پیگیری"
         verbose_name_plural = "پیگیری‌ها"
@@ -66,5 +84,9 @@ class Tracking(models.Model):
     def __str__(self):
         return f"{self.customer} - {self.track_kind} ({self.created_at})"
 
+    def get_status_details(self):
+        return STATUS_DETAILS.get(self.status_code,
+                                  {"status": "Unknown", "persian": "نامشخص", "color": "text-secondary",
+                                   "icon": "fa-question"})
 
 from django.db import models

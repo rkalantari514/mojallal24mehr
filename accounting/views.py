@@ -24,7 +24,7 @@ from datetime import timedelta, date
 from khayyam import JalaliDate, JalaliDatetime
 from django.db.models import F
 
-from mahakupdate.sendtogap import send_to_admin1, send_sms
+from mahakupdate.sendtogap import send_to_admin1, send_sms, check_sms_status
 
 
 def fix_persian_characters(value):
@@ -1126,6 +1126,8 @@ from django.shortcuts import render, redirect
 
 @login_required(login_url='/login')
 def HesabMoshtariDetail(request, tafsili):
+    print(check_sms_status(1147299806))
+    print(check_sms_status(1147806950))
     name = 'جزئیات حساب مشتری'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
@@ -1148,32 +1150,69 @@ def HesabMoshtariDetail(request, tafsili):
     if request.method == 'POST':
         action = request.POST.get('action')  # دریافت نام دکمه کلیک شده
 
-        if action == 'send_sms':  # عملیات ارسال پیامک
+        # if action == 'send_sms':  # عملیات ارسال پیامک
+        #     form = SMSTrackingForm(request.POST, customer=hesabmoshtari)
+        #     if form.is_valid():
+        #         phone_number = form.cleaned_data.get('phone_number')  # دریافت شماره تلفن از فرم
+        #         sample_sms = form.cleaned_data.get('sample_sms')  # دریافت پیامک نمونه از فرم
+        #         message = form.cleaned_data.get('message')  # دریافت متن پیامک واردشده توسط کاربر
+        #
+        #         if not sample_sms and not message:
+        #             form.add_error('message', "حداقل یکی از فیلدهای متن پیامک یا پیامک نمونه باید مقدار داشته باشد.")
+        #         else:
+        #             # ترکیب پیامک
+        #             message_to_send = ""
+        #             if sample_sms:
+        #                 message_to_send += sample_sms.text
+        #             if message:
+        #                 message_to_send += f"\n{message}"
+        #
+        #             test_message = f"{phone_number}: {message_to_send}"
+        #
+        #             # ارسال پیامک
+        #             response = send_to_admin1(test_message)
+        #
+        #
+        #             send_sms(user.mobile_number, test_message)
+        #
+        #             if response and response.status_code == 200:
+        #                 # پیدا کردن نوع پیگیری "پیامک"
+        #                 try:
+        #                     track_kind = TrackKinde.objects.get(kind_name="پیامک")
+        #                 except TrackKinde.DoesNotExist:
+        #                     track_kind = None
+        #                     form.add_error(None, "نوع پیگیری 'پیامک' در سیستم وجود ندارد.")
+        #
+        #                 if track_kind:
+        #                     tracking = form.save(commit=False)
+        #                     tracking.customer = hesabmoshtari
+        #                     tracking.message_to_send = message_to_send
+        #                     tracking.created_by = user if user.is_authenticated else None
+        #                     tracking.track_kind = track_kind  # مقدار نوع پیگیری
+        #                     tracking.save()
+        #
+        #                 return redirect(f'/acc/jariashkhas/moshtari/{tafsili}')  # هدایت به صفحه مناسب
+        #
+        #             else:
+        #                 form.add_error('phone_number', "ارسال پیامک موفقیت‌آمیز نبود. لطفاً دوباره تلاش کنید.")
+        if action == 'send_sms':
             form = SMSTrackingForm(request.POST, customer=hesabmoshtari)
             if form.is_valid():
-                phone_number = form.cleaned_data.get('phone_number')  # دریافت شماره تلفن از فرم
-                sample_sms = form.cleaned_data.get('sample_sms')  # دریافت پیامک نمونه از فرم
-                message = form.cleaned_data.get('message')  # دریافت متن پیامک واردشده توسط کاربر
+                phone_number = form.cleaned_data.get('phone_number')
+                sample_sms = form.cleaned_data.get('sample_sms')
+                message = form.cleaned_data.get('message')
 
                 if not sample_sms and not message:
                     form.add_error('message', "حداقل یکی از فیلدهای متن پیامک یا پیامک نمونه باید مقدار داشته باشد.")
                 else:
-                    # ترکیب پیامک
-                    message_to_send = ""
-                    if sample_sms:
-                        message_to_send += sample_sms.text
+                    message_to_send = sample_sms.text if sample_sms else ""
                     if message:
                         message_to_send += f"\n{message}"
 
-                    test_message = f"{phone_number}: {message_to_send}"
+                    # ارسال پیامک و دریافت `message_id`
+                    message_id = send_sms(user.mobile_number, message_to_send)
 
-                    # ارسال پیامک
-                    response = send_to_admin1(test_message)
-
-
-                    send_sms(user.mobile_number, test_message)
-
-                    if response and response.status_code == 200:
+                    if message_id:
                         # پیدا کردن نوع پیگیری "پیامک"
                         try:
                             track_kind = TrackKinde.objects.get(kind_name="پیامک")
@@ -1186,7 +1225,8 @@ def HesabMoshtariDetail(request, tafsili):
                             tracking.customer = hesabmoshtari
                             tracking.message_to_send = message_to_send
                             tracking.created_by = user if user.is_authenticated else None
-                            tracking.track_kind = track_kind  # مقدار نوع پیگیری
+                            tracking.track_kind = track_kind
+                            tracking.message_id = message_id  # ⬅️ ذخیره `message_id`
                             tracking.save()
 
                         return redirect(f'/acc/jariashkhas/moshtari/{tafsili}')  # هدایت به صفحه مناسب
@@ -1199,7 +1239,16 @@ def HesabMoshtariDetail(request, tafsili):
     else:
         form = SMSTrackingForm(customer=hesabmoshtari)  # نمایش فرم خالی
 
-    tracking=Tracking.objects.filter(customer=hesabmoshtari).order_by('-id')
+    tracking = Tracking.objects.filter(customer=hesabmoshtari).order_by('-id')
+    for t in tracking:
+        try:
+            if t.message_id and t.status_code < 2:
+                status_code = check_sms_status(t.message_id)
+                if status_code is not None:  # فقط اگر مقدار معتبر باشد، ذخیره شود
+                    t.status_code = status_code
+                    t.save()
+        except:
+            pass
 
     context = {
         'title': 'حساب مشتری',

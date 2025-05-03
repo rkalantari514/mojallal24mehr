@@ -1,7 +1,9 @@
 import requests
 import time
 
-from mojallal24mehr.settings import ip_panel_token
+from django.utils.translation.trans_null import activate
+
+from dashboard.models import MasterInfo
 
 
 def send_to_admin(data):
@@ -106,7 +108,34 @@ import requests
 
 
 
+ip_panel_token=MasterInfo.objects.filter(is_active=True).last().ip_panel_token
 
+import requests
+
+import requests
+
+# def send_sms(phone_number, message):
+#     url = "https://api2.ippanel.com/api/v1/sms/send/webservice/single"
+#     headers = {
+#         "accept": "application/json",
+#         "apikey": ip_panel_token,  # فقط مقدار API Key، بدون "Bearer"
+#         "Content-Type": "application/json"
+#     }
+#     data = {
+#         "recipient": [phone_number],
+#         "sender": "+983000505",
+#         "message": message
+#     }
+#
+#     response = requests.post(url, json=data, headers=headers)
+#     print('response')
+#     print(response.json())
+#
+#     if response.status_code == 200:
+#         return response.json()
+#     else:
+#         print(f"Error: {response.status_code}, Response: {response.text}")
+#         return None
 
 import requests
 
@@ -116,7 +145,7 @@ def send_sms(phone_number, message):
     url = "https://api2.ippanel.com/api/v1/sms/send/webservice/single"
     headers = {
         "accept": "application/json",
-        "apikey": ip_panel_token,  # فقط مقدار API Key، بدون "Bearer"
+        "apikey": ip_panel_token,
         "Content-Type": "application/json"
     }
     data = {
@@ -128,15 +157,41 @@ def send_sms(phone_number, message):
     response = requests.post(url, json=data, headers=headers)
 
     if response.status_code == 200:
-        return response.json()
+        response_data = response.json()
+        return response_data.get("data", {}).get("message_id", None)  # بازگرداندن `message_id`
     else:
         print(f"Error: {response.status_code}, Response: {response.text}")
         return None
 
 
 
+import requests
 
 
+import requests
+
+def check_sms_status(message_id):
+    url = f"https://api2.ippanel.com/api/v1/sms/message/show-recipient/message-id/{message_id}?page=1&per_page=10"
+    headers = {
+        "accept": "application/json",
+        "apikey": ip_panel_token  # فقط مقدار API Key
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+
+        if "data" in data and "deliveries" in data["data"]:
+            status_code = data["data"]["deliveries"][0]["status"]
+
+            if isinstance(status_code, int):  # بررسی اینکه مقدار عددی است
+                return status_code
+
+        return None  # مقدار `None` برمی‌گرداند تا ذخیره نشود
+    else:
+        print(f"Error: {response.status_code}, Response: {response.text}")
+        return None  # مقدار `None` به جای متن خطا برمی‌گردد
 
 
 

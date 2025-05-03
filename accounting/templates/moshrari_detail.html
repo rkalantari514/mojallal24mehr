@@ -171,7 +171,7 @@
             </div>
 
 
-            <!-- ردیف پیگیری اقساط -->
+            <!-- ردیف پیگیری پیگیری -->
             <div class="row">
                 <div class="col-xl-4 mb-30">
                     <div class="card card-statistics h-100">
@@ -234,7 +234,13 @@
                     </div>
                 </div>
 
-                <div class="col-xl-8 mb-30">
+            </div>
+
+
+            <!-- ردیف گزارش اقساط -->
+            <div class="row">
+
+                <div class="col-xl-12 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="card-body">
                             <h5 class="card-title pb-0 border-0">آخرین پیگیری ها </h5>
@@ -247,11 +253,12 @@
                                             <th>ردیف</th>
                                             <th>اقدم کننده</th>
                                             <th>نوع</th>
+                                            <th>وضعیت</th>
                                             <th>زمان</th>
                                             <th>سطح</th>
                                             <th>پیام ارسالی</th>
                                             <th>تلفن</th>
-{#                                            <th></th>#}
+                                            {#                                            <th></th>#}
 
                                         </tr>
                                         </thead>
@@ -264,13 +271,19 @@
                                                 <td>
                                                     <i class="fa {{ t.track_kind.kind_icon }} text-{{ t.track_kind.kind_color }} fa-2x"></i>
                                                 </td>
+                                                <td>
+                                                <span class="{{ t.get_status_details.color }}">
+                                                    <i class="fa {{ t.get_status_details.icon }}"></i>
+                                                    {{ t.get_status_details.persian }}
+                                                </span>
+                                                </td>
                                                 <td>{{ t.created_at }}</td>
                                                 <td>{{ t.sample_sms.level }}</td>
                                                 <td>{{ t.message_to_send }}</td>
                                                 <td>{{ t.phone_number }}</td>
                                                 {#                    <td><label class="badge badge-success">Approved</label></td>#}
                                                 {#                    <td><a href="#" class="btn btn-outline-success btn-sm">View Order</a></td>#}
-{#                                                <td><a href="#" class="btn btn-outline-warning btn-sm">Cancel</a></td>#}
+                                                {#                                                <td><a href="#" class="btn btn-outline-warning btn-sm">Cancel</a></td>#}
                                             </tr>
                                         {% endfor %}
 
@@ -283,8 +296,6 @@
 
                 </div>
             </div>
-
-
 
 
             <!-- ردیف جزئیات اسناد -->
