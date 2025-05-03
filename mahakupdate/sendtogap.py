@@ -171,6 +171,7 @@ import requests
 import requests
 
 def check_sms_status(message_id):
+    print('message_id',message_id)
     url = f"https://api2.ippanel.com/api/v1/sms/message/show-recipient/message-id/{message_id}?page=1&per_page=10"
     headers = {
         "accept": "application/json",
@@ -178,7 +179,9 @@ def check_sms_status(message_id):
     }
 
     response = requests.get(url, headers=headers)
-
+    print('response.json()')
+    print(response.json())
+    print('++++++++++++++++')
     if response.status_code == 200:
         data = response.json()
 

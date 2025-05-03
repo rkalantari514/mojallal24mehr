@@ -1127,7 +1127,7 @@ from django.shortcuts import render, redirect
 @login_required(login_url='/login')
 def HesabMoshtariDetail(request, tafsili):
     print(check_sms_status(1147299806))
-    print(check_sms_status(1147806950))
+    # print(check_sms_status(1147867789))
     name = 'جزئیات حساب مشتری'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
@@ -1144,7 +1144,8 @@ def HesabMoshtariDetail(request, tafsili):
 
     if hesabmoshtari:
         full_name = f'{hesabmoshtari.person.name} {hesabmoshtari.person.lname}'
-        cleaned_name = re.split(r"[a-zA-Z-$]|قسط", full_name, maxsplit=1)[0].strip()
+        # cleaned_name = re.split(r"[a-zA-Z-$]|قسط", full_name, maxsplit=1)[0].strip()
+        cleaned_name = re.split(r"[a-zA-Z-$/]|قسط", full_name, maxsplit=1)[0].strip()
         m_name = cleaned_name
 
     if request.method == 'POST':
