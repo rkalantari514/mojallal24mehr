@@ -1206,7 +1206,9 @@ def HesabMoshtariDetail(request, tafsili):
                 if not sample_sms and not message:
                     form.add_error('message', "حداقل یکی از فیلدهای متن پیامک یا پیامک نمونه باید مقدار داشته باشد.")
                 else:
-                    message_to_send = sample_sms.text if sample_sms else ""
+                    message_to_send='مشتری گرامی'
+                    message_to_send += f"\n{m_name}"
+                    message_to_send += sample_sms.text if sample_sms else ""
                     if message:
                         message_to_send += f"\n{message}"
 
