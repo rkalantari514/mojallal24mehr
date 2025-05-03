@@ -277,7 +277,8 @@
                                                     {{ t.get_status_details.persian }}
                                                 </span>
                                                 </td>
-                                                <td>{{ t.created_at }}</td>
+
+                                                <td>    {{ t.created_at|to_jalali:"%Y/%m/%d - %H:%M" }}</td>
                                                 <td>{{ t.sample_sms.level }}</td>
                                                 <td>{{ t.message_to_send }}</td>
                                                 <td>{{ t.phone_number }}</td>
