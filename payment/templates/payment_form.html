@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>پرداخت</title>
+</head>
+<body>
+    <h2>پرداخت آنلاین</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label for="amount">مبلغ (ریال):</label>
+        <input type="number" name="amount" required>
+        <button type="submit">پرداخت</button>
+    </form>
+</body>
+</html>

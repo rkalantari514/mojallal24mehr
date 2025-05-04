@@ -32,6 +32,7 @@ urlpatterns = [
     path('', include('dashkala.urls')),
     path('', include('custom_login.urls')),
     path('', include('accounting.urls')),
+    path('', include('payment.urls')),
 
     path('update-dark-mode/', update_dark_mode, name='update_dark_mode'),
 

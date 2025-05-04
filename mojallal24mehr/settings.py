@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'custom_login',
     'accounting',
     'loantracker',
+    'payment',
 
 ]
 
@@ -237,3 +238,13 @@ AUTH_GROUP_MODEL = 'custom_login.CustomGroup'
 # ip_panel_token='mXNpJ1zIFb-dAzt02O94tQ11tOTkc9H9NDwfwB6_1xE='
 
 USE_THOUSAND_SEPARATOR = True
+
+
+BEHPARDAKHT_TERMINAL_ID = 7031741
+BEHPARDAKHT_USERNAME = "abcuser"
+BEHPARDAKHT_PASSWORD = "123890"
+BEHPARDAKHT_MERCHANT_ID = "MERCHANT_ID"
+
+
+# شماره پذیرنده: 2964432
+# شماره ترمینال: 7031741

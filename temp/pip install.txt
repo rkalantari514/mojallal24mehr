@@ -21,6 +21,7 @@ pip install setuptools
 
 pip install dash pandas plotly
 pip install python-dateutil
+pip install requests
 
 
 pip install django-pwa django-service-worker
