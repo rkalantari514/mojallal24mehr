@@ -285,6 +285,12 @@
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="condiition" data-filter-control="select">وضعیت
                                                 </th>
+                                                 <th class="card-text text-center" data-sortable="true"
+                                                    data-field="last_tracks" >آخرین پیگیری
+                                                </th>
+                                            <th class="card-text text-center" data-sortable="true"
+                                                    data-field="last_tracks_status" data-filter-control="select">وضعیت پیامک
+                                                </th>
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="delay" data-sorter="numericOnly"
                                                     data-filter-control="select">
@@ -346,6 +352,15 @@
                                                     <td class="card-text text-center">{{ l.delaycost|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ l.from_last_daryaft|default_if_none:'' }}</td>
                                                     <td class="card-text text-center">{{ l.category_fa }}</td>
+                                                    <td class="card-text text-center">
+                                                        {{ l.last_tracks.created_at|timesince }}
+                                                        </td>
+                                                    <td class="card-text text-center">
+                                                    <span class="{{ l.last_tracks.get_status_details.color }}">
+                                                    <i class="fa {{ l.last_tracks.get_status_details.icon }}"></i>
+                                                    {{ l.last_tracks.get_status_details.persian }}
+                                                </span>
+                                                    </td>
                                                     <td class="card-text text-center">{{ l.delay_days }} </td>
                                                     <td class="card-text text-center">{{ l.mtday|floatformat:0|intcomma:False }} </td>
                                                 </tr>

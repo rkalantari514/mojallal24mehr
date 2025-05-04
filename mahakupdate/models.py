@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from django.db.models import Sum, Min
 
 
+
 # Create your models here.
 
 
@@ -754,3 +755,8 @@ class LoanDetil(models.Model):
 
     def __str__(self):
         return f"{self.code} - {self.tarikh}"
+
+
+    def last_tracks(self):
+        from loantracker.models import Tracking
+        return Tracking.objects.filter(customer__person=self.loan.person).last() or None
