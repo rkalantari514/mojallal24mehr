@@ -1212,6 +1212,7 @@ def HesabMoshtariDetail(request, tafsili):
 
                     # ارسال پیامک و دریافت `message_id`
                     message_id = send_sms(user.mobile_number, message_to_send)
+                    # message_id = send_sms(phone_number, message_to_send)
 
                     if message_id:
                         # پیدا کردن نوع پیگیری "پیامک"

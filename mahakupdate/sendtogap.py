@@ -150,7 +150,8 @@ def send_sms(phone_number, message):
     }
     data = {
         "recipient": [phone_number],
-        "sender": "+983000505",
+        # "sender": "+983000505",
+        "sender": "+9890002741",
         "message": message
     }
 
