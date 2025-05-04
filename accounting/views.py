@@ -1126,8 +1126,6 @@ from django.shortcuts import render, redirect
 
 @login_required(login_url='/login')
 def HesabMoshtariDetail(request, tafsili):
-    print(check_sms_status(1147299806))
-    # print(check_sms_status(1147867789))
     name = 'جزئیات حساب مشتری'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
@@ -1385,7 +1383,28 @@ def LoanTotal(request, status,*args, **kwargs):
         day_report.total_mtday = loan_stats["total_mtday"]
         day_report.save()
 
+    from django.db.models import Q
 
+    # فیلتر کردن مواردی که نیاز به بررسی دارند
+    tracking = Tracking.objects.filter(
+        Q(message_id__isnull=False) &
+        ~Q(status_code__in=[2, 3, 4])
+    )
+
+    updated_objects = []
+
+    for t in tracking:
+        try:
+            status_code = check_sms_status(t.message_id)
+            if status_code is not None:  # فقط اگر مقدار معتبر باشد، ذخیره شود
+                t.status_code = status_code
+                updated_objects.append(t)  # جمع‌آوری موارد برای به‌روزرسانی دسته‌ای
+        except Exception as e:
+            print(f"خطا در پردازش {t.id}: {e}")  # مدیریت خطا برای اشکال‌زدایی
+
+    # به‌روزرسانی دسته‌ای برای بهبود عملکرد
+    if updated_objects:
+        Tracking.objects.bulk_update(updated_objects, ["status_code"])
 
     context = {
         'title': title,
