@@ -173,27 +173,30 @@
 
             <!-- ردیف پیگیری پیگیری -->
             <div class="row">
+                <!-- ردیف پیامک -->
                 <div class="col-xl-4 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="p-4 text-center bg-success">
-                            <h5 class="mb-60 text-white">{{ m_name }} </h5>
-                            {#                <div class="btn-group info-drop">#}
-                            {#                  <button type="button" class="dropdown-toggle-split text-white" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="ti-more"></i></button>#}
-                            {#                  <div class="dropdown-menu">#}
-                            {#                    <a class="dropdown-item" href="#"><i class="text-primary ti-files"></i> اضافه کردن کار</a>#}
-                            {#                    <a class="dropdown-item" href="#"><i class="text-dark ti-pencil-alt"></i> ویرایش مشخصات</a>#}
-                            {#                    <a class="dropdown-item" href="#"><i class="text-success ti-user"></i> نمایش مشخصات</a>#}
-                            {#                    <a class="dropdown-item" href="#"><i class="text-secondary ti-info"></i> اطلاعات تماس</a>#}
-                            {#                  </div>#}
-                            {#                </div>#}
+                            <h5 class="mb-60 text-white"> </h5>
                         </div>
                         <div class="card-body text-center">
                             <div class="avatar-top">
                                 <img class="img-fluid w-25 rounded-circle " src="{% static 'images/noimage.png' %}"
                                      alt="">
                             </div>
-                            <p class="mt-30">{{ hesabmoshtari.person.address }}</p>
-                            <p class="mt-10">-</p>
+                            <h5 class="card-title text-facebook pb-0 border-0">{{ m_name }}</h5>
+                                <div class="card-body">
+                                    <div class="clearfix">
+                                        <div class="float-left icon-box bg-success rounded-circle">
+                  <span class="text-white">
+                    <i class="fa fa-envelope highlight-icon" aria-hidden="true"></i>
+                  </span>
+                                        </div>
+                                        <div class="float-right text-right">
+                                            <h4>پیگیری پیامکی</h4>
+                                        </div>
+                                    </div>
+                                </div>
 
                             <div class="social-icons color-icon mt-20">
                                 <ul>
@@ -209,8 +212,8 @@
                             </div>
                             <form method="POST">
                                 {% csrf_token %}
-                                {{ form.as_p }}
-                                <button type="submit" name="action" value="send_sms" class="btn btn-primary">ارسال پیامک
+                                {{ sms_form.as_p }}
+                                <button type="submit" name="action" value="send_sms" class="btn btn-success">ارسال پیامک
                                 </button>
                             </form>
 
@@ -233,7 +236,72 @@
                         </div>
                     </div>
                 </div>
+                <!-- ردیف تلفن -->
+                <div class="col-xl-4 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="p-4 text-center bg-primary">
+                            <h5 class="mb-60 text-white"> </h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="avatar-top">
+                                <img class="img-fluid w-25 rounded-circle " src="{% static 'images/noimage.png' %}"
+                                     alt="">
+                            </div>
+                            <h5 class="card-title text-facebook pb-0 border-0">{{ m_name }}</h5>
+                                <div class="card-body">
+                                    <div class="clearfix">
+                                        <div class="float-left icon-box bg-primary rounded-circle">
+                  <span class="text-white">
+                    <i class="fa fa-phone highlight-icon" aria-hidden="true"></i>
+                  </span>
+                                        </div>
+                                        <div class="float-right text-right">
+                                            <h4>پیگیری تلفنی</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            <div class="social-icons color-icon mt-20">
+                                <ul>
+                                    {% if gh in hesabmoshtari.person %}
+                                        <li class="social-rss"><a href="#"><i class="fa fa-rss"></i></a></li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            <form method="POST">
+                                {% csrf_token %}
 
+                                <!-- شماره تلفن -->
+                                <label for="id_phone_number">شماره تلفن:</label>
+                                {{ call_form.phone_number }}
+
+                                <!-- دکمه شروع تماس (درست بعد از شماره تلفن) -->
+                                <button type="button" id="start_call" class="btn btn-success mt-3">شروع تماس (0s)
+                                </button>
+                                <!-- دکمه انصراف -->
+                                <button type="button" id="cancel_call" class="btn btn-secondary mt-3">انصراف تماس
+                                </button>
+                                <br>
+                                <br>
+                                <!-- سایر فیلدهای فرم -->
+                                <label for="id_call_status">وضعیت تماس:</label>
+                                {{ call_form.call_status }}
+
+                                <label for="id_call_description">شرح تماس:</label>
+                                {{ call_form.call_description }}
+
+                                <label for="id_next_reminder_date">زمان پیگیری بعدی:</label>
+                                {{ call_form.next_reminder_date }}
+
+                                <input type="hidden" id="call_duration" name="call_duration" value="0">
+
+                                <button type="submit" name="action" value="track_call" class="btn btn-primary mt-3">ثبت
+                                    گزارش تماس
+                                </button>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
             </div>
 
 
@@ -427,6 +495,48 @@
 
 
 {% block myjs %}
+    <script>
+        document.getElementById("start_call").addEventListener("click", function () {
+            let button = this;
+
+            if (button.classList.contains("btn-success")) {
+                button.textContent = "پایان تماس (0s)";
+                button.classList.remove("btn-success");
+                button.classList.add("btn-danger");
+
+                let counter = 0;
+                let timer = setInterval(() => {
+                    counter++;
+                    document.getElementById("call_duration").value = counter;
+                    button.textContent = `پایان تماس (${counter}s)`; // 🔹 نمایش ثانیه داخل دکمه
+                }, 1000);
+
+                button.setAttribute("data-timer", timer);
+
+                let phoneNumber = document.getElementById("id_phone_number").value;
+                window.location.href = `tel:${phoneNumber}`;
+
+            } else {
+                clearInterval(button.getAttribute("data-timer"));
+                button.classList.remove("btn-danger");
+                button.classList.add("btn-secondary");
+                button.textContent = `تماس پایان یافت (${document.getElementById("call_duration").value}s)`;
+            }
+        });
+
+        // 🛠 دکمه انصراف -> تنظیم زمان تماس به صفر و پاک کردن شرح تماس
+        document.getElementById("cancel_call").addEventListener("click", function () {
+            clearInterval(document.getElementById("start_call").getAttribute("data-timer"));
+            document.getElementById("call_duration").value = "0";
+            document.getElementById("start_call").textContent = "شروع تماس (0s)";
+            document.getElementById("start_call").classList.remove("btn-danger", "btn-secondary");
+            document.getElementById("start_call").classList.add("btn-success");
+
+            // پاک کردن متن شرح تماس
+            document.getElementById("id_call_description").value = "";
+        });
+    </script>
+
 
 
 {% endblock %}

@@ -16,7 +16,7 @@ from custom_login.models import UserLog
 from custom_login.views import page_permision
 from dashboard.models import MasterInfo, MasterReport
 from dashboard.views import generate_calendar_data_cheque
-from loantracker.forms import SMSTrackingForm
+from loantracker.forms import SMSTrackingForm, CallTrackingForm
 from loantracker.models import TrackKinde, Tracking
 from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan, LoanDetil
 from jdatetime import date as jdate
@@ -1126,6 +1126,8 @@ from django.shortcuts import render, redirect
 
 @login_required(login_url='/login')
 def HesabMoshtariDetail(request, tafsili):
+    start_time = time.time()  # زمان شروع تابع
+
     name = 'جزئیات حساب مشتری'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
@@ -1148,54 +1150,12 @@ def HesabMoshtariDetail(request, tafsili):
 
     if request.method == 'POST':
         action = request.POST.get('action')  # دریافت نام دکمه کلیک شده
+        print('action',action)
 
-        # if action == 'send_sms':  # عملیات ارسال پیامک
-        #     form = SMSTrackingForm(request.POST, customer=hesabmoshtari)
-        #     if form.is_valid():
-        #         phone_number = form.cleaned_data.get('phone_number')  # دریافت شماره تلفن از فرم
-        #         sample_sms = form.cleaned_data.get('sample_sms')  # دریافت پیامک نمونه از فرم
-        #         message = form.cleaned_data.get('message')  # دریافت متن پیامک واردشده توسط کاربر
-        #
-        #         if not sample_sms and not message:
-        #             form.add_error('message', "حداقل یکی از فیلدهای متن پیامک یا پیامک نمونه باید مقدار داشته باشد.")
-        #         else:
-        #             # ترکیب پیامک
-        #             message_to_send = ""
-        #             if sample_sms:
-        #                 message_to_send += sample_sms.text
-        #             if message:
-        #                 message_to_send += f"\n{message}"
-        #
-        #             test_message = f"{phone_number}: {message_to_send}"
-        #
-        #             # ارسال پیامک
-        #             response = send_to_admin1(test_message)
-        #
-        #
-        #             send_sms(user.mobile_number, test_message)
-        #
-        #             if response and response.status_code == 200:
-        #                 # پیدا کردن نوع پیگیری "پیامک"
-        #                 try:
-        #                     track_kind = TrackKinde.objects.get(kind_name="پیامک")
-        #                 except TrackKinde.DoesNotExist:
-        #                     track_kind = None
-        #                     form.add_error(None, "نوع پیگیری 'پیامک' در سیستم وجود ندارد.")
-        #
-        #                 if track_kind:
-        #                     tracking = form.save(commit=False)
-        #                     tracking.customer = hesabmoshtari
-        #                     tracking.message_to_send = message_to_send
-        #                     tracking.created_by = user if user.is_authenticated else None
-        #                     tracking.track_kind = track_kind  # مقدار نوع پیگیری
-        #                     tracking.save()
-        #
-        #                 return redirect(f'/acc/jariashkhas/moshtari/{tafsili}')  # هدایت به صفحه مناسب
-        #
-        #             else:
-        #                 form.add_error('phone_number', "ارسال پیامک موفقیت‌آمیز نبود. لطفاً دوباره تلاش کنید.")
         if action == 'send_sms':
             form = SMSTrackingForm(request.POST, customer=hesabmoshtari)
+            print('پیامک/////////////////////////1')
+
             if form.is_valid():
                 phone_number = form.cleaned_data.get('phone_number')
                 sample_sms = form.cleaned_data.get('sample_sms')
@@ -1218,6 +1178,8 @@ def HesabMoshtariDetail(request, tafsili):
                         # پیدا کردن نوع پیگیری "پیامک"
                         try:
                             track_kind = TrackKinde.objects.get(kind_name="پیامک")
+                            print('تماس پیامک/////////////////////////2')
+
                         except TrackKinde.DoesNotExist:
                             track_kind = None
                             form.add_error(None, "نوع پیگیری 'پیامک' در سیستم وجود ندارد.")
@@ -1236,11 +1198,47 @@ def HesabMoshtariDetail(request, tafsili):
                     else:
                         form.add_error('phone_number', "ارسال پیامک موفقیت‌آمیز نبود. لطفاً دوباره تلاش کنید.")
 
-        elif action == 'other_action':  # عملیات دیگر
-            pass
-    else:
-        form = SMSTrackingForm(customer=hesabmoshtari)  # نمایش فرم خالی
 
+        elif action == 'track_call':
+            print('تماس تلفنی/////////////////////////0')
+            form = CallTrackingForm(request.POST, customer=hesabmoshtari)
+            if form.is_valid():
+                print('تماس تلفنی/////////////////////////1')
+                try:
+                    track_kind = TrackKinde.objects.get(kind_name="تماس تلفنی")
+                    print('تماس تلفنی/////////////////////////2')
+                except TrackKinde.DoesNotExist:
+                    print('تماس تلفنی/////////////////////////3')
+                    track_kind = None
+                    form.add_error(None, "نوع پیگیری 'تماس تلفنی' در سیستم وجود ندارد.")
+
+                if track_kind:
+                    print('تماس تلفنی/////////////////////////4')
+                    tracking = form.save(commit=False)
+                    tracking.customer = hesabmoshtari
+                    tracking.track_kind = track_kind
+                    tracking.created_by = request.user
+                    tracking.call_duration = int(request.POST.get('call_duration', 0))  # ذخیره مدت تماس
+                    tracking.phone_number = form.cleaned_data.get('phone_number')
+                    # 🔹 محاسبه زمان یادآوری بعدی
+
+                    tracking.next_reminder_date = form.cleaned_data['next_reminder_date']
+
+                    tracking.save()
+
+                return redirect(f'/acc/jariashkhas/moshtari/{tafsili}')
+            else:
+                print('form call not valiid')
+                print(form.errors)  # 🔎 مشاهده خطاهای فرم
+
+
+    else:
+        sms_form = SMSTrackingForm(customer=hesabmoshtari)
+        call_form = CallTrackingForm(customer=hesabmoshtari)
+
+
+    sms_form = SMSTrackingForm(customer=hesabmoshtari)
+    call_form = CallTrackingForm(customer=hesabmoshtari)
     tracking = Tracking.objects.filter(customer=hesabmoshtari).order_by('-id')
     for t in tracking:
         try:
@@ -1259,10 +1257,11 @@ def HesabMoshtariDetail(request, tafsili):
         'today': today,
         'asnad': asnad,
         'm_name': m_name,
-        'form': form,  # ارسال فرم به قالب
-        'tracking': tracking,  # ارسال فرم به قالب
+        'sms_form': sms_form,  # ارسال فرم به قالب
+        'call_form': call_form,  # ارسال فرم به قالب
+        'tracking': tracking,
     }
-
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
     return render(request, 'moshrari_detail.html', context)
 
 from django.utils import timezone

@@ -11,6 +11,8 @@ class TrackKinde(models.Model):
     kind_name = models.CharField(blank=True, null=True,max_length=150, verbose_name='نوع پیگیری')
     kind_icon = models.CharField(blank=True, null=True,max_length=150, verbose_name='آیکون نوع پیگیری')
     kind_color = models.CharField(blank=True, null=True,max_length=150, verbose_name='رنگ نوع پیگیری')
+    is_call_related = models.BooleanField(default=False, verbose_name="مربوط به تماس تلفنی")
+    call_statuses = models.JSONField(blank=True, null=True, verbose_name="وضعیت‌های ممکن تماس")
 
     class Meta:
         verbose_name = 'نوع پیگیری'
@@ -44,8 +46,11 @@ STATUS_DETAILS = {
     0: {"status": "Sent 🚀", "persian": "ارسال شد", "color": "text-info", "icon": "fa-paper-plane"}
 }
 
-
-
+CALL_STATUS = {
+    2: {"status": "Successful Call ✅", "persian": "برقراری تماس موفق", "color": "text-success", "icon": "fa-check"},
+    1: {"status": "No Answer ⏳", "persian": "عدم پاسخگویی", "color": "text-warning", "icon": "fa-clock"},
+    0: {"status": "Wrong Number ❌", "persian": "شماره اشتباه", "color": "text-danger", "icon": "fa-times"},
+}
 
 
 
@@ -75,6 +80,15 @@ class Tracking(models.Model):
     )
     message_id = models.CharField(blank=True, null=True, max_length=50, verbose_name="شناسه پیامک")
     status_code = models.IntegerField(blank=True, null=True, verbose_name="کد وضعیت پیامک")
+
+    call_status = models.IntegerField(
+        blank=True,
+        null=True,
+        choices=[(key, value["persian"]) for key, value in CALL_STATUS.items()],
+        verbose_name="وضعیت تماس"
+    )
+    call_description = models.TextField(blank=True, null=True, verbose_name="شرح تماس")
+
 
 
     class Meta:
