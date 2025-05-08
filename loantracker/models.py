@@ -1,7 +1,9 @@
 from django.db import models
 
 from accounting.models import BedehiMoshtari
-
+from django.db import models
+from django.conf import settings
+from datetime import datetime
 
 # Create your models here.
 
@@ -34,9 +36,7 @@ class SampleSMS(models.Model):
     def __str__(self):
         return f"{self.level} : {self.text[:150]} "  # نمایش متن پیامک و سطح آن
 
-from django.db import models
-from django.conf import settings
-from datetime import datetime
+
 
 STATUS_DETAILS = {
     2: {"status": "Delivered ✅", "persian": "رسیده به گوشی", "color": "text-success", "icon": "fa-check"},
@@ -50,7 +50,7 @@ CALL_STATUS = {
     2: {"status": "Successful Call ✅", "persian": "برقراری تماس موفق", "color": "text-success", "icon": "fa-check"},
     1: {"status": "No Answer ⏳", "persian": "عدم پاسخگویی", "color": "text-warning", "icon": "fa-clock"},
     0: {"status": "Wrong Number ❌", "persian": "شماره اشتباه", "color": "text-danger", "icon": "fa-times"},
-}
+    4: {"status": "Reminder ⏳", "persian": "صرفاً یادآوری", "color": "text-primary", "icon": "fa-clock"},}
 
 
 
@@ -103,4 +103,6 @@ class Tracking(models.Model):
                                   {"status": "Unknown", "persian": "نامشخص", "color": "text-secondary",
                                    "icon": "fa-question"})
 
-from django.db import models
+    def get_call_status_details(self):
+        return CALL_STATUS.get(self.call_status,
+                               {"status": "Unknown", "persian": "نامشخص", "color": "text-secondary", "icon": "fa-question"})

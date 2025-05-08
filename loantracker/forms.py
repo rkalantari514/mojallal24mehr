@@ -101,7 +101,7 @@ class CallTrackingForm(forms.ModelForm):
     call_description = forms.CharField(
         required=False,
         label="شرح تماس",
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 4,'placeholder': 'شرح تماس را اینجا وارد کنید...',}),
     )
 
     next_reminder_date = forms.IntegerField(

@@ -312,52 +312,85 @@
                     <div class="card card-statistics h-100">
                         <div class="card-body">
                             <h5 class="card-title pb-0 border-0">آخرین پیگیری ها </h5>
+                            <h5 class="card-title pb-0 border-0 text-warning">پیگیری بعدی{{ tracking.first.next_reminder_date|timeuntil }} دیگر </h5>
                             <div class="table-responsive scrollbar max-h-500">
                                 <div class="table-responsive">
 
+
                                     <table class="table center-aligned-table mb-0">
-                                        <thead>
-                                        <tr class="text-dark">
-                                            <th>ردیف</th>
-                                            <th>اقدم کننده</th>
-                                            <th>نوع</th>
-                                            <th>وضعیت</th>
-                                            <th>زمان</th>
-                                            <th>سطح</th>
-                                            <th>پیام ارسالی</th>
-                                            <th>تلفن</th>
-                                            {#                                            <th></th>#}
+    <thead>
+        <tr class="text-dark">
+            <th>ردیف</th>
+            <th>اقدام کننده</th>
+            <th>نوع پیگیری</th>
+            <th>وضعیت</th>
+            <th>زمان</th>
+            <th>سطح پیامک</th>
+            <th>شرح</th>
+            <th>تلفن</th>
+{#            <th>پیگیری بعدی</th>#}
+        </tr>
+    </thead>
+<tbody>
+    {% for t in tracking %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% if t.created_by %}
+                    <img class="img-fluid avatar-small" src="{{ t.created_by.avatar.url }}" alt="">
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>
+                {% if t.call_status == 4 %}
+                                    <i class="fa fa-hourglass-end text-warning fa-2x"></i>
 
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {% for t in tracking %}
-                                            <tr>
-                                                <td>{{ forloop.counter }}</td>
-                                                <td><img class="img-fluid avatar-small"
-                                                         src={{ t.created_by.avatar.url }} alt=""></td>
-                                                <td>
-                                                    <i class="fa {{ t.track_kind.kind_icon }} text-{{ t.track_kind.kind_color }} fa-2x"></i>
-                                                </td>
-                                                <td>
-                                                <span class="{{ t.get_status_details.color }}">
-                                                    <i class="fa {{ t.get_status_details.icon }}"></i>
-                                                    {{ t.get_status_details.persian }}
-                                                </span>
-                                                </td>
+                {% else %}
+                <i class="fa {{ t.track_kind.kind_icon }} text-{{ t.track_kind.kind_color }} fa-2x"></i>
+                {% endif %}
+            </td>
 
-                                                <td>    {{ t.created_at|to_jalali:"%Y/%m/%d - %H:%M" }}</td>
-                                                <td>{{ t.sample_sms.level }}</td>
-                                                <td>{{ t.message_to_send }}</td>
-                                                <td>{{ t.phone_number }}</td>
-                                                {#                    <td><label class="badge badge-success">Approved</label></td>#}
-                                                {#                    <td><a href="#" class="btn btn-outline-success btn-sm">View Order</a></td>#}
-                                                {#                                                <td><a href="#" class="btn btn-outline-warning btn-sm">Cancel</a></td>#}
-                                            </tr>
-                                        {% endfor %}
+            <!-- وضعیت پیامک یا تماس -->
+            <td>
+                {% if t.track_kind.is_call_related %}
+                    <span class="{{ t.get_call_status_details.color }}">
+                        <i class="fa {{ t.get_call_status_details.icon }}"></i>
+                        {{ t.get_call_status_details.persian }}
+                    </span>
+                {% else %}
+                    <span class="{{ t.get_status_details.color }}">
+                        <i class="fa {{ t.get_status_details.icon }}"></i>
+                        {{ t.get_status_details.persian }}
+                    </span>
+                {% endif %}
+            </td>
 
-                                        </tbody>
-                                    </table>
+            <td>{{ t.created_at|to_jalali:"%Y/%m/%d - %H:%M" }}</td>
+            <td>{{ t.sample_sms.level|default:"-" }}</td>
+
+            <!-- نمایش شرح تماس یا پیامک -->
+            <td>
+                {% if t.track_kind.is_call_related %}
+                    {{ t.call_description|default:"-" }}
+                {% else %}
+                    {{ t.message_to_send|default:"-" }}
+                {% endif %}
+            </td>
+
+            <td>{{ t.phone_number|default:"-" }}</td>
+{#            <td>{{ t.next_reminder_date|timeuntil }}</td>#}
+        </tr>
+    {% endfor %}
+</tbody>
+</table>
+
+
+
+
+
+
+
                                 </div>
                             </div>
                         </div>
