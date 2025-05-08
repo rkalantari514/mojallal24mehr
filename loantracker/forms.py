@@ -112,7 +112,8 @@ class CallTrackingForm(forms.ModelForm):
             (14, "دو هفته دیگر"),
             (7, "یک هفته دیگر"),
             (3, "۳ روز دیگر"),
-            (1, "یک روز دیگر")
+            (1, "یک روز دیگر"),
+            (0, "بدون پیگیری")
 
         ], attrs={'class': 'custom-select'}),
     )
@@ -124,8 +125,10 @@ class CallTrackingForm(forms.ModelForm):
     def clean_next_reminder_date(self):
         """ تبدیل عدد به تاریخ صحیح """
         next_reminder_days = self.cleaned_data['next_reminder_date']
-        return timezone.now().date() + timedelta(days=next_reminder_days)
-
+        if next_reminder_days>0:
+            return timezone.now().date() + timedelta(days=next_reminder_days)
+        else:
+            return None
 
 
     def __init__(self, *args, **kwargs):

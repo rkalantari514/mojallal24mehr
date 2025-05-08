@@ -47,10 +47,10 @@ STATUS_DETAILS = {
 }
 
 CALL_STATUS = {
-    2: {"status": "Successful Call ✅", "persian": "برقراری تماس موفق", "color": "text-success", "icon": "fa-check"},
+    2: {"status": "Successful Call ✅", "persian": " تماس موفق", "color": "text-primary", "icon": "fa-check"},
     1: {"status": "No Answer ⏳", "persian": "عدم پاسخگویی", "color": "text-warning", "icon": "fa-clock"},
     0: {"status": "Wrong Number ❌", "persian": "شماره اشتباه", "color": "text-danger", "icon": "fa-times"},
-    4: {"status": "Reminder ⏳", "persian": "صرفاً یادآوری", "color": "text-primary", "icon": "fa-clock"},}
+    4: {"status": "Reminder ⏳", "persian": "صرفاً یادآوری", "color": "text-warning", "icon": "fa-clock"},}
 
 
 

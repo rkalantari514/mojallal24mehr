@@ -344,7 +344,7 @@
             </td>
             <td>
                 {% if t.call_status == 4 %}
-                                    <i class="fa fa-hourglass-end text-warning fa-2x"></i>
+                                    <i class="fa fa-hourglass-start text-warning fa-2x"></i>
 
                 {% else %}
                 <i class="fa {{ t.track_kind.kind_icon }} text-{{ t.track_kind.kind_color }} fa-2x"></i>
@@ -353,6 +353,7 @@
 
             <!-- وضعیت پیامک یا تماس -->
             <td>
+
                 {% if t.track_kind.is_call_related %}
                     <span class="{{ t.get_call_status_details.color }}">
                         <i class="fa {{ t.get_call_status_details.icon }}"></i>

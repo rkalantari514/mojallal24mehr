@@ -195,10 +195,10 @@
                             <div class="card-body">
                                 <div class="table-responsive mt-15 ">
                                     {% if status == 'overdue' %}
-                                    <h6 class="card-title pb-0 border-0">خواب تعویق: <span id="total-mandah"
-                                                                                           class="text-primary"></span>
-                                        میلیون تومان روز </h6>
-                                {% endif %}
+                                        <h6 class="card-title pb-0 border-0">خواب تعویق: <span id="total-mandah"
+                                                                                               class="text-primary"></span>
+                                            میلیون تومان روز </h6>
+                                    {% endif %}
                                     {% if status == 'soon' %}
                                         <h6 class="card-title pb-0 border-0">معادل تعجیل: <span id="total-mandah"
                                                                                                 class="text-primary"></span>
@@ -272,11 +272,11 @@
                                                     data-field="delaycost" data-footer-formatter="priceFormatter"
                                                 >
                                                     {% if status == 'overdue' %}
-                                        مبلغ معوق
-                                    {% endif %}
-                                    {% if status == 'soon' %}
-                                        مبلغ تعجیل
-                                    {% endif %}
+                                                        مبلغ معوق
+                                                    {% endif %}
+                                                    {% if status == 'soon' %}
+                                                        مبلغ تعجیل
+                                                    {% endif %}
                                                 </th>
 
                                                 <th class="card-text text-center" data-sortable="true"
@@ -285,21 +285,22 @@
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="condiition" data-filter-control="select">وضعیت
                                                 </th>
-                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-field="last_tracks" >آخرین پیگیری
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="last_tracks">آخرین پیگیری
                                                 </th>
-                                            <th class="card-text text-center" data-sortable="true"
-                                                    data-field="last_tracks_status" data-filter-control="select">وضعیت پیامک
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="last_tracks_status" data-filter-control="select">وضعیت
+                                                    پیامک
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="delay" data-sorter="numericOnly"
                                                     data-filter-control="select">
                                                     {% if status == 'overdue' %}
-                                        تاخیر
-                                    {% endif %}
-                                    {% if status == 'soon' %}
-                                        تعجیل
-                                    {% endif %}
+                                                        تاخیر
+                                                    {% endif %}
+                                                    {% if status == 'soon' %}
+                                                        تعجیل
+                                                    {% endif %}
 
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
@@ -308,18 +309,11 @@
 
 
                                                     {% if status == 'overdue' %}
-خواب تعویق (میلیون تومان روز)
+                                                        خواب تعویق (میلیون تومان روز)
                                                     {% endif %}
-                                    {% if status == 'soon' %}
-معادل تعجیل (میلیون تومان روز)
-                                    {% endif %}
-
-
-
-
-
-
-
+                                                    {% if status == 'soon' %}
+                                                        معادل تعجیل (میلیون تومان روز)
+                                                    {% endif %}
 
 
                                                 </th>
@@ -354,13 +348,29 @@
                                                     <td class="card-text text-center">{{ l.category_fa }}</td>
                                                     <td class="card-text text-center">
                                                         {{ l.last_tracks.created_at|timesince }}
-                                                        </td>
+                                                    </td>
                                                     <td class="card-text text-center">
-                                                    <span class="{{ l.last_tracks.get_status_details.color }}">
+                                                        {% if l.last_tracks.call_status == 4 %}
+                                                            <i class="fa fa-hourglass-start text-warning fa-2x"></i>
+
+                                                        {% else %}
+                                                            <i class="fa {{ l.last_tracks.track_kind.kind_icon }} text-{{ l.last_tracks.track_kind.kind_color }} fa-2x"></i>
+                                                        {% endif %}
+                                                        {% if l.last_tracks.track_kind.is_call_related %}
+                                                            <span class="{{ l.last_tracks.get_call_status_details.color }}">
+                        <i class="fa {{ l.last_tracks.get_call_status_details.icon }}"></i>
+                        {{ l.last_tracks.get_call_status_details.persian }}
+                    </span>
+                                                        {% else %}
+
+                                                            <span class="{{ l.last_tracks.get_status_details.color }}">
                                                     <i class="fa {{ l.last_tracks.get_status_details.icon }}"></i>
                                                     {{ l.last_tracks.get_status_details.persian }}
                                                 </span>
+
+                                                        {% endif %}
                                                     </td>
+
                                                     <td class="card-text text-center">{{ l.delay_days }} </td>
                                                     <td class="card-text text-center">{{ l.mtday|floatformat:0|intcomma:False }} </td>
                                                 </tr>
