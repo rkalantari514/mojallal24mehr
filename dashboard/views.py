@@ -12,6 +12,7 @@ from custom_login.views import page_permision
 from .models import MasterInfo, MasterReport, MonthlyReport
 from khayyam import JalaliDate
 from django.db.models import OuterRef, Subquery
+from django.db.models import Sum, Case, When, Value
 logger = logging.getLogger(__name__)
 from django.http import JsonResponse
 
@@ -1105,14 +1106,28 @@ def CreateReport(request):
         if not SanadDetail.objects.filter(date=current_date):
             continue
         acc_year2=SanadDetail.objects.filter(date= current_date).last().acc_year
+        # data = SanadDetail.objects.filter(
+        #     # acc_year=acc_year,
+        #     is_active=True,
+        #     date= current_date
+        # ).filter(
+        #     Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101) | Q(kol=200)
+        # ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
+
         data = SanadDetail.objects.filter(
-            # acc_year=acc_year,
             is_active=True,
-            date= current_date
+            date=current_date
         ).filter(
-            # Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101) | Q(kol=401) | Q(kol=501)| Q(kol=200)
             Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101) | Q(kol=200)
-        ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
+        ).values('date', 'kol').annotate(
+            total_amount=Sum(
+                Case(
+                    When(kol=400, curramount__gt=0, then='curramount'),
+                    When(~Q(kol=400), then='curramount'),
+                    default=Value(0)
+                )
+            )
+        )
 
         # محاسبه داده‌ها برای روزهای مختلف
         # today_data = TarazCal(current_date, current_date, data)
