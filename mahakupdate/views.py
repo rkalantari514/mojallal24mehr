@@ -68,7 +68,15 @@ def connect_to_mahak():
     else:
         raise EnvironmentError("The computer name does not match.")
 
-
+def jalali_to_gregorian(jalali_date):
+    # تابع تبدیل تاریخ شمسی به میلادی (نیاز به پیاده سازی دارد)
+    # مثال: '1403/10/02' -> datetime.date(2025, 1, 22)
+    year, month, day = map(int, jalali_date.split('/'))
+    # **نکته مهم:** برای تبدیل دقیق تاریخ شمسی به میلادی، نیاز به یک کتابخانه مانند `jdatetime` دارید.
+    # اگر از این کتابخانه استفاده نمی‌کنید، باید منطق تبدیل را خودتان پیاده‌سازی کنید.
+    import jdatetime
+    gregorian_date = jdatetime.date(year, month, day).togregorian()
+    return gregorian_date
 def get_databases(request):
     try:
         conn = connect_to_mahak()
@@ -283,7 +291,7 @@ def Updateall(request):
 
 
 # آپدیت فاکتور
-def UpdateFactor(request):
+def UpdateFactor2(request):
     t0 = time.time()
     print('شروع آپدیت فاکتور--------------------------------------')
     conn = connect_to_mahak()  # تابع تخمینی برای اتصال به پایگاه داده Mahak
@@ -372,6 +380,145 @@ def UpdateFactor(request):
     table.save()
 
     return redirect('/updatedb')
+
+
+
+def UpdateFactor(request):
+    t0 = time.time()
+    print('شروع آپدیت فاکتور--------------------------------------')
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    t1 = time.time()
+
+    cursor.execute("SELECT [Code], [tarikh], [mablagh_factor], [takhfif], [CreatedTime], [Takhfif_Percent], [Shakhs_Code] FROM Fact_Fo")
+    mahakt_data = cursor.fetchall()
+    existing_in_mahak_codes = {row[0] for row in mahakt_data}
+
+    factors_to_create = []
+    factors_to_update = []
+    factors_to_update_map = {}
+
+    # دریافت سال مالی فعال
+    try:
+        acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    except MasterInfo.DoesNotExist:
+        print("هشدار: هیچ سال مالی فعالی یافت نشد.")
+        return redirect('/updatedb')  # یا هندل کردن مناسب دیگر
+
+    # فیلتر فاکتورها بر اساس سال مالی و ساخت دیکشنری برای دسترسی سریع
+    current_factors = {
+        (factor.code, factor.acc_year): factor
+        for factor in Factor.objects.filter(acc_year=acc_year).select_related('person').iterator()
+    }
+    existing_django_codes = set(f[0] for f in current_factors.keys())
+
+    person_cache = {}  # کش برای افراد
+
+    for row in mahakt_data:
+        code = row[0]
+        pdate_jalali = row[1]
+        mablagh_factor = Decimal(row[2]) if row[2] is not None else Decimal(0)
+        takhfif = Decimal(row[3]) if row[3] is not None else Decimal(0)
+        create_time = row[4]
+        darsad_takhfif = Decimal(row[5]) if row[5] is not None else Decimal(0)
+        per_code_mahak = row[6]
+
+        defaults = {
+            'pdate': pdate_jalali,
+            'mablagh_factor': mablagh_factor,
+            'takhfif': takhfif,
+            'create_time': str(create_time) if create_time else None,
+            'darsad_takhfif': darsad_takhfif,
+            'acc_year': acc_year,
+            'per_code': per_code_mahak,
+        }
+
+        try:
+            defaults['date'] = jalali_to_gregorian(pdate_jalali) if pdate_jalali else None
+        except Exception as e:
+            print(f"خطا در تبدیل تاریخ شمسی '{pdate_jalali}': {e}")
+            defaults['date'] = None
+
+        # یافتن یا ایجاد شی Person
+        person = None
+        if per_code_mahak is not None:
+            if per_code_mahak in person_cache:
+                person = person_cache[per_code_mahak]
+            else:
+                try:
+                    person = Person.objects.get(code=per_code_mahak)
+                    person_cache[per_code_mahak] = person
+                except Person.DoesNotExist:
+                    print(f"هشدار: شخص با کد '{per_code_mahak}' یافت نشد.")
+                    pass  # در صورت عدم وجود، person همچنان None خواهد بود
+        defaults['person'] = person
+
+        key = (code, acc_year)
+
+        if key in current_factors:
+            factor = current_factors[key]
+            updated = False
+            for attr, value in defaults.items():
+                current_value = getattr(factor, attr)
+                if attr in ['mablagh_factor', 'takhfif', 'darsad_takhfif']:
+                    if Decimal(current_value).quantize(Decimal('0.00')) != Decimal(value).quantize(Decimal('0.00')):
+                        setattr(factor, attr, value)
+                        updated = True
+                elif isinstance(current_value, str) and current_value != str(value):
+                    setattr(factor, attr, value)
+                    updated = True
+                elif not isinstance(current_value, str) and current_value != value:
+                    setattr(factor, attr, value)
+                    updated = True
+
+            if updated:
+                factors_to_update.append(factor)
+                factors_to_update_map[key] = factor
+        else:
+            factors_to_create.append(Factor(code=code, **defaults))
+
+    with transaction.atomic():
+        if factors_to_create:
+            Factor.objects.bulk_create(factors_to_create)
+        if factors_to_update:
+            Factor.objects.bulk_update(
+                factors_to_update,
+                ['pdate', 'mablagh_factor', 'takhfif', 'create_time', 'darsad_takhfif', 'acc_year', 'date', 'per_code', 'person']
+            )
+
+        # حذف فاکتورهایی که در Mahak نیستند
+        codes_in_django_to_delete = existing_django_codes - existing_in_mahak_codes
+        Factor.objects.filter(code__in=codes_in_django_to_delete, acc_year=acc_year).delete()
+
+    tend = time.time()
+    print(f"زمان کل: {tend - t0:.2f} ثانیه")
+    print(f" اتصال به دیتابیس: {t1 - t0:.2f} ثانیه")
+    print(f" زمان آپدیت جدول: {tend - t1:.2f} ثانیه")
+
+    try:
+        cursor.execute(f"SELECT COUNT(*) FROM Fact_Fo")
+        row_count = cursor.fetchone()[0]
+        cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Fact_Fo'")
+        column_count = cursor.fetchone()[0]
+
+        table = Mtables.objects.filter(name='Fact_Fo').last()
+        if table:
+            table.last_update_time = timezone.now()
+            table.update_duration = tend - t1
+            table.row_count = row_count
+            table.column_count = column_count
+            table.save()
+    except Exception as e:
+        print(f"خطا در به‌روزرسانی جدول Mtables: {e}")
+
+    if conn:
+        conn.close()
+    print('پایان آپدیت فاکتور--------------------------------------')
+    return redirect('/updatedb')
+
+
+
+
 
 # آپدیت کاردکس
 def UpdateKardex(request):
