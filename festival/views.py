@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.db import transaction
 from django.utils import timezone
 import time
+from django.db.models import F
 
 from custom_login.models import UserLog
 from custom_login.views import page_permision
@@ -107,10 +108,10 @@ def FestivalTotal(request):
 
     start_time = time.time()  # زمان شروع تابع
 
-    points=CustomerPoints.objects.filter(festival__is_active=True)
-    for p in points:
-        p.mablagh_k = p.factor.mablagh_factor - p.factor.takhfif
 
+    points = CustomerPoints.objects.filter(festival__is_active=True).annotate(
+        mablagh_k=F('factor__mablagh_factor') - F('factor__takhfif')
+    )
 
 
     context = {
