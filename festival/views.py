@@ -51,6 +51,9 @@ def Calculate_and_award_points(request):
                 calculated_points_float = invoice_value / points_per_purchase_ratio
                 calculated_points = math.floor(calculated_points_float)  # تغییر به math.floor
 
+                # calculated_points_float = invoice_value / points_per_purchase_ratio
+                # calculated_points = int(round(calculated_points_float))
+
             if (factor.person_id, factor.id) in existing_points_map:
                 customer_point = existing_points_map[(factor.person_id, factor.id)]
                 if customer_point.points_awarded != calculated_points:
@@ -105,6 +108,8 @@ def FestivalTotal(request):
     start_time = time.time()  # زمان شروع تابع
 
     points=CustomerPoints.objects.filter(festival__is_active=True)
+    for p in points:
+        p.mablagh_k = p.factor.mablagh_factor - p.factor.takhfif
 
 
 
