@@ -141,47 +141,45 @@ def TarazCal(fday, lday, data):
     }
     return to_return
 
-def TarazCal1day(day, data,acc_year2):
-    m_info=MasterInfo.objects.filter(acc_year=acc_year2).last()
+
+from decimal import Decimal
+from collections import defaultdict
+
+
+def TarazCal1day(day, data, acc_year2):
+    m_info = MasterInfo.objects.filter(acc_year=acc_year2).last()
+
     # فیلتر کردن داده‌ها برای تمام روزها در یک بار
-    current_data = defaultdict(int)
+    current_data = defaultdict(lambda: Decimal(0))
+
     for item in data:
-        current_data[(item['date'], item['kol'])] = item['total_amount']
+        current_data[(item['date'], item['kol'])] = Decimal(item['total_amount'])  # تبدیل مقدار به Decimal
 
-    asnad_daryaftan = []  # لیست برای ذخیره مقادیر asnad_daryaftan
-    asnad_pardakhtan = []  # لیست برای ذخیره مقادیر asnad_pardakhtan
-
-    baha_tamam_forosh = current_data.get((day, 500), 0)
-    # sayer_hazine = current_data.get((day, 501), 0)
-    daramad_forosh = current_data.get((day, 400), 0)
-    # sayer_daramad = current_data.get((day, 401), 0)
-    barghasht_az_forosh = current_data.get((day, 403), 0)  # منفی است
-    khales_forosh = daramad_forosh + barghasht_az_forosh
-    asnad_daryaftani = current_data.get((day, 101), 0)  # محاسبه asnad_daryaftani
-    asnad_pardakhtani = current_data.get((day, 200), 0)  # محاسبه asnad_pardakhtani
-
-
-
+    baha_tamam_forosh = current_data.get((day, 500), Decimal(0))
+    daramad_forosh = current_data.get((day, 400), Decimal(0))
+    barghasht_az_forosh = current_data.get((day, 403), Decimal(0))
+    khales_forosh = daramad_forosh + barghasht_az_forosh  # اضافه کردن khales_forosh به‌صورت صحیح
+    asnad_daryaftani = current_data.get((day, 101), Decimal(0))
+    asnad_pardakhtani = current_data.get((day, 200), Decimal(0))
 
     # محاسبه مجموع روزانه
     sood_navizhe = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh
-    sood_vizhe = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh - m_info.sayer_hazine_ave*10000000 + m_info.sayer_daramad_ave*10000000
+    sood_vizhe = sood_navizhe - Decimal(m_info.sayer_hazine_ave) * Decimal(10000000) + Decimal(
+        m_info.sayer_daramad_ave) * Decimal(10000000)
 
-    # ذخیره مقدار asnad_daryaftani با علامت منفی
-    asnad_daryaftan.append(-asnad_daryaftani)
-    asnad_pardakhtan.append(asnad_pardakhtani)
-
+    # تنظیم خروجی
     to_return = {
-        'khales_forosh': khales_forosh / 10000000,
-        'baha_tamam_forosh': baha_tamam_forosh / -10000000,
-        'sayer_hazine': m_info.sayer_hazine_ave,
-        'sayer_daramad': m_info.sayer_daramad_ave,
-        'sood_navizhe': sood_navizhe / 10000000,
-        'sood_vizhe': sood_vizhe / 10000000,
-        'asnad_daryaftani': sum(asnad_daryaftan) / 10000000,  # جمع مقادیر asnad_daryaftani
-        'asnad_pardakhtani': sum(asnad_pardakhtan) / 10000000,  # جمع مقادیر asnad_pardakhtani
+        'khales_forosh': khales_forosh / Decimal(10000000),  # khales_forosh را برگرداندم
+        'baha_tamam_forosh': baha_tamam_forosh / Decimal(-10000000),
+        'sayer_hazine': Decimal(m_info.sayer_hazine_ave),
+        'sayer_daramad': Decimal(m_info.sayer_daramad_ave),
+        'sood_navizhe': sood_navizhe / Decimal(10000000),
+        'sood_vizhe': sood_vizhe / Decimal(10000000),
+        'asnad_daryaftani': asnad_daryaftani / Decimal(10000000),
+        'asnad_pardakhtani': asnad_pardakhtani / Decimal(10000000),
     }
     return to_return
+
 
 def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_data,loan_detail_data):
     # مشخص کردن اولین روز ماه
@@ -1094,7 +1092,7 @@ def CreateReport(request):
     print(current_time.hour)
     # بررسی اینکه آیا ساعت 1 بامداد است یا خیر
     if current_time.hour != 1:
-        report_days = report_days.order_by('-day')[:10]
+        report_days = report_days.order_by('-day')[:80]
 
     # لیست برای به‌روزرسانی
     reports_to_update = []

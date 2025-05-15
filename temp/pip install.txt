@@ -26,6 +26,7 @@ pip install requests
 
 pip install django-pwa django-service-worker
 
+pip install pyserial
 
 
 

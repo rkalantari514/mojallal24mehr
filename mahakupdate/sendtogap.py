@@ -201,3 +201,79 @@ def check_sms_status(message_id):
 
 
 
+import serial
+from django.http import JsonResponse
+
+import serial
+from django.http import JsonResponse
+#
+# import serial
+# from django.http import JsonResponse
+#
+# def dial_number(request):
+#     phone_number = request.GET.get("phone_number", "")
+#     if not phone_number:
+#         return JsonResponse({"error": "شماره تلفن وارد نشده است"}, status=400)
+#
+#     try:
+#         modem = serial.Serial(
+#             port='COM3',         # شماره پورت مودم شما
+#             baudrate=115200,     # تنظیم Baud Rate مطابق `mode`
+#             parity=serial.PARITY_NONE,
+#             stopbits=serial.STOPBITS_ONE,
+#             bytesize=serial.EIGHTBITS,
+#             timeout=1
+#         )
+#
+#         modem.write(f'ATDT{phone_number};\r'.encode())  # شماره‌گیری
+#         return JsonResponse({"message": f"در حال شماره‌گیری {phone_number}"})
+#     except Exception as e:
+#         return JsonResponse({"error": str(e)}, status=500)
+
+
+
+
+import subprocess
+from django.http import JsonResponse
+
+import subprocess
+import os
+from django.http import JsonResponse
+
+import subprocess
+import os
+from django.http import JsonResponse
+
+
+import subprocess
+import os
+from django.http import JsonResponse
+
+def run_dial_script(request):
+    phone_number = request.GET.get("phone_number", "")
+    if not phone_number:
+        return JsonResponse({"error": "شماره تلفن وارد نشده است"}, status=400)
+
+    try:
+        script_path = os.path.join(os.path.dirname(__file__), "../mahakupdate/dial.bat")
+        result = subprocess.run([script_path, phone_number], capture_output=True, text=True)
+        return JsonResponse({"message": result.stdout})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+import subprocess
+from django.http import JsonResponse
+
+import subprocess
+from django.http import JsonResponse
+
+import subprocess
+from django.http import JsonResponse
+
+def stop_dialer(request):
+    try:
+        subprocess.run(["taskkill", "/IM", "dialer.exe", "/F"])
+        return JsonResponse({"message": "تماس لغو شد و Dialer بسته شد."})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

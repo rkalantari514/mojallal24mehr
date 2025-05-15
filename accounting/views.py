@@ -1262,7 +1262,8 @@ def HesabMoshtariDetail(request, tafsili):
         'tracking': tracking,
     }
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
-    return render(request, 'moshrari_detail.html', context)
+    # return render(request, 'moshrari_detail.html', context)
+    return render(request, 'master_moshrari_detail.html', context)
 
 from django.utils import timezone
 from django.db.models import Value, CharField, IntegerField, F, ExpressionWrapper, DurationField

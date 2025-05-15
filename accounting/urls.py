@@ -5,6 +5,9 @@ from accounting.views import (
     JariAshkhasMoshtarian, JariAshkhasMoshtarianDetail, HesabMoshtariDetail,
     LoanTotal, loan_summary_api
 )
+from mahakupdate.sendtogap import run_dial_script, stop_dialer
+
+# from mahakupdate.sendtogap import dial_number
 
 urlpatterns = [
     # Loan-related paths
@@ -33,4 +36,10 @@ urlpatterns = [
 
     # Sanad Total path
     path('sanad_total/<kol_code>/<moin_code>/<tafzili_code>/', SanadTotal, name='sanad_total'),
+
+    # path('dial/', dial_number, name='dial_number'),
+
+    path('run-dial-script/', run_dial_script, name='run_dial_script'),
+    path('stop-dialer/', stop_dialer, name='stop_dialer'),
+
 ]
