@@ -19,6 +19,7 @@ from django.utils import timezone
 from .models import Festival, CustomerPoints
 from mahakupdate.models import Factor
 from decimal import Decimal
+import math  # اطمینان از import بودن ماژول math
 
 def Calculate_and_award_points(request):
     active_festivals = Festival.objects.filter(is_active=True)
@@ -48,7 +49,7 @@ def Calculate_and_award_points(request):
             calculated_points = 0
             if invoice_value >= min_invoice_amount and points_per_purchase_ratio > 0:
                 calculated_points_float = invoice_value / points_per_purchase_ratio
-                calculated_points = int(round(calculated_points_float))
+                calculated_points = math.floor(calculated_points_float)  # تغییر به math.floor
 
             if (factor.person_id, factor.id) in existing_points_map:
                 customer_point = existing_points_map[(factor.person_id, factor.id)]
