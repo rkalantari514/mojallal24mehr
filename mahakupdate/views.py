@@ -864,6 +864,20 @@ def UpdateFactorDetail2(request):
     return redirect('/updatedb')
 
 
+from django.db import transaction
+from django.shortcuts import redirect
+from django.utils import timezone
+from decimal import Decimal
+import time
+import pyodbc
+
+# فرضا مدل های شما (برای جلوگیری از خطا در صورت اجرا)
+
+
+
+
+
+
 def UpdateFactorDetail(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات فاکتور-------------------------------------------------')
@@ -904,6 +918,9 @@ def UpdateFactorDetail(request):
     details_to_update = []
     existing_in_mahak_keys = set()
 
+    created_count = 0
+    updated_count = 0
+
     for row in mahakt_data:
         code_factor_mahak = row[0]
         radif_mahak = row[1]
@@ -932,30 +949,49 @@ def UpdateFactorDetail(request):
                 detail = existing_details[key_mahak]
                 updated = False
                 for attr, value in defaults.items():
-                    if getattr(detail, attr) != value:
+                    current_value = getattr(detail, attr)
+                    if isinstance(current_value, (int, float, Decimal)) and isinstance(value, (int, float, Decimal)):
+                        if Decimal(str(current_value)).quantize(Decimal('0.000001')) != Decimal(str(value)).quantize(Decimal('0.000001')):
+                            print(f"تفاوت (عددی) در فیلد '{attr}' برای فاکتور '{detail.code_factor}' و ردیف '{detail.radif}':")
+                            print(f"  مقدار فعلی (جنگو): {current_value}")
+                            print(f"  مقدار جدید (Mahak): {value}")
+                            setattr(detail, attr, value)
+                            updated = True
+                    elif current_value != value:
+                        print(f"تفاوت (غیر عددی) در فیلد '{attr}' برای فاکتور '{detail.code_factor}' و ردیف '{detail.radif}':")
+                        print(f"  مقدار فعلی (جنگو): {current_value} ({type(current_value)})")
+                        print(f"  مقدار جدید (Mahak): {value} ({type(value)})")
                         setattr(detail, attr, value)
                         updated = True
                 if updated:
                     details_to_update.append(detail)
+                    updated_count += 1
             else:
                 details_to_create.append(FactorDetaile(
                     code_factor=code_factor_mahak,
                     radif=radif_mahak,
                     **defaults
                 ))
+                created_count += 1
 
+    deleted_count = 0
     with transaction.atomic():
         if details_to_create:
             FactorDetaile.objects.bulk_create(details_to_create, ignore_conflicts=True)
         if details_to_update:
             FactorDetaile.objects.bulk_update(details_to_update, ['code_kala', 'count', 'mablagh_vahed', 'mablagh_nahaee', 'acc_year', 'factor', 'kala'])
 
-        FactorDetaile.objects.filter(
+        deleted_count = FactorDetaile.objects.filter(
             acc_year=acc_year
         ).exclude(
             code_factor__in=[k[0] for k in existing_in_mahak_keys],
             radif__in=[k[1] for k in existing_in_mahak_keys],
-        ).delete()
+        ).delete()[0] if FactorDetaile.objects.filter(
+            acc_year=acc_year
+        ).exclude(
+            code_factor__in=[k[0] for k in existing_in_mahak_keys],
+            radif__in=[k[1] for k in existing_in_mahak_keys],
+        ).exists() else 0
 
     t2 = time.time()
     print('آپدیت انجام شد', t2 - t1)
@@ -968,6 +1004,9 @@ def UpdateFactorDetail(request):
 
     print(f"زمان کل: {total_time:.2f} ثانیه")
     print(f" اتصال به دیتابیس: {db_time:.2f} ثانیه")
+    print(f" ایجاد شده: {created_count} ردیف")
+    print(f" به‌روزرسانی شده: {updated_count} ردیف")
+    print(f" حذف شده: {deleted_count} ردیف")
     print(f" عملیات اصلی آپدیت: {up_time:.2f} ثانیه")
 
     try:
@@ -990,6 +1029,7 @@ def UpdateFactorDetail(request):
         conn.close()
     print('پایان آپدیت جزئیات فاکتور-------------------------------------------------')
     return redirect('/updatedb')
+
 
 def UpdateKala(request):
     t0 = time.time()
