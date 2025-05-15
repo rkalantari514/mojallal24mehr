@@ -30,7 +30,7 @@ class KalaAdmin(admin.ModelAdmin):
 
 
 class FactorAdmin(admin.ModelAdmin):
-    list_display = ['acc_year','pdate', 'code', 'create_time', 'mablagh_factor', 'takhfif', 'darsad_takhfif']
+    list_display = ['acc_year','pdate', 'code', 'create_time', 'person','date','mablagh_factor', 'takhfif', 'darsad_takhfif']
 
     list_filter = ['acc_year']
     # list_editable = ['description', 'in_use']

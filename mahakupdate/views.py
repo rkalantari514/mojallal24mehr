@@ -871,7 +871,7 @@ def UpdateKala(request):
     return redirect('/updatedb')
 
 
-def UpdatePerson(request):
+def UpdatePerson2(request):
     send_to_admin('شروع آپدیت افراد')
     t0 = time.time()
     print('🚀 شروع آپدیت افراد --------------------------------------------')
@@ -955,6 +955,95 @@ def UpdatePerson(request):
     table.save()
     return redirect('/updatedb')
 
+
+
+def UpdatePerson(request):
+    send_to_admin('شروع آپدیت افراد')
+    t0 = time.time()
+    print('🚀 شروع آپدیت افراد --------------------------------------------')
+
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    t1 = time.time()
+
+    # 🔹 دریافت داده‌های AccDetailsCollection و ساخت دیکشنری
+    cursor.execute("SELECT AccDetailCode, AccountCode FROM AccDetailsCollection WHERE AccDetailsTypesID = 1")
+    acc_details_mapping = {int(row[0]): row[1] for row in cursor.fetchall()}  # تبدیل به int برای اطمینان
+
+    # 🔹 دریافت داده‌های افراد (PerInf)
+    cursor.execute("SELECT * FROM PerInf")
+    mahakt_data = cursor.fetchall()
+    existing_in_mahak = {row[0] for row in mahakt_data}
+
+    persons_to_create = []
+    persons_to_update = []
+
+    current_persons = {person.code: person for person in Person.objects.iterator()}
+    created_codes_in_this_run = set() # برای جلوگیری از ایجاد تکراری در یک اجرا
+
+    for row in mahakt_data:
+        code = int(row[0])  # تبدیل به عدد برای سازگاری
+        per_taf_value = int(acc_details_mapping.get(code, 0)) if acc_details_mapping.get(code, 0) else 0
+        defaults = {
+            'grpcode': row[3],
+            'name': row[1],
+            'lname': row[2],
+            'tel1': row[6],
+            'tel2': row[7],
+            'fax': row[8],
+            'mobile': row[9],
+            'address': row[10],
+            'comment': row[12],
+            'per_taf': per_taf_value
+        }
+
+        if code in current_persons:
+            person = current_persons[code]
+            if any(getattr(person, attr) != value for attr, value in defaults.items()):
+                for attr, value in defaults.items():
+                    setattr(person, attr, value)
+                persons_to_update.append(person)
+        elif code not in created_codes_in_this_run: # بررسی کنید که در همین اجرا ایجاد نشده باشد
+            persons_to_create.append(Person(code=code, **defaults))
+            created_codes_in_this_run.add(code)
+
+
+    with transaction.atomic():
+        if persons_to_create:
+            Person.objects.bulk_create(persons_to_create, ignore_conflicts=True) # برای جلوگیری از خطای تکراری بودن کد در سطح دیتابیس
+
+        if persons_to_update:
+            Person.objects.bulk_update(persons_to_update, [
+                'grpcode', 'name', 'lname', 'tel1', 'tel2', 'fax', 'mobile', 'address', 'comment', 'per_taf'
+            ])
+
+        Person.objects.exclude(code__in=existing_in_mahak).delete()
+
+    tend = time.time()
+    total_time = tend - t0
+    db_time = t1 - t0
+    update_time = tend - t1
+
+    print(f"🕒 زمان کل: {total_time:.2f} ثانیه")
+    print(f"🔗 اتصال به دیتابیس: {db_time:.2f} ثانیه")
+    print(f"🔄 زمان آپدیت جدول: {update_time:.2f} ثانیه")
+
+    cursor.execute("SELECT COUNT(*) FROM PerInf")
+    row_count = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'PerInf'")
+    column_count = cursor.fetchone()[0]
+
+    table = Mtables.objects.filter(name='PerInf').last()
+    if table:
+        table.last_update_time = timezone.now()
+        table.update_duration = update_time
+        table.row_count = row_count
+        table.cloumn_count = column_count
+        table.save()
+    if conn:
+        conn.close()
+    return redirect('/updatedb')
 
 def UpdatePerson2(request):
     send_to_admin('شروع آپدیت افراد')
