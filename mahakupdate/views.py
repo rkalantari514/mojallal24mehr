@@ -381,9 +381,63 @@ def UpdateFactor2(request):
 
     return redirect('/updatedb')
 
+import pyodbc
 
+from django.shortcuts import redirect
+import pyodbc
 
 def UpdateFactor(request):
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+
+    # یافتن کدهای تکراری
+    cursor.execute("""
+        SELECT [Code], COUNT([Code]) AS count
+        FROM [mahak].[dbo].[Fact_Fo]
+        GROUP BY [Code]
+        HAVING COUNT([Code]) > 1
+    """)
+    duplicate_codes = cursor.fetchall()
+
+    if not duplicate_codes:
+        print("هیچ کد فاکتور تکراری در دیتابیس Mahak یافت نشد.")
+        if conn:
+            conn.close()
+        return redirect('/updatedb')  # بازگرداندن HttpResponse حتی در صورت عدم وجود تکراری
+
+    print("کدهای فاکتور تکراری در دیتابیس Mahak:")
+    for code, count in duplicate_codes:
+        print(f"کد: {code}, تعداد تکرار: {count}")
+
+        # مقایسه 5 نمونه از ردیف های تکراری برای هر کد
+        cursor.execute(f"""
+            SELECT TOP 5 *
+            FROM [mahak].[dbo].[Fact_Fo]
+            WHERE [Code] = ?
+        """, (code,))
+        duplicate_rows = cursor.fetchall()
+
+        if duplicate_rows:
+            print(f"\n5 نمونه از ردیف های تکراری برای کد {code}:")
+            columns = [column[0] for column in cursor.description]
+            for row in duplicate_rows:
+                row_dict = dict(zip(columns, row))
+                print(row_dict)
+        else:
+            print(f"خطا در واکشی ردیف های تکراری برای کد {code}.")
+
+    if conn:
+        conn.close()
+
+    return redirect('/updatedb')
+
+
+
+
+
+
+
+def UpdateFactorasli(request):
     t0 = time.time()
     print('شروع آپدیت فاکتور--------------------------------------')
     conn = connect_to_mahak()
