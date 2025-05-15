@@ -2,6 +2,7 @@ from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
 from dashboard.models import MasterInfo
 from dashboard.views import CreateReport, CreateMonthlyReport, CreateTotalReport
+from festival.views import Calculate_and_award_points
 from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category, Sanad, SanadDetail, AccCoding, ChequesPay, \
     Bank, Loan, LoanDetil
 from .models import FactorDetaile
@@ -248,6 +249,7 @@ def Updateall(request):
         '/create_monthly_report',
         'update/bedehimoshtari',
         'update/compleloan',
+        'update/calculate_award',
     ]
     # نگاشت آدرس‌های استاتیک به توابع
     static_view_map = {
@@ -263,6 +265,7 @@ def Updateall(request):
         '/create_monthly_report': CreateMonthlyReport,
         'update/bedehimoshtari': UpdateBedehiMoshtari,
         'update/compleloan': CompleLoan,
+        'update/calculate_award': Calculate_and_award_points,
     }
     # چاپ تزئینی برای عیب یابی
     print(f"Request path: {request.path}")
