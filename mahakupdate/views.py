@@ -386,7 +386,7 @@ import pyodbc
 from django.shortcuts import redirect
 import pyodbc
 
-def UpdateFactor(request):
+def TsesFactorDuplicatte(request):
     conn = connect_to_mahak()
     cursor = conn.cursor()
 
@@ -437,7 +437,7 @@ def UpdateFactor(request):
 
 
 
-def UpdateFactorasli(request):
+def UpdateFactor(request):
     t0 = time.time()
     print('شروع آپدیت فاکتور--------------------------------------')
     conn = connect_to_mahak()
