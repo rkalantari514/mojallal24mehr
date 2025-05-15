@@ -4,6 +4,10 @@ from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.db import transaction
 from django.utils import timezone
+import time
+
+from custom_login.models import UserLog
+from custom_login.views import page_permision
 from .models import Festival, CustomerPoints
 from mahakupdate.models import Factor
 from decimal import Decimal
@@ -83,3 +87,37 @@ def Calculate_and_award_points(request):
             CustomerPoints.objects.bulk_update(points_to_update, ['points_awarded'])
 
     return redirect('/updatedb')
+
+
+
+
+
+def FestivalTotal(request):
+    name = 'جشنواره'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='جشنواره', code=0)
+
+    start_time = time.time()  # زمان شروع تابع
+
+    points=CustomerPoints.objects.filter(festival__is_active=True)
+
+
+
+    context = {
+        'title': 'جشنواره',
+        'user': user,
+        'points': points,
+    }
+
+
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+
+    return render(request, 'festival_total.html', context)
+
+
+

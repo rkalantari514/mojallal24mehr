@@ -1,0 +1,591 @@
+{% extends 'shared/_MainLayout.html' %}
+{% load humanize %}
+{% load static %}
+{% block content %}
+    {% load jalali_tags %}
+
+    <div class="content-wrapper">
+
+        <div class="page-title">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="d-block">
+                        <h4 class="card-title text-facebook pb-0 border-0">جشنواره ها </h4>
+                    </div>
+
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
+                        <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
+                        <li class="breadcrumb-item active">جشنواره</li>
+
+                    </ol>
+                </div>
+            </div>
+            <!-- ردیف اول خلاصه ها -->
+            <div class="row">
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-primary rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-download highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark">----</p>
+                                    <h4>
+                                        <a href="/acc/jariashkhas/moshtarian/detaile/4" target="_blank">
+                                            {{ table1.3|floatformat:0|intcomma:False }} میلیون تومان
+                                        </a>
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-danger rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-times-rectangle-o highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark"> ----- </p>
+                                    <h4>
+                                        <a href="/acc/jariashkhas/moshtarian/detaile/6" target="_blank">
+                                            {{ table1.5|floatformat:0|intcomma:False }} میلیون تومان
+                                        </a>
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-warning rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-times highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark"> ----- </p>
+                                    <h4>
+                                        <a href="/acc/jariashkhas/moshtarian/detaile/7" target="_blank">
+                                            {{ table1.8|floatformat:0|intcomma:False }} میلیون تومان
+                                        </a>
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-info rounded-circle">
+    <span class="text-white">
+    <i class="fa  fa fa-hourglass-end highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark"> ----- </p>
+                                    <h4>
+                                        <a href="/acc/loan_total" target="_blank">
+                                            {{ table1.9|floatformat:0|intcomma:False }} میلیون تومان
+                                        </a>
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ردیف کلیات و نمودار فروش -->
+
+
+
+            <!-- ردیف موجودی انبار و تقویم -->
+            <div class="row">
+                <div class="col-md-12 mb-30">
+                    <div class="col-xl-12 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="card-body">
+                                <div class="table-responsive mt-15 ">
+                                    <h6 class="card-title pb-0 border-0">جشنواره ها <span
+                                            id="total-mandah"
+                                            class="text-primary"></span>
+                                        -- </h6>
+                                    <div class="table-responsive">
+                                        <table id="table"
+                                               class="table-striped"
+                                               data-toggle="table"
+                                               data-locale="fa-IR"
+                                               data-search="true"
+                                               data-show-columns="true"
+                                               data-show-export="true"
+                                               data-show-refresh="true"
+                                               data-show-columns-toggle-all="true"
+                                               data-show-pagination-switch="true"
+                                               data-show-toggle="true"
+                                               data-show-fullscreen="true"
+                                               data-buttons="buttons"
+                                               data-search-align="left"
+                                               data-buttons-class="primary"
+                                               data-pagination="true"
+                                               data-show-columns-search="true"
+                                               data-show-footer="true"
+                                               data-page-size="10"
+                                               data-remember-order="true"
+                                               data-sortable="true"
+                                               data-show-search-clear-button="true"
+                                               data-sort-name="date"
+                                               data-sort-order="asc"
+                                               data-filter-control="true"
+                                               data-show-print="true"
+                                               data-export-data-type="all"
+                                               data-export-types='["excel"]'>
+                                            <thead>
+                                            <tr class="tr-class-1">
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="festival"
+                                                    data-filter-control="select" data-sorter="numericOnly">جشنواره
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="customer" data-filter-control="select"
+                                                    data-sorter="numericOnly">مشتری
+                                                </th>
+
+
+                                                <th class="card-text text-center" data-sortable="true" data-field="cost"
+                                                    data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">تاریخ فاکتور
+                                                </th>
+
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="mablagh"
+                                                    data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">مبلغ فاکتور
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="point"
+                                                    data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">امتیاز
+                                                </th>
+
+
+
+
+
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for p in points %}
+                                                <tr>
+                                                    <td class="card-text text-center">{{ p.festival }}</td>
+                                                    <td class="card-text text-center">{{ p.customer }}</td>
+                                                    <td class="card-text text-center">{{ p.factor.pdate }}</td>
+                                                    <td class="card-text text-center">{{ p.factor.mablagh_factor|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ p.points_awarded}}</td>
+
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- تقوم چک ها -->
+
+        </div>
+    </div>
+
+    </div>
+
+
+    </div>
+
+
+{% endblock %}
+
+
+
+
+
+{% block myjs %}
+
+    <!-- نمودار میله ای چکهای ماهانه -->
+
+    <!--  اضافه کردن دکمه زیر نمودار -->
+    <script>
+        var labels = [
+            {% for item in chartmahanedata %}
+                '{{ item.month_name }}',
+            {% endfor %}
+        ];
+
+        var originalDataValues = [
+            {% for item in chartmahanedata %}
+                {{ item.total_count }},
+            {% endfor %}
+        ];
+
+        var dataValues = originalDataValues.slice();
+
+        var backgroundColors = [
+            'rgba(239,9,9,0.3)',
+            'rgba(239,9,9,0.3)',
+            'rgba(239,9,9,0.3)',
+            'rgba(75, 192, 75, 0.2)',
+            'rgba(75, 192, 75, 0.2)',
+            'rgba(75, 192, 75, 0.2)',
+            'rgba(75, 75, 192, 0.2)',
+            'rgba(75, 75, 192, 0.2)',
+            'rgba(75, 75, 192, 0.2)',
+            'rgba(255, 165, 0, 0.2)',
+            'rgba(255, 165, 0, 0.2)',
+            'rgba(255, 165, 0, 0.2)',
+            'rgba(192, 75, 75, 0.2)',
+            'rgba(192, 75, 75, 0.2)',
+            'rgba(192, 75, 75, 0.2)',
+            'rgba(128, 0, 128, 0.2)'
+        ];
+
+        var borderColors = backgroundColors.map((color) => color.replace('0.2', '1'));
+
+        var data = {
+            labels: labels,
+            datasets: [{
+                label: 'بدهی و اقساط',
+                data: dataValues,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 1
+            }]
+        };
+
+        var options = {
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            },
+            onClick: function (event) {
+                var chart = Chart.getChart('ChartMahaneh');
+                var activePoints = chart.getElementsAtEventForMode(event, 'nearest', {intersect: true}, false);
+                if (activePoints.length) {
+                    var index = activePoints[0].index;
+                    // حذف میله موقت
+                    chart.data.datasets[0].data[index] = null;
+                    chart.update();
+                }
+            }
+        };
+
+        var myChart = new Chart(document.getElementById("ChartMahaneh"), {
+            type: 'bar',
+            data: data,
+            options: options
+        });
+
+        // اضافه کردن رویداد کلیک به دکمه
+        document.getElementById('resetButton').addEventListener('click', function () {
+            myChart.data.datasets[0].data = originalDataValues.slice(); // بازگرداندن داده‌ها به مقدار اصلی
+            myChart.update();
+        });
+
+        // اضافه کردن کلیک روی عنوان برای بازگرداندن همه میله‌ها
+        document.querySelector('canvas').addEventListener('click', function (event) {
+            var activePoints = myChart.getElementsAtEventForMode(event, 'nearest', {intersect: true}, false);
+            if (!activePoints.length) {
+                myChart.data.datasets[0].data = originalDataValues.slice();
+                myChart.update();
+            }
+        });
+    </script>
+
+
+    <!-- نمودار دونات فروش دسته ها -->
+    <script>
+        var labels = [
+            {% for item in donat_forosh_data %}
+                '{{ item.name }}',
+            {% endfor %}
+        ];
+        var dataValues = [
+            {% for item in donat_forosh_data %}
+                {{ item.count }},
+            {% endfor %}
+        ];
+
+
+        var data = {
+            labels: labels,
+            datasets: [{
+                label: 'سهم فروش زیر مجموعه',
+                data: dataValues,
+                backgroundColor: [
+                    window.chartColors.red,
+                    window.chartColors.orange,
+                    window.chartColors.yellow,
+                    window.chartColors.green,
+                    window.chartColors.blue,
+                    window.chartColors.purple,
+                ],
+                {#borderColor: borderColors,#}
+                borderWidth: 1
+            }]
+        };
+
+        var options = {
+            responsive: true,
+            maintainAspectRatio: true,
+            legend: {
+                position: 'bottom',
+            },
+            title: {
+                display: false,
+                text: 'نمودار دونات'
+            },
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            }
+        {#scales: {#}
+        {#    y: {#}
+        {#        beginAtZero: true#}
+        {#    }#}
+        {#}#}
+        }
+        ;
+
+
+        drawChart('donat-forosh', 'doughnut', data, options);
+    </script>
+
+
+    <script src="{% static 'js/plugins/jquery-circle-progress/circle-progress.min.js' %}"></script>
+    <script>
+        function getColor(value) {
+
+            if (value <= 1 / 12) {
+                return ["#00FF00", "#00FF00"];
+            } else if (value <= 2 / 12) {
+                return ["#FFFF00", "#FFFF00"];
+            } else if (value <= 3 / 12) {
+                return ["#FFA500", "#FFA500"];
+            } else {
+                return [
+
+                    "#FF0000", "#FF0000"];
+            }
+        }
+
+        var value = {{ rosobper }};
+
+        $('#circle1').circleProgress({
+            value: value,
+            size: 80,
+            fill: {
+                gradient: getColor(value)
+            }
+            ,
+            animation: {
+                duration: 2000
+            }
+        })
+        ;
+
+        $('#circle2').circleProgress({
+            {#value: 0.25,#}
+            value: {{ rankper }},
+            size: 80,
+            fill: {
+                gradient: ["#EC4433", "#FE9500"]
+            }
+            ,
+            animation: {
+                duration: 2000
+            }
+        })
+        ;
+        $('#circle3').circleProgress({
+            {#value: {{ rosobper }},#}
+            value: .0016556291390728,
+            size: 80,
+            fill: {
+                gradient: ["#00CDFF", "#1E74FD"]
+            }
+            ,
+            animation: {
+                duration: 2000
+            }
+        })
+        ;
+    </script>
+
+
+
+
+{% endblock %}
+
+
+{% block date %}
+    <script src="{% static 'js/table1/tableExport.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-locale-all.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-export.min.js' %}"></script>
+    <script src="{% static 'js/table1/natural-sorting.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-filter-control.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-print.min.js' %}"></script>
+    <script src="{% static 'js/table1/jspdf.min.js' %}"></script>
+    <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
+
+
+    {#    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>#}
+    {#    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.3/bootstrap-table.min.js"></script>#}
+    {#    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.3/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>#}
+
+
+
+    {#    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>#}
+    {#    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.3/bootstrap-table.min.js"></script>#}
+    {#    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.3/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>#}
+
+
+    <script>
+        var $table = $('#table');
+        var totalMandah = 0; // متغیر برای ذخیره مجموع مانده
+
+        $(function () {
+            $table.bootstrapTable();
+            updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده هنگام بارگذاری جدول
+        });
+
+        function priceFormatter(data) {
+            var field = this.field;
+            console.log("Data received for priceFormatter:", data);
+            var result = data.map(function (row) {
+                var valueString = row[field].replace(/,/g, ''); // حذف کاماها
+                var value = parseFloat(valueString);
+                console.log("Processing row:", row);
+                console.log("Parsed value:", value);
+                return isNaN(value) ? 0 : value;
+            }).reduce(function (sum, i) {
+                console.log("Current sum:", sum);
+                return sum + i;
+            }, 0);
+            console.log("Final result for priceFormatter:", result);
+            totalMandah = result; // ذخیره مجموع مانده
+            updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده
+            return result.toLocaleString('fa-IR'); // نمایش با کاما به صورت 3 تا 3 تا
+        }
+
+        function updateTotalMandah() {
+            $('#total-mandah').text(totalMandah.toLocaleString('fa-IR'));
+        }
+    </script>
+
+
+
+
+{% endblock %}
+
+
+{% block jscal %}
+    <script>
+
+        $(document).ready(function () {
+            var currentYear = {{ year }};
+            var currentMonth = {{ month }};
+            var url = '/acc/cheques_pay_total';
+
+            console.log("Initial setup");
+            console.log("Current Year: " + currentYear);
+            console.log("Current Month: " + currentMonth);
+            console.log("Initial URL: " + url);
+
+            function loadCalendar(month, year) {
+                console.log("Loading calendar for month: " + month + ", year: " + year);
+                console.log("URL being used for AJAX call: " + url);
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    data: {month: month, year: year},
+                    success: function (data) {
+                        console.log("AJAX call success");
+                        $('#calendarf').html(data);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error loading calendar: ', error);
+                        console.error('XHR:', xhr);
+                        console.error('Status:', status);
+                    }
+                });
+            }
+
+            $('#prev-month').click(function (e) {
+                e.preventDefault();
+                if (currentMonth === 1) {
+                    currentMonth = 12;
+                    currentYear -= 1;
+                } else {
+                    currentMonth -= 1;
+                }
+                console.log("Previous month clicked. New Month: " + currentMonth + ", Year: " + currentYear);
+                loadCalendar(currentMonth, currentYear);
+            });
+
+            $('#next-month').click(function (e) {
+                e.preventDefault();
+                if (currentMonth === 12) {
+                    currentMonth = 1;
+                    currentYear += 1;
+                } else {
+                    currentMonth += 1;
+                }
+                console.log("Next month clicked. New Month: " + currentMonth + ", Year: " + currentYear);
+                loadCalendar(currentMonth, currentYear);
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="popover"]').popover({
+                trigger: 'click',  // تنظیم برای فعال‌سازی فقط با کلیک
+                placement: 'top',
+                html: true
+            });
+
+            // بستن Popover زمانی که در جای دیگری کلیک شود
+            $(document).on('click', function (e) {
+                $('[data-toggle="popover"]').each(function () {
+                    // اگر روی عنصر Popover کلیک نشده باشد
+                    if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+                        $(this).popover('hide');
+                    }
+                });
+            });
+        });
+    </script>
+
+{% endblock %}
+
+
