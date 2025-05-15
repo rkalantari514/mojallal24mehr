@@ -767,7 +767,7 @@ def UpdateKardex(request):
 
 
 
-def UpdateFactorDetail(request):
+def UpdateFactorDetail2(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات فاکتور-------------------------------------------------')
 
@@ -861,6 +861,134 @@ def UpdateFactorDetail(request):
     table.cloumn_count = column_count
     table.save()
 
+    return redirect('/updatedb')
+
+
+def UpdateFactorDetail(request):
+    t0 = time.time()
+    print('شروع آپدیت جزئیات فاکتور-------------------------------------------------')
+
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    cursor.execute("SELECT [code], [radif], [kala_code], [meghdar], [naghdi], [TotalCost] FROM [mahak].[dbo].[Fact_Fo_Detail]")
+    mahakt_data = cursor.fetchall()
+
+    t1 = time.time()
+    print('اتصال به دیتابیس انجام شد', t1 - t0)
+
+    # دریافت سال مالی فعال
+    try:
+        acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    except MasterInfo.DoesNotExist:
+        print("هشدار: هیچ سال مالی فعالی یافت نشد.")
+        if conn:
+            conn.close()
+        return redirect('/updatedb')
+
+    # بارگذاری فاکتورها و کالاها به صورت دسته‌ای
+    factor_codes_from_mahak = {row[0] for row in mahakt_data}
+    kala_codes_from_mahak = {row[2] for row in mahakt_data if row[2] is not None}
+
+    factors = {f.code: f for f in Factor.objects.filter(code__in=factor_codes_from_mahak, acc_year=acc_year)}
+    kalas = {k.code: k for k in Kala.objects.filter(code__in=kala_codes_from_mahak)}
+
+    existing_details = {
+        (detail.code_factor, detail.radif, detail.acc_year): detail
+        for detail in FactorDetaile.objects.filter(
+            code_factor__in=factor_codes_from_mahak,
+            acc_year=acc_year
+        ).select_related('factor', 'kala')
+    }
+
+    details_to_create = []
+    details_to_update = []
+    existing_in_mahak_keys = set()
+
+    for row in mahakt_data:
+        code_factor_mahak = row[0]
+        radif_mahak = row[1]
+        kala_code_mahak = row[2]
+        count_mahak = row[3]
+        mablagh_vahed_mahak = row[4]
+        mablagh_nahaee_mahak = row[5]
+        key_mahak = (code_factor_mahak, radif_mahak, acc_year)
+        existing_in_mahak_keys.add((code_factor_mahak, radif_mahak))
+
+        factor = factors.get(code_factor_mahak)
+        kala = kalas.get(kala_code_mahak)
+
+        if factor:
+            defaults = {
+                'code_kala': kala_code_mahak,
+                'count': count_mahak if count_mahak is not None else 0,
+                'mablagh_vahed': mablagh_vahed_mahak if mablagh_vahed_mahak is not None else 0,
+                'mablagh_nahaee': mablagh_nahaee_mahak if mablagh_nahaee_mahak is not None else 0,
+                'acc_year': acc_year,
+                'factor': factor,
+                'kala': kala,
+            }
+
+            if key_mahak in existing_details:
+                detail = existing_details[key_mahak]
+                updated = False
+                for attr, value in defaults.items():
+                    if getattr(detail, attr) != value:
+                        setattr(detail, attr, value)
+                        updated = True
+                if updated:
+                    details_to_update.append(detail)
+            else:
+                details_to_create.append(FactorDetaile(
+                    code_factor=code_factor_mahak,
+                    radif=radif_mahak,
+                    **defaults
+                ))
+
+    with transaction.atomic():
+        if details_to_create:
+            FactorDetaile.objects.bulk_create(details_to_create, ignore_conflicts=True)
+        if details_to_update:
+            FactorDetaile.objects.bulk_update(details_to_update, ['code_kala', 'count', 'mablagh_vahed', 'mablagh_nahaee', 'acc_year', 'factor', 'kala'])
+
+        FactorDetaile.objects.filter(
+            acc_year=acc_year
+        ).exclude(
+            code_factor__in=[k[0] for k in existing_in_mahak_keys],
+            radif__in=[k[1] for k in existing_in_mahak_keys],
+        ).delete()
+
+    t2 = time.time()
+    print('آپدیت انجام شد', t2 - t1)
+
+    tend = time.time()
+
+    total_time = tend - t0
+    db_time = t1 - t0
+    up_time = t2 - t1
+
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    print(f" اتصال به دیتابیس: {db_time:.2f} ثانیه")
+    print(f" عملیات اصلی آپدیت: {up_time:.2f} ثانیه")
+
+    try:
+        cursor.execute(f"SELECT COUNT(*) FROM Fact_Fo_Detail")
+        row_count = cursor.fetchone()[0]
+        cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Fact_Fo_Detail'")
+        column_count = cursor.fetchone()[0]
+
+        table = Mtables.objects.filter(name='Fact_Fo_Detail').last()
+        if table:
+            table.last_update_time = timezone.now()
+            table.update_duration = total_time
+            table.row_count = row_count
+            table.cloumn_count = column_count
+            table.save()
+    except Exception as e:
+        print(f"خطا در به‌روزرسانی جدول Mtables: {e}")
+
+    if conn:
+        conn.close()
+    print('پایان آپدیت جزئیات فاکتور-------------------------------------------------')
     return redirect('/updatedb')
 
 def UpdateKala(request):
