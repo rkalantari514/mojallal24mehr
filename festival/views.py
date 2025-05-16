@@ -221,13 +221,13 @@ def send_bulk_promotional_sms(request):
 
         if phone_number:
             message = f""" مشتری گرامی{customer_point.customer.cleaned_name()}
-تشکر بابت شرکت در جشنواره{customer_point.festival.name}
-با توجه به فاکتور خرید شماره{customer_point.factor.code}
-{customer_point.points_awarded} امتیاز کسب کرده‌اید.
-:مجموع امتیازات شما در این جشنواره
-{customer_point.total_point_this_festival()}امتیاز
+ تشکر بابت شرکت در جشنواره{customer_point.festival.name}
+ با توجه به فاکتور خرید شماره{customer_point.factor.code}
+{customer_point.points_awarded}  امتیاز کسب کرده‌اید.
+مجموع امتیازات شما در این جشنواره:
+{customer_point.total_point_this_festival()} امتیاز
 منتظر خرید بعدی شما هستیم
-هر{customer_point.festival.min_invoice_amount / 10000000} میلیون تومان خرید یک امتیاز
+ هر{customer_point.festival.min_invoice_amount / 10000000} میلیون تومان خرید یک امتیاز
 فروشگاه سرای یاس مجلل"""
 
 
