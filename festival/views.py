@@ -199,7 +199,9 @@ def normalize_phone_number(phone_number):
 
 @transaction.atomic
 def send_bulk_promotional_sms(request):
-    st = (0, 1, 2, 3, 4)
+    user = request.user
+    # st = (0, 1, 2, 3, 4)
+    st = (404,0, 1, 2, 3, 4)
     customer_points = CustomerPoints.objects.filter(festival__is_active=True).exclude(status_code__in=st)
     print('customer_points.count()')
     print(customer_points.count())
@@ -212,7 +214,7 @@ def send_bulk_promotional_sms(request):
 
     for customer_point in customer_points:
         print('counter=',counter)
-        if counter > 8:
+        if counter > 5:
             break
 
         person = customer_point.customer
@@ -237,7 +239,8 @@ def send_bulk_promotional_sms(request):
             # message_id = send_sms(phone_number, message)
 
             # خط زیر فقط برای تست به شماره ثابت ارسال می‌کند
-            message_id = send_sms('09151006447', message)
+            # message_id = send_sms('09151006447', message)
+            message_id = send_sms(user.mobile_number, message)
 
             if message_id:
                 customer_point.phone_number = phone_number
