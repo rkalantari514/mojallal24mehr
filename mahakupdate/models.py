@@ -414,6 +414,7 @@ class PersonGroup(models.Model):
     def __str__(self):
         return self.name
 
+import re
 
 class Person(models.Model):
     code = models.IntegerField(default=0, verbose_name='کد فرد')
@@ -437,7 +438,10 @@ class Person(models.Model):
     def __str__(self):
         return f'{self.name}  {self.lname}'
 
-
+    def cleaned_name(self):
+        full_name = f'{self.name} {self.lname}'
+        cleaned_name = re.split(r"[a-zA-Z-$/]|قسط", full_name, maxsplit=1)[0].strip()
+        return cleaned_name
 
 
 class WordCount(models.Model):

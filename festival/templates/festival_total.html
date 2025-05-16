@@ -23,107 +23,69 @@
                 </div>
             </div>
             <!-- ردیف اول خلاصه ها -->
+            <!-- ردیف خلاصه جشنواره  -->
             <div class="row">
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                <div class="col-xl-12 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="card-body">
-                            <div class="clearfix">
-                                <div class="float-left icon-box bg-primary rounded-circle">
-    <span class="text-white">
-    <i class="fa fa-download highlight-icon" aria-hidden="true"></i>
-    </span>
-                                </div>
-                                <div class="float-right text-right">
-                                    <p class="card-text text-dark">----</p>
-                                    <h4>
-                                        <a href="/acc/jariashkhas/moshtarian/detaile/4" target="_blank">
-                                            {{ table1.3|floatformat:0|intcomma:False }} میلیون تومان
-                                        </a>
-                                    </h4>
+                            <div class="d-block d-md-flex justify-content-between">
+                                <div class="d-block">
+                                    <h5 class="card-title pb-0 border-0">جشنواره ها</h5>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <div class="clearfix">
-                                <div class="float-left icon-box bg-danger rounded-circle">
-    <span class="text-white">
-    <i class="fa fa-times-rectangle-o highlight-icon" aria-hidden="true"></i>
-    </span>
-                                </div>
-                                <div class="float-right text-right">
-                                    <p class="card-text text-dark"> ----- </p>
-                                    <h4>
-                                        <a href="/acc/jariashkhas/moshtarian/detaile/6" target="_blank">
-                                            {{ table1.5|floatformat:0|intcomma:False }} میلیون تومان
-                                        </a>
-                                    </h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <div class="clearfix">
-                                <div class="float-left icon-box bg-warning rounded-circle">
-    <span class="text-white">
-    <i class="fa fa-times highlight-icon" aria-hidden="true"></i>
-    </span>
-                                </div>
-                                <div class="float-right text-right">
-                                    <p class="card-text text-dark"> ----- </p>
-                                    <h4>
-                                        <a href="/acc/jariashkhas/moshtarian/detaile/7" target="_blank">
-                                            {{ table1.8|floatformat:0|intcomma:False }} میلیون تومان
-                                        </a>
-                                    </h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <div class="clearfix">
-                                <div class="float-left icon-box bg-info rounded-circle">
-    <span class="text-white">
-    <i class="fa  fa fa-hourglass-end highlight-icon" aria-hidden="true"></i>
-    </span>
-                                </div>
-                                <div class="float-right text-right">
-                                    <p class="card-text text-dark"> ----- </p>
-                                    <h4>
-                                        <a href="/acc/loan_total" target="_blank">
-                                            {{ table1.9|floatformat:0|intcomma:False }} میلیون تومان
-                                        </a>
-                                    </h4>
-                                </div>
+                            <div class="table-responsive mt-15">
+                                <table class="table center-aligned-table mb-0">
+                                    <thead>
+                                    <tr class="text-dark">
+                                        <th>ردیف</th>
+                                        <th>نام</th>
+                                        <th>تاریخ شروع</th>
+                                        <th>تاریخ پایان</th>
+                                        <th>مدت جشنواره</th>
+                                        <th>حداقل خرید</th>
+                                        <th>ضریب امتیاز</th>
+                                        <th>جمع امتیازات</th>
+                                        <th>فروش / میلیون تومان</th>
+                                        <th>وضعیت</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for f in festivals %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ f.name }}</td>
+                                            <td>{{ f.start_date|to_jalali:"%Y/%m/%d" }}</td>
+                                            <td>{{ f.end_date|to_jalali:"%Y/%m/%d" }}</td>
+                                            <td>{{ f.days }}</td>
+                                            <td>{{ f.min_invoice_amount|floatformat:0|intcomma:False }}</td>
+                                            <td>{{ f.points_per_purchase_ratio|floatformat:0|intcomma:False }}</td>
+                                            <td>{{ f.points_sum }}</td>
+                                            <td>{{ f.factor_sum|floatformat:0|intcomma:False }}</td>
+                                            <td><label
+                                                    class="{{ f.status_info.class }} ">{{ f.status_info.label }}</label>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- ردیف کلیات و نمودار فروش -->
 
 
-
-            <!-- ردیف موجودی انبار و تقویم -->
+            <!--ردیف امتیازات -->
             <div class="row">
                 <div class="col-md-12 mb-30">
                     <div class="col-xl-12 mb-30">
                         <div class="card card-statistics h-100">
                             <div class="card-body">
                                 <div class="table-responsive mt-15 ">
-                                    <h6 class="card-title pb-0 border-0">جشنواره ها <span
+                                    <h6 class="card-title pb-0 border-0">مجموع امتیاز جشنواره ها <span
                                             id="total-mandah"
                                             class="text-primary"></span>
-                                        -- </h6>
+                                        امتیاز </h6>
                                     <div class="table-responsive">
                                         <table id="table"
                                                class="table-striped"
@@ -143,12 +105,13 @@
                                                data-pagination="true"
                                                data-show-columns-search="true"
                                                data-show-footer="true"
-                                               data-page-size="10"
+                                               data-page-size="50"
                                                data-remember-order="true"
                                                data-sortable="true"
                                                data-show-search-clear-button="true"
-                                               data-sort-name="date"
-                                               data-sort-order="asc"
+                                               data-sort-name="total_point_global"
+{#                                               data-sort-order="asc"#}
+                                               data-sort-order="desc"
                                                data-filter-control="true"
                                                data-show-print="true"
                                                data-export-data-type="all"
@@ -180,9 +143,28 @@
                                                     data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter">امتیاز
                                                 </th>
-
-
-
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="total_point_this_festival"
+                                                    data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">امتیاز در این جشنواره
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="total_point_global"
+                                                    data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">امتیاز در کل جشنواره ها
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="phones"
+                                                    data-footer-formatter="priceFormatter">تلفنها
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="phone_number"
+                                                    data-footer-formatter="priceFormatter">شماره تلفن
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="condiition" data-filter-control="select"
+                                                    data-footer-formatter="priceFormatter">وضعیت پیامک
+                                                </th>
 
 
                                             </tr>
@@ -191,10 +173,28 @@
                                             {% for p in points %}
                                                 <tr>
                                                     <td class="card-text text-center">{{ p.festival }}</td>
-                                                    <td class="card-text text-center">{{ p.customer }}</td>
+                                                    <td class="card-text text-center">{{ p.customer.cleaned_name }}</td>
                                                     <td class="card-text text-center">{{ p.factor.pdate }}</td>
                                                     <td class="card-text text-center">{{ p.mablagh_k|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center">{{ p.points_awarded}}</td>
+                                                    <td class="card-text text-center">{{ p.points_awarded }}</td>
+                                                    <td class="card-text text-center">{{ p.total_point_this_festival }}</td>
+                                                    <td class="card-text text-center">{{ p.total_point_global }}</td>
+                                                    <td class="card-text text-center">
+                                                        تلفن 1: {{ p.customer.tel1 }}<br>
+                                                        تلفن 2: {{ p.customer.tel2 }}<br>
+                                                        فکس: {{ p.customer.fax }}<br>
+                                                        موبایل: {{ p.customer.mobile }}
+                                                    </td>
+                                                    <td class="card-text text-center">{{ p.phone_number }}</td>
+                                                    <td class="card-text text-center">
+                                                     <span class="{{ p.get_status_details.color }}">
+                        <i class="fa {{ p.get_status_details.icon }}"></i>
+                        {{ p.get_status_details.persian }}
+                    </span>
+
+
+                                                    </td>
+
 
                                                 </tr>
                                             {% endfor %}
