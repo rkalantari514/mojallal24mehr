@@ -4,6 +4,7 @@ from django.db import models
 from mahakupdate.models import Factor, Person  # فرض بر اینکه مدل Factor در اپلیکیشن 'mahakupdate' قرار دارد
 from django.db.models import Sum, F
 from django.utils import timezone
+from django.db.models import Count, Q
 
 class Festival(models.Model):
     name = models.CharField(max_length=255, verbose_name='نام جشنواره')
@@ -32,6 +33,20 @@ class Festival(models.Model):
             net_amount=F('factor__mablagh_factor') - F('factor__takhfif')
         ).aggregate(total_sales=Sum('net_amount'))
         return result['total_sales']/10000000 if result['total_sales'] else 0
+
+    def sms_status_counts(self):
+        return CustomerPoints.objects.filter(festival=self).aggregate(
+            not_sent=Count('status_code', filter=Q(status_code=None)),
+            no_verified_number=Count('status_code', filter=Q(status_code=404)),
+            sent=Count('status_code', filter=Q(status_code=0)),
+            pending=Count('status_code', filter=Q(status_code=1)),
+            delivered=Count('status_code', filter=Q(status_code=2)),
+            failed=Count('status_code', filter=Q(status_code=3)),
+            discarded=Count('status_code', filter=Q(status_code=4)),
+        )
+
+
+
 
     @property
     def status_info(self):

@@ -34,43 +34,56 @@
                                     <a href="/update/send-festival-sms"><i class="fa fa-paper-plane-o"></i></a>
                                 </div>
                             </div>
-                            <div class="table-responsive mt-15">
-                                <table class="table center-aligned-table mb-0">
-                                    <thead>
-                                    <tr class="text-dark">
-                                        <th>ردیف</th>
-                                        <th>نام</th>
-                                        <th>تاریخ شروع</th>
-                                        <th>تاریخ پایان</th>
-                                        <th>مدت جشنواره</th>
-                                        <th>حداقل خرید</th>
-                                        <th>ضریب امتیاز</th>
-                                        <th>جمع امتیازات</th>
-                                        <th>فروش / میلیون تومان</th>
-                                        <th>وضعیت</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for f in festivals %}
-                                        <tr>
-                                            <td>{{ forloop.counter }}</td>
-                                            <td>{{ f.name }}</td>
-                                            <td>{{ f.start_date|to_jalali:"%Y/%m/%d" }}</td>
-                                            <td>{{ f.end_date|to_jalali:"%Y/%m/%d" }}</td>
-                                            <td>{{ f.days }}</td>
-                                            <td>{{ f.min_invoice_amount|floatformat:0|intcomma:False }}</td>
-                                            <td>{{ f.points_per_purchase_ratio|floatformat:0|intcomma:False }}</td>
-                                            <td>{{ f.points_sum }}</td>
-                                            <td>{{ f.factor_sum|floatformat:0|intcomma:False }}</td>
-                                            <td><label
-                                                    class="{{ f.status_info.class }} ">{{ f.status_info.label }}</label>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+<div class="table-responsive mt-15">
+    <table class="table center-aligned-table mb-0">
+        <thead>
+        <tr class="text-dark">
+            <th>ردیف</th>
+            <th>نام</th>
+            <th>تاریخ شروع</th>
+            <th>تاریخ پایان</th>
+            <th>مدت جشنواره</th>
+            <th>حداقل خرید</th>
+            <th>ضریب امتیاز</th>
+            <th>جمع امتیازات</th>
+            <th>فروش / میلیون تومان</th>
+            <th>وضعیت</th>
+            <th>ارسال نشده</th>
+            <th>فاقد شماره</th>
+            <th>ارسال شده</th>
+            <th>در انتظار ارسال</th>
+            <th>رسیده به گوشی</th>
+            <th>ناموفق</th>
+            <th>رد شده</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for f in festivals %}
+            {% with sms_counts=f.sms_status_counts %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ f.name }}</td>
+                    <td>{{ f.start_date|to_jalali:"%Y/%m/%d" }}</td>
+                    <td>{{ f.end_date|to_jalali:"%Y/%m/%d" }}</td>
+                    <td>{{ f.days }}</td>
+                    <td>{{ f.min_invoice_amount|floatformat:0|intcomma:False }}</td>
+                    <td>{{ f.points_per_purchase_ratio|floatformat:0|intcomma:False }}</td>
+                    <td>{{ f.points_sum }}</td>
+                    <td>{{ f.factor_sum|floatformat:0|intcomma:False }}</td>
+                    <td><label class="{{ f.status_info.class }} ">{{ f.status_info.label }}</label></td>
+                    <td>{{ sms_counts.not_sent }}</td>
+                    <td>{{ sms_counts.no_verified_number }}</td>
+                    <td>{{ sms_counts.sent }}</td>
+                    <td>{{ sms_counts.pending }}</td>
+                    <td>{{ sms_counts.delivered }}</td>
+                    <td>{{ sms_counts.failed }}</td>
+                    <td>{{ sms_counts.discarded }}</td>
+                </tr>
+            {% endwith %}
+        {% endfor %}
+        </tbody>
+    </table>
+</div>                        </div>
                     </div>
                 </div>
             </div>
