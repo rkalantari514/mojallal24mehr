@@ -36,7 +36,8 @@ class Festival(models.Model):
 
     def sms_status_counts(self):
         return CustomerPoints.objects.filter(festival=self).aggregate(
-            not_sent=Count('status_code', filter=Q(status_code__isnull=True)),
+            # not_sent=Count('status_code', filter=Q(status_code__isnull=True)),
+            not_sent=Count('id', filter=Q(status_code=None)),
             no_verified_number=Count('status_code', filter=Q(status_code=404)),
             sent=Count('status_code', filter=Q(status_code=0)),
             pending=Count('status_code', filter=Q(status_code=1)),
