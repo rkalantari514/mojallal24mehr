@@ -1244,15 +1244,21 @@ def UpdatePerson(request):
 
         Person.objects.exclude(code__in=existing_in_mahak).delete()
 
-     # 🗑️ حذف همه رکوردهای تکراری با نگه داشتن قدیمی ترین رکورد
+
+# 🗑️ حذف همه رکوردهای تکراری با نگه داشتن قدیمی ترین رکورد
     duplicate_codes = (Person.objects.values('code')
                       .annotate(count=Count('code'))
                       .filter(count__gt=1)
                       .values_list('code', flat=True))
 
     for code in duplicate_codes:
-        duplicates_to_delete = Person.objects.filter(code=code).order_by('id')[1:]  # انتخاب همه رکوردها بعد از اولین
-        duplicates_to_delete.delete()
+        # واکشی تمام رکوردهای تکراری برای کد فعلی، مرتب شده بر اساس id
+        duplicates = Person.objects.filter(code=code).order_by('id')
+        # انتخاب تمام رکوردها از دومین رکورد به بعد برای حذف
+        duplicates_to_delete = duplicates[1:]
+        # حذف رکوردهای انتخاب شده
+        if duplicates_to_delete.exists():  # اطمینان از وجود رکوردهای تکراری برای حذف
+            duplicates_to_delete.delete()
 
 
 
