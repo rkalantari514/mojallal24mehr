@@ -1252,19 +1252,9 @@ def UpdatePerson(request):
                       .values_list('code', flat=True))
 
     for code in duplicate_codes:
-        # واکشی تمام رکوردهای تکراری برای کد فعلی، مرتب شده بر اساس id
         duplicates = Person.objects.filter(code=code).order_by('id')
-        # انتخاب تمام رکوردها از دومین رکورد به بعد برای حذف
-        duplicates_to_delete = duplicates[1:]
-        # حذف رکوردهای انتخاب شده
-        if duplicates_to_delete.exists():  # اطمینان از وجود رکوردهای تکراری برای حذف
-            duplicates_to_delete.delete()
-
-
-
-
-
-
+        first_record = duplicates.first()  # نگه داشتن قدیمی‌ترین رکورد
+        duplicates.exclude(id=first_record.id).delete()  # حذف سایر رکوردها
 
 
 
