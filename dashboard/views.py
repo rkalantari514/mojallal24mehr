@@ -1105,12 +1105,20 @@ def CreateReport(request):
             continue
         acc_year2=SanadDetail.objects.filter(date= current_date).last().acc_year
         # data = SanadDetail.objects.filter(
-        #     # acc_year=acc_year,
         #     is_active=True,
-        #     date= current_date
+        #     date=current_date
         # ).filter(
         #     Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101) | Q(kol=200)
-        # ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
+        # ).values('date', 'kol').annotate(
+        #     total_amount=Sum(
+        #         Case(
+        #             When(kol=400, curramount__gt=0, then='curramount'),
+        #             When(~Q(kol=400), then='curramount'),
+        #             default=Value(0)
+        #         )
+        #     )
+        # )
+        from django.db.models import Sum, Case, When, Value, Q, DecimalField
 
         data = SanadDetail.objects.filter(
             is_active=True,
@@ -1122,7 +1130,8 @@ def CreateReport(request):
                 Case(
                     When(kol=400, curramount__gt=0, then='curramount'),
                     When(~Q(kol=400), then='curramount'),
-                    default=Value(0)
+                    default=Value(0),
+                    output_field=DecimalField(max_digits=20, decimal_places=2)
                 )
             )
         )
