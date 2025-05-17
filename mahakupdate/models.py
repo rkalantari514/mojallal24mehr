@@ -440,10 +440,16 @@ class Person(models.Model):
 
     import re
 
+    import re
+
     def cleaned_name(self):
         full_name = f'{self.name} {self.lname}'
 
-        # الگوی اصلاح‌شده برای حذف موارد اضافی و کاراکترهای خاص
+        # اگر نام دقیقاً "رسول غریبانی مرزبانی استان خراسان رضوی" باشد، فقط "رسول غریبانی" را نگه دار
+        if full_name == "رسول غريباني مرزباني استان خراسان رضوي":
+            return "رسول غريباني"
+
+        # حذف موارد اضافی و کاراکترهای خاص
         cleaned_name = re.split(r"[a-zA-Z-$/]|قسط|طرح رفاه\s*\d+ماهه|ماهی\d+|[._+()]", full_name, maxsplit=1)[0].strip()
 
         return cleaned_name
