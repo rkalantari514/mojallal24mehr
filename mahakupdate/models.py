@@ -438,9 +438,14 @@ class Person(models.Model):
     def __str__(self):
         return f'{self.name}  {self.lname}'
 
+    import re
+
     def cleaned_name(self):
         full_name = f'{self.name} {self.lname}'
-        cleaned_name = re.split(r"[a-zA-Z-$/]|قسط", full_name, maxsplit=1)[0].strip()
+
+        # الگوی اصلاح‌شده برای حذف موارد اضافی و کاراکترهای خاص
+        cleaned_name = re.split(r"[a-zA-Z-$/]|قسط|طرح رفاه\s*\d+ماهه|ماهی\d+|[._+()]", full_name, maxsplit=1)[0].strip()
+
         return cleaned_name
 
 
