@@ -28,7 +28,7 @@ from django.http import JsonResponse
 import pyodbc
 from django.http import JsonResponse
 # sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
-
+from django.db.models import Sum, Count, F, Q
 
 def connect_to_mahak():
     sn = os.getenv('COMPUTERNAME')
@@ -1243,6 +1243,17 @@ def UpdatePerson(request):
             ])
 
         Person.objects.exclude(code__in=existing_in_mahak).delete()
+
+        # 🗑️ حذف رکوردهای تکراری با نگه داشتن قدیمی ترین رکورد
+    duplicate_codes = (Person.objects.values('code')
+                       .annotate(count=Count('code'))
+                       .filter(count__gt=1)
+                       .values_list('code', flat=True))
+
+    for code in duplicate_codes:
+        duplicates = Person.objects.filter(code=code).order_by('id')[
+                     1:]  # نگه داشتن اولین رکورد (با id کوچکتر که احتمالاً قدیمی تر است)
+        duplicates.delete()
 
     tend = time.time()
     total_time = tend - t0
