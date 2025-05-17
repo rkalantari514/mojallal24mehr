@@ -214,7 +214,7 @@ def send_bulk_promotional_sms(request):
 
     for customer_point in customer_points:
         print('counter=',counter)
-        if counter > 1:
+        if counter > 25:
             break
 
         person = customer_point.customer
@@ -252,11 +252,11 @@ def send_bulk_promotional_sms(request):
             message_id = None
 
             # خط زیر برای ارسال واقعی به شماره مشتری است (در آینده فعال کنید)
-            # message_id = send_sms(phone_number, message)
+            message_id = send_sms(phone_number, message)
 
             # خط زیر فقط برای تست به شماره ثابت ارسال می‌کند
             # message_id = send_sms('09151006447', message)
-            message_id = send_sms(user.mobile_number, message)
+            # message_id = send_sms(user.mobile_number, message)
 
             if message_id:
                 customer_point.phone_number = phone_number
