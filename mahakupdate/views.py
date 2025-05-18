@@ -4090,9 +4090,10 @@ def UpdateBedehiMoshtari(request):
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
     try:
         with transaction.atomic():
+            mm=[1,16]
             # دریافت مجموع بدهی‌ها و اطلاعات مرتبط
             tafzili_sums = SanadDetail.objects.filter(
-                moin=1, kol=103, is_active=True, acc_year=acc_year
+                moin__in=mm, kol=103, is_active=True, acc_year=acc_year
             ).values('tafzili', 'moin').annotate(total_curramount=Sum('curramount'))
 
             existing_entries = {
