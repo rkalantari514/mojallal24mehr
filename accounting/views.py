@@ -1137,7 +1137,8 @@ def HesabMoshtariDetail(request, tafsili):
         UserLog.objects.create(user=user, page='حساب مشتری', code=tafsili)
 
     today = timezone.now().date()
-    asnad = SanadDetail.objects.filter(kol=103, moin=1, tafzili=tafsili).order_by('date')
+    # asnad = SanadDetail.objects.filter(kol=103, moin=1, tafzili=tafsili).order_by('date')
+    asnad = SanadDetail.objects.filter(kol=103,  tafzili=tafsili).order_by('date')
 
     hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
     m_name = None
