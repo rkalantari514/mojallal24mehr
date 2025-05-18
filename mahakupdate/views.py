@@ -4189,7 +4189,7 @@ def UpdateBedehiMoshtari(request):
         print(f"خطا در به‌روزرسانی بدهی مشتری: {e}")
 
     print(f"زمان کل: {time.time() - t0:.2f} ثانیه")
-    return redirect('/acc/loan_total')
+    return redirect('/acc/loan_total/overdue')
 
 
 
