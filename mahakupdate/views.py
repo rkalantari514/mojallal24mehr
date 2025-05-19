@@ -2252,7 +2252,7 @@ def UpdateSanadDetail(request):
     SanadDetail.objects.bulk_update(
         sanads_to_update,
         ['kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
-         'sanad_code', 'sanad_type', 'meghdar',person,
+         'sanad_code', 'sanad_type', 'meghdar','person',
          'syscomment', 'curramount', 'usercreated', 'tarikh', 'is_analiz'],
         batch_size=BATCH_SIZE
     )
