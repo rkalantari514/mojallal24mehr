@@ -1257,6 +1257,9 @@ def UpdatePerson(request):
         duplicates.exclude(id=first_record.id).delete()  # حذف سایر رکوردها
 
 
+    for p in Person.objects.filter(clname=None):
+        p.clname=p.cleaned_name()
+        p.save()
 
     tend = time.time()
     total_time = tend - t0

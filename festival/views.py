@@ -67,6 +67,9 @@ def Calculate_and_award_points(request):
         for factor in eligible_factors:
             invoice_value = Decimal(factor.mablagh_factor) - Decimal(factor.takhfif)
             calculated_points = 0
+            if factor.person is None:
+                print(f"Warning: Factor with ID {factor.id} has no associated person. Skipping.")
+                continue  # رد شدن از این فاکتور و رفتن به فاکتور بعدی
             if invoice_value >= min_invoice_amount and points_per_purchase_ratio > 0:
                 calculated_points_float = invoice_value / points_per_purchase_ratio
                 calculated_points = math.floor(calculated_points_float)

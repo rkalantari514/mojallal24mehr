@@ -416,6 +416,8 @@ class PersonGroup(models.Model):
 
 import re
 
+
+
 class Person(models.Model):
     code = models.IntegerField(default=0, verbose_name='کد فرد')
     grpcode = models.IntegerField(default=0, verbose_name='کد گروه')
@@ -429,7 +431,7 @@ class Person(models.Model):
     address = models.CharField(max_length=550, verbose_name='آدرس')
     comment = models.CharField(max_length=550, verbose_name='توضیحات')
     per_taf=models.IntegerField(default=0, verbose_name='کد تفصیلی فرد')
-    # reminbg
+    clname = models.CharField(max_length=150, verbose_name='نام مخاطب', blank=True, null=True)
 
     class Meta:
         verbose_name = 'فرد'
@@ -453,6 +455,11 @@ class Person(models.Model):
         cleaned_name = re.split(r"[a-zA-Z-$/]|قسط|طرح رفاه\s*\d+ماهه|ماهی\d+|[._+()]", full_name, maxsplit=1)[0].strip()
 
         return cleaned_name
+
+    def save(self, *args, **kwargs):
+        if not self.clname:  # فقط اگر clname مقدار ندارد
+            self.clname = self.cleaned_name()
+        super().save(*args, **kwargs)
 
 
 class WordCount(models.Model):
