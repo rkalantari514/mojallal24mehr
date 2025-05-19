@@ -217,8 +217,8 @@ def send_bulk_promotional_sms(request):
 
     for customer_point in customer_points:
         print('counter=',counter)
-        if counter > 25:
-            break
+        # if counter > 25:
+        #     break
 
         person = customer_point.customer
         phone_number = normalize_phone_number(person.mobile)
