@@ -1143,12 +1143,6 @@ def HesabMoshtariDetail(request, tafsili):
     hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
     m_name = None
 
-    if hesabmoshtari:
-        full_name = f'{hesabmoshtari.person.name} {hesabmoshtari.person.lname}'
-        # cleaned_name = re.split(r"[a-zA-Z-$]|قسط", full_name, maxsplit=1)[0].strip()
-        cleaned_name = re.split(r"[a-zA-Z-$/]|قسط", full_name, maxsplit=1)[0].strip()
-        m_name = hesabmoshtari.clname
-
     if request.method == 'POST':
         action = request.POST.get('action')  # دریافت نام دکمه کلیک شده
         print('action',action)
