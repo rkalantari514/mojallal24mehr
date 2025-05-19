@@ -225,7 +225,7 @@ def send_bulk_promotional_sms(request):
         print('normalize_phone_number:',phone_number)
 
         if phone_number:
-            message1 = f"""مشتری گرامی {customer_point.customer.cleaned_name()}
+            message1 = f"""مشتری گرامی {customer_point.customer.clname}
 تشکر بابت شرکت در جشنواره {customer_point.festival.name}
 با توجه به فاکتور خرید شماره {customer_point.factor.code}
 {customer_point.points_awarded} امتیاز کسب کرده‌اید.
@@ -235,7 +235,7 @@ def send_bulk_promotional_sms(request):
 هر {customer_point.festival.min_invoice_amount / 10000000} میلیون تومان خرید یک امتیاز
 فروشگاه سرای یاس مجلل"""
 
-            message = f"""{customer_point.customer.cleaned_name()} عزیز 
+            message = f"""{customer_point.customer.clname} عزیز 
 سپاس از  شرکت در جشنواره {customer_point.festival.name}
 با فاکتور  {customer_point.factor.code} شما {customer_point.points_awarded} امتیاز گرفتین!
  مجموع امتیازات شما  {customer_point.total_point_this_festival()} 

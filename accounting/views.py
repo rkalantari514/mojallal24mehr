@@ -1147,7 +1147,7 @@ def HesabMoshtariDetail(request, tafsili):
         full_name = f'{hesabmoshtari.person.name} {hesabmoshtari.person.lname}'
         # cleaned_name = re.split(r"[a-zA-Z-$]|قسط", full_name, maxsplit=1)[0].strip()
         cleaned_name = re.split(r"[a-zA-Z-$/]|قسط", full_name, maxsplit=1)[0].strip()
-        m_name = cleaned_name
+        m_name = hesabmoshtari.clname
 
     if request.method == 'POST':
         action = request.POST.get('action')  # دریافت نام دکمه کلیک شده
@@ -1166,7 +1166,7 @@ def HesabMoshtariDetail(request, tafsili):
                     form.add_error('message', "حداقل یکی از فیلدهای متن پیامک یا پیامک نمونه باید مقدار داشته باشد.")
                 else:
                     message_to_send='مشتری گرامی'
-                    message_to_send += f"\n{m_name}\n"
+                    message_to_send += f"\n{hesabmoshtari.clname}\n"
                     message_to_send += sample_sms.text if sample_sms else ""
                     if message:
                         message_to_send += f"\n{message}"

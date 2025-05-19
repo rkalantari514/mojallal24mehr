@@ -97,7 +97,7 @@ class MojodiAdmin(admin.ModelAdmin):
 class PersonAdmin(admin.ModelAdmin):
     list_display = ['__str__', 'code','per_taf', 'name', 'lname','clname', 'group']
     # list_filter = ['level','parent',]
-    # list_editable = ['name','parent','level']
+    list_editable = ['clname']
     search_fields = ['name', 'code','per_taf']
 
     class Meta:
