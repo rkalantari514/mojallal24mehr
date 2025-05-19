@@ -2162,7 +2162,7 @@ def UpdateSanadDetail(request):
             curramount = Decimal(row[12]) if row[12] is not None else Decimal('0.0000000000')
             usercreated = row[13] if row[13] is not None else ''
             voucher_date = row[14]  # تاریخ وچر از دیتابیس
-            person=Person.objects.filter(per_taf=a.tafzili).last()
+            person=Person.objects.filter(per_taf=tafzili).last()
 
         except (ValueError, InvalidOperation) as e:
             print(f"خطا در پردازش رکورد {row}: {e}. گذر از این رکورد.")

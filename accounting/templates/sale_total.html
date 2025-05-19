@@ -54,6 +54,10 @@
                                             <thead>
                                             <tr class="tr-class-1">
                                                 <th class="card-text text-center" data-sortable="true"
+                                                    data-field="person"
+                                                    data-filter-control="input">مشتری
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true"
                                                     data-field="code"
                                                     data-filter-control="input">کد
                                                 </th>
@@ -66,8 +70,14 @@
                                                     data-filter-control="select">تاریخ
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-field="kind" data-filter-control="select">نوع
+                                                    data-field="years"
+                                                    data-filter-control="select">سال
                                                 </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="months"
+                                                    data-filter-control="select">ماه
+                                                </th>
+
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="sharh"
                                                     data-filter-control="input">شرح سند
@@ -75,16 +85,7 @@
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="bed" data-footer-formatter="priceFormatter">بدهکار
                                                 </th>
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-field="bes" data-footer-formatter="priceFormatter">بستانکار
-                                                </th>
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-field="mand1" data-footer-formatter="priceFormatter">مانده سند
-                                                </th>
-                                                {#                                                <th class="card-text text-center" data-sortable="true"#}
-                                                {#                                                    data-field="mandkol"#}
-                                                {#                                                    data-filter-control="select">مانده کل#}
-                                                {#                                                </th>#}
+
 
                                             </tr>
                                             </thead>
@@ -92,11 +93,11 @@
                                             {% for s in asnadp %}
                                                 <tr>
                                                     <td class="card-text text-center">{{ s.person }}</td>
+                                                    <td class="card-text text-center">{{ s.code }}</td>
                                                     <td class="card-text text-center">{{ s.radif }}</td>
                                                     <td class="card-text text-center">{{ s.tarikh }}</td>
-                                                    {#                                                    <td class="card-text text-center ">{{ s.kind.0 }}</td>#}
-                                                    <td class="card-text text-center text-{{ s.kind.2 }}">{{ s.kind.1 }}</td>
-                                                    {#                                                     <td class="card-text text-center ">{{ s.syscomment }}</td>#}
+                                                <td class="card-text text-center">{{ s.tarikh|slice:":4" }}</td>
+                                                <td class="card-text text-center">{{ s.tarikh|slice:"5:7" }}</td>
                                                     <td class="card-text text-center ">
                                                         {% if s.syscomment %}
                                                             {{ s.syscomment }}
@@ -106,10 +107,7 @@
                                                     </td>
 
                                                     <td class="card-text text-center">{{ s.bed|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center">{{ s.bes|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center"
-                                                        style="direction: ltr">{{ s.curramount|floatformat:0|intcomma:False }}</td>
-                                                    {#                                                    <td class="card-text text-center"></td>#}
+
                                                 </tr>
                                             {% endfor %}
                                             </tbody>

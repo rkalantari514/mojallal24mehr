@@ -1460,11 +1460,7 @@ def SaleTotal(request):
     today = timezone.now().date()
     # asnad = SanadDetail.objects.filter(kol=103,kind=?).order_by('date')[:40]
     asnadp = SanadDetail.objects.filter(kol=103, sharh__startswith='خريدار در فاکتور فروش').order_by('date')[:40]
-    for a in asnadp:
-        per=Person.objects.filter(per_taf=a.tafzili).last()
-        if per:
-            a.person=per
-            a.save()
+
 
 
 
