@@ -511,8 +511,7 @@ class SanadDetail(models.Model):
     cheque_id = models.CharField(blank=True, null=True, max_length=255,
                                  verbose_name="شناسه چک")  # یا مقدار max_length مناسب
     is_active = models.BooleanField(default=True, verbose_name='فعال است')
-
-
+    person = models.ForeignKey('Person', on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         unique_together = (('acc_year','code', 'radif'),)  # تعریف کلید یگانه

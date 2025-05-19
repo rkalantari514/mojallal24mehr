@@ -2162,6 +2162,7 @@ def UpdateSanadDetail(request):
             curramount = Decimal(row[12]) if row[12] is not None else Decimal('0.0000000000')
             usercreated = row[13] if row[13] is not None else ''
             voucher_date = row[14]  # تاریخ وچر از دیتابیس
+            person=Person.objects.filter(per_taf=a.tafzili).last()
 
         except (ValueError, InvalidOperation) as e:
             print(f"خطا در پردازش رکورد {row}: {e}. گذر از این رکورد.")
@@ -2208,7 +2209,7 @@ def UpdateSanadDetail(request):
                     # sanad.tafzili != tafzili or
                     sanad.sharh != sharh or sanad.bed != bed or sanad.bes != bes or
                     sanad.sanad_code != sanad_code or sanad.sanad_type != sanad_type or
-                    sanad.meghdar != meghdar or sanad.syscomment != syscomment or
+                    sanad.meghdar != meghdar or sanad.person != person or sanad.syscomment != syscomment or
                     sanad.curramount != curramount or sanad.usercreated != usercreated or
                     sanad.tarikh != voucher_date):
                 sanad.kol = kol
@@ -2220,6 +2221,7 @@ def UpdateSanadDetail(request):
                 sanad.sanad_code = sanad_code
                 sanad.sanad_type = sanad_type
                 sanad.meghdar = meghdar
+                sanad.person = person
                 sanad.syscomment = syscomment
                 sanad.curramount = curramount
                 sanad.usercreated = usercreated
@@ -2230,7 +2232,7 @@ def UpdateSanadDetail(request):
             sanads_to_create.append(SanadDetail(
                 code=code, radif=radif, kol=kol, moin=moin, tafzili=tafzili,
                 sharh=sharh, bed=bed, bes=bes, sanad_code=sanad_code,
-                sanad_type=sanad_type, meghdar=meghdar, syscomment=syscomment,
+                sanad_type=sanad_type, meghdar=meghdar,person=person, syscomment=syscomment,
                 curramount=curramount, usercreated=usercreated,
                 tarikh=voucher_date,  # ذخیره تاریخ شمسی
                 is_analiz=False,  # تنظیم is_analiz به False
@@ -2250,7 +2252,7 @@ def UpdateSanadDetail(request):
     SanadDetail.objects.bulk_update(
         sanads_to_update,
         ['kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
-         'sanad_code', 'sanad_type', 'meghdar',
+         'sanad_code', 'sanad_type', 'meghdar',person,
          'syscomment', 'curramount', 'usercreated', 'tarikh', 'is_analiz'],
         batch_size=BATCH_SIZE
     )
