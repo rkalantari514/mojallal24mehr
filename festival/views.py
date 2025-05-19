@@ -222,6 +222,13 @@ def send_bulk_promotional_sms(request):
 
         person = customer_point.customer
         phone_number = normalize_phone_number(person.mobile)
+        if not phone_number:
+            phone_number = normalize_phone_number(person.tel1)
+        if not phone_number:
+            phone_number = normalize_phone_number(person.tel2)
+        if not phone_number:
+            phone_number = normalize_phone_number(person.fax)
+
         print('normalize_phone_number:',phone_number)
 
         if phone_number:
