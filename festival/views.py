@@ -204,7 +204,7 @@ def normalize_phone_number(phone_number):
 def send_bulk_promotional_sms(request):
     user = request.user
     # st = (0, 1, 2, 3, 4)
-    st = (404,0, 1, 2, 3, 4)
+    st = (0, 1, 2, 3, 4)
     customer_points = CustomerPoints.objects.filter(festival__is_active=True).exclude(status_code__in=st)
     print('customer_points.count()')
     print(customer_points.count())
