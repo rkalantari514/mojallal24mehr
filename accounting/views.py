@@ -1402,6 +1402,7 @@ def LoanTotal(request, status,*args, **kwargs):
     if updated_objects:
         Tracking.objects.bulk_update(updated_objects, ["status_code"])
 
+
     context = {
         'title': title,
         'user': user,
@@ -1442,3 +1443,41 @@ def loan_summary_api(request):
         "total_delaycost": loan_stats["total_delaycost"],
         "total_mtday": loan_stats["total_mtday"],
     })
+
+
+@login_required(login_url='/login')
+def SaleTotal(request):
+    name = 'گزارش فروش'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page=' گزارش فروش', code=0)
+
+    start_time = time.time()  # زمان شروع تابع
+
+    today = timezone.now().date()
+    # asnad = SanadDetail.objects.filter(kol=103,kind=?).order_by('date')[:40]
+    asnadp = SanadDetail.objects.filter(kol=103, sharh__startswith='خريدار در فاکتور فروش').order_by('date')[:40]
+    for a in asnadp:
+        per=Person.objects.filter(per_taf=a.tafzili).last()
+        if per:
+            a.person=per
+            a.save()
+
+
+
+
+    title = 'گزارش فروش'
+
+    context = {
+        'title': title,
+        'user': user,
+        'asnadp': asnadp,
+
+    }
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+
+    return render(request, 'sale_total.html', context)

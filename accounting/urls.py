@@ -3,14 +3,16 @@ from accounting.views import (
     TarazKol, ChequesRecieveTotal, balance_sheet_kol, balance_sheet_moin,
     balance_sheet_tafsili, SanadTotal, ChequesPayTotal, BedehkaranMoshtarian,
     JariAshkhasMoshtarian, JariAshkhasMoshtarianDetail, HesabMoshtariDetail,
-    LoanTotal, loan_summary_api
+    LoanTotal, loan_summary_api, SaleTotal
 )
 from mahakupdate.sendtogap import run_dial_script, stop_dialer
 
 # from mahakupdate.sendtogap import dial_number
 
 urlpatterns = [
-    # Loan-related paths
+    path('sale/total/', SaleTotal, name='sale-total'),
+
+
     path('acc/loan_total/<str:status>/', LoanTotal, name='loan-total'),
     path('api/loan-summary/', loan_summary_api, name='loan_summary'),
 
