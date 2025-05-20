@@ -1545,6 +1545,7 @@ def SaleTotalData(request, year, month, day):
 
         data.append({
             'person_name': f"{s.person.name} {s.person.lname}",
+            'person_id': s.person.per_taf,  # <--- این خط جدید: اضافه کردن per_taf
             'sanad_code': s.sanad_code,
             'radif': s.radif,
             'tarikh': jalali_tarikh_str,

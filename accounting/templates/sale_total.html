@@ -21,9 +21,12 @@
                                         </button>
                                         {# نمایش تاریخ فعلی #}
                                         <div class="fc-center">
-                                            <h4>گزارش فروش روز <span id="currentDateDisplay">{{ day|to_jalali:'%Y/%m/%d' }} ({{ day_of_week }})</span></h4>
+                                            <h4>گزارش فروش روز <span
+                                                    id="currentDateDisplay">{{ day|to_jalali:'%Y/%m/%d' }} ({{ day_of_week }})</span>
+                                            </h4>
                                             {# فیلد مخفی برای نگه داشتن تاریخ میلادی فعلی برای JS #}
-                                            <input type="hidden" id="currentGregorianDateInput" value="{{ day|date:'Y-m-d' }}">
+                                            <input type="hidden" id="currentGregorianDateInput"
+                                                   value="{{ day|date:'Y-m-d' }}">
                                         </div>
                                         {# دکمه روز بعدی #}
                                         <button type="button"
@@ -33,7 +36,9 @@
                                         </button>
                                     </div>
 
-                                    <h5 class="card-title pb-0 border-0">خالص فروش: <span id="total-mandah" class="text-primary"></span> ریال </h5>
+                                    <h5 class="card-title pb-0 border-0">خالص فروش: <span id="total-mandah"
+                                                                                          class="text-primary"></span>
+                                        ریال </h5>
                                     <div class="table-responsive">
                                         <table id="table"
                                                class="table-striped"
@@ -65,8 +70,10 @@
                                             <thead>
                                             <tr class="tr-class-1">
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-field="person_name" {# نام فیلد در JSON #}
-                                                    data-filter-control="input">مشتری
+                                                    data-field="person_name" {# این نام فیلد در JSON است #}
+                                                    data-filter-control="input"
+                                                    data-formatter="customerNameFormatter" {# <--- فرمت‌دهنده جدید برای این ستون #}
+                                                >مشتری
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="sanad_code"
@@ -90,7 +97,13 @@
                                             <tbody>
                                             {% for s in asnadp %}
                                                 <tr>
-                                                    <td class="card-text text-center">{{ s.person.name }} {{ s.person.lname }}</td>
+                                                    <td class="card-text text-center">
+                                                        <a target="_blank"
+                                                           href="/acc/jariashkhas/moshtari/{{ s.person.per_taf }}">
+
+                                                            {{ s.person.name }} {{ s.person.lname }}
+                                                        </a>
+                                                    </td>
                                                     <td class="card-text text-center">{{ s.sanad_code }}</td>
                                                     <td class="card-text text-center">{{ s.radif }}</td>
                                                     <td class="card-text text-center ">
@@ -100,7 +113,8 @@
                                                             {{ s.sharh }}
                                                         {% endif %}
                                                     </td>
-                                                    <td class="card-text text-center {% if s.negative_curramount < 0 %}text-danger{% else %}text-success{% endif %}" style="direction: ltr">
+                                                    <td class="card-text text-center {% if s.negative_curramount < 0 %}text-danger{% else %}text-success{% endif %}"
+                                                        style="direction: ltr">
                                                         {{ s.negative_curramount|floatformat:0|intcomma:False }}
                                                     </td>
                                                 </tr>
@@ -157,12 +171,24 @@
             return `<span class="${className}" style="direction: ltr">${formattedValue}</span>`;
         }
 
+        // --- فرمت‌دهنده جدید برای ستون مشتری ---
+        function customerNameFormatter(value, row, index) {
+            // 'value' در اینجا همان 'person_name' است
+            // 'row' کل شیء ردیف از JSON است، پس به 'row.person_id' دسترسی داریم
+            const personName = value;
+            const personId = row.person_id; // از فیلد جدید در JSON استفاده می‌کنیم
+            const url = `/acc/jariashkhas/moshtari/${personId}`;
+
+            return `<a target="_blank" href="${url}">${personName}</a>`;
+        }
+        // --- پایان فرمت‌دهنده جدید ---
+
         // فرمت‌دهنده برای فوتر جدول (مجموع خالص فروش)
         function priceFormatter(data) {
             var field = this.field;
             var sum = 0;
             // 'data' در اینجا آرایه‌ای از اشیاء ردیف است (که از JSON می‌آید)
-            data.forEach(function(row) {
+            data.forEach(function (row) {
                 if (typeof row[field] === 'number' && !isNaN(row[field])) {
                     sum += row[field];
                 }
@@ -183,12 +209,12 @@
                 url: dataUrl,
                 method: 'GET',
                 dataType: 'json',
-                beforeSend: function() {
+                beforeSend: function () {
                     // نمایش لودینگ و غیرفعال کردن دکمه‌ها در حین بارگذاری
                     $table.bootstrapTable('showLoading');
                     $('#prevDayBtn, #nextDayBtn').prop('disabled', true);
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.error) {
                         console.error("Error loading data:", response.error);
                         alert("خطا در بارگذاری داده‌ها: " + response.error);
@@ -205,11 +231,11 @@
                     totalMandah = response.total_mandah;
                     updateTotalMandah();
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error("AJAX Error:", status, error, xhr.responseText);
                     alert("خطا در ارتباط با سرور: " + error);
                 },
-                complete: function() {
+                complete: function () {
                     // مخفی کردن لودینگ و فعال کردن دکمه‌ها
                     $table.bootstrapTable('hideLoading');
                     $('#prevDayBtn, #nextDayBtn').prop('disabled', false);
@@ -218,7 +244,7 @@
         }
 
         // کدهای جدید برای دکمه‌های قبلی/بعدی روز
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const prevDayBtn = document.getElementById('prevDayBtn');
             const nextDayBtn = document.getElementById('nextDayBtn');
             const currentGregorianDateInput = document.getElementById('currentGregorianDateInput');
@@ -243,13 +269,13 @@
             }
 
             if (prevDayBtn) {
-                prevDayBtn.addEventListener('click', function() {
+                prevDayBtn.addEventListener('click', function () {
                     navigateByDay(-1);
                 });
             }
 
             if (nextDayBtn) {
-                nextDayBtn.addEventListener('click', function() {
+                nextDayBtn.addEventListener('click', function () {
                     navigateByDay(1);
                 });
             }
