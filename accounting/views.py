@@ -1485,6 +1485,11 @@ def SaleTotal(request, year=None, month=None, day=None):
             # اگر s.curramount قابل تبدیل به عدد نبود، 0 در نظر بگیرید یا مقدار دیگری
             s.negative_curramount = 0 # یا s.curramount اگر می‌خواهید همان مقدار اصلی باشد
 
+    # --- اضافه کردن روز هفته برای رندر اولیه ---
+    jalali_weekday_names = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"]
+    current_day_jalali = jdate.fromgregorian(date=day_filter_gregorian)
+    day_of_week_jalali = jalali_weekday_names[current_day_jalali.weekday()] # weekday() بر اساس شنبه (0) شروع می‌شود
+
     title = 'گزارش فروش'
 
     context = {
@@ -1492,6 +1497,8 @@ def SaleTotal(request, year=None, month=None, day=None):
         'user': user,
         'day': day_filter_gregorian,
         'asnadp': asnadp,
+        'day_of_week': day_of_week_jalali,  # اضافه کردن روز هفته به context
+
     }
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
@@ -1552,10 +1559,16 @@ def SaleTotalData(request, year, month, day):
     display_date_jalali = jdate.fromgregorian(date=day_filter_gregorian)
     display_date_str = display_date_jalali.strftime('%Y/%m/%d')
 
+    # --- اضافه کردن روز هفته برای پاسخ AJAX ---
+    jalali_weekday_names = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"]
+    day_of_week_jalali = jalali_weekday_names[display_date_jalali.weekday()]
+
     return JsonResponse({
         'data': data,
         'total_mandah': total_mandah,
-        'display_date': display_date_str
+        'display_date': display_date_str,
+        'day_of_week': day_of_week_jalali,  # اضافه کردن روز هفته به پاسخ JSON
+
     })
 
 

@@ -21,7 +21,7 @@
                                         </button>
                                         {# نمایش تاریخ فعلی #}
                                         <div class="fc-center">
-                                            <h4>گزارش فروش روز <span id="currentDateDisplay">{{ day|to_jalali:'%Y/%m/%d' }}</span></h4>
+                                            <h4>گزارش فروش روز <span id="currentDateDisplay">{{ day|to_jalali:'%Y/%m/%d' }} ({{ day_of_week }})</span></h4>
                                             {# فیلد مخفی برای نگه داشتن تاریخ میلادی فعلی برای JS #}
                                             <input type="hidden" id="currentGregorianDateInput" value="{{ day|date:'Y-m-d' }}">
                                         </div>
@@ -197,10 +197,9 @@
                     // داده‌های جدید را به bootstrap-table لود کنید
                     $table.bootstrapTable('load', response.data);
 
-                    // به‌روزرسانی تاریخ نمایش در بالای صفحه (شمسی)
-                    $('#currentDateDisplay').text(response.display_date);
-                    // به‌روزرسانی مقدار فیلد hidden input (میلادی) برای ناوبری بعدی/قبلی
+                    $('#currentDateDisplay').html(`${response.display_date} (${response.day_of_week})`);
                     $('#currentGregorianDateInput').val(`${year}-${month}-${day}`);
+
 
                     // به‌روزرسانی خالص فروش
                     totalMandah = response.total_mandah;
