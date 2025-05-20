@@ -1447,23 +1447,26 @@ from django.db.models import Q
 
 
 @login_required(login_url='/login')
-def SaleTotal(request):
+def SaleTotal(request, year=None, month=None, day=None):
     name = 'گزارش فروش'
-    result = page_permision(request, name)  # بررسی دسترسی
-    if result:  # اگر هدایت انجام شده است
+    result = page_permision(request, name)
+    if result:
         return result
     user = request.user
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page=' گزارش فروش', code=0)
 
-    start_time = time.time()  # زمان شروع تابع
+    start_time = time.time()
 
-    day = timezone.now().date()
-    # asnad = SanadDetail.objects.filter(kol=103,kind=?).order_by('date')[:40]
+    if year and month and day:
+        try:
+            day_filter_gregorian = datetime.date(int(year), int(month), int(day))
+        except (ValueError, TypeError):
+            day_filter_gregorian = timezone.now().date()
+    else:
+        day_filter_gregorian = timezone.now().date()
 
     kind1 = ['خريدار در برگشت از فروش', 'خريدار در فاکتور فروش']
-
-    # ایجاد یک Q object برای هر شرط startswith و ترکیب آنها با OR
     q_objects = Q()
     for item in kind1:
         q_objects |= Q(sharh__startswith=item)
@@ -1471,22 +1474,88 @@ def SaleTotal(request):
     asnadp = SanadDetail.objects.filter(
         q_objects,
         kol=103,
-        date=day
+        date=day_filter_gregorian
     ).select_related('person')
+
+    for s in asnadp:
+        try:
+            # اطمینان از اینکه curramount قبل از ضرب عددی است
+            s.negative_curramount = float(s.curramount) * -1
+        except (ValueError, TypeError):
+            # اگر s.curramount قابل تبدیل به عدد نبود، 0 در نظر بگیرید یا مقدار دیگری
+            s.negative_curramount = 0 # یا s.curramount اگر می‌خواهید همان مقدار اصلی باشد
 
     title = 'گزارش فروش'
 
     context = {
         'title': title,
         'user': user,
-
-
-
-        'day': day,
+        'day': day_filter_gregorian,
         'asnadp': asnadp,
-
     }
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
     return render(request, 'sale_total.html', context)
+
+
+def SaleTotalData(request, year, month, day):
+    try:
+        day_filter_gregorian = datetime.date(int(year), int(month), int(day))
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Invalid date format'}, status=400)
+
+    kind1 = ['خريدار در برگشت از فروش', 'خريدار در فاکتور فروش']
+    q_objects = Q()
+    for item in kind1:
+        q_objects |= Q(sharh__startswith=item)
+
+    asnadp = SanadDetail.objects.filter(
+        q_objects,
+        kol=103,
+        date=day_filter_gregorian
+    ).select_related('person')
+
+    data = []
+    total_mandah = 0
+    for s in asnadp:
+        sharh_display = s.syscomment if s.syscomment else s.sharh
+
+        jalali_tarikh_str = s.tarikh
+
+        try:
+            jalali_year = s.tarikh.split('/')[0]
+            jalali_month = s.tarikh.split('/')[1]
+        except IndexError:
+            jalali_year = ''
+            jalali_month = ''
+            print(f"Warning: s.tarikh format invalid for split: {s.tarikh}")
+        try:
+            current_amount_numeric = float(s.curramount) # یا int() اگر همیشه صحیح است
+            negative_curramount = current_amount_numeric * -1
+        except (ValueError, TypeError):
+            negative_curramount = 0 # اگر نتوانست به عدد تبدیل شود، 0 در نظر گرفته شود
+
+        data.append({
+            'person_name': f"{s.person.name} {s.person.lname}",
+            'sanad_code': s.sanad_code,
+            'radif': s.radif,
+            'tarikh': jalali_tarikh_str,
+            'year': jalali_year,
+            'month': jalali_month,
+            'sharh': sharh_display,
+            'mablagh': negative_curramount, # این حتما باید یک عدد باشد
+            'is_negative': negative_curramount < 0
+        })
+        total_mandah += negative_curramount # جمع نیز باید روی اعداد انجام شود
+
+    display_date_jalali = jdate.fromgregorian(date=day_filter_gregorian)
+    display_date_str = display_date_jalali.strftime('%Y/%m/%d')
+
+    return JsonResponse({
+        'data': data,
+        'total_mandah': total_mandah,
+        'display_date': display_date_str
+    })
+
+
