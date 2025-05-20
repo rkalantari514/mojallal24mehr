@@ -17,104 +17,139 @@
                     <div class="col-xl-12 mb-30">
                         <div class="card card-statistics h-100">
                             <div class="card-body">
-                            گزارش فروش روز {{ day|to_jalali:'%Y/%m/%d' }}
+                                گزارش فروش روز {{ day|to_jalali:'%Y/%m/%d' }}
                                 <div class="table-responsive mt-15 ">
+                                    <div class="fc-toolbar fc-header-toolbar">
+                                        <div class="fc-left">
+                                            <div class="fc-button-group">
+                                                <button type="button"
+                                                        class="fc-prev-button fc-button fc-state-default fc-corner-left"
+                                                        aria-label="prev"><span
+                                                        class="fc-icon fc-icon-left-single-arrow"></span></button>
+                                                <button type="button"
+                                                        class="fc-next-button fc-button fc-state-default fc-corner-right"
+                                                        aria-label="next"><span
+                                                        class="fc-icon fc-icon-right-single-arrow"></span></button>
+                                            </div>
+                                            <button type="button"
+                                                    class="fc-today-button fc-button fc-state-default fc-corner-left fc-corner-right fc-state-disabled"
+                                                    disabled="">today
+                                            </button>
+                                        </div>
+                                        <div class="fc-right">
+                                            <div class="fc-button-group">
+                                                <button type="button"
+                                                        class="fc-month-button fc-button fc-state-default fc-corner-left fc-state-active">
+                                                    month
+                                                </button>
+                                                <button type="button"
+                                                        class="fc-agendaWeek-button fc-button fc-state-default">week
+                                                </button>
+                                                <button type="button"
+                                                        class="fc-agendaDay-button fc-button fc-state-default fc-corner-right">
+                                                    day
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="fc-center"><h4>مه 2025</h4></div>
+                                        <div class="fc-clear"></div>
+                                    </div>
                                     <h6 class="card-title pb-0 border-0">مانده
-{#                                        حساب {{ hesabmoshtari.person.name }} {{ hesabmoshtari.person.lname }} :</h6>#}
-                                    <h5 class="card-title pb-0 border-0"><span id="total-mandah"
-                                                                               class="text-primary"></span>
-                                        ریال </h5>
-                                    <div class="table-responsive">
-                                        <table id="table"
-                                               class="table-striped"
-                                               data-toggle="table"
-                                               data-locale="fa-IR"
-                                               data-search="true"
-                                               data-show-columns="true"
-                                               data-show-export="true"
-                                               data-show-refresh="true"
-                                               data-show-columns-toggle-all="true"
-                                               data-show-pagination-switch="true"
-                                               data-show-toggle="true"
-                                               data-show-fullscreen="true"
-                                               data-buttons="buttons"
-                                               data-search-align="left"
-                                               data-buttons-class="primary"
-                                               data-pagination="true"
-                                               data-show-columns-search="true"
-                                               data-show-footer="true"
-                                               data-page-size="10"
-                                               data-remember-order="true"
-                                               data-sortable="true"
-                                               data-show-search-clear-button="true"
-                                                {#                                                   data-sort-name="date"#}
-                                               data-sort-order="asc"
-                                               data-filter-control="true"
-                                               data-show-print="true"
-                                               data-export-data-type="all"
-                                               data-export-types='["excel"]'>
-                                            <thead>
-                                            <tr class="tr-class-1">
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-field="person"
-                                                    data-filter-control="input">مشتری
-                                                </th>
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-field="code"
-                                                    data-filter-control="input">کد
-                                                </th>
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-field="radif"
-                                                    data-filter-control="input">ردیف
-                                                </th>
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-field="date"
-                                                    data-filter-control="select">تاریخ
-                                                </th>
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-field="years"
-                                                    data-filter-control="select">سال
-                                                </th>
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-field="months"
-                                                    data-filter-control="select">ماه
-                                                </th>
+                                        {#                                        حساب {{ hesabmoshtari.person.name }} {{ hesabmoshtari.person.lname }} :</h6>#}
+                                        <h5 class="card-title pb-0 border-0"><span id="total-mandah"
+                                                                                   class="text-primary"></span>
+                                            ریال </h5>
+                                        <div class="table-responsive">
+                                            <table id="table"
+                                                   class="table-striped"
+                                                   data-toggle="table"
+                                                   data-locale="fa-IR"
+                                                   data-search="true"
+                                                   data-show-columns="true"
+                                                   data-show-export="true"
+                                                   data-show-refresh="true"
+                                                   data-show-columns-toggle-all="true"
+                                                   data-show-pagination-switch="true"
+                                                   data-show-toggle="true"
+                                                   data-show-fullscreen="true"
+                                                   data-buttons="buttons"
+                                                   data-search-align="left"
+                                                   data-buttons-class="primary"
+                                                   data-pagination="true"
+                                                   data-show-columns-search="true"
+                                                   data-show-footer="true"
+                                                   data-page-size="10"
+                                                   data-remember-order="true"
+                                                   data-sortable="true"
+                                                   data-show-search-clear-button="true"
+                                                    {#                                                   data-sort-name="date"#}
+                                                   data-sort-order="asc"
+                                                   data-filter-control="true"
+                                                   data-show-print="true"
+                                                   data-export-data-type="all"
+                                                   data-export-types='["excel"]'>
+                                                <thead>
+                                                <tr class="tr-class-1">
+                                                    <th class="card-text text-center" data-sortable="true"
+                                                        data-field="person"
+                                                        data-filter-control="input">مشتری
+                                                    </th>
+                                                    <th class="card-text text-center" data-sortable="true"
+                                                        data-field="code"
+                                                        data-filter-control="input">کد
+                                                    </th>
+                                                    <th class="card-text text-center" data-sortable="true"
+                                                        data-field="radif"
+                                                        data-filter-control="input">ردیف
+                                                    </th>
+                                                    <th class="card-text text-center" data-sortable="true"
+                                                        data-field="date"
+                                                        data-filter-control="select">تاریخ
+                                                    </th>
+                                                    <th class="card-text text-center" data-sortable="true"
+                                                        data-field="years"
+                                                        data-filter-control="select">سال
+                                                    </th>
+                                                    <th class="card-text text-center" data-sortable="true"
+                                                        data-field="months"
+                                                        data-filter-control="select">ماه
+                                                    </th>
 
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-field="sharh"
-                                                    data-filter-control="input">شرح سند
-                                                </th>
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-field="bed" data-footer-formatter="priceFormatter">بدهکار
-                                                </th>
+                                                    <th class="card-text text-center" data-sortable="true"
+                                                        data-field="sharh"
+                                                        data-filter-control="input">شرح سند
+                                                    </th>
+                                                    <th class="card-text text-center" data-sortable="true"
+                                                        data-field="bed" data-footer-formatter="priceFormatter">بدهکار
+                                                    </th>
 
-
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {% for s in asnadp %}
-                                                <tr>
-                                                    <td class="card-text text-center">{{ s.person.name }}</td>
-                                                    <td class="card-text text-center">{{ s.code }}</td>
-                                                    <td class="card-text text-center">{{ s.radif }}</td>
-                                                    <td class="card-text text-center">{{ s.tarikh }}</td>
-                                                <td class="card-text text-center">{{ s.tarikh|slice:":4" }}</td>
-                                                <td class="card-text text-center">{{ s.tarikh|slice:"5:7" }}</td>
-                                                    <td class="card-text text-center ">
-                                                        {% if s.syscomment %}
-                                                            {{ s.syscomment }}
-                                                        {% else %}
-                                                            {{ s.sharh }}
-                                                        {% endif %}
-                                                    </td>
-
-                                                    <td class="card-text text-center">{{ s.curramount|floatformat:0|intcomma:False }}</td>
 
                                                 </tr>
-                                            {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                                </thead>
+                                                <tbody>
+                                                {% for s in asnadp %}
+                                                    <tr>
+                                                        <td class="card-text text-center">{{ s.person.name }} {{ s.person.lname }}</td>
+                                                        <td class="card-text text-center">{{ s.code }}</td>
+                                                        <td class="card-text text-center">{{ s.radif }}</td>
+                                                        <td class="card-text text-center">{{ s.tarikh }}</td>
+                                                        <td class="card-text text-center">{{ s.tarikh|slice:":4" }}</td>
+                                                        <td class="card-text text-center">{{ s.tarikh|slice:"5:7" }}</td>
+                                                        <td class="card-text text-center ">
+                                                            {% if s.syscomment %}
+                                                                {{ s.syscomment }}
+                                                            {% else %}
+                                                                {{ s.sharh }}
+                                                            {% endif %}
+                                                        </td>
+
+                                                        <td class="card-text text-center">{{ s.curramount|floatformat:0|intcomma:False }}</td>
+
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                 </div>
 
 
