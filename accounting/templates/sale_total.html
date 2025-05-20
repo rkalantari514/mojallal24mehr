@@ -1,9 +1,10 @@
 {% extends 'shared/_MainLayout.html' %}
 {% load humanize %}
 {% load static %}
+{% load jalali_tags %}
+{% load custom_filters %}
 {% block content %}
-    {% load jalali_tags %}
-    {% load custom_filters %}
+
 
     <div class="content-wrapper">
 
@@ -16,6 +17,7 @@
                     <div class="col-xl-12 mb-30">
                         <div class="card card-statistics h-100">
                             <div class="card-body">
+                            گزارش فروش روز {{ day|to_jalali:'%Y/%m/%d' }}
                                 <div class="table-responsive mt-15 ">
                                     <h6 class="card-title pb-0 border-0">مانده
 {#                                        حساب {{ hesabmoshtari.person.name }} {{ hesabmoshtari.person.lname }} :</h6>#}
@@ -92,7 +94,7 @@
                                             <tbody>
                                             {% for s in asnadp %}
                                                 <tr>
-                                                    <td class="card-text text-center">{{ s.person }}</td>
+                                                    <td class="card-text text-center">{{ s.person.name }}</td>
                                                     <td class="card-text text-center">{{ s.code }}</td>
                                                     <td class="card-text text-center">{{ s.radif }}</td>
                                                     <td class="card-text text-center">{{ s.tarikh }}</td>
@@ -106,7 +108,7 @@
                                                         {% endif %}
                                                     </td>
 
-                                                    <td class="card-text text-center">{{ s.bed|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ s.curramount|floatformat:0|intcomma:False }}</td>
 
                                                 </tr>
                                             {% endfor %}

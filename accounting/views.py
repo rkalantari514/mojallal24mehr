@@ -1443,6 +1443,7 @@ def loan_summary_api(request):
         "total_delaycost": loan_stats["total_delaycost"],
         "total_mtday": loan_stats["total_mtday"],
     })
+from django.db.models import Q
 
 
 @login_required(login_url='/login')
@@ -1457,19 +1458,31 @@ def SaleTotal(request):
 
     start_time = time.time()  # زمان شروع تابع
 
-    today = timezone.now().date()
+    day = timezone.now().date()
     # asnad = SanadDetail.objects.filter(kol=103,kind=?).order_by('date')[:40]
-    asnadp = SanadDetail.objects.filter(kol=103, sharh__startswith='خريدار در فاکتور فروش').order_by('date')[:400]
 
+    kind1 = ['خريدار در برگشت از فروش', 'خريدار در فاکتور فروش']
 
+    # ایجاد یک Q object برای هر شرط startswith و ترکیب آنها با OR
+    q_objects = Q()
+    for item in kind1:
+        q_objects |= Q(sharh__startswith=item)
 
-
+    asnadp = SanadDetail.objects.filter(
+        q_objects,
+        kol=103,
+        date=day
+    ).select_related('person')
 
     title = 'گزارش فروش'
 
     context = {
         'title': title,
         'user': user,
+
+
+
+        'day': day,
         'asnadp': asnadp,
 
     }
