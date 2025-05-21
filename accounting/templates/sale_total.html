@@ -6,6 +6,30 @@
 {% block content %}
     <div class="content-wrapper">
         <div class="page-title">
+
+            <div class="row">
+                <div class="col-xl-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+
+<canvas id="Chart3" height="250"></canvas>
+
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-6 mb-30">
+                    <div class="card card-statistics h-100 admin-followers">
+                        <div class="card-body">
+                                        <canvas id="Chart4" height="250"></canvas>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
             <div class="row">
                 <div class="col-md-12 mb-30">
                     <div class="col-xl-12 mb-30">
@@ -72,7 +96,8 @@
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="person_name" {# این نام فیلد در JSON است #}
                                                     data-filter-control="input"
-                                                    data-formatter="customerNameFormatter" {# <--- فرمت‌دهنده جدید برای این ستون #}
+                                                    data-formatter="customerNameFormatter"
+                                                        {# <--- فرمت‌دهنده جدید برای این ستون #}
                                                 >مشتری
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
@@ -181,6 +206,7 @@
 
             return `<a target="_blank" href="${url}">${personName}</a>`;
         }
+
         // --- پایان فرمت‌دهنده جدید ---
 
         // فرمت‌دهنده برای فوتر جدول (مجموع خالص فروش)
@@ -281,4 +307,268 @@
             }
         });
     </script>
+
+
+<script>
+        // ... (توابع drawChart و بقیه کدهای موجود شما برای Chart2 و Chart3) ...
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // ... (کدهای مربوط به ناوبری روزانه - Chart2 و Chart3 موجود شما) ...
+
+            // --- کد جدید برای نمودار خالص فروش هفتگی (Chart4) ---
+            // دریافت داده‌ها از Django context با استفاده از json_script
+            var chart4_labels_data_raw = document.getElementById('chart-labels-weekly-khales-forosh-data').textContent;
+            var chart4_datasets_data_raw = document.getElementById('chart-datasets-weekly-khales-forosh-data').textContent;
+
+            var chart4_labels = JSON.parse(chart4_labels_data_raw);
+            var chart4_datasets = JSON.parse(chart4_datasets_data_raw);
+
+            // لاگ کردن داده‌های دریافتی برای اشکال‌زدایی
+            console.log("Chart4 Labels (raw):", chart4_labels_data_raw);
+            console.log("Chart4 Datasets (raw):", chart4_datasets_data_raw);
+            console.log("Chart4 Labels (parsed):", chart4_labels);
+            console.log("Chart4 Datasets (parsed):", chart4_datasets);
+
+            var chart4_data = {
+                labels: chart4_labels,
+                datasets: chart4_datasets
+            };
+
+            var chart4_options = {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        rtl: true,
+                        labels: {
+                            usePointStyle: true,
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'خالص فروش هفتگی',
+                        rtl: true,
+                        font: {
+                            size: 16
+                        }
+                    },
+                    tooltip: {
+                        rtl: true,
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                return tooltipItems[0].label; // روز هفته (مثلاً "شنبه")
+                            },
+                            label: function(tooltipItem) {
+                                let label = tooltipItem.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += tooltipItem.raw.toLocaleString('fa-IR');
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: false, // برای نمودار میله ای عادی
+                        title: {
+                            display: true,
+                            text: 'روز هفته',
+                            rtl: true,
+                            font: {
+                                size: 14
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: 12
+                            }
+                        },
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.7,
+                    },
+                    y: {
+                        beginAtZero: true,
+                        stacked: false,
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return value.toLocaleString('fa-IR');
+                            },
+                            font: {
+                                size: 12
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'میلیارد تومان',
+                            rtl: true,
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                }
+            };
+            drawChart('Chart4', 'bar', chart4_data, chart4_options);
+
+
+            // --- تنظیمات سراسری برای فارسی سازی Chart.js ---
+            Chart.defaults.font.family = 'IRANSans, Arial, sans-serif';
+            Chart.defaults.plugins.tooltip.rtl = true;
+            Chart.defaults.plugins.legend.rtl = true;
+            Chart.defaults.plugins.title.rtl = true;
+        });
+    </script>
+
+
+
+
+
+    <script>
+        var myCharts = {};
+        function drawChart(canvasId, type, data, options) {
+            var ctx = document.getElementById(canvasId);
+            if (!ctx) {
+                console.error("Canvas element with ID '" + canvasId + "' not found. Chart drawing cancelled for:", canvasId);
+                return;
+            }
+            ctx = ctx.getContext('2d');
+
+            if (myCharts[canvasId]) {
+                myCharts[canvasId].destroy();
+            }
+            myCharts[canvasId] = new Chart(ctx, {
+                type: type,
+                data: data,
+                options: options
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // --------------------------------------------------------------------------------
+            var chart3_labels_data_raw = document.getElementById('chart-labels-khales-forosh-by-year-data').textContent;
+            var chart3_datasets_data_raw = document.getElementById('chart-datasets-khales-forosh-by-year-data').textContent;
+
+            var chart3_labels = JSON.parse(chart3_labels_data_raw);
+            var chart3_datasets = JSON.parse(chart3_datasets_data_raw);
+
+            // لاگ کردن داده‌های دریافتی برای اشکال‌زدایی
+            console.log("Chart3 Labels (raw):", chart3_labels_data_raw);
+            console.log("Chart3 Datasets (raw):", chart3_datasets_data_raw);
+            console.log("Chart3 Labels (parsed):", chart3_labels);
+            console.log("Chart3 Datasets (parsed):", chart3_datasets);
+
+
+            var chart3_data = {
+                labels: chart3_labels,
+                datasets: chart3_datasets
+            };
+
+            var chart3_options = {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        rtl: true, // راست به چپ کردن لجند
+                        labels: {
+                            usePointStyle: true,
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'خالص فروش ماهانه',
+                        rtl: true,
+                        font: {
+                            size: 16
+                        }
+                    },
+                    tooltip: {
+                        rtl: true,
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                return tooltipItems[0].label; // ماه (مثلاً "فروردین")
+                            },
+                            label: function(tooltipItem) {
+                                let label = tooltipItem.dataset.label || ''; // لیبل سال (مثلاً "خالص فروش سال 1402")
+                                if (label) {
+                                    label = label.replace('خالص فروش سال ', ''); // فقط سال را نگه دار (مثلاً "1402")
+                                    label += ': ';
+                                }
+                                label += tooltipItem.raw.toLocaleString('fa-IR');
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: false, // برای نمودار میله ای گروهی (کنار هم)
+                        title: {
+                            display: true,
+                            text: 'ماه ',
+                            rtl: true,
+                            font: {
+                                size: 14
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: 12
+                            }
+                        },
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.8,
+                    },
+                    y: {
+                        beginAtZero: true,
+                        stacked: false, // برای نمودار میله ای گروهی (کنار هم)
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return value.toLocaleString('fa-IR');
+                            },
+                            font: {
+                                size: 12
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'میلیون تومان',
+                            rtl: true,
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                }
+            };
+            drawChart('Chart3', 'bar', chart3_data, chart3_options);
+
+
+            // --- تنظیمات سراسری برای فارسی سازی Chart.js ---
+            Chart.defaults.font.family = 'IRANSans, Arial, sans-serif';
+            Chart.defaults.plugins.tooltip.rtl = true;
+            Chart.defaults.plugins.legend.rtl = true;
+            Chart.defaults.plugins.title.rtl = true;
+        });
+    </script>
+
+    {{ chart_labels_khales_forosh_by_year|json_script:"chart-labels-khales-forosh-by-year-data" }}
+    {{ chart_datasets_khales_forosh_by_year|json_script:"chart-datasets-khales-forosh-by-year-data" }}
+
+
+    {{ chart_labels_weekly_khales_forosh|json_script:"chart-labels-weekly-khales-forosh-data" }}
+    {{ chart_datasets_weekly_khales_forosh|json_script:"chart-datasets-weekly-khales-forosh-data" }}
+
+
 {% endblock %}
+
+
+
+

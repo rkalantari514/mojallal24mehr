@@ -14,7 +14,7 @@ from django.db.models import Sum, F, DecimalField
 from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
 from custom_login.views import page_permision
-from dashboard.models import MasterInfo, MasterReport
+from dashboard.models import MasterInfo, MasterReport, MonthlyReport
 from dashboard.views import generate_calendar_data_cheque
 from loantracker.forms import SMSTrackingForm, CallTrackingForm
 from loantracker.models import TrackKinde, Tracking
@@ -1490,16 +1490,122 @@ def SaleTotal(request, year=None, month=None, day=None):
     current_day_jalali = jdate.fromgregorian(date=day_filter_gregorian)
     day_of_week_jalali = jalali_weekday_names[current_day_jalali.weekday()] # weekday() بر اساس شنبه (0) شروع می‌شود
 
-    title = 'گزارش فروش'
+    # -------------------------------------------------------------------------------------------------
 
+
+    jalali_month_names = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن",
+                          "اسفند"]
+
+    all_report_years = MonthlyReport.objects.values_list('year', flat=True).distinct().order_by('year')
+
+    yearly_monthly_khales_forosh_data = {year: [0] * 12 for year in all_report_years}
+
+    all_monthly_reports = MonthlyReport.objects.filter(year__in=all_report_years).order_by('year', 'month')
+
+    for report in all_monthly_reports:
+        try:
+            year_val = report.year
+            month_index = report.month - 1  # ماه شمسی 1 تا 12، ایندکس 0 تا 11
+
+            if 0 <= month_index < 12:
+                yearly_monthly_khales_forosh_data[year_val][month_index] = float(report.khales_forosh/1000)
+        except (ValueError, TypeError, KeyError):
+            print(f"Error processing monthly report: Year {report.year}, Month {report.month}")
+            pass
+
+    chart_datasets_khales_forosh_by_year = []
+
+    colors_for_yearly_chart = [
+        'rgba(30, 144, 255, 0.7)',  # Dodger Blue
+        'rgba(255, 69, 0, 0.7)',  # Orange Red
+        'rgba(50, 205, 50, 0.7)',  # Lime Green
+        'rgba(147, 112, 219, 0.7)',  # MediumPurple
+        'rgba(255, 165, 0, 0.7)',  # Orange
+        'rgba(0, 191, 255, 0.7)',  # Deep Sky Blue
+        'rgba(255, 0, 128, 0.7)',  # Pink
+        'rgba(128, 128, 0, 0.7)',  # Olive
+        'rgba(0, 200, 200, 0.7)',  # Teal
+        'rgba(200, 0, 200, 0.7)',  # Fuchsia
+    ]
+    border_colors_for_yearly_chart = [c.replace('0.7', '1') for c in colors_for_yearly_chart]
+
+    color_index = 0
+    for year_val in sorted(yearly_monthly_khales_forosh_data.keys()):
+        chart_datasets_khales_forosh_by_year.append({
+            'label': f'خالص فروش  {year_val}',
+            'data': yearly_monthly_khales_forosh_data[year_val],
+            'backgroundColor': colors_for_yearly_chart[color_index % len(colors_for_yearly_chart)],
+            'borderColor': border_colors_for_yearly_chart[color_index % len(border_colors_for_yearly_chart)],
+            'borderWidth': 1,
+            'barPercentage': 0.8,
+            'categoryPercentage': 0.8,
+            # 'stack': 'khales_forosh_stack' # اگر نمودار میله ای انباشته (Stacked) می خواهید، این خط را فعال کنید
+        })
+        color_index += 1
+#-------------------------------------------------------
+        jalali_weekday_names = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"]
+
+        all_master_reports = MasterReport.objects.all()
+
+        weekly_khales_forosh_sum = [0] * 7
+
+        total_khales_forosh = 0
+        # valid_days_count = 0
+
+        for report in all_master_reports:
+            try:
+                gregorian_date = report.day
+                jdate_obj = jdate.fromgregorian(date=gregorian_date)
+                weekday_index = jdate_obj.weekday()
+                khales_forosh_value = float(report.khales_forosh/1000)
+                weekly_khales_forosh_sum[weekday_index] += khales_forosh_value
+                total_khales_forosh += khales_forosh_value
+                # valid_days_count += 1  # تعداد روزهایی که خالص فروش دارند را می‌شماریم برای محاسبه میانگین
+            except (ValueError, TypeError):
+                print(f"Error processing MasterReport for date {report.day}")
+                pass
+
+        # محاسبه میانگین خالص فروش برای خط افقی
+        # average_khales_forosh = total_khales_forosh / valid_days_count if valid_days_count > 0 else 0
+        average_khales_forosh = total_khales_forosh / 7
+
+        chart_datasets_weekly_khales_forosh = [
+            {
+                'label': 'خالص فروش',
+                'data': weekly_khales_forosh_sum,
+                'backgroundColor': 'rgba(102, 51, 153, 0.7)',  # رنگ بنفش
+                'borderColor': 'rgba(102, 51, 153, 1)',
+                'borderWidth': 1,
+                'barPercentage': 0.7,
+                'categoryPercentage': 0.7,
+            },
+            {
+                'type': 'line',  # نوع نمودار خطی برای میانگین
+                'label': 'میانگین هفتگی',
+                'data': [average_khales_forosh] * 7,  # خط افقی در ارتفاع میانگین
+                'borderColor': 'rgba(255, 193, 7, 1)',  # رنگ زرد/نارنجی
+                'backgroundColor': 'transparent',  # بدون پر کردن
+                'borderWidth': 2,
+                'pointRadius': 0,  # نقاط را نمایش نده
+                'tension': 0,  # خط صاف
+            }
+        ]
+
+    title = 'گزارش فروش'
     context = {
         'title': title,
         'user': user,
         'day': day_filter_gregorian,
         'asnadp': asnadp,
         'day_of_week': day_of_week_jalali,  # اضافه کردن روز هفته به context
+        'chart_labels_khales_forosh_by_year': jalali_month_names,
+        'chart_datasets_khales_forosh_by_year': chart_datasets_khales_forosh_by_year,
 
+        'chart_labels_weekly_khales_forosh': jalali_weekday_names,  # لیبل‌های روزهای هفته
+        'chart_datasets_weekly_khales_forosh': chart_datasets_weekly_khales_forosh,  # Dataset‌ها (میله‌ای و خط میانگین)
     }
+
+
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
