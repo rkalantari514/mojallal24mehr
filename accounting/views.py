@@ -1278,11 +1278,12 @@ def LoanTotal(request, status, *args, **kwargs):
     total_count = 0
     total_cost = 0
     total_mtday = 0
+
     if status == 'overdue':
         title = 'گزارش اقساط معوق'
         loans = LoanDetil.objects.filter(complete_percent__lt=1, date__lt=today)
         person = Person.objects.filter(pk__in=loans.values('loan__person__pk')).distinct()
-        total_count=0
+        total_count=person.count()
         total_cost=0
         total_mtday=0
         for p in person:
@@ -1305,17 +1306,25 @@ def LoanTotal(request, status, *args, **kwargs):
             except:
                 pass
             last_tracks=Tracking.objects.filter(customer__person=p).last()
+            try:
+                p.mandeh=BedehiMoshtari.objects.filter(person=p).last().total_mandeh
+            except:
+                p.mandeh=0
             p.last_tracks=last_tracks
             p.loan_count = count
             p.cost = cost
             p.mtday = mtday/10000000
             p.from_last_daryaft = from_last_daryaft
             p.save()
+            total_cost+=cost
+            total_mtday+= mtday*1/10000000
 
     if status == 'soon':
         title = 'گزارش اقساط دارای تعجیل'
         loans = LoanDetil.objects.filter(complete_percent__gt=0, date__gte=today)
         person = Person.objects.filter(pk__in=loans.values('loan__person__pk')).distinct()
+        total_cost=0
+        total_mtday=0
         for p in person:
             l_p = loans.filter(loan__person=p)
             try:
@@ -1337,12 +1346,18 @@ def LoanTotal(request, status, *args, **kwargs):
             except:
                 pass
             last_tracks = Tracking.objects.filter(customer__person=p).last()
+            try:
+                p.mandeh=BedehiMoshtari.objects.filter(person=p).last().total_mandeh
+            except:
+                p.mandeh=0
             p.last_tracks = last_tracks
             p.loan_count = count
             p.cost = cost
             p.mtday = -1 * mtday / 10000000
             p.from_last_daryaft = from_last_daryaft
             p.save()
+            total_cost += cost
+            total_mtday += mtday * 1 / 10000000
 
 
 
@@ -1394,8 +1409,8 @@ def LoanTotal(request, status, *args, **kwargs):
 
         'person': person,
         "total_count": total_count,
-        "total_cost": total_cost,
-        "total_mtday": total_mtday,
+        "total_cost": total_cost/ 10000000000,
+        "total_mtday": total_mtday/ 1000,
         'status': status,
 
     }

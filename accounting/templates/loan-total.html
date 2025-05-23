@@ -239,34 +239,34 @@
                                             <tr class="tr-class-1">
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="tafsily"
-                                                        {#                                                    data-filter-control="select"#}
                                                     data-filter-control="input"
                                                 >کد تفصیلی
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="percode"
-                                                        {#                                                    data-filter-control="select"#}
                                                     data-filter-control="input"
                                                 >کد فرد
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true" data-field="fard"
-                                                        {#                                                    data-filter-control="select"#}
                                                     data-filter-control="input"
                                                 >فرد
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-field="date" data-filter-control="select">قدیمی ترین قسط
+                                                    data-field="date" data-sorter="numericOnly" data-footer-formatter="priceFormatter">مانده حساب
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="mandeh" >قدیمی ترین قسط
                                                 </th>
                                                 {% if status == 'overdue' %}
                                                     <th class="card-text text-center" data-sortable="true"
                                                         data-sorter="numericOnly"
-                                                        data-field="persent" data-filter-control="select">تعداد معوق
+                                                        data-field="persent" >تعداد معوق
                                                     </th>
                                                 {% endif %}
                                                 {% if status == 'soon' %}
                                                     <th class="card-text text-center" data-sortable="true"
                                                         data-sorter="numericOnly"
-                                                        data-field="persent" data-filter-control="select">تعداد تعجیل
+                                                        data-field="persent" >تعداد تعجیل
                                                     </th>
                                                 {% endif %}
                                                 <th class="card-text text-center" data-sortable="true"
@@ -328,6 +328,8 @@
                                                             {{ p.name }} {{ p.lname }}
                                                         </a>
                                                     </td>
+                                                    <td class="card-text text-center" style="direction: ltr">{{ p.mandeh|floatformat:0|intcomma:False }}</td>
+
                                                     <td class="card-text text-center">{{ p.f_date }}</td>
                                                     <td class="card-text text-center">{{ p.loan_count|floatformat:2 }}</td>
                                                     <td class="card-text text-center">{{ p.cost|floatformat:0|intcomma:False }}</td>
