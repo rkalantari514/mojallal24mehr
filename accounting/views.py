@@ -1465,6 +1465,7 @@ def SaleTotal(request, year=None, month=None, day=None):
             day_filter_gregorian = timezone.now().date()
     else:
         day_filter_gregorian = timezone.now().date()
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
 
     kind1 = ['خريدار در برگشت از فروش', 'خريدار در فاکتور فروش']
     q_objects = Q()
