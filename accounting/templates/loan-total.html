@@ -67,8 +67,6 @@
     </style>
 
 
-
-
     <div class="content-wrapper">
 
         <div class="page-title">
@@ -120,7 +118,7 @@
                                     {% endif %}
 
 
-                                    <h4>{{ total_delaycost|floatformat:3|intcomma:False }} میلیارد تومان</h4>
+                                    <h4>{{ total_cost|floatformat:3|intcomma:False }} میلیارد تومان</h4>
                                 </div>
                             </div>
                         </div>
@@ -257,20 +255,23 @@
                                                 >فرد
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-field="date" data-filter-control="select">تاریخ
+                                                    data-field="date" data-filter-control="select">قدیمی ترین قسط
                                                 </th>
-                                                <th class="card-text text-center" data-sortable="true" data-field="cost"
-                                                    data-sorter="numericOnly"
-                                                >مبلغ قسط
-                                                </th>
+                                                {% if status == 'overdue' %}
+                                                    <th class="card-text text-center" data-sortable="true"
+                                                        data-sorter="numericOnly"
+                                                        data-field="persent" data-filter-control="select">تعداد معوق
+                                                    </th>
+                                                {% endif %}
+                                                {% if status == 'soon' %}
+                                                    <th class="card-text text-center" data-sortable="true"
+                                                        data-sorter="numericOnly"
+                                                        data-field="persent" data-filter-control="select">تعداد تعجیل
+                                                    </th>
+                                                {% endif %}
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-sorter="numericOnly"
-                                                    data-field="persent" data-filter-control="select">درصد تکمیل
-                                                </th>
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-sorter="numericOnly"
-                                                    data-field="delaycost" data-footer-formatter="priceFormatter"
-                                                >
+                                                    data-field="delaycost" data-footer-formatter="priceFormatter" >
                                                     {% if status == 'overdue' %}
                                                         مبلغ معوق
                                                     {% endif %}
@@ -282,32 +283,19 @@
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="from_last_daryaft">روز از آخرین پرداختی
                                                 </th>
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-field="condiition" data-filter-control="select">وضعیت
-                                                </th>
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-field="last_tracks">آخرین پیگیری
-                                                </th>
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-field="last_tracks_status" data-filter-control="select">وضعیت
 
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="last_tracks" data-sorter="numericOnly">آخرین پیگیری
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-field="delay" data-sorter="numericOnly"
-                                                    data-filter-control="select">
-                                                    {% if status == 'overdue' %}
-                                                        تاخیر
-                                                    {% endif %}
-                                                    {% if status == 'soon' %}
-                                                        تعجیل
-                                                    {% endif %}
-
+                                                    data-field="reminderoverdo">یاد آور فراموش شده
+                                                </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="reminder">یادآور
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-sorter="numericOnly" data-footer-formatter="priceFormatter"
                                                     data-field="mtday">
-
-
                                                     {% if status == 'overdue' %}
                                                         خواب تعویق (میلیون تومان روز)
                                                     {% endif %}
@@ -320,59 +308,86 @@
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            {% for l in loans %}
+                                            {% for p in person %}
                                                 <tr>
                                                     <td class="card-text text-center">
-                                                        <a href="/acc/jariashkhas/moshtari/{{ l.loan.person.per_taf }}"
+                                                        <a href="/acc/jariashkhas/moshtari/{{ p.per_taf }}"
                                                            target="_blank">
-                                                            {{ l.loan.person.per_taf }}
+                                                            {{ p.per_taf }}
                                                         </a>
                                                     </td>
                                                     <td class="card-text text-center">
-                                                        <a href="/acc/jariashkhas/moshtari/{{ l.loan.person.per_taf }}"
+                                                        <a href="/acc/jariashkhas/moshtari/{{ p.per_taf }}"
                                                            target="_blank">
-                                                            {{ l.loan.person.code }}
+                                                            {{ p.code }}
                                                         </a>
                                                     </td>
                                                     <td class="card-text text-center">
-                                                        <a href="/acc/jariashkhas/moshtari/{{ l.loan.person.per_taf }}"
+                                                        <a href="/acc/jariashkhas/moshtari/{{ p.per_taf }}"
                                                            target="_blank">
-                                                            {{ l.loan.person }}
+                                                            {{ p.name }} {{ p.lname }}
                                                         </a>
                                                     </td>
-                                                    <td class="card-text text-center">{{ l.tarikh }}</td>
-                                                    <td class="card-text text-center">{{ l.cost|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center">{{ l.complete_percent|percentage }}%</td>
-                                                    <td class="card-text text-center">{{ l.delaycost|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center">{{ l.from_last_daryaft|default_if_none:'' }}</td>
-                                                    <td class="card-text text-center">{{ l.category_fa }}</td>
-                                                    <td class="card-text text-center">
-                                                        {{ l.last_tracks.created_at|timesince }}
-                                                    </td>
-                                                    <td class="card-text text-center">
-                                                        {% if l.last_tracks.call_status == 4 %}
-                                                            <i class="fa fa-hourglass-start text-warning fa-2x"></i>
+                                                    <td class="card-text text-center">{{ p.f_date }}</td>
+                                                    <td class="card-text text-center">{{ p.loan_count|floatformat:2 }}</td>
+                                                    <td class="card-text text-center">{{ p.cost|floatformat:0|intcomma:False }}</td>
 
+                                                    {#                                                    <td class="card-text text-center">{{ l.delaycost|floatformat:0|intcomma:False }}</td>#}
+                                                    <td class="card-text text-center">{{ p.from_last_daryaft|default_if_none:'' }}</td>
+                                                    {#                                                    <td class="card-text text-center">{{ l.category_fa }}</td>#}
+                                                    {% if p.last_tracks.created_at %}
+                                                        <td class="card-text text-center">
+                                                            {{ p.last_tracks.created_at|abs_days_diff:today }} روز پیش
+                                                        </td>
+                                                    {% else %}
+                                                        <td></td>
+                                                    {% endif %}
+
+                                                    <td class="card-text text-center text-danger">
+                                                        {% if p.last_tracks.reminder_status %}
                                                         {% else %}
-                                                            <i class="fa {{ l.last_tracks.track_kind.kind_icon }} text-{{ l.last_tracks.track_kind.kind_color }} fa-2x"></i>
-                                                        {% endif %}
-                                                        {% if l.last_tracks.track_kind.is_call_related %}
-                                                            <span class="{{ l.last_tracks.get_call_status_details.color }}">
-                        <i class="fa {{ l.last_tracks.get_call_status_details.icon }}"></i>
-                        {{ l.last_tracks.get_call_status_details.persian }}
-                    </span>
-                                                        {% else %}
-
-                                                            <span class="{{ l.last_tracks.get_status_details.color }}">
-                                                    <i class="fa {{ l.last_tracks.get_status_details.icon }}"></i>
-                                                    {{ l.last_tracks.get_status_details.persian }}
-                                                </span>
-
+                                                            {% if p.last_tracks.next_reminder_date %}
+                                                                {{ p.last_tracks.next_reminder_date|abs_days_diff:today }}
+                                                                روز گذشته
+                                                            {% endif %}
                                                         {% endif %}
                                                     </td>
 
-                                                    <td class="card-text text-center">{{ l.delay_days }} </td>
-                                                    <td class="card-text text-center">{{ l.mtday|floatformat:0|intcomma:False }} </td>
+
+                                                    <td class="card-text text-center text-success">
+                                                        {% if p.last_tracks.reminder_status %}
+                                                            {% if p.last_tracks.next_reminder_date %}
+                                                                {{ p.last_tracks.next_reminder_date|abs_days_diff:today }}
+                                                                روز دیگر
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </td>
+
+
+                                                    {#                                                    <td class="card-text text-center">#}
+                                                    {#                                                        {% if l.last_tracks.call_status == 4 %}#}
+                                                    {#                                                            <i class="fa fa-hourglass-start text-warning fa-2x"></i>#}
+                                                    {##}
+                                                    {#                                                        {% else %}#}
+                                                    {#                                                            <i class="fa {{ l.last_tracks.track_kind.kind_icon }} text-{{ l.last_tracks.track_kind.kind_color }} fa-2x"></i>#}
+                                                    {#                                                        {% endif %}#}
+                                                    {#                                                        {% if l.last_tracks.track_kind.is_call_related %}#}
+                                                    {#                                                            <span class="{{ l.last_tracks.get_call_status_details.color }}">#}
+                                                    {#                        <i class="fa {{ l.last_tracks.get_call_status_details.icon }}"></i>#}
+                                                    {#                        {{ l.last_tracks.get_call_status_details.persian }}#}
+                                                    {#                    </span>#}
+                                                    {#                                                        {% else %}#}
+                                                    {##}
+                                                    {#                                                            <span class="{{ l.last_tracks.get_status_details.color }}">#}
+                                                    {#                                                    <i class="fa {{ l.last_tracks.get_status_details.icon }}"></i>#}
+                                                    {#                                                    {{ l.last_tracks.get_status_details.persian }}#}
+                                                    {#                                                </span>#}
+                                                    {##}
+                                                    {#                                                        {% endif %}#}
+                                                    {#                                                    </td>#}
+                                                    {##}
+                                                    {#                                                    <td class="card-text text-center">{{ l.delay_days }} </td>#}
+                                                    <td class="card-text text-center">{{ p.mtday|floatformat:0|intcomma:False }} </td>
                                                 </tr>
                                             {% endfor %}
                                             </tbody>

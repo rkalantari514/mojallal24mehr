@@ -269,7 +269,6 @@ def ChequesRecieveTotal(request, *args, **kwargs):
         'chartmahanedata': chart_data,
         'table1': table1,
 
-
     }
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
@@ -385,7 +384,6 @@ def ChequesPayTotal(request, *args, **kwargs):
     for chequ in chequespay:
         com = chequ.last_sanad_detaile.syscomment if chequ.last_sanad_detaile else ''
 
-
         # Split تاریخ به سال، ماه و روز
         year, month, day = chequ.cheque_tarik.split('/')
 
@@ -412,8 +410,6 @@ def ChequesPayTotal(request, *args, **kwargs):
     year = request.GET.get('year', None)
     print("Query params - Year:", year, "Month:", month)
 
-
-
     print(f"8: {time.time() - start_time:.2f} ثانیه")
 
     # آماده‌سازی context برای رندر
@@ -424,7 +420,6 @@ def ChequesPayTotal(request, *args, **kwargs):
         'chartmahanedata': chart_data,
         'table1': table1,
 
-
     }
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
@@ -432,7 +427,7 @@ def ChequesPayTotal(request, *args, **kwargs):
     return render(request, 'cheques-pay-total.html', context)
 
 
-@ login_required(login_url='/login')
+@login_required(login_url='/login')
 def balance_sheet_kol(request):
     name = 'تراز آزمایشی | کل'
     result = page_permision(request, name)  # بررسی دسترسی
@@ -1114,6 +1109,7 @@ def HesabMoshtariDetail1(request, tafsili):
 
     return render(request, 'moshrari_detail.html', context)
 
+
 from datetime import timedelta
 
 from datetime import timedelta
@@ -1138,14 +1134,14 @@ def HesabMoshtariDetail(request, tafsili):
 
     today = timezone.now().date()
     # asnad = SanadDetail.objects.filter(kol=103, moin=1, tafzili=tafsili).order_by('date')
-    asnad = SanadDetail.objects.filter(kol=103,  tafzili=tafsili).order_by('date')
+    asnad = SanadDetail.objects.filter(kol=103, tafzili=tafsili).order_by('date')
 
     hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
     m_name = None
 
     if request.method == 'POST':
         action = request.POST.get('action')  # دریافت نام دکمه کلیک شده
-        print('action',action)
+        print('action', action)
 
         if action == 'send_sms':
             form = SMSTrackingForm(request.POST, customer=hesabmoshtari)
@@ -1159,7 +1155,7 @@ def HesabMoshtariDetail(request, tafsili):
                 if not sample_sms and not message:
                     form.add_error('message', "حداقل یکی از فیلدهای متن پیامک یا پیامک نمونه باید مقدار داشته باشد.")
                 else:
-                    message_to_send='مشتری گرامی'
+                    message_to_send = 'مشتری گرامی'
                     message_to_send += f"\n{hesabmoshtari.person.clname}\n"
                     message_to_send += sample_sms.text if sample_sms else ""
                     if message:
@@ -1231,7 +1227,6 @@ def HesabMoshtariDetail(request, tafsili):
         sms_form = SMSTrackingForm(customer=hesabmoshtari)
         call_form = CallTrackingForm(customer=hesabmoshtari)
 
-
     sms_form = SMSTrackingForm(customer=hesabmoshtari)
     call_form = CallTrackingForm(customer=hesabmoshtari)
     tracking = Tracking.objects.filter(customer=hesabmoshtari).order_by('-id')
@@ -1260,6 +1255,7 @@ def HesabMoshtariDetail(request, tafsili):
     # return render(request, 'moshrari_detail.html', context)
     return render(request, 'master_moshrari_detail.html', context)
 
+
 from django.utils import timezone
 from django.db.models import Value, CharField, IntegerField, F, ExpressionWrapper, DurationField
 from django.db.models import Value, CharField, IntegerField, F, ExpressionWrapper, DecimalField, Sum, Count
@@ -1267,7 +1263,7 @@ from django.db.models import OuterRef, Subquery
 
 
 @login_required(login_url='/login')
-def LoanTotal(request, status,*args, **kwargs):
+def LoanTotal(request, status, *args, **kwargs):
     name = 'اقساط معوق'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
@@ -1279,105 +1275,94 @@ def LoanTotal(request, status,*args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
 
     today = timezone.now().date()
-
-    if status=='overdue':
+    total_count = 0
+    total_cost = 0
+    total_mtday = 0
+    if status == 'overdue':
         title = 'گزارش اقساط معوق'
-        loans = LoanDetil.objects.filter(complete_percent__lt=1, date__lt=today).annotate(
-            category_en=Value("Overdue", CharField()),
-            category_fa=Value("معوق", CharField()),
-            delay_days=(ExpressionWrapper(F("date") - today, output_field=IntegerField())) / -86400000000,
-            mtday=(ExpressionWrapper(
-                (F("delay_days") * F("cost") * (1 - F("complete_percent"))),
-                output_field=DecimalField(max_digits=15, decimal_places=0)) / 10000000
-                   ),
-            delaycost=(ExpressionWrapper(
-                (F("cost") * (1 - F("complete_percent"))),
-                output_field=DecimalField(max_digits=15, decimal_places=0))
-            ),
-            from_last_daryaft=Subquery(
-                BedehiMoshtari.objects.filter(person=OuterRef("loan__person")).values('from_last_daryaft')[:1]
-            )
-        )
+        loans = LoanDetil.objects.filter(complete_percent__lt=1, date__lt=today)
+        person = Person.objects.filter(pk__in=loans.values('loan__person__pk')).distinct()
+        total_count=0
+        total_cost=0
+        total_mtday=0
+        for p in person:
+            l_p = loans.filter(loan__person=p)
+            try:
+                p.f_date = l_p.first().tarikh
+            except:
+                p.f_date = "-"
+            count = 0
+            cost = 0
+            from_last_daryaft=0
+            mtday=0
+            for l in l_p:
+                count += (1 - l.complete_percent)
+                if l.date < today:
+                    cost += (1 - l.complete_percent) * float(l.cost)
+                    mtday=((1 - l.complete_percent) * float(l.cost))*int((today-l.date).days)
+            try:
+                from_last_daryaft = BedehiMoshtari.objects.filter(person=p).last().from_last_daryaft
+            except:
+                pass
+            last_tracks=Tracking.objects.filter(customer__person=p).last()
+            p.last_tracks=last_tracks
+            p.loan_count = count
+            p.cost = cost
+            p.mtday = mtday/10000000
+            p.from_last_daryaft = from_last_daryaft
+            p.save()
 
-    if status=='soon':
-        title='گزارش اقساط دارای تعجیل'
-        loans = LoanDetil.objects.filter(complete_percent__gt=0, date__gte=today).annotate(
-            category_en=Value("Soon", CharField()),
-            category_fa=Value("تعجیل", CharField()),
-            delay_days=(ExpressionWrapper(F("date") - today, output_field=IntegerField())) / 86400000000,
-            mtday=(ExpressionWrapper(
-                (F("delay_days") * F("cost") * (1 - F("complete_percent"))),
-                output_field=DecimalField(max_digits=15, decimal_places=0)) / 10000000
-                   ),
-            delaycost=(ExpressionWrapper(
-                (F("cost") * (1 - F("complete_percent"))),
-                output_field=DecimalField(max_digits=15, decimal_places=0))
-            ),
-            from_last_daryaft=Subquery(
-                BedehiMoshtari.objects.filter(person=OuterRef("loan__person")).values('from_last_daryaft')[:1]
-            )
-        )
+    if status == 'soon':
+        title = 'گزارش اقساط دارای تعجیل'
+        loans = LoanDetil.objects.filter(complete_percent__gt=0, date__gte=today)
+        person = Person.objects.filter(pk__in=loans.values('loan__person__pk')).distinct()
+        for p in person:
+            l_p = loans.filter(loan__person=p)
+            try:
+                p.f_date = l_p.first().tarikh
+            except:
+                p.f_date = "-"
+            count = 0
+            cost = 0
+            from_last_daryaft = 0
+            mtday = 0
+            for l in l_p:
+
+                if l.date > today:
+                    count += (l.complete_percent)
+                    cost += (l.complete_percent) * float(l.cost)
+                    mtday = ((l.complete_percent) * float(l.cost)) * int((today - l.date).days)
+            try:
+                from_last_daryaft = BedehiMoshtari.objects.filter(person=p).last().from_last_daryaft
+            except:
+                pass
+            last_tracks = Tracking.objects.filter(customer__person=p).last()
+            p.last_tracks = last_tracks
+            p.loan_count = count
+            p.cost = cost
+            p.mtday = -1 * mtday / 10000000
+            p.from_last_daryaft = from_last_daryaft
+            p.save()
 
 
 
 
-    # loans = LoanDetil.objects.filter(complete_percent__lt=1, date__lt=today).annotate(
-    #     category_en=Value("Overdue", CharField()),
-    #     category_fa=Value("معوق", CharField()),
-    #     # delay_days=ExpressionWrapper(today - F("date"), output_field=DurationField()),
-    #     delay_days=(ExpressionWrapper(F("date") - today, output_field=IntegerField())) / -86400000000,
-    #     mtday=(ExpressionWrapper(
-    #         (F("delay_days") * F("cost") * (1 - F("complete_percent"))),
-    #         output_field=DecimalField(max_digits=15, decimal_places=0)) / 10000000
-    #            ),
-    #     delaycost=(ExpressionWrapper(
-    #         (F("cost") * (1 - F("complete_percent"))),
-    #         output_field=DecimalField(max_digits=15, decimal_places=0))
-    #     )
-    #
+    print('loan_stats["total_cost"]')
+
+    # loan_stats = person.aggregate(
+    #     total_count=Count("id"),
+    #     total_cost=Sum("cost") / 10000000000,
+    #     total_mtday=Sum("mtday") / 1000
     # )
+    # print(loan_stats["total_cost"])
+    # day_report = MasterReport.objects.filter(day=today).last()
 
-    # loans_today = LoanDetil.objects.filter(complete_percent__lt=1, date=today).annotate(
-    #     category_en=Value("Today", CharField()),
-    #     category_fa=Value("امروز", CharField()),
-    #     delay_days=Value(0, IntegerField()),
-    #     mtday=Value(0, FloatField())
-    # )
-    #
-    # loans_future = LoanDetil.objects.filter(complete_percent__lt=1, date__gt=today).annotate(
-    #     category_en=Value("Future", CharField()),
-    #     category_fa=Value("آینده", CharField()),
-    #     delay_days=Value(0, IntegerField()),
-    #     mtday=Value(0, FloatField())
-    # )
-
-    # loans_soon = LoanDetil.objects.filter(complete_percent__gt=0, date__lte=today).annotate(
-    #     category_en=Value("Soon", CharField()),
-    #     category_fa=Value("تعجیل", CharField()),
-    #     delay_days=Value(0, output_field=IntegerField()),
-    #     mtday=Value(0, output_field=IntegerField()),
-    #     delaycost=Value(0, output_field=IntegerField()),
-    #     from_last_daryaft=Value(0.0, output_field=FloatField()),
-    #
-    # )
-
-    # final_loans = loans.union(loans_soon)
-    # final_loans = loans.union(loans_today, loans_future)
-    # final_loans = loans.union(loans_today)
-
-    # محاسبه تعداد وام‌ها، مجموع delay_days و مجموع mtday
-    loan_stats = loans.aggregate(
-        total_count=Count("id"),
-        total_delaycost=Sum("delaycost") / 10000000000,
-        total_mtday=Sum("mtday")/1000
-    )
-
-    day_report=MasterReport.objects.filter(day=today).last()
-
-    if day_report and (day_report.total_delaycost != loan_stats["total_delaycost"] or day_report.total_mtday != loan_stats["total_mtday"]):
-        day_report.total_delaycost = loan_stats["total_delaycost"]
-        day_report.total_mtday = loan_stats["total_mtday"]
-        day_report.save()
+    # if day_report and (
+    #         day_report.total_delaycost != loan_stats["total_delaycost"] or day_report.total_mtday != loan_stats[
+    #     "total_mtday"]):
+    #     day_report.total_delaycost = loan_stats["total_delaycost"]
+    #     day_report.total_mtday = loan_stats["total_mtday"]
+    #     day_report.save()
 
     from django.db.models import Q
 
@@ -1402,14 +1387,15 @@ def LoanTotal(request, status,*args, **kwargs):
     if updated_objects:
         Tracking.objects.bulk_update(updated_objects, ["status_code"])
 
-
     context = {
         'title': title,
         'user': user,
-        'loans': loans,
-        "total_count": loan_stats["total_count"],
-        "total_delaycost": loan_stats["total_delaycost"],
-        "total_mtday": loan_stats["total_mtday"],
+        'today': today,  # <--- این خط را اضافه کنید!
+
+        'person': person,
+        "total_count": total_count,
+        "total_cost": total_cost,
+        "total_mtday": total_mtday,
         'status': status,
 
     }
@@ -1418,6 +1404,7 @@ def LoanTotal(request, status,*args, **kwargs):
 
     return render(request, 'loan-total.html', context)
 
+
 # برای api
 from django.http import JsonResponse
 
@@ -1425,12 +1412,14 @@ from django.http import JsonResponse
 from django.db.models import ExpressionWrapper, F, IntegerField, Sum
 from django.utils import timezone
 
+
 def loan_summary_api(request):
     today = timezone.now().date()
 
     loans = LoanDetil.objects.filter(complete_percent__lt=1, date__lt=today).annotate(
         delay_days=(ExpressionWrapper(F("date") - today, output_field=IntegerField())) / -86400000000,
-        mtday=(ExpressionWrapper((F("delay_days") * F("cost") * (1 - F("complete_percent"))), output_field=IntegerField())) / 10000000,
+        mtday=(ExpressionWrapper((F("delay_days") * F("cost") * (1 - F("complete_percent"))),
+                                 output_field=IntegerField())) / 10000000,
         delaycost=(ExpressionWrapper((F("cost") * (1 - F("complete_percent"))), output_field=IntegerField()))
     )
 
@@ -1443,6 +1432,8 @@ def loan_summary_api(request):
         "total_delaycost": loan_stats["total_delaycost"],
         "total_mtday": loan_stats["total_mtday"],
     })
+
+
 from django.db.models import Q
 
 
@@ -1484,15 +1475,14 @@ def SaleTotal(request, year=None, month=None, day=None):
             s.negative_curramount = float(s.curramount) * -1
         except (ValueError, TypeError):
             # اگر s.curramount قابل تبدیل به عدد نبود، 0 در نظر بگیرید یا مقدار دیگری
-            s.negative_curramount = 0 # یا s.curramount اگر می‌خواهید همان مقدار اصلی باشد
+            s.negative_curramount = 0  # یا s.curramount اگر می‌خواهید همان مقدار اصلی باشد
 
     # --- اضافه کردن روز هفته برای رندر اولیه ---
     jalali_weekday_names = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"]
     current_day_jalali = jdate.fromgregorian(date=day_filter_gregorian)
-    day_of_week_jalali = jalali_weekday_names[current_day_jalali.weekday()] # weekday() بر اساس شنبه (0) شروع می‌شود
+    day_of_week_jalali = jalali_weekday_names[current_day_jalali.weekday()]  # weekday() بر اساس شنبه (0) شروع می‌شود
 
     # -------------------------------------------------------------------------------------------------
-
 
     jalali_month_names = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن",
                           "اسفند"]
@@ -1509,7 +1499,7 @@ def SaleTotal(request, year=None, month=None, day=None):
             month_index = report.month - 1  # ماه شمسی 1 تا 12، ایندکس 0 تا 11
 
             if 0 <= month_index < 12:
-                yearly_monthly_khales_forosh_data[year_val][month_index] = float(report.khales_forosh/1000)
+                yearly_monthly_khales_forosh_data[year_val][month_index] = float(report.khales_forosh / 1000)
         except (ValueError, TypeError, KeyError):
             print(f"Error processing monthly report: Year {report.year}, Month {report.month}")
             pass
@@ -1543,7 +1533,7 @@ def SaleTotal(request, year=None, month=None, day=None):
             # 'stack': 'khales_forosh_stack' # اگر نمودار میله ای انباشته (Stacked) می خواهید، این خط را فعال کنید
         })
         color_index += 1
-#-------------------------------------------------------
+        # -------------------------------------------------------
         jalali_weekday_names = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"]
 
         # بهینه‌سازی: فقط فیلدهای لازم را از دیتابیس دریافت کنید
@@ -1622,8 +1612,6 @@ def SaleTotal(request, year=None, month=None, day=None):
         'chart_datasets_weekly_khales_forosh': chart_datasets_weekly_khales_forosh,  # Dataset‌ها (میله‌ای و خط میانگین)
     }
 
-
-
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
     return render(request, 'sale_total.html', context)
@@ -1661,10 +1649,10 @@ def SaleTotalData(request, year, month, day):
             jalali_month = ''
             print(f"Warning: s.tarikh format invalid for split: {s.tarikh}")
         try:
-            current_amount_numeric = float(s.curramount) # یا int() اگر همیشه صحیح است
+            current_amount_numeric = float(s.curramount)  # یا int() اگر همیشه صحیح است
             negative_curramount = current_amount_numeric * -1
         except (ValueError, TypeError):
-            negative_curramount = 0 # اگر نتوانست به عدد تبدیل شود، 0 در نظر گرفته شود
+            negative_curramount = 0  # اگر نتوانست به عدد تبدیل شود، 0 در نظر گرفته شود
 
         data.append({
             'person_name': f"{s.person.name} {s.person.lname}",
@@ -1675,10 +1663,10 @@ def SaleTotalData(request, year, month, day):
             'year': jalali_year,
             'month': jalali_month,
             'sharh': sharh_display,
-            'mablagh': negative_curramount, # این حتما باید یک عدد باشد
+            'mablagh': negative_curramount,  # این حتما باید یک عدد باشد
             'is_negative': negative_curramount < 0
         })
-        total_mandah += negative_curramount # جمع نیز باید روی اعداد انجام شود
+        total_mandah += negative_curramount  # جمع نیز باید روی اعداد انجام شود
 
     display_date_jalali = jdate.fromgregorian(date=day_filter_gregorian)
     display_date_str = display_date_jalali.strftime('%Y/%m/%d')
@@ -1694,5 +1682,3 @@ def SaleTotalData(request, year, month, day):
         'day_of_week': day_of_week_jalali,  # اضافه کردن روز هفته به پاسخ JSON
 
     })
-
-

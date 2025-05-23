@@ -106,3 +106,15 @@ class Tracking(models.Model):
     def get_call_status_details(self):
         return CALL_STATUS.get(self.call_status,
                                {"status": "Unknown", "persian": "نامشخص", "color": "text-secondary", "icon": "fa-question"})
+
+
+
+    def reminder_status(self):
+        from django.utils import timezone
+        today = timezone.now().date()
+        if self.next_reminder_date:
+            if self.next_reminder_date < today:
+                return False
+            else:
+                return True
+        return False
