@@ -1545,49 +1545,65 @@ def SaleTotal(request, year=None, month=None, day=None):
 #-------------------------------------------------------
         jalali_weekday_names = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"]
 
-        all_master_reports = MasterReport.objects.all()
+        # بهینه‌سازی: فقط فیلدهای لازم را از دیتابیس دریافت کنید
+        all_master_reports_data = MasterReport.objects.values('day', 'khales_forosh')
 
-        weekly_khales_forosh_sum = [0] * 7
+        # لیست برای نگهداری مجموع خالص فروش برای هر روز هفته
+        weekly_khales_forosh_sum_temp = [0.0] * 7
+        # لیست برای نگهداری تعداد رکوردهای هر روز هفته
+        weekly_day_counts = [0] * 7
 
-        total_khales_forosh = 0
-        # valid_days_count = 0
-
-        for report in all_master_reports:
+        for report_data in all_master_reports_data:
             try:
-                gregorian_date = report.day
+                gregorian_date = report_data['day']
+                khales_forosh_value = float(report_data['khales_forosh'])
+
                 jdate_obj = jdate.fromgregorian(date=gregorian_date)
-                weekday_index = jdate_obj.weekday()
-                khales_forosh_value = float(report.khales_forosh/1000)
-                weekly_khales_forosh_sum[weekday_index] += khales_forosh_value
-                total_khales_forosh += khales_forosh_value
-                # valid_days_count += 1  # تعداد روزهایی که خالص فروش دارند را می‌شماریم برای محاسبه میانگین
-            except (ValueError, TypeError):
-                print(f"Error processing MasterReport for date {report.day}")
+                weekday_index = jdate_obj.weekday()  # 0=شنبه, 1=یکشنبه, ..., 6=جمعه
+
+                weekly_khales_forosh_sum_temp[weekday_index] += khales_forosh_value
+                weekly_day_counts[weekday_index] += 1
+
+            except (ValueError, TypeError, KeyError):
+                print(f"Error processing MasterReport for date {report_data.get('day')}")
                 pass
 
-        # محاسبه میانگین خالص فروش برای خط افقی
-        # average_khales_forosh = total_khales_forosh / valid_days_count if valid_days_count > 0 else 0
-        average_khales_forosh = total_khales_forosh / 7
+        # محاسبه میانگین خالص فروش برای هر روز هفته
+        weekly_khales_forosh_average = [0.0] * 7
+        valid_weekly_averages_sum = 0.0  # مجموع میانگین‌های غیر صفر
+        valid_weekly_averages_count = 0  # تعداد میانگین‌های غیر صفر
+
+        for i in range(7):
+            if weekly_day_counts[i] > 0:
+                weekly_khales_forosh_average[i] = weekly_khales_forosh_sum_temp[i] / weekly_day_counts[i]
+                valid_weekly_averages_sum += weekly_khales_forosh_average[i]
+                valid_weekly_averages_count += 1
+            else:
+                weekly_khales_forosh_average[i] = 0.0
+
+        # محاسبه میانگین کل از میانگین‌های روزهای هفته
+        # این همان "متوسط فروش روزهای هفته" است
+        average_of_weekly_averages = valid_weekly_averages_sum / valid_weekly_averages_count if valid_weekly_averages_count > 0 else 0
 
         chart_datasets_weekly_khales_forosh = [
             {
-                'label': 'خالص فروش',
-                'data': weekly_khales_forosh_sum,
-                'backgroundColor': 'rgba(102, 51, 153, 0.7)',  # رنگ بنفش
+                'label': 'میانگین فروش روزانه',
+                'data': weekly_khales_forosh_average,
+                'backgroundColor': 'rgba(102, 51, 153, 0.7)',
                 'borderColor': 'rgba(102, 51, 153, 1)',
                 'borderWidth': 1,
                 'barPercentage': 0.7,
                 'categoryPercentage': 0.7,
             },
             {
-                'type': 'line',  # نوع نمودار خطی برای میانگین
-                'label': 'میانگین هفتگی',
-                'data': [average_khales_forosh] * 7,  # خط افقی در ارتفاع میانگین
-                'borderColor': 'rgba(255, 193, 7, 1)',  # رنگ زرد/نارنجی
-                'backgroundColor': 'transparent',  # بدون پر کردن
+                'type': 'line',
+                'label': 'میانگین (متوسط روزانه)',  # لیبل برای خط افقی
+                'data': [average_of_weekly_averages] * 7,  # خط افقی در ارتفاع میانگین کل
+                'borderColor': 'rgba(255, 193, 7, 1)',
+                'backgroundColor': 'transparent',
                 'borderWidth': 2,
-                'pointRadius': 0,  # نقاط را نمایش نده
-                'tension': 0,  # خط صاف
+                'pointRadius': 0,
+                'tension': 0,
             }
         ]
 
