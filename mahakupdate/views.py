@@ -1,3 +1,5 @@
+from jinja2.ext import loopcontrols
+
 from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
 from dashboard.models import MasterInfo
@@ -1629,7 +1631,7 @@ def Kala_group(request):
 
 
 
-def UpdateKalaGroupinfo(request):
+def UpdateKalaGroupinfo_old(request):
     print('def UpdateKalaGroupinfo=========================================')
     # مسیر فایل اکسل
     file_path = os.path.join(settings.BASE_DIR, 'temp', 'kala_group.xlsx')  # خواندن فایل اکسل با Pandas
@@ -1659,7 +1661,103 @@ def UpdateKalaGroupinfo(request):
     return redirect('/updatedb')
 
 
-def update_categories_from_kala_groupinfo():
+def UpdateKalaGroupinfo(request):
+    print('شروع آپدیت شروط گروه بندی کالا---------------------------------------------------')
+    mahakt_data = []
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    cursor.execute("SELECT Name, Code FROM GoodGrps")
+    mahakt_data = cursor.fetchall()
+    print(f"تعداد {len(mahakt_data)} رکورد از دیتابیس محک واکشی شد.")
+
+    file_path = os.path.join(settings.BASE_DIR, 'temp', 'kala_group_by_mahak.xlsx')
+    df = pd.read_excel(file_path)
+
+    # مدیریت NaN در ستون‌های فایل اکسل
+    df['code_mahak'] = df['code_mahak'].apply(lambda x: None if pd.isna(x) else x)
+
+    # ساخت مجموعه زوج‌های نام و کد محک موجود در فایل اکسل
+    excel_pairs = set(
+        tuple(x) for x in df[['cat2', 'code_mahak']].values
+        if not pd.isna(x[0]) and not pd.isna(x[1])
+    )
+
+    # پیدا کردن حداکثر کد در فایل اکسل برای افزودن ردیف‌های جدید
+    max_code_in_excel = 0
+    if 'code' in df.columns and not df['code'].dropna().empty:
+        numeric_codes = pd.to_numeric(df['code'], errors='coerce')
+        if not numeric_codes.dropna().empty:
+            max_code_in_excel = int(numeric_codes.max())
+
+    next_code = max_code_in_excel + 1
+    rows_to_add = []
+
+    # مقایسه با داده‌های داده‌تا در بانک اطلاعاتی
+    for name, code_mahak in mahakt_data:
+        if (name, code_mahak) not in excel_pairs:
+            rows_to_add.append({
+                'code': next_code,
+                'code_mahak': code_mahak,
+                'cat1': name + "_1",
+                'cat2': name,
+                'cat3': name + "_3",
+                'contain': '',
+                'not_contain': ''
+            })
+            next_code += 1
+
+    # اضافه کردن ردیف‌های جدید به دیتافریم
+    if rows_to_add:
+        df = pd.concat([df, pd.DataFrame(rows_to_add)], ignore_index=True)
+
+    # ذخیره‌ی مجدد فایل اکسل
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    df.to_excel(file_path, index=False)
+    print(f"فایل اکسل در مسیر {file_path} با موفقیت به‌روزرسانی و ذخیره شد.")
+
+    # مجدداً خواندن فایل اکسل پس از بروزرسانی
+    df = pd.read_excel(file_path)
+    df['code_mahak'] = df['code_mahak'].apply(lambda x: None if pd.isna(x) else x)
+
+    # استخراج لیست کدهای فایل اکسل برای بررسی حذف ردیف‌های موجود در مدل
+    code_list_in_excel = set(df['code'])
+
+    # حذف ردیف‌هایی که در فایل اکسل وجود ندارند در مدل
+    KalaGroupinfo.objects.exclude(code__in=code_list_in_excel).delete()
+
+    # بروزرسانی یا افزودن رکوردهای فایل اکسل به مدل
+    for index, row in df.iterrows():
+        code = row['code']
+        code_mahak = row['code_mahak']
+        if pd.isna(code_mahak):
+            code_mahak = None
+
+        cat1 = row.get('cat1', '')
+        cat2 = row.get('cat2', '')
+        cat3 = row.get('cat3', '')
+        contain = row.get('contain', '')
+        not_contain = row.get('not_contain', '')
+
+        KalaGroupinfo.objects.update_or_create(
+            code=code,
+            defaults={
+                'code_mahak': code_mahak,
+                'cat1': cat1,
+                'cat2': cat2,
+                'cat3': cat3,
+                'contain': contain,
+                'not_contain': not_contain,
+            }
+        )
+
+    return redirect('/updatedb')  # مسیر دلخواه شما
+
+
+
+
+
+
+def update_categories_from_kala_groupinfoold():
     # استخراج دسته‌بندی‌های یکتا از ستون‌های cat1, cat2, cat3
     kala_groups = KalaGroupinfo.objects.all()
     categories = []
@@ -1686,6 +1784,52 @@ def update_categories_from_kala_groupinfo():
                 name=name,
                 defaults={'level': level, 'parent': parent}
             )
+
+from django.db import transaction
+
+from django.db import transaction
+
+def update_categories_from_kala_groupinfo():
+    # استخراج دسته‌بندی‌های یکتا از ستون‌های cat1، cat2، و cat3
+    kala_groups = KalaGroupinfo.objects.all()
+    categories = []
+
+    for group in kala_groups:
+        if group.cat1:
+            categories.append((group.cat1, 1, None, None))
+        if group.cat2:
+            categories.append((group.cat2, 2, group.cat1, group.code_mahak))
+        if group.cat3:
+            categories.append((group.cat3, 3, group.cat2, group.code_mahak))  # تنها در سطح 3
+
+    # حذف دسته‌بندی‌های تکراری، بر اساس نام و سطح
+    unique_categories = list({(name, level): (name, level, parent_name, code_mahak)
+                                for name, level, parent_name, code_mahak in categories}.values())
+
+    # ساخت مجموعه نام‌ها برای حذف رکوردهای قدیمی
+    new_category_names = [name for name, _, _, _ in unique_categories]
+
+    with transaction.atomic():
+        # حذف رکوردهای قدیمی که دیگر در مجموعه وجود ندارند
+        Category.objects.exclude(name__in=new_category_names).delete()
+
+        # بروزرسانی یا ایجاد رکوردهای جدید
+        for name, level, parent_name, code_mahak in unique_categories:
+            parent = None
+            if parent_name:
+                parent = Category.objects.filter(name=parent_name).first()
+
+            defaults_kwargs = {'level': level, 'parent': parent}
+            # فقط در سطح 3 و در صورت وجود، مقدار code_mahak تنظیم شود
+            if level == 3 and code_mahak is not None:
+                defaults_kwargs['code_mahak'] = code_mahak
+
+            Category.objects.update_or_create(
+                name=name,
+                defaults=defaults_kwargs
+            )
+
+
 
 
 def CreateKalaGroup(request):

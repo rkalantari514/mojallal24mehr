@@ -63,7 +63,7 @@ class WordCountAdmin(admin.ModelAdmin):
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'name', 'parent', 'level']
+    list_display = ['__str__', 'name', 'parent', 'level','code_mahak']
     list_filter = ['level', 'parent', ]
     list_editable = ['name', 'parent', 'level']
     search_fields = ['name', 'level']
@@ -105,7 +105,7 @@ class PersonAdmin(admin.ModelAdmin):
 
 
 class KalaGroupinfoAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'id', 'code', 'contain', 'cat3', 'cat2', 'cat1']
+    list_display = ['__str__', 'id', 'code','code_mahak', 'contain', 'cat3', 'cat2', 'cat1']
 
     # list_filter = ['level','parent',]
     # list_editable = ['name','parent','level']

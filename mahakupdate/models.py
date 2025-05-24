@@ -36,6 +36,7 @@ class Mtables(models.Model):
 
 class KalaGroupinfo(models.Model):
     code = models.IntegerField(default=0, verbose_name='کد اطلاعات گروه بندی')
+    code_mahak = models.IntegerField(blank=True, null=True, verbose_name='کد گروه بندی محک')
     cat1 = models.CharField(max_length=150, blank=True, null=True, default="", verbose_name='دسته بندی 1')
     cat2 = models.CharField(max_length=150, blank=True, null=True, default="", verbose_name='دسته بندی 2')
     cat3 = models.CharField(max_length=150, blank=True, null=True, default="", verbose_name='دسته بندی 3')
@@ -60,6 +61,7 @@ class Category(models.Model):
     parent = models.ForeignKey('self', on_delete=models.SET_NULL, related_name='children', null=True, blank=True,
                                verbose_name='دسته‌بندی والد')
     level = models.PositiveSmallIntegerField(choices=LEVEL_CHOICES, verbose_name='سطح')
+    code_mahak = models.IntegerField(blank=True, null=True, verbose_name='کد گروه بندی محک')
 
     class Meta:
         verbose_name = 'دسته‌بندی'
