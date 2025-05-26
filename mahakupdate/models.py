@@ -80,6 +80,7 @@ class Kala(models.Model):
     s_m_ratio = models.FloatField(default=0, verbose_name='نسبت فروش به میانگین موجودی')
     last_updated_ratio = models.DateField(blank=True, null=True, verbose_name='آخرین تاریخ به‌روزرسانی')
     total_sale = models.FloatField(default=0, verbose_name='کل فروش')
+    kala_taf=models.IntegerField(blank=True, null=True,default=0, verbose_name='کد تفصیلی کالا')
 
     # l_mojodi=models.FloatField(default=0, verbose_name='آخرین موجودی')
     # t_sales=models.FloatField(default=0, verbose_name='کل فروش')
