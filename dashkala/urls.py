@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import DsshKala, TotalKala, load_categories_level2, load_categories_level3,DetailKala,CategoryDetail
+from .views import DsshKala, TotalKala, load_categories_level2, load_categories_level3, DetailKala, CategoryDetail, \
+    CategorySale
 from django.shortcuts import redirect
 urlpatterns = [
     path('dash/kala', DsshKala, name='dssh_kala'),
@@ -12,6 +13,7 @@ urlpatterns = [
 
 
     path('dash/kala/category/<id>', CategoryDetail, name='categor_ydetail'),
+    path('sale/category/<total>/<id>/<since>/<to>', CategorySale, name='category_sale'),
 
 
 

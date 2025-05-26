@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from custom_login.models import UserLog
 from custom_login.views import page_permision
-from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek, Kala
+from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek, Kala, SanadDetail
 from persianutils import standardize
 from django.db.models import Max, Subquery
 from .forms import FilterForm, KalaSelectForm, Kala_Detail_Form
@@ -804,3 +804,125 @@ def CategoryDetail(request, *args, **kwargs):
         return render(request, 'partial_category.html', context)
     return render(request, 'category_detail.html', context)
 
+from django.db.models import Q
+
+
+@login_required(login_url='/login')
+def CategorySale(request, *args, **kwargs):
+    total = kwargs['total']
+    if total == 'total':
+        cat_id='all'
+    else:
+        cat_id = int(kwargs['id'])
+    since = kwargs['since']
+    to = kwargs['to']
+    name = 'گزارش فروش کالا'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
+    start_time = time.time()  # زمان شروع تابع
+    user=request.user
+
+
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(
+            user=user,
+            page='جزئیات دسته بندی',
+            code=cat_id,
+        )
+
+    st_with = ['کالا در فاکتور فروش', 'کالاهاي برگشت شده در برگشت از فروش']
+    q_objects = Q()
+    for phrase in st_with:
+        q_objects |= Q(sharh__startswith=phrase)
+    sale_sanad = SanadDetail.objects.filter(q_objects)
+    print('sale_sanad.count()')
+    print(sale_sanad.count())
+
+    if cat_id != 'all':
+        cat = Category.objects.filter(id=cat_id).last()
+        print('cat', cat)
+        cat_level = cat.level
+
+        print('cat_level',cat_level)
+        if cat_level == 1:
+            kalas = Kala.objects.filter(category__parent__parent=cat)
+        elif cat_level == 2:
+            kalas = Kala.objects.filter(category__parent=cat)
+        elif cat_level == 3:
+            kalas = Kala.objects.filter(category=cat)
+
+        print('kalas.count():', kalas.count())
+        taf_list = kalas.values_list('kala_taf', flat=True).distinct()
+        taf_list = list(taf_list)
+        sale_sanad=sale_sanad.filter(tafzili__in=taf_list)
+
+
+        khales_forosh = sale_sanad.aggregate(total_sale=Sum('curramount'))['total_sale'] or 0
+        print('khales_forosh')
+        print(khales_forosh)
+        print('+++++++++++++++++++++++++++++++++++++++++++')
+
+
+
+
+        import re
+        all_sharh_descriptions = SanadDetail.objects.filter(kol=102).values_list('sharh', flat=True)
+        unique_sharh_patterns = set()
+        pattern = re.compile(r'(.*?)\(')
+        for sharh_text in all_sharh_descriptions:
+            if '(' in sharh_text:
+                match = pattern.match(sharh_text)
+                if match:
+                    extracted_pattern = match.group(1).strip()
+                    unique_sharh_patterns.add(extracted_pattern)
+
+        print("حالت‌های منحصر به فرد (کلمات قبل از پرانتز باز):")
+        for pattern_found in sorted(list(unique_sharh_patterns)):  # مرتب‌سازی برای نمایش بهتر
+            print(f"- '{pattern_found}'")
+
+        print(f"\nتعداد کل حالت‌های منحصر به فرد: {len(unique_sharh_patterns)}")
+
+    cat1 = Category.objects.filter(level=1).order_by('-id')
+    if cat_level == 1:
+        print('cat_level==1')
+        par1 = cat
+        par2 = None
+        cat2 = Category.objects.filter(parent=cat)
+        # cat3=Category.objects.filter(parent__parent=cat)
+        cat3 = None
+    if cat_level == 2:
+        print('cat_level==2')
+        par1 = cat.parent
+        par2 = cat
+        cat2 = Category.objects.filter(parent=par1)
+        cat3 = Category.objects.filter(parent=cat)
+
+    if cat_level == 3:
+        print('cat_level==3')
+        par2 = cat.parent
+        par1 = par2.parent
+        cat2 = Category.objects.filter(parent=par1)
+        cat3 = Category.objects.filter(parent=par2)
+
+
+    context = {
+        'title': f'{cat}',
+        'cat_id': f'{cat.id}',
+        'cat_level': cat_level,
+        'user': user,
+        'cat': cat,
+        'cat1': cat1,
+        'cat2': cat2,
+        'cat3': cat3,
+        'par1': par1,
+        'par2': par2,
+
+
+    }
+
+    total_time = time.time() - start_time  # محاسبه زمان اجرا
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+
+
+    return render(request, 'category_sale_report.html', context)
