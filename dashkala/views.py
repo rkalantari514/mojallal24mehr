@@ -1,4 +1,6 @@
 from django.contrib.auth.decorators import login_required
+from openpyxl.styles.builtins import title
+
 from custom_login.models import UserLog
 from custom_login.views import page_permision
 from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek, Kala, SanadDetail
@@ -837,8 +839,9 @@ def CategorySale(request, *args, **kwargs):
         q_objects |= Q(sharh__startswith=phrase)
     sale_sanad = SanadDetail.objects.filter(q_objects)
     print('sale_sanad.count()')
-    print(sale_sanad.count())
-
+    # print(sale_sanad.count())
+    cat_level=0
+    cat=None
     if cat_id != 'all':
         cat = Category.objects.filter(id=cat_id).last()
         print('cat', cat)
@@ -884,6 +887,14 @@ def CategorySale(request, *args, **kwargs):
         print(f"\nتعداد کل حالت‌های منحصر به فرد: {len(unique_sharh_patterns)}")
 
     cat1 = Category.objects.filter(level=1).order_by('-id')
+    if cat_level == 0:
+        print('cat_level==0')
+        par1 = None
+        par2 = None
+        cat2 = None
+        cat3 = None
+
+
     if cat_level == 1:
         print('cat_level==1')
         par1 = cat
@@ -905,10 +916,23 @@ def CategorySale(request, *args, **kwargs):
         cat2 = Category.objects.filter(parent=par1)
         cat3 = Category.objects.filter(parent=par2)
 
+    try:
+        title=f'{cat}'
+    except:
+        title='همه دسته بندی ها'
+
+    try:
+        cid=f'{cat.id}'
+    except:
+        cid=0
+
+
+
+
 
     context = {
-        'title': f'{cat}',
-        'cat_id': f'{cat.id}',
+        'title': title,
+        'cat_id': cid,
         'cat_level': cat_level,
         'user': user,
         'cat': cat,
