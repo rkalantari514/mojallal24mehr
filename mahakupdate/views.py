@@ -1044,7 +1044,7 @@ def UpdateKala(request):
     cursor = conn.cursor()
     t1 = time.time()
 
-    cursor.execute("SELECT code, name FROM GoodInf")
+    cursor.execute("SELECT code, name , grpcode FROM GoodInf")
     mahakt_data = cursor.fetchall()
     existing_in_mahak = {row[0] for row in mahakt_data}
 
@@ -1056,19 +1056,21 @@ def UpdateKala(request):
     for row in mahakt_data:
         code = row[0]
         name = row[1]
+        grpcode = row[2]
 
         if code in current_kalas:
-            if current_kalas[code].name != name:
+            if current_kalas[code].name != name or current_kalas[grpcode].name != grpcode:
                 current_kalas[code].name = name
+                current_kalas[code].grpcode = grpcode
                 kalas_to_update.append(current_kalas[code])
         else:
-            kalas_to_create.append(Kala(code=code, name=name))
+            kalas_to_create.append(Kala(code=code, name=name,grpcode=grpcode))
 
     # Bulk create new kalas
     Kala.objects.bulk_create(kalas_to_create)
 
     # Bulk update existing kalas
-    Kala.objects.bulk_update(kalas_to_update, ['name'])
+    Kala.objects.bulk_update(kalas_to_update, ['name' , 'grpcode'])
 
     # Delete obsolete kalas
     Kala.objects.exclude(code__in=existing_in_mahak).delete()
@@ -1852,7 +1854,7 @@ def update_kala_categories():
         category_found = False  # متغیری برای پیگیری پیدا شدن دسته‌بندی
 
         for group in group_infos:
-            if (group.contain in kala.name) and (group.not_contain not in kala.name):
+            if (group.contain in kala.name) and (group.not_contain not in kala.name) and (group.code_mahak == kala.grpcode):
                 # پیدا کردن دسته‌بندی سطح 3
                 category = Category.objects.filter(name=group.cat3, level=3).first()
                 if category:
@@ -1860,6 +1862,11 @@ def update_kala_categories():
                     kala.category = category
                     updates.append(kala)
                     category_found = True
+                    break
+            elif group.code_mahak == kala.grpcode:
+                kala.category = Category.objects.filter(level=3,code_mahak=kala.grpcode).first()
+                updates.append(kala)
+                category_found = True
                 break
 
         # اگر دسته‌بندی مناسب پیدا نشد، استفاده از دسته‌بندی پیش‌فرض

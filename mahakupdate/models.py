@@ -73,6 +73,7 @@ class Category(models.Model):
 
 class Kala(models.Model):
     code = models.IntegerField(default=0, verbose_name='کد کالا')
+    grpcode = models.IntegerField(blank=True, null=True, verbose_name='کد گروه کالا در محک')
     name = models.CharField(max_length=150, verbose_name='نام کالا')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name='kalas', verbose_name='دسته‌بندی',
                                  blank=True, null=True)
