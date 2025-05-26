@@ -1411,3 +1411,135 @@ def ReportsDailyDetile(request, *args, **kwargs):
     }
 
     return render(request, 'reports_daily_detail.html', context)
+
+
+from jdatetime import date as jdate
+
+
+
+
+
+@login_required(login_url='/login')
+def YealyChart(request, year=None, month=None, day=None):
+    name = ' نمودار های سالانه'
+    result = page_permision(request, name)
+    if result:
+        return result
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page=' نمودار های سالانه', code=0)
+
+    start_time = time.time()
+
+    if year and month and day:
+        try:
+            day_filter_gregorian = datetime.date(int(year), int(month), int(day))
+        except (ValueError, TypeError):
+            day_filter_gregorian = timezone.now().date()
+    else:
+        day_filter_gregorian = timezone.now().date()
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+
+    kind1 = ['خريدار در برگشت از فروش', 'خريدار در فاکتور فروش']
+    q_objects = Q()
+    for item in kind1:
+        q_objects |= Q(sharh__startswith=item)
+
+    asnadp = SanadDetail.objects.filter(
+        q_objects,
+        kol=103,
+        date=day_filter_gregorian
+    ).select_related('person')
+
+    for s in asnadp:
+        try:
+            # اطمینان از اینکه curramount قبل از ضرب عددی است
+            s.negative_curramount = float(s.curramount) * -1
+        except (ValueError, TypeError):
+            # اگر s.curramount قابل تبدیل به عدد نبود، 0 در نظر بگیرید یا مقدار دیگری
+            s.negative_curramount = 0  # یا s.curramount اگر می‌خواهید همان مقدار اصلی باشد
+
+    # --- اضافه کردن روز هفته برای رندر اولیه ---
+    jalali_weekday_names = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"]
+    current_day_jalali = jdate.fromgregorian(date=day_filter_gregorian)
+    day_of_week_jalali = jalali_weekday_names[current_day_jalali.weekday()]  # weekday() بر اساس شنبه (0) شروع می‌شود
+
+    # -------------------------------------------------------------------------------------------------
+
+    jalali_month_names = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن",
+                          "اسفند"]
+
+    all_report_years = MonthlyReport.objects.values_list('year', flat=True).distinct().order_by('year')
+
+    yearly_monthly_khales_forosh_data = {year: [0] * 12 for year in all_report_years}
+
+    all_monthly_reports = MonthlyReport.objects.filter(year__in=all_report_years).order_by('year', 'month')
+
+    for report in all_monthly_reports:
+        try:
+            year_val = report.year
+            month_index = report.month - 1  # ماه شمسی 1 تا 12، ایندکس 0 تا 11
+
+            if 0 <= month_index < 12:
+                yearly_monthly_khales_forosh_data[year_val][month_index] = float(report.khales_forosh / 1000)
+        except (ValueError, TypeError, KeyError):
+            print(f"Error processing monthly report: Year {report.year}, Month {report.month}")
+            pass
+
+    chart_datasets_khales_forosh_by_year = []
+
+    colors_for_yearly_chart = [
+        'rgba(30, 144, 255, 0.7)',  # Dodger Blue
+        'rgba(255, 69, 0, 0.7)',  # Orange Red
+        'rgba(50, 205, 50, 0.7)',  # Lime Green
+        'rgba(147, 112, 219, 0.7)',  # MediumPurple
+        'rgba(255, 165, 0, 0.7)',  # Orange
+        'rgba(0, 191, 255, 0.7)',  # Deep Sky Blue
+        'rgba(255, 0, 128, 0.7)',  # Pink
+        'rgba(128, 128, 0, 0.7)',  # Olive
+        'rgba(0, 200, 200, 0.7)',  # Teal
+        'rgba(200, 0, 200, 0.7)',  # Fuchsia
+    ]
+    border_colors_for_yearly_chart = [c.replace('0.7', '1') for c in colors_for_yearly_chart]
+
+    color_index = 0
+    for year_val in sorted(yearly_monthly_khales_forosh_data.keys()):
+        chart_datasets_khales_forosh_by_year.append({
+            'label': f'خالص فروش  {year_val}',
+            'data': yearly_monthly_khales_forosh_data[year_val],
+            'backgroundColor': colors_for_yearly_chart[color_index % len(colors_for_yearly_chart)],
+            'borderColor': border_colors_for_yearly_chart[color_index % len(border_colors_for_yearly_chart)],
+            'borderWidth': 1,
+            'barPercentage': 0.8,
+            'categoryPercentage': 0.8,
+            # 'stack': 'khales_forosh_stack' # اگر نمودار میله ای انباشته (Stacked) می خواهید، این خط را فعال کنید
+        })
+        color_index += 1
+        # -------------------------------------------------------
+
+
+
+
+
+
+        # محاسبه میانگین کل از میانگین‌های روزهای هفته
+        # این همان "متوسط فروش روزهای هفته" است
+
+
+    title = 'گزارش نمودار ای سالانه'
+    context = {
+        'title': title,
+        'user': user,
+        'day': day_filter_gregorian,
+        'day_of_week': day_of_week_jalali,  # اضافه کردن روز هفته به context
+        'chart_labels_khales_forosh_by_year': jalali_month_names,
+        'chart_datasets_khales_forosh_by_year': chart_datasets_khales_forosh_by_year,
+
+    }
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+
+    return render(request, 'yearly_report_chrat.html', context)
+
+
+

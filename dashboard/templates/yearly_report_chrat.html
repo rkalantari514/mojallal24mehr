@@ -1,0 +1,191 @@
+{% extends 'shared/_MainLayout.html' %}
+{% load humanize %}
+{% load static %}
+{% load jalali_tags %} {# برای فیلتر to_jalali در نمایش تاریخ بالای صفحه #}
+
+{% block content %}
+    <div class="content-wrapper">
+        <div class="page-title">
+
+            <div class="row">
+                <div class="col-xl-6 mb-30">
+                    <div class="card card-statistics h-100 admin-followers">
+                        <div class="card-body">
+                                        <canvas id="Chart3" height="250"></canvas>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block date %}
+    {# دیگر نیازی به moment.js و moment-jalaali.js نیست مگر اینکه برای کارهای دیگر استفاده شوند #}
+    {# <script src="{% static 'js/moment.min.js' %}"></script> #}
+    {# <script src="{% static 'js/moment-jalaali.min.js' %}"></script> #}
+
+    <script src="{% static 'js/table1/tableExport.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-locale-all.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-export.min.js' %}"></script>
+    <script src="{% static 'js/table1/natural-sorting.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-filter-control.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-print.min.js' %}"></script>
+    <script src="{% static 'js/table1/jspdf.min.js' %}"></script>
+    <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
+
+
+
+
+
+
+
+
+    <script>
+        var myCharts = {};
+        function drawChart(canvasId, type, data, options) {
+            var ctx = document.getElementById(canvasId);
+            if (!ctx) {
+                console.error("Canvas element with ID '" + canvasId + "' not found. Chart drawing cancelled for:", canvasId);
+                return;
+            }
+            ctx = ctx.getContext('2d');
+
+            if (myCharts[canvasId]) {
+                myCharts[canvasId].destroy();
+            }
+            myCharts[canvasId] = new Chart(ctx, {
+                type: type,
+                data: data,
+                options: options
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // --------------------------------------------------------------------------------
+            var chart3_labels_data_raw = document.getElementById('chart-labels-khales-forosh-by-year-data').textContent;
+            var chart3_datasets_data_raw = document.getElementById('chart-datasets-khales-forosh-by-year-data').textContent;
+
+            var chart3_labels = JSON.parse(chart3_labels_data_raw);
+            var chart3_datasets = JSON.parse(chart3_datasets_data_raw);
+
+            // لاگ کردن داده‌های دریافتی برای اشکال‌زدایی
+            console.log("Chart3 Labels (raw):", chart3_labels_data_raw);
+            console.log("Chart3 Datasets (raw):", chart3_datasets_data_raw);
+            console.log("Chart3 Labels (parsed):", chart3_labels);
+            console.log("Chart3 Datasets (parsed):", chart3_datasets);
+
+
+            var chart3_data = {
+                labels: chart3_labels,
+                datasets: chart3_datasets
+            };
+
+            var chart3_options = {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        rtl: true, // راست به چپ کردن لجند
+                        labels: {
+                            usePointStyle: true,
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'خالص فروش ماهانه',
+                        rtl: true,
+                        font: {
+                            size: 16
+                        }
+                    },
+                    tooltip: {
+                        rtl: true,
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                return tooltipItems[0].label; // ماه (مثلاً "فروردین")
+                            },
+                            label: function(tooltipItem) {
+                                let label = tooltipItem.dataset.label || ''; // لیبل سال (مثلاً "خالص فروش سال 1402")
+                                if (label) {
+                                    label = label.replace('خالص فروش سال ', ''); // فقط سال را نگه دار (مثلاً "1402")
+                                    label += ': ';
+                                }
+                                label += tooltipItem.raw.toLocaleString('fa-IR');
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: false, // برای نمودار میله ای گروهی (کنار هم)
+                        title: {
+                            display: true,
+                            text: 'ماه ',
+                            rtl: true,
+                            font: {
+                                size: 14
+                            }
+                        },
+                        ticks: {
+                            font: {
+                                size: 12
+                            }
+                        },
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.8,
+                    },
+                    y: {
+                        beginAtZero: true,
+                        stacked: false, // برای نمودار میله ای گروهی (کنار هم)
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return value.toLocaleString('fa-IR');
+                            },
+                            font: {
+                                size: 12
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'میلیارد تومان',
+                            rtl: true,
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                }
+            };
+            drawChart('Chart3', 'bar', chart3_data, chart3_options);
+
+
+            // --- تنظیمات سراسری برای فارسی سازی Chart.js ---
+            Chart.defaults.font.family = 'IRANSans, Arial, sans-serif';
+            Chart.defaults.plugins.tooltip.rtl = true;
+            Chart.defaults.plugins.legend.rtl = true;
+            Chart.defaults.plugins.title.rtl = true;
+        });
+    </script>
+
+    {{ chart_labels_khales_forosh_by_year|json_script:"chart-labels-khales-forosh-by-year-data" }}
+    {{ chart_datasets_khales_forosh_by_year|json_script:"chart-datasets-khales-forosh-by-year-data" }}
+
+
+
+
+{% endblock %}
+
+
+
+
