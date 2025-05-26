@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 
 
 def get_category_tree(parent=None):
-    categories = Category.objects.filter(parent=parent).order_by('-id')
+    categories = Category.objects.filter(parent=parent).order_by('id')
     tree = []
     for category in categories:
         subtree = get_category_tree(category)

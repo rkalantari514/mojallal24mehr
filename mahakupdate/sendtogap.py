@@ -141,7 +141,7 @@ import requests
 
 import requests
 
-def send_sms(phone_number, message):
+def send_smsold(phone_number, message):
     url = "https://api2.ippanel.com/api/v1/sms/send/webservice/single"
     headers = {
         "accept": "application/json",
@@ -162,6 +162,50 @@ def send_sms(phone_number, message):
         return response_data.get("data", {}).get("message_id", None)  # بازگرداندن `message_id`
     else:
         print(f"Error: {response.status_code}, Response: {response.text}")
+        return None
+
+import requests
+# مطمئن شوید ip_panel_token در این فایل قابل دسترسی است (مثلاً از settings.py یا یک فایل config)
+# اگر ip_panel_token یک متغیر گلوبال است، مطمئن شوید مقداردهی شده است.
+# فرض می‌کنیم ip_panel_token قبلاً تعریف شده است.
+
+def send_sms(phone_number, message):
+    url = "https://api2.ippanel.com/api/v1/sms/send/webservice/single"
+    headers = {
+        "accept": "application/json",
+        "apikey": ip_panel_token, # مطمئن شوید این متغیر مقداردهی شده است
+        "Content-Type": "application/json"
+    }
+    data = {
+        "recipient": [phone_number],
+        "sender": "+9890002741", # یا هر شماره فرستنده دیگر شما
+        "message": message
+    }
+
+    try:
+        # اضافه کردن timeout به درخواست POST
+        # timeout = (connect_timeout, read_timeout)
+        # 10 ثانیه برای برقراری اتصال و 30 ثانیه برای خواندن پاسخ
+        response = requests.post(url, json=data, headers=headers, timeout=(10, 30))
+
+        if response.status_code == 200:
+            response_data = response.json()
+            # برای دیباگینگ، می‌توانید کل پاسخ را چاپ کنید
+            # print(f"SMS Response Data: {response_data}")
+            return response_data.get("data", {}).get("message_id", None)
+        else:
+            print(f"Error sending SMS: Status Code {response.status_code}, Response: {response.text}")
+            return None
+    except requests.exceptions.Timeout as e:
+        print(f"Error sending SMS: Connection to ippanel.com timed out. Details: {e}")
+        # اینجا می‌توانید یک سیستم لاگینگ استفاده کنید یا به کاربر اطلاع دهید.
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending SMS: An error occurred during the request to ippanel.com. Details: {e}")
+        # این شامل خطاهای اتصال دیگر، خطاهای SSL و غیره می‌شود.
+        return None
+    except Exception as e:
+        print(f"An unexpected error occurred during SMS sending: {e}")
         return None
 
 

@@ -1473,7 +1473,7 @@ def SaleTotal(request, year=None, month=None, day=None):
         day_filter_gregorian = timezone.now().date()
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
 
-    kind1 = ['خريدار در برگشت از فروش', 'خريدار در فاکتور فروش']
+    kind1 = ['خريدار در برگشت از فروش', 'خريدار در فاکتور فروش','تخفيف فاکتور فروش']
     q_objects = Q()
     for item in kind1:
         q_objects |= Q(sharh__startswith=item)
@@ -1638,7 +1638,7 @@ def SaleTotalData(request, year, month, day):
     except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid date format'}, status=400)
 
-    kind1 = ['خريدار در برگشت از فروش', 'خريدار در فاکتور فروش']
+    kind1 = ['خريدار در برگشت از فروش', 'خريدار در فاکتور فروش','تخفيف فاکتور فروش']
     q_objects = Q()
     for item in kind1:
         q_objects |= Q(sharh__startswith=item)

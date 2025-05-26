@@ -1059,7 +1059,7 @@ def UpdateKala(request):
         grpcode = row[2]
 
         if code in current_kalas:
-            if current_kalas[code].name != name or current_kalas[grpcode].name != grpcode:
+            if current_kalas[code].name != name or current_kalas[code].grpcode != grpcode:
                 current_kalas[code].name = name
                 current_kalas[code].grpcode = grpcode
                 kalas_to_update.append(current_kalas[code])

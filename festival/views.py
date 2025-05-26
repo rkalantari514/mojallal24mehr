@@ -65,6 +65,9 @@ def Calculate_and_award_points(request):
                 points_to_delete_ids.append(customer_point.id)
 
         for factor in eligible_factors:
+            if factor.person is None:
+                print(f"Warning: Factor with ID {factor.id} has no associated person. Skipping.")
+                continue  # رد شدن از این فاکتور و رفتن به فاکتور بعدی
             invoice_value = Decimal(factor.mablagh_factor) - Decimal(factor.takhfif)
             calculated_points = 0
             if factor.person is None:
