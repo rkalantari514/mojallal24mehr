@@ -16,7 +16,7 @@
         }
 
         .category-btn {
-            width: 125px; /* عرض دکمه‌ها را تنظیم می‌کند */
+            width: 200px; /* عرض دکمه‌ها را تنظیم می‌کند */
             margin-bottom: 10px; /* فاصله بین خطوط را تنظیم می‌کند */
         }
 
@@ -120,7 +120,7 @@
 
             </div>
 
-            <div class="text-center">
+            <div class="text-center border-top my-3">
                 {% for c in cat2 %}
                     {% if c == par2 %}
                         <a href="/dash/kala/category/{{ c.id }}">
@@ -134,7 +134,7 @@
                 {% endfor %}
             </div>
 
-            <div class="text-center">
+            <div class="text-center border-top my-3">
                 {% for c in cat3 %}
                     {% if c == cat %}
                         <a href="/dash/kala/category/{{ c.id }}">
