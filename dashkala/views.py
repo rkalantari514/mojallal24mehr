@@ -319,7 +319,8 @@ def TotalKala(request, *args, **kwargs):
 
 
 
-def generate_calendar_data(month, year, kardex_data):
+def generate_calendar_data2(month, year, kardex_data):
+    start_time = time.time()
     # مشخص کردن اولین روز ماه
     first_day_of_month = jdatetime.date(year, month, 1)
 
@@ -328,17 +329,20 @@ def generate_calendar_data(month, year, kardex_data):
 
     # برای بدست آوردن آخرین روز ماه شمسی
     lday = first_day_of_month + jdatetime.timedelta(days=30)
-
+    print(f"5.10 {time.time() - start_time:.2f} ثانیه")
+    start_time = time.time()
     if lday.month != month:
         lday = first_day_of_month + jdatetime.timedelta(days=29)
         if lday.month != month:
             lday = first_day_of_month + jdatetime.timedelta(days=28)
 
     last_day_of_month = lday
-
+    print(f"5.11 {time.time() - start_time:.2f} ثانیه")
+    start_time = time.time()
     # تولید ماتریس روزهای ماه
     days_in_month = []
-
+    print(f"5.12 {time.time() - start_time:.2f} ثانیه")
+    start_time = time.time()
     week = [None] * start_day_of_week  # اضافه کردن روزهای خالی
     for i in range((last_day_of_month - first_day_of_month).days + 1):
         current_day = first_day_of_month + jdatetime.timedelta(days=i)
@@ -355,14 +359,59 @@ def generate_calendar_data(month, year, kardex_data):
         if len(week) == 7 or current_day == last_day_of_month:
             days_in_month.append(week)
             week = []
-
+    print(f"5.13 {time.time() - start_time:.2f} ثانیه")
+    start_time = time.time()
     # اضافه کردن هفته‌ای که کمتر از 7 روز است
     if len(week) > 0:
         days_in_month.append(week + [None] * (7 - len(week)))
-
+    print(f"5.14 {time.time() - start_time:.2f} ثانیه")
     return days_in_month
 
+from django.db.models import Sum
+from collections import defaultdict
+import jdatetime
+import time
 
+def generate_calendar_data(month, year, kardex_queryset): # تغییر نام پارامتر برای وضوح
+    aggregated_data = kardex_queryset.values('date', 'ktype').annotate(total_count=Sum('count'))
+    daily_kardex_summary = defaultdict(lambda: defaultdict(float))
+    for item in aggregated_data:
+        if isinstance(item['date'], jdatetime.date):
+            jdate = item['date']
+        else: # فرض می‌کنیم datetime.date است
+            jdate = jdatetime.date.fromgregorian(date=item['date'])
+
+        daily_kardex_summary[jdate][item['ktype']] += item['total_count']
+    first_day_of_month = jdatetime.date(year, month, 1)
+    start_day_of_week = first_day_of_month.weekday()
+    lday = first_day_of_month + jdatetime.timedelta(days=30)
+    if lday.month != month:
+        lday = first_day_of_month + jdatetime.timedelta(days=29)
+        if lday.month != month:
+            lday = first_day_of_month + jdatetime.timedelta(days=28)
+    last_day_of_month = lday
+    days_in_month = []
+    week = [None] * start_day_of_week
+    for i in range((last_day_of_month - first_day_of_month).days + 1):
+        current_day = first_day_of_month + jdatetime.timedelta(days=i)
+        sales_count = daily_kardex_summary[current_day][1]
+        kharid_count = daily_kardex_summary[current_day][2]
+        sales = sales_count * -1
+        kharid = kharid_count
+        day_info = {
+            'jyear': current_day.year,
+            'jmonth': current_day.month,
+            'jday': current_day.day,
+            'sales': sales,
+            'kharid': kharid
+        }
+        week.append(day_info)
+        if len(week) == 7 or current_day == last_day_of_month:
+            days_in_month.append(week)
+            week = []
+    if len(week) > 0:
+        days_in_month.append(week + [None] * (7 - len(week)))
+    return days_in_month
 
 @login_required(login_url='/login')
 def DetailKala(request, *args, **kwargs):
@@ -543,13 +592,18 @@ def DetailKala(request, *args, **kwargs):
         return render(request, 'partial_kala.html', context)
     return render(request, 'detail_kala.html', context)
 
+
+
+from django.db.models import Sum, Avg
+import time
+import jdatetime
 @login_required(login_url='/login')
 def CategoryDetail(request, *args, **kwargs):
     name = 'دسته بندی کالاها'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
         return result
-    start_time = time.time()  # زمان شروع تابع
+    start_time2 = time.time()  # زمان شروع تابع
     user=request.user
 
     cat_id=int(kwargs['id'])
@@ -563,14 +617,75 @@ def CategoryDetail(request, *args, **kwargs):
             code=cat_id,
         )
 
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        name = 'دسته بندی کالاها'
+        result = page_permision(request, name)  # بررسی دسترسی
+        if result:  # اگر هدایت انجام شده است
+            return result
+        start_time2 = time.time()  # زمان شروع تابع
+        user = request.user
+
+        cat_id = int(kwargs['id'])
+        cat = Category.objects.filter(id=cat_id).last()
+        cat_level = cat.level
+
+        if user.mobile_number != '09151006447':
+            UserLog.objects.create(
+                user=user,
+                page='جزئیات دسته بندی',
+                code=cat_id,
+            )
+
+        month = request.GET.get('month', None)
+        year = request.GET.get('year', None)
+        print("Query params - Year:", year, "Month:", month)
+
+
+        if month is not None and year is not None:
+            current_month = int(month)
+            current_year = int(year)
+        else:
+            today_jalali = JalaliDate.today()
+            current_year = today_jalali.year
+            current_month = today_jalali.month
+
+
+        months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+        month_name = months[current_month - 1]
+        if cat_level == 3:
+            kardex_data2 = Kardex.objects.filter(kala__category=cat, ktype__in=(1, 2))
+        if cat_level == 2:
+            kardex_data2 = Kardex.objects.filter(kala__category__parent=cat, ktype__in=(1, 2))
+        if cat_level == 1:
+            kardex_data2 = Kardex.objects.filter(kala__category__parent__parent=cat, ktype__in=(1, 2))
+        if cat_level == 0:
+            kardex_data2 = Kardex.objects.filter(ktype__in=(1, 2))
+        days_in_month = generate_calendar_data(current_month, current_year, kardex_data2)
+
+        context = {
+            'month': current_month,
+            'cat_id': f'{cat.id}',
+            'days_in_month': days_in_month,
+            'month_name': month_name,
+            'year': current_year,
+        }
+
+        total_time = time.time() - start_time2  # محاسبه زمان اجرا
+        print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+
+        return render(request, 'partial_category.html', context)
+
+
+
+
+
+
+#------------------------------------------------------------------------------------------
     month = request.GET.get('month', None)
     year = request.GET.get('year', None)
     print("Query params - Year:", year, "Month:", month)
 
-    # دریافت ماه و سال جاری شمسی
-    today_jalali = JalaliDate.today()
-
-    # دریافت تاریخ شمسی امروز
     month = request.GET.get('month', None)
     year = request.GET.get('year', None)
     print("Request GET params - Year:", year, "Month:", month)
@@ -584,8 +699,6 @@ def CategoryDetail(request, *args, **kwargs):
         current_month = today_jalali.month
 
     print("Current Year:", current_year, "Current Month:", current_month)
-
-    # تعریف بازه زمانی: 12 ماه گذشته تا ماه جاری
     month_list = []
     for i in range(12):
         month = current_month - i
@@ -596,19 +709,12 @@ def CategoryDetail(request, *args, **kwargs):
         month_list.append((year, month))
     month_list.reverse()  # ترتیب به صورت قدیمی به جدید
 
-    print("Month List:", month_list)
-
-
     if cat_level==3:
         kardex_data=Kardex.objects.filter(kala__category=cat, ktype=1)
     if cat_level==2:
         kardex_data=Kardex.objects.filter(kala__category__parent=cat, ktype=1)
     if cat_level==1:
         kardex_data=Kardex.objects.filter(kala__category__parent__parent=cat, ktype=1)
-
-
-
-    # پردازش داده‌ها
 
     chart1_data_dict = {}
     for item in kardex_data:
@@ -652,23 +758,17 @@ def CategoryDetail(request, *args, **kwargs):
     if cat_level == 3:
         kalas = Kala.objects.filter(category=cat)
         kardex = Kardex.objects.filter(kala__category=cat,ktype__in=(1,2)).order_by('date', 'radif')
-        # mojodi = Mojodi.objects.filter(kala__category=cat)
 
     if cat_level==2:
         kalas = Kala.objects.filter(category__parent=cat)
         kardex = Kardex.objects.filter(kala__category__parent=cat,ktype__in=(1,2)).order_by('date', 'radif')
-        # mojodi = Mojodi.objects.filter(kala__category__parent=cat)
 
     if cat_level==1:
         kalas = Kala.objects.filter(category__parent__parent=cat)
         kardex = Kardex.objects.filter(kala__category__parent__parent=cat,ktype__in=(1,2)).order_by('date', 'radif')
-        # mojodi = Mojodi.objects.filter(kala__category__parent__parent=cat)
-
-
 
     months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
     month_name = months[current_month - 1]
-
     if cat_level == 3:
         kardex_data2 = Kardex.objects.filter(kala__category=cat,ktype__in=(1,2))
     if cat_level == 2:
@@ -678,7 +778,6 @@ def CategoryDetail(request, *args, **kwargs):
     if cat_level == 0:
         kardex_data2 = Kardex.objects.filter(ktype__in=(1,2))
     days_in_month = generate_calendar_data(current_month, current_year, kardex_data2)
-
     cat1 = Category.objects.filter(level=1).order_by('-id')
     if cat_level==1:
         print('cat_level==1')
@@ -695,53 +794,53 @@ def CategoryDetail(request, *args, **kwargs):
         cat2=Category.objects.filter(parent=par1)
         cat3=Category.objects.filter(parent=cat)
         distinct_kalas = Mojodi.objects.filter(kala__category__parent=cat).values('kala').distinct()
-
     if cat_level==3:
         print('cat_level==3')
         par2=cat.parent
         par1=par2.parent
         cat2=Category.objects.filter(parent=par1)
         cat3=Category.objects.filter(parent=par2)
-
         distinct_kalas = Mojodi.objects.filter(kala__category=cat).values('kala').distinct()
 
+    # ابتدا شناسه‌های کالای مورد نیاز را استخراج می‌کنیم
+    kala_ids = [item['kala'] for item in distinct_kalas]
 
-    totl_mojodi = sum(
-        [Mojodi.objects.filter(kala=item['kala']).values_list('total_stock', flat=True).first() for item in
-         distinct_kalas])
+    mojodi_queryset = Mojodi.objects.filter(kala__in=kala_ids)
 
-    total_arzesh = sum(
-        [Mojodi.objects.filter(kala=item['kala']).values_list('total_stock', flat=True).first() *
-         Mojodi.objects.filter(kala=item['kala']).values_list('averageprice', flat=True).first()
-         for item in distinct_kalas]
+    mojodi_data = mojodi_queryset.values('kala').annotate(
+        total_stock=Sum('total_stock'),
+        average_price=Avg('averageprice'),
+        mojodi_roz=Sum('mojodi_roz'),
+        mojodi_roz_arzesh=Sum('mojodi_roz_arzesh')
     )
 
+    totl_mojodi = sum([item['total_stock'] or 0 for item in mojodi_data])
+
+    total_arzesh = sum(
+        (item['total_stock'] or 0) * (item['average_price'] or 0) for item in mojodi_data
+    )
     try:
         total_sale = kardex.filter(ktype=1).aggregate(total_count=Sum('count'))['total_count'] * -1
     except:
         total_sale=0
-
-    mojodi_roz = sum(
-        [Mojodi.objects.filter(kala=item['kala']).values_list('mojodi_roz', flat=True).first() for item in
-         distinct_kalas])
-
-    mojodi_roz_arzesh = sum(
-        [Mojodi.objects.filter(kala=item['kala']).values_list('mojodi_roz_arzesh', flat=True).first() for item in
-         distinct_kalas])
-
-    s_m_ratio=total_sale/mojodi_roz*100 if mojodi_roz!=0 else 0
-
-
-    master_data={
-        'totl_mojodi':totl_mojodi,
-        'total_arzesh':total_arzesh,
-        'total_sale':total_sale,
-        's_m_ratio':s_m_ratio,
-        'mojodi_roz':mojodi_roz,
-        'mojodi_roz_arzesh':mojodi_roz_arzesh,
-
+    kala_ids = [item['kala'] for item in distinct_kalas]
+    mojodi_qs = Mojodi.objects.filter(kala__in=kala_ids)
+    mojodi_data = mojodi_qs.values('kala').annotate(
+        mojodi_roz=Sum('mojodi_roz'),
+        mojodi_roz_arzesh=Sum('mojodi_roz_arzesh')
+    )
+    mojodi_dict = {item['kala']: item for item in mojodi_data}
+    mojodi_roz = sum([mojodi_dict.get(kala, {}).get('mojodi_roz', 0) for kala in kala_ids])
+    mojodi_roz_arzesh = sum([mojodi_dict.get(kala, {}).get('mojodi_roz_arzesh', 0) for kala in kala_ids])
+    s_m_ratio = total_sale / mojodi_roz * 100 if mojodi_roz != 0 else 0
+    master_data = {
+        'totl_mojodi': totl_mojodi,
+        'total_arzesh': total_arzesh,
+        'total_sale': total_sale,
+        's_m_ratio': s_m_ratio,
+        'mojodi_roz': mojodi_roz,
+        'mojodi_roz_arzesh': mojodi_roz_arzesh,
     }
-
     donat_forosh_data=[]
     if cat_level==1:
         for category in cat2:
@@ -772,7 +871,6 @@ def CategoryDetail(request, *args, **kwargs):
                 'name': category.name,
                 'count': total_sale
             })
-
     context = {
         'title': f'{cat}',
         'cat_id': f'{cat.id}',
@@ -791,19 +889,11 @@ def CategoryDetail(request, *args, **kwargs):
         'month_name': month_name,
         'year': current_year,
         'month': current_month,
-
-
         'kalas': kalas,
-        # 'kardex': kardex,
-        # 'mojodi': mojodi,
-
     }
 
-    total_time = time.time() - start_time  # محاسبه زمان اجرا
+    total_time = time.time() - start_time2  # محاسبه زمان اجرا
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
-
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return render(request, 'partial_category.html', context)
     return render(request, 'category_detail.html', context)
 
 from django.db.models import Q
