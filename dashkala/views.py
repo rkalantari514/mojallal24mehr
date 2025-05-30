@@ -784,7 +784,7 @@ def CategoryDetail(request, *args, **kwargs):
     for phrase in st_with:
         q_objects |= Q(sharh__startswith=phrase)
 
-    sale_sanad = SanadDetail.objects.filter(q_objects)
+    sale_sanad = SanadDetail.objects.filter(q_objects).filter(kol=102)
 
     taf_list = list(kalas.values_list('kala_taf', flat=True).distinct())
     sale_sanad = sale_sanad.filter(tafzili__in=taf_list)
