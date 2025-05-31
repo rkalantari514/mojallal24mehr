@@ -3,7 +3,7 @@ from openpyxl.styles.builtins import title
 
 from custom_login.models import UserLog
 from custom_login.views import page_permision
-from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek, Kala, SanadDetail
+from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek, Kala, SanadDetail, FactorDetaile
 from persianutils import standardize
 from django.db.models import Max, Subquery
 from .forms import FilterForm, KalaSelectForm, Kala_Detail_Form
@@ -592,11 +592,8 @@ def DetailKala(request, *args, **kwargs):
         return render(request, 'partial_kala.html', context)
     return render(request, 'detail_kala.html', context)
 
-from decimal import Decimal
-
-import jdatetime
+from decimal import Decimal, InvalidOperation
 from collections import defaultdict
-from django.db.models import Sum
 from django.db.models import Sum, Avg
 import time
 import jdatetime
@@ -714,16 +711,21 @@ def CategoryDetail(request, *args, **kwargs):
         month_list.append((year, month))
     month_list.reverse()  # ترتیب به صورت قدیمی به جدید
 
-    if cat_level==3:
-        kardex_data=Kardex.objects.filter(kala__category=cat, ktype=1)
+    if cat_level == 3:
+        kalas = Kala.objects.filter(category=cat)
+        kardex = Kardex.objects.filter(kala__category=cat,ktype__in=(1,2)).order_by('date', 'radif')
+
     if cat_level==2:
-        kardex_data=Kardex.objects.filter(kala__category__parent=cat, ktype=1)
+        kalas = Kala.objects.filter(category__parent=cat)
+        kardex = Kardex.objects.filter(kala__category__parent=cat,ktype__in=(1,2)).order_by('date', 'radif')
+
     if cat_level==1:
-        kardex_data=Kardex.objects.filter(kala__category__parent__parent=cat, ktype=1)
+        kalas = Kala.objects.filter(category__parent__parent=cat)
+        kardex = Kardex.objects.filter(kala__category__parent__parent=cat,ktype__in=(1,2)).order_by('date', 'radif')
+
     if cat_level==0:
-        kardex_data=Kardex.objects.filter(ktype=1)
-
-
+        kalas = Kala.objects.all()
+        kardex = Kardex.objects.filter(ktype__in=(1,2)).order_by('date', 'radif')
 
     if cat_level == 3:
         kalas = Kala.objects.filter(category=cat)
@@ -742,100 +744,6 @@ def CategoryDetail(request, *args, **kwargs):
         kardex = Kardex.objects.filter(ktype__in=(1,2)).order_by('date', 'radif')
 
 
-# چارت اول:-------------------------------------------------------------- فروش ماهانه تعداد
-    month_names_jalali = {
-        1: 'فروردین', 2: 'اردیبهشت', 3: 'خرداد', 4: 'تیر',
-        5: 'مرداد', 6: 'شهریور', 7: 'مهر', 8: 'آبان',
-        9: 'آذر', 10: 'دی', 11: 'بهمن', 12: 'اسفند'
-    }
-
-    # استفاده درست از defaultdict
-    sales_by_year_month_count = defaultdict(lambda: defaultdict(lambda: 0))
-    # داده‌های مربوط به تعداد را پردازش کنید
-    for item in kardex_data:
-        if item.ktype == 1:
-            pdate = item.pdate
-            try:
-                year, month, _ = map(int, pdate.split('/'))
-                sales_by_year_month_count[year][month] += (item.count * -1)
-            except ValueError:
-                pass
-
-    all_years = sorted(sales_by_year_month_count.keys())
-
-    chart1_labels = list(month_names_jalali.values())
-
-    chart1_datasets = []
-    for year in all_years:
-        data_for_year = []
-        for month_num in range(1, 13):
-            data_for_year.append(sales_by_year_month_count[year][month_num])
-        chart1_datasets.append({
-            'label': f'فروش {year}',
-            'data': data_for_year,
-            'borderWidth': 1,
-            'categoryPercentage': 0.8,
-            'barPercentage': 0.9
-        })
-
-    # چارت دوم: مبلغ فروش ----------------------------------------------------------------------
-    q_objects = Q()
-    st_with = ['کالا در فاکتور فروش', 'کالاهاي برگشت شده در برگشت از فروش']
-    for phrase in st_with:
-        q_objects |= Q(sharh__startswith=phrase)
-
-    sale_sanad = SanadDetail.objects.filter(q_objects).filter(kol=102)
-
-    taf_list = list(kalas.values_list('kala_taf', flat=True).distinct())
-    sale_sanad = sale_sanad.filter(tafzili__in=taf_list)
-
-    # استفاده درست از defaultdict برای مبلغ فروش
-    sales_by_year_month_amount = defaultdict(lambda: defaultdict(lambda: Decimal('0')))
-
-    for item in sale_sanad:
-        tarikh = item.tarikh
-        try:
-            year, month, _ = map(int, tarikh.split('/'))
-            sales_by_year_month_amount[year][month] += Decimal(str(item.curramount))
-        except (ValueError, KeyError):
-            pass
-
-    all_years_amount = sorted(sales_by_year_month_amount.keys())
-
-    chart2_labels = list(month_names_jalali.values())
-
-    chart2_datasets = []
-    for year in all_years_amount:
-        data_for_year = []
-        for month_num in range(1, 13):
-            data_for_year.append(sales_by_year_month_amount[year][month_num])
-        chart2_datasets.append({
-            'label': f'فروش {year}',
-            'data': data_for_year,
-            'borderWidth': 1,
-            'categoryPercentage': 0.8,
-            'barPercentage': 0.9
-        })
-
-    #----------------------------------------------------------------------------- دریافت اطلاعات کالا
-    if cat_level == 3:
-        kalas = Kala.objects.filter(category=cat)
-        kardex = Kardex.objects.filter(kala__category=cat,ktype__in=(1,2)).order_by('date', 'radif')
-
-    if cat_level==2:
-        kalas = Kala.objects.filter(category__parent=cat)
-        kardex = Kardex.objects.filter(kala__category__parent=cat,ktype__in=(1,2)).order_by('date', 'radif')
-
-    if cat_level==1:
-        kalas = Kala.objects.filter(category__parent__parent=cat)
-        kardex = Kardex.objects.filter(kala__category__parent__parent=cat,ktype__in=(1,2)).order_by('date', 'radif')
-
-    if cat_level==0:
-        kalas = Kala.objects.all()
-        kardex = Kardex.objects.filter(ktype__in=(1,2)).order_by('date', 'radif')
-
-    months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
-    month_name = months[current_month - 1]
     if cat_level == 3:
         kardex_data2 = Kardex.objects.filter(kala__category=cat,ktype__in=(1,2))
     if cat_level == 2:
@@ -845,7 +753,6 @@ def CategoryDetail(request, *args, **kwargs):
     if cat_level == 0:
         kardex_data2 = Kardex.objects.filter(ktype__in=(1,2))
 
-    days_in_month = generate_calendar_data(current_month, current_year, kardex_data2)
     cat1 = Category.objects.filter(level=1).order_by('id')
     if cat_level==0:
         print('cat_level==0')
@@ -879,6 +786,94 @@ def CategoryDetail(request, *args, **kwargs):
         cat2=Category.objects.filter(parent=par1)
         cat3=Category.objects.filter(parent=par2)
         distinct_kalas = Mojodi.objects.filter(kala__category=cat).values('kala').distinct()
+
+
+# چارت اول:-------------------------------------------------------------- فروش ماهانه تعداد
+
+    taf_list = list(kalas.values_list('kala_taf', flat=True).distinct())
+    fac=FactorDetaile.objects.filter(kala__kala_taf__in=taf_list)
+
+    month_names_jalali = {
+        1: 'فروردین', 2: 'اردیبهشت', 3: 'خرداد', 4: 'تیر',
+        5: 'مرداد', 6: 'شهریور', 7: 'مهر', 8: 'آبان',
+        9: 'آذر', 10: 'دی', 11: 'بهمن', 12: 'اسفند'
+    }
+
+    from collections import defaultdict
+
+    sales_by_year_month_count = defaultdict(lambda: defaultdict(lambda: 0))
+
+    for item in fac:
+        try:
+            # بررسی اگر factor وجود دارد
+            if not hasattr(item, 'factor') or item.factor is None:
+                continue
+            pdate = item.factor.pdate
+            year, month, _ = map(int, pdate.split('/'))
+            sales_by_year_month_count[year][month] += item.count
+        except (ValueError, AttributeError):
+            pass
+    all_years = sorted(sales_by_year_month_count.keys())
+
+    chart1_labels = list(month_names_jalali.values())
+
+    chart1_datasets = []
+    for year in all_years:
+        data_for_year = []
+        for month_num in range(1, 13):
+            data_for_year.append(sales_by_year_month_count[year][month_num])
+        chart1_datasets.append({
+            'label': f'فروش {year}',
+            'data': data_for_year,
+            'borderWidth': 1,
+            'categoryPercentage': 0.8,
+            'barPercentage': 0.9
+        })
+
+    # چارت دوم: مبلغ فروش ----------------------------------------------------------------------
+
+
+
+    sales_by_year_month_amount = defaultdict(lambda: defaultdict(lambda: Decimal('0')))
+
+    for item in fac:
+        try:
+            tarikh = item.factor.pdate
+
+            year, month, _ = map(int, tarikh.split('/'))
+            # بررسی و تبدیل مقدار مبلغ، با مدیریت خطا
+            try:
+                amount = Decimal(str(item.mablagh_nahaee))
+            except (InvalidOperation, ValueError, TypeError):
+                amount = Decimal('0')
+            sales_by_year_month_amount[year][month] += amount/10000000000
+        except (ValueError, KeyError, AttributeError):
+            pass
+
+
+    all_years_amount = sorted(sales_by_year_month_amount.keys())
+
+    chart2_labels = list(month_names_jalali.values())
+
+    chart2_datasets = []
+    for year in all_years_amount:
+        data_for_year = []
+        for month_num in range(1, 13):
+            data_for_year.append(sales_by_year_month_amount[year][month_num])
+        chart2_datasets.append({
+            'label': f'فروش {year}',
+            'data': data_for_year,
+            'borderWidth': 1,
+            'categoryPercentage': 0.8,
+            'barPercentage': 0.9
+        })
+
+    #----------------------------------------------------------------------------- دریافت اطلاعات کالا
+
+    months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+    month_name = months[current_month - 1]
+
+    days_in_month = generate_calendar_data(current_month, current_year, kardex_data2)
 
     # ابتدا شناسه‌های کالای مورد نیاز را استخراج می‌کنیم
     kala_ids = [item['kala'] for item in distinct_kalas]
@@ -920,11 +915,18 @@ def CategoryDetail(request, *args, **kwargs):
         'mojodi_roz_arzesh': mojodi_roz_arzesh,
     }
     donat_forosh_data=[]
+    donat_forosh_mablagh=[]
     if cat_level==0:
         for category in cat1:
-            kardex5 = Kardex.objects.filter(kala__category__parent__parent=category, ktype=1)
-            total_sale = kardex5.filter(ktype=1).aggregate(total_count=Sum('count'))['total_count'] or 0
-            total_sale *= -1
+            kalas_cat = Kala.objects.filter(category__parent__parent=category)
+            taf_list_cat = list(kalas_cat.values_list('kala_taf', flat=True).distinct())
+            fac_cat = FactorDetaile.objects.filter(kala__kala_taf__in=taf_list_cat)
+            total_sale = fac_cat.aggregate(total_count=Sum('count'))['total_count'] or 0
+            total_sale_mab = fac_cat.aggregate(total_count=Sum('mablagh_nahaee'))['total_count'] or 0
+            donat_forosh_mablagh.append({
+                'name': category.name,
+                'count': total_sale_mab
+            })
             donat_forosh_data.append({
                 'name': category.name,
                 'count': total_sale
@@ -932,9 +934,15 @@ def CategoryDetail(request, *args, **kwargs):
 
     if cat_level==1:
         for category in cat2:
-            kardex5 = Kardex.objects.filter(kala__category__parent=category, ktype=1)
-            total_sale = kardex5.filter(ktype=1).aggregate(total_count=Sum('count'))['total_count'] or 0
-            total_sale *= -1
+            kalas_cat = Kala.objects.filter(category__parent=category)
+            taf_list_cat = list(kalas_cat.values_list('kala_taf', flat=True).distinct())
+            fac_cat = FactorDetaile.objects.filter(kala__kala_taf__in=taf_list_cat)
+            total_sale = fac_cat.aggregate(total_count=Sum('count'))['total_count'] or 0
+            total_sale_mab = fac_cat.aggregate(total_count=Sum('mablagh_nahaee'))['total_count'] or 0
+            donat_forosh_mablagh.append({
+                'name': category.name,
+                'count': total_sale_mab
+            })
             donat_forosh_data.append({
                 'name': category.name,
                 'count': total_sale
@@ -942,21 +950,33 @@ def CategoryDetail(request, *args, **kwargs):
 
     if cat_level==2:
         for category in cat3:
-            kardex5 = Kardex.objects.filter(kala__category=category, ktype=1)
-            total_sale = kardex5.filter(ktype=1).aggregate(total_count=Sum('count'))['total_count'] or 0
-            total_sale *= -1
+            kalas_cat = Kala.objects.filter(category=category)
+            taf_list_cat = list(kalas_cat.values_list('kala_taf', flat=True).distinct())
+            fac_cat = FactorDetaile.objects.filter(kala__kala_taf__in=taf_list_cat)
+            total_sale = fac_cat.aggregate(total_count=Sum('count'))['total_count'] or 0
+            total_sale_mab = fac_cat.aggregate(total_count=Sum('mablagh_nahaee'))['total_count'] or 0
+            donat_forosh_mablagh.append({
+                'name': category.name,
+                'count': total_sale_mab
+            })
             donat_forosh_data.append({
                 'name': category.name,
                 'count': total_sale
             })
 
     if cat_level==3:
-        for category in cat3:
-            kardex5 = Kardex.objects.filter(kala__category=category, ktype=1)
-            total_sale = kardex5.filter(ktype=1).aggregate(total_count=Sum('count'))['total_count'] or 0
-            total_sale *= -1
-            donat_forosh_data.append({
+        kalas_cat = Kala.objects.filter(category=cat)
+        for kal in kalas_cat:
+            fac_cat = FactorDetaile.objects.filter(kala=kal)
+            total_sale = fac_cat.aggregate(total_count=Sum('count'))['total_count'] or 0
+            total_sale_mab = fac_cat.aggregate(total_count=Sum('mablagh_nahaee'))['total_count'] or 0
+            donat_forosh_mablagh.append({
                 'name': category.name,
+                'count': total_sale_mab
+            })
+
+            donat_forosh_data.append({
+                'name': kal.name,
                 'count': total_sale
             })
 
@@ -979,6 +999,7 @@ def CategoryDetail(request, *args, **kwargs):
         'par2': par2,
         'master_data':master_data,
         'donat_forosh_data': donat_forosh_data,
+        'donat_forosh_mablagh': donat_forosh_mablagh,
         'days_in_month': days_in_month,
         'month_name': month_name,
         'year': current_year,

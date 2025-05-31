@@ -426,7 +426,7 @@
                     <div class="card card-statistics h-100">
                         <div class="card-body col-9">
                             <h5 class="card-title pb-0 border-0 ">سهم فروش- مبلغ</h5>
-{#                            <canvas id="donat-forosh"></canvas>#}
+                            <canvas id="donat-forosh-mablagh"></canvas>
                         </div>
                     </div>
 
@@ -884,7 +884,7 @@
                     responsive: true,
                     maintainAspectRatio: true, // !!! این را به false تغییر دهید !!!
                     plugins: {
-                        title: { display: true, text: 'فروش ماهانه مقدار', rtl: true, font: { size: 16 } },
+                        title: { display: true, text: 'فروش ماهانه - مبلغ', rtl: true, font: { size: 16 } },
                         legend: { position: 'top', rtl: true, labels: { usePointStyle: true, font: { size: 14 } } },
                         tooltip: {
                             rtl: true,
@@ -986,6 +986,65 @@
 
 
         drawChart('donat-forosh', 'doughnut', data, options);
+    </script>
+
+        <!-- نمودار دونات فروش دسته ها مبلغ-->
+
+    <script>
+        var labels = [
+            {% for item in donat_forosh_mablagh %}
+                '{{ item.name }}',
+            {% endfor %}
+        ];
+        var dataValues = [
+            {% for item in donat_forosh_mablagh %}
+                {{ item.count }},
+            {% endfor %}
+        ];
+
+
+        var data = {
+            labels: labels,
+            datasets: [{
+                label: 'سهم فروش زیر مجموعه- مبلغ',
+                data: dataValues,
+                backgroundColor: [
+                    window.chartColors.red,
+                    window.chartColors.orange,
+                    window.chartColors.yellow,
+                    window.chartColors.green,
+                    window.chartColors.blue,
+                    window.chartColors.purple,
+                ],
+                {#borderColor: borderColors,#}
+                borderWidth: 1
+            }]
+        };
+
+        var options = {
+            responsive: true,
+            maintainAspectRatio: true,
+            legend: {
+                position: 'bottom',
+            },
+            title: {
+                display: false,
+                text: 'نمودار دونات'
+            },
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            }
+        {#scales: {#}
+        {#    y: {#}
+        {#        beginAtZero: true#}
+        {#    }#}
+        {#}#}
+        }
+        ;
+
+
+        drawChart('donat-forosh-mablagh', 'doughnut', data, options);
     </script>
 
 
