@@ -107,13 +107,13 @@
                 </div>
             </div>
             <!-- ردیف دسته بندی ها -->
-        <div class="text-center">
-                    {% if  cat_level == 0 %}
-                <button type="button" class="btn btn-success category-btn">همه دسته بندی ها</button>
-                    {% else %}
-                        <a href="/dash/kala/category/0">
-                <button type="button" class="btn btn-success category-btn">همه دسته بندی ها</button>
-                        </a>
+            <div class="text-center">
+                {% if  cat_level == 0 %}
+                    <button type="button" class="btn btn-success category-btn">همه دسته بندی ها</button>
+                {% else %}
+                    <a href="/dash/kala/category/0">
+                        <button type="button" class="btn btn-success category-btn">همه دسته بندی ها</button>
+                    </a>
                 {% endif %}
 
             </div>
@@ -410,10 +410,10 @@
                 <div class="col-md-7 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="card-body">
-{#                            <h5 class="card-title pb-0 border-0 "> فروش ماهانه- تعداد</h5>#}
+                            {#                            <h5 class="card-title pb-0 border-0 "> فروش ماهانه- تعداد</h5>#}
 
-<canvas id="myChart" width="400" height="300" style="width: 100%; height: 300px;"></canvas>
-{#<canvas id="myChart"></canvas>#}
+                            <canvas id="myChart" width="400" height="300" style="width: 100%; height: 300px;"></canvas>
+                            {#<canvas id="myChart"></canvas>#}
                         </div>
                     </div>
 
@@ -434,7 +434,7 @@
                 <div class="col-md-7 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="card-body">
-{#<canvas id="myChart2"></canvas>#}
+                            {#<canvas id="myChart2"></canvas>#}
                             <canvas id="myChart2" width="400" height="300" style="width: 100%; height: 300px;"></canvas>
 
                         </div>
@@ -486,7 +486,7 @@
                                         >
                                             <thead>
                                             <tr class="tr-class-1">
-                                            <th class="card-text text-center" data-sortable="true"
+                                                <th class="card-text text-center" data-sortable="true"
                                                     data-sorter="numericOnly"
                                                     data-field="name">نام کالا
                                                 </th>
@@ -501,9 +501,9 @@
                                                     data-sorter="numericOnly"
                                                     data-field="sales">تعداد فروش
                                                 </th>
-                                                <th class="card-text text-center" data-sortable="true" data-sorter="numericOnly" data-field="smratio">بازده فروش
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-sorter="numericOnly" data-field="smratio">بازده فروش
                                                 </th>
-
 
 
                                             </tr>
@@ -511,27 +511,23 @@
                                             <tbody>
                                             {% for kala in kalas %}
 
-                                                   <tr>
-                                                   <td class="card-text text-center"><a
+                                                <tr>
+                                                    <td class="card-text text-center"><a
                                                             href="/dash/kala/detail/{{ kala.code }}"
                                                             target="_blank">
                                                         {{ kala.name }}</a></td>
-                                                    <td class="card-text text-center"><a href="/dash/kala/detail/{{ kala.code }}"
-                                                                                             target="_blank">
+                                                    <td class="card-text text-center"><a
+                                                            href="/dash/kala/detail/{{ kala.code }}"
+                                                            target="_blank">
                                                         {{ kala.category.name }}</a></td>
-                                                    <td class="card-text text-center"><a href="/dash/kala/detail/{{ kala.code }}"
-                                                                                             target="_blank">
+                                                    <td class="card-text text-center"><a
+                                                            href="/dash/kala/detail/{{ kala.code }}"
+                                                            target="_blank">
                                                         {{ kala.total_sale }}</a></td>
-                                                   <td class="card-text text-center"><a href="/dash/kala/detail/{{ kala.code }}"
-                                                                                             target="_blank">
+                                                    <td class="card-text text-center"><a
+                                                            href="/dash/kala/detail/{{ kala.code }}"
+                                                            target="_blank">
                                                         {{ kala.s_m_ratio|floatformat:2|intcomma:False }}</a></td>
-
-
-
-
-
-
-
 
 
                                                 </tr>
@@ -542,14 +538,8 @@
                                     </div>
 
 
-
-
-
-
-
-
                                 </div>
-                              </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -699,236 +689,256 @@
 {% block myjs %}
 
     <!-- نمودار میله ای تعداد -->
-<script>
-    const canvas = document.getElementById('myChart'); // این خط اضافی و استفاده نشده است، می‌توانید حذف کنید
-    var myCharts = {}; // برای نگهداری نمونه‌های نمودارها
+    <script>
+        const canvas = document.getElementById('myChart'); // این خط اضافی و استفاده نشده است، می‌توانید حذف کنید
+        var myCharts = {}; // برای نگهداری نمونه‌های نمودارها
 
-    function drawChart(canvasId, type, data, options) {
-        var ctx = document.getElementById(canvasId);
-        if (!ctx) {
-            console.error("Canvas element with ID '" + canvasId + "' not found. Chart drawing cancelled for:", canvasId);
-            return;
+        function drawChart(canvasId, type, data, options) {
+            var ctx = document.getElementById(canvasId);
+            if (!ctx) {
+                console.error("Canvas element with ID '" + canvasId + "' not found. Chart drawing cancelled for:", canvasId);
+                return;
+            }
+
+            // اگر از یک wrapper برای canvas استفاده می‌کنید و maintainAspectRatio: false است،
+            // می‌توانید ارتفاع canvas را به صورت اینلاین تنظیم کنید.
+            // canvas.style.height = '400px'; // این خط را در صورت نیاز اضافه کنید
+
+            ctx = ctx.getContext('2d');
+
+            if (myCharts[canvasId]) {
+                myCharts[canvasId].destroy();
+            }
+            myCharts[canvasId] = new Chart(ctx, {
+                type: type,
+                data: data,
+                options: options
+            });
+            console.log(`Chart '${canvasId}' drawn successfully.`);
         }
 
-        // اگر از یک wrapper برای canvas استفاده می‌کنید و maintainAspectRatio: false است،
-        // می‌توانید ارتفاع canvas را به صورت اینلاین تنظیم کنید.
-        // canvas.style.height = '400px'; // این خط را در صورت نیاز اضافه کنید
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log("DOM fully loaded and parsed. Script execution started.");
 
-        ctx = ctx.getContext('2d');
+            // --- تنظیمات سراسری برای فارسی سازی Chart.js ---
+            Chart.defaults.font.family = 'IRANSans, Arial, sans-serif';
+            Chart.defaults.plugins.tooltip.rtl = true;
+            Chart.defaults.plugins.legend.rtl = true;
+            Chart.defaults.plugins.title.rtl = true;
+            Chart.defaults.interaction.mode = 'index'; // برای نمایش tooltip همه میله‌ها در یک نقطه
+            Chart.defaults.interaction.intersect = false; // برای tooltip، نیازی به قرار گرفتن دقیق روی میله نباشد
 
-        if (myCharts[canvasId]) {
-            myCharts[canvasId].destroy();
-        }
-        myCharts[canvasId] = new Chart(ctx, {
-            type: type,
-            data: data,
-            options: options
+            // --- نمودار فروش ماهانه-تعداد (chart1) ---
+            console.log("Attempting to load data for chart1...");
+            var chart1_labels_data_element = document.getElementById('chart1-labels-data');
+            var chart1_datasets_data_element = document.getElementById('chart1-datasets-data');
+
+            if (!chart1_labels_data_element || !chart1_datasets_data_element) {
+                console.error("Error: Chart1 data script elements not found. Check IDs or if data is passed from Django context correctly.");
+                console.log("chart1-labels-data element:", chart1_labels_data_element);
+                console.log("chart1-datasets-data element:", chart1_datasets_data_element);
+                // return; // اگر المنت‌ها پیدا نشدند، از ادامه جلوگیری کنید
+            } else {
+                var chart1_labels_raw = chart1_labels_data_element.textContent;
+                var chart1_datasets_raw = chart1_datasets_data_element.textContent;
+
+                var chart1_labels;
+                var chart1_datasets;
+
+                try {
+                    chart1_labels = JSON.parse(chart1_labels_raw);
+                } catch (e) {
+                    console.error("Error parsing chart1 Labels JSON:", e);
+                    console.error("Raw Labels content that caused error:", chart1_labels_raw);
+                    // return;
+                }
+
+                try {
+                    chart1_datasets = JSON.parse(chart1_datasets_raw);
+                } catch (e) {
+                    console.error("Error parsing chart1 Datasets JSON:", e);
+                    console.error("Raw Datasets content that caused error:", chart1_datasets_raw);
+                    // return;
+                }
+
+                if (!chart1_labels || chart1_labels.length === 0 || !chart1_datasets || chart1_datasets.length === 0) {
+                    console.warn("Chart1 data is empty or invalid. Not drawing chart.");
+                    // return;
+                } else {
+                    var predefinedColors = [
+                        'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)', 'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)', 'rgba(153, 102, 255, 0.7)', 'rgba(255, 159, 64, 0.7)',
+                        'rgba(199, 199, 199, 0.7)', 'rgba(83, 102, 255, 0.7)'
+                    ];
+                    chart1_datasets.forEach((dataset, index) => {
+                        const baseColor = predefinedColors[index % predefinedColors.length];
+                        dataset.backgroundColor = baseColor;
+                        dataset.borderColor = baseColor.replace('0.7', '1');
+                    });
+
+                    var chart1_data = {
+                        labels: chart1_labels,
+                        datasets: chart1_datasets
+                    };
+
+                    var chart1_options = {
+                        responsive: true,
+                        maintainAspectRatio: true, // !!! این را به false تغییر دهید !!!
+                        plugins: {
+                            title: {display: true, text: 'فروش ماهانه - تعداد', rtl: true, font: {size: 16}},
+                            legend: {position: 'top', rtl: true, labels: {usePointStyle: true, font: {size: 14}}},
+                            tooltip: {
+                                rtl: true,
+                                callbacks: {
+                                    title: function (tooltipItems) {
+                                        return tooltipItems[0].label;
+                                    },
+                                    label: function (tooltipItem) {
+                                        let label = tooltipItem.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += tooltipItem.raw.toLocaleString('fa-IR', {maximumFractionDigits: 2});
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: false,
+                                title: {display: true, text: 'ماه', rtl: true, font: {size: 14}},
+                                ticks: {font: {size: 12}},
+                                barPercentage: 0.8,
+                                categoryPercentage: 0.8
+                            },
+                            y: {
+                                beginAtZero: true, stacked: false,
+                                ticks: {
+                                    callback: function (value, index, values) {
+                                        return value.toLocaleString('fa-IR', {maximumFractionDigits: 0});
+                                    },
+                                    font: {size: 12}
+                                },
+                                title: {display: true, text: 'تعداد', rtl: true, font: {size: 14}}
+                            }
+                        }
+                    };
+                    drawChart('myChart', 'bar', chart1_data, chart1_options);
+                }
+            }
+
+            // --- نمودار دوم (myChart2) ---
+            console.log("Attempting to load data for chart2...");
+            var chart2_labels_data_element = document.getElementById('chart2-labels-data');
+            var chart2_datasets_data_element = document.getElementById('chart2-datasets-data');
+
+            if (!chart2_labels_data_element || !chart2_datasets_data_element) {
+                console.error("Error: Chart2 data script elements not found. Check IDs or if data is passed from Django context correctly.");
+                console.log("chart2-labels-data element:", chart2_labels_data_element);
+                console.log("chart2-datasets-data element:", chart2_datasets_data_element);
+                // return;
+            } else {
+                var chart2_labels_raw = chart2_labels_data_element.textContent;
+                var chart2_datasets_raw = chart2_datasets_data_element.textContent;
+
+                var chart2_labels;
+                var chart2_datasets;
+
+                try {
+                    chart2_labels = JSON.parse(chart2_labels_raw);
+                } catch (e) {
+                    console.error("Error parsing chart2 Labels JSON:", e);
+                    console.error("Raw Labels content that caused error:", chart2_labels_raw);
+                    // return;
+                }
+
+                try {
+                    chart2_datasets = JSON.parse(chart2_datasets_raw);
+                } catch (e) {
+                    console.error("Error parsing chart2 Datasets JSON:", e);
+                    console.error("Raw Datasets content that caused error:", chart2_datasets_raw);
+                    // return;
+                }
+
+                if (!chart2_labels || chart2_labels.length === 0 || !chart2_datasets || chart2_datasets.length === 0) {
+                    console.warn("Chart2 data is empty or invalid. Not drawing chart.");
+                    // return;
+                } else {
+                    // می‌توانید رنگ‌های خاصی برای chart2 تعریف کنید یا از همان predefinedColors استفاده کنید
+                    var chart2_predefinedColors = [
+                        'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)', 'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)', 'rgba(153, 102, 255, 0.7)', 'rgba(255, 159, 64, 0.7)',
+                        'rgba(199, 199, 199, 0.7)', 'rgba(83, 102, 255, 0.7)'
+                    ];
+                    chart2_datasets.forEach((dataset, index) => {
+                        const baseColor = chart2_predefinedColors[index % chart2_predefinedColors.length];
+                        dataset.backgroundColor = baseColor;
+                        dataset.borderColor = baseColor.replace('0.7', '1');
+                    });
+
+                    var chart2_data = {
+                        labels: chart2_labels,
+                        datasets: chart2_datasets
+                    };
+
+                    var chart2_options = {
+                        responsive: true,
+                        maintainAspectRatio: true, // !!! این را به false تغییر دهید !!!
+                        plugins: {
+                            title: {display: true, text: 'فروش ماهانه - مبلغ', rtl: true, font: {size: 16}},
+                            legend: {position: 'top', rtl: true, labels: {usePointStyle: true, font: {size: 14}}},
+                            tooltip: {
+                                rtl: true,
+                                callbacks: {
+                                    title: function (tooltipItems) {
+                                        return tooltipItems[0].label;
+                                    },
+                                    label: function (tooltipItem) {
+                                        let label = tooltipItem.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += tooltipItem.raw.toLocaleString('fa-IR', {maximumFractionDigits: 2});
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: false,
+                                title: {display: true, text: 'ماه', rtl: true, font: {size: 14}},
+                                ticks: {font: {size: 12}},
+                                barPercentage: 0.8,
+                                categoryPercentage: 0.8
+                            },
+                            y: {
+                                beginAtZero: true, stacked: false,
+                                ticks: {
+                                    callback: function (value, index, values) {
+                                        return value.toLocaleString('fa-IR', {maximumFractionDigits: 0});
+                                    },
+                                    font: {size: 12}
+                                },
+                                title: {display: true, text: 'مبلغ فروش', rtl: true, font: {size: 14}}
+                            }
+                        }
+                    };
+                    drawChart('myChart2', 'bar', chart2_data, chart2_options);
+                }
+            }
         });
-        console.log(`Chart '${canvasId}' drawn successfully.`);
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log("DOM fully loaded and parsed. Script execution started.");
-
-        // --- تنظیمات سراسری برای فارسی سازی Chart.js ---
-        Chart.defaults.font.family = 'IRANSans, Arial, sans-serif';
-        Chart.defaults.plugins.tooltip.rtl = true;
-        Chart.defaults.plugins.legend.rtl = true;
-        Chart.defaults.plugins.title.rtl = true;
-        Chart.defaults.interaction.mode = 'index'; // برای نمایش tooltip همه میله‌ها در یک نقطه
-        Chart.defaults.interaction.intersect = false; // برای tooltip، نیازی به قرار گرفتن دقیق روی میله نباشد
-
-        // --- نمودار فروش ماهانه-تعداد (chart1) ---
-        console.log("Attempting to load data for chart1...");
-        var chart1_labels_data_element = document.getElementById('chart1-labels-data');
-        var chart1_datasets_data_element = document.getElementById('chart1-datasets-data');
-
-        if (!chart1_labels_data_element || !chart1_datasets_data_element) {
-            console.error("Error: Chart1 data script elements not found. Check IDs or if data is passed from Django context correctly.");
-            console.log("chart1-labels-data element:", chart1_labels_data_element);
-            console.log("chart1-datasets-data element:", chart1_datasets_data_element);
-            // return; // اگر المنت‌ها پیدا نشدند، از ادامه جلوگیری کنید
-        } else {
-            var chart1_labels_raw = chart1_labels_data_element.textContent;
-            var chart1_datasets_raw = chart1_datasets_data_element.textContent;
-
-            var chart1_labels;
-            var chart1_datasets;
-
-            try {
-                chart1_labels = JSON.parse(chart1_labels_raw);
-            } catch (e) {
-                console.error("Error parsing chart1 Labels JSON:", e);
-                console.error("Raw Labels content that caused error:", chart1_labels_raw);
-                // return;
-            }
-
-            try {
-                chart1_datasets = JSON.parse(chart1_datasets_raw);
-            } catch (e) {
-                console.error("Error parsing chart1 Datasets JSON:", e);
-                console.error("Raw Datasets content that caused error:", chart1_datasets_raw);
-                // return;
-            }
-
-            if (!chart1_labels || chart1_labels.length === 0 || !chart1_datasets || chart1_datasets.length === 0) {
-                console.warn("Chart1 data is empty or invalid. Not drawing chart.");
-                // return;
-            } else {
-                var predefinedColors = [
-                    'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)', 'rgba(255, 206, 86, 0.7)',
-                    'rgba(75, 192, 192, 0.7)', 'rgba(153, 102, 255, 0.7)', 'rgba(255, 159, 64, 0.7)',
-                    'rgba(199, 199, 199, 0.7)', 'rgba(83, 102, 255, 0.7)'
-                ];
-                chart1_datasets.forEach((dataset, index) => {
-                    const baseColor = predefinedColors[index % predefinedColors.length];
-                    dataset.backgroundColor = baseColor;
-                    dataset.borderColor = baseColor.replace('0.7', '1');
-                });
-
-                var chart1_data = {
-                    labels: chart1_labels,
-                    datasets: chart1_datasets
-                };
-
-                var chart1_options = {
-                    responsive: true,
-                    maintainAspectRatio: true, // !!! این را به false تغییر دهید !!!
-                    plugins: {
-                        title: { display: true, text: 'فروش ماهانه - تعداد', rtl: true, font: { size: 16 } },
-                        legend: { position: 'top', rtl: true, labels: { usePointStyle: true, font: { size: 14 } } },
-                        tooltip: {
-                            rtl: true,
-                            callbacks: {
-                                title: function(tooltipItems) { return tooltipItems[0].label; },
-                                label: function(tooltipItem) {
-                                    let label = tooltipItem.dataset.label || '';
-                                    if (label) { label += ': '; }
-                                    label += tooltipItem.raw.toLocaleString('fa-IR', {maximumFractionDigits: 2});
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: { stacked: false, title: { display: true, text: 'ماه', rtl: true, font: { size: 14 } }, ticks: { font: { size: 12 } }, barPercentage: 0.8, categoryPercentage: 0.8 },
-                        y: {
-                            beginAtZero: true, stacked: false,
-                            ticks: {
-                                callback: function(value, index, values) {
-                                    return value.toLocaleString('fa-IR', {maximumFractionDigits: 0});
-                                },
-                                font: { size: 12 }
-                            },
-                            title: { display: true, text: 'تعداد', rtl: true, font: { size: 14 } }
-                        }
-                    }
-                };
-                drawChart('myChart', 'bar', chart1_data, chart1_options);
-            }
-        }
-
-        // --- نمودار دوم (myChart2) ---
-        console.log("Attempting to load data for chart2...");
-        var chart2_labels_data_element = document.getElementById('chart2-labels-data');
-        var chart2_datasets_data_element = document.getElementById('chart2-datasets-data');
-
-        if (!chart2_labels_data_element || !chart2_datasets_data_element) {
-            console.error("Error: Chart2 data script elements not found. Check IDs or if data is passed from Django context correctly.");
-            console.log("chart2-labels-data element:", chart2_labels_data_element);
-            console.log("chart2-datasets-data element:", chart2_datasets_data_element);
-            // return;
-        } else {
-            var chart2_labels_raw = chart2_labels_data_element.textContent;
-            var chart2_datasets_raw = chart2_datasets_data_element.textContent;
-
-            var chart2_labels;
-            var chart2_datasets;
-
-            try {
-                chart2_labels = JSON.parse(chart2_labels_raw);
-            } catch (e) {
-                console.error("Error parsing chart2 Labels JSON:", e);
-                console.error("Raw Labels content that caused error:", chart2_labels_raw);
-                // return;
-            }
-
-            try {
-                chart2_datasets = JSON.parse(chart2_datasets_raw);
-            } catch (e) {
-                console.error("Error parsing chart2 Datasets JSON:", e);
-                console.error("Raw Datasets content that caused error:", chart2_datasets_raw);
-                // return;
-            }
-
-            if (!chart2_labels || chart2_labels.length === 0 || !chart2_datasets || chart2_datasets.length === 0) {
-                console.warn("Chart2 data is empty or invalid. Not drawing chart.");
-                // return;
-            } else {
-                // می‌توانید رنگ‌های خاصی برای chart2 تعریف کنید یا از همان predefinedColors استفاده کنید
-                var chart2_predefinedColors = [
-                   'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)', 'rgba(255, 206, 86, 0.7)',
-                    'rgba(75, 192, 192, 0.7)', 'rgba(153, 102, 255, 0.7)', 'rgba(255, 159, 64, 0.7)',
-                    'rgba(199, 199, 199, 0.7)', 'rgba(83, 102, 255, 0.7)'
-                ];
-                chart2_datasets.forEach((dataset, index) => {
-                    const baseColor = chart2_predefinedColors[index % chart2_predefinedColors.length];
-                    dataset.backgroundColor = baseColor;
-                    dataset.borderColor = baseColor.replace('0.7', '1');
-                });
-
-                var chart2_data = {
-                    labels: chart2_labels,
-                    datasets: chart2_datasets
-                };
-
-                var chart2_options = {
-                    responsive: true,
-                    maintainAspectRatio: true, // !!! این را به false تغییر دهید !!!
-                    plugins: {
-                        title: { display: true, text: 'فروش ماهانه - مبلغ', rtl: true, font: { size: 16 } },
-                        legend: { position: 'top', rtl: true, labels: { usePointStyle: true, font: { size: 14 } } },
-                        tooltip: {
-                            rtl: true,
-                            callbacks: {
-                                title: function(tooltipItems) { return tooltipItems[0].label; },
-                                label: function(tooltipItem) {
-                                    let label = tooltipItem.dataset.label || '';
-                                    if (label) { label += ': '; }
-                                    label += tooltipItem.raw.toLocaleString('fa-IR', {maximumFractionDigits: 2});
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: { stacked: false, title: { display: true, text: 'ماه', rtl: true, font: { size: 14 } }, ticks: { font: { size: 12 } }, barPercentage: 0.8, categoryPercentage: 0.8 },
-                        y: {
-                            beginAtZero: true, stacked: false,
-                            ticks: {
-                                callback: function(value, index, values) {
-                                    return value.toLocaleString('fa-IR', {maximumFractionDigits: 0});
-                                },
-                                font: { size: 12 }
-                            },
-                            title: { display: true, text: 'مبلغ فروش', rtl: true, font: { size: 14 } }
-                        }
-                    }
-                };
-                drawChart('myChart2', 'bar', chart2_data, chart2_options);
-            }
-        }
-    });
-</script>
+    </script>
 
 
 
 
 
-{{ chart1_labels|json_script:"chart1-labels-data" }}
-{{ chart1_datasets|json_script:"chart1-datasets-data" }}
-{{ chart2_labels|json_script:"chart2-labels-data" }}
-{{ chart2_datasets|json_script:"chart2-datasets-data" }}
+    {{ chart1_labels|json_script:"chart1-labels-data" }}
+    {{ chart1_datasets|json_script:"chart1-datasets-data" }}
+    {{ chart2_labels|json_script:"chart2-labels-data" }}
+    {{ chart2_datasets|json_script:"chart2-datasets-data" }}
 
 
 
@@ -952,45 +962,54 @@
                 label: 'سهم فروش زیر مجموعه',
                 data: dataValues,
                 backgroundColor: [
-                    window.chartColors.red,
                     window.chartColors.orange,
                     window.chartColors.yellow,
                     window.chartColors.green,
                     window.chartColors.blue,
                     window.chartColors.purple,
+                    window.chartColors.cyan,
+                    window.chartColors.pink,
+                    window.chartColors.brown,
+                    window.chartColors.lime,
                 ],
                 {#borderColor: borderColors,#}
                 borderWidth: 1
             }]
         };
 
-        var options = {
-            responsive: true,
-            maintainAspectRatio: true,
-            legend: {
-                position: 'bottom',
-            },
-            title: {
-                display: false,
-                text: 'نمودار دونات'
-            },
-            animation: {
-                animateScale: true,
-                animateRotate: true
+var options = {
+    responsive: true,
+    maintainAspectRatio: true,
+    legend: {
+        position: 'bottom',
+    },
+    title: {
+        display: false,
+        text: 'نمودار دونات'
+    },
+    animation: {
+        animateScale: true,
+        animateRotate: true
+    }, // اینجا ویرایش شده: اضافه کردن کاما
+
+    tooltips: {
+        callbacks: {
+            label: function (tooltipItem, data) {
+                var dataset = data.datasets[tooltipItem.datasetIndex];
+                var total = dataset.data.reduce((sum, value) => sum + value, 0);
+                var currentValue = dataset.data[tooltipItem.index];
+                var percentage = ((currentValue / total) * 100).toFixed(2);
+                return data.labels[tooltipItem.index] + ': ' + currentValue + ' (' + percentage + '%)';
             }
-        {#scales: {#}
-        {#    y: {#}
-        {#        beginAtZero: true#}
-        {#    }#}
-        {#}#}
         }
-        ;
+    }
+};
 
 
         drawChart('donat-forosh', 'doughnut', data, options);
     </script>
 
-        <!-- نمودار دونات فروش دسته ها مبلغ-->
+    <!-- نمودار دونات فروش دسته ها مبلغ-->
 
     <script>
         var labels = [
@@ -1017,7 +1036,12 @@
                     window.chartColors.green,
                     window.chartColors.blue,
                     window.chartColors.purple,
-                ],
+                    window.chartColors.cyan,
+                    window.chartColors.pink,
+                    window.chartColors.brown,
+                    window.chartColors.lime,
+                ]
+                ,
                 {#borderColor: borderColors,#}
                 borderWidth: 1
             }]
@@ -1051,64 +1075,64 @@
 
 
     <script src="{% static 'js/plugins/jquery-circle-progress/circle-progress.min.js' %}"></script>
-    <script>
-        function getColor(value) {
-
-            if (value <= 1 / 12) {
-                return ["#00FF00", "#00FF00"];
-            } else if (value <= 2 / 12) {
-                return ["#FFFF00", "#FFFF00"];
-            } else if (value <= 3 / 12) {
-                return ["#FFA500", "#FFA500"];
-            } else {
-                return [
-
-                    "#FF0000", "#FF0000"];
-            }
-        }
-
-        var value = {{ rosobper }};
-
-        $('#circle1').circleProgress({
-            value: value,
-            size: 80,
-            fill: {
-                gradient: getColor(value)
-            }
-            ,
-            animation: {
-                duration: 2000
-            }
-        })
-        ;
-
-        $('#circle2').circleProgress({
-            {#value: 0.25,#}
-            value: {{ rankper }},
-            size: 80,
-            fill: {
-                gradient: ["#EC4433", "#FE9500"]
-            }
-            ,
-            animation: {
-                duration: 2000
-            }
-        })
-        ;
-        $('#circle3').circleProgress({
-            {#value: {{ rosobper }},#}
-            value: .0016556291390728,
-            size: 80,
-            fill: {
-                gradient: ["#00CDFF", "#1E74FD"]
-            }
-            ,
-            animation: {
-                duration: 2000
-            }
-        })
-        ;
-    </script>
+    {#    <script>#}
+    {#        function getColor(value) {#}
+    {##}
+    {#            if (value <= 1 / 12) {#}
+    {#                return ["#00FF00", "#00FF00"];#}
+    {#            } else if (value <= 2 / 12) {#}
+    {#                return ["#FFFF00", "#FFFF00"];#}
+    {#            } else if (value <= 3 / 12) {#}
+    {#                return ["#FFA500", "#FFA500"];#}
+    {#            } else {#}
+    {#                return [#}
+    {##}
+    {#                    "#FF0000", "#FF0000"];#}
+    {#            }#}
+    {#        }#}
+    {##}
+    {#        var value = {{ rosobper }};#}
+    {##}
+    {#        $('#circle1').circleProgress({#}
+    {#            value: value,#}
+    {#            size: 80,#}
+    {#            fill: {#}
+    {#                gradient: getColor(value)#}
+    {#            }#}
+    {#            ,#}
+    {#            animation: {#}
+    {#                duration: 2000#}
+    {#            }#}
+    {#        })#}
+    {#        ;#}
+    {##}
+    {#        $('#circle2').circleProgress({#}
+    {#value: 0.25,#}
+    {#            value: {{ rankper }},#}
+    {#            size: 80,#}
+    {#            fill: {#}
+    {#                gradient: ["#EC4433", "#FE9500"]#}
+    {#            }#}
+    {#            ,#}
+    {#            animation: {#}
+    {#                duration: 2000#}
+    {#            }#}
+    {#        })#}
+    {#        ;#}
+    {#        $('#circle3').circleProgress({#}
+    {#value: {{ rosobper }},#}
+    {#            value: .0016556291390728,#}
+    {#            size: 80,#}
+    {#            fill: {#}
+    {#                gradient: ["#00CDFF", "#1E74FD"]#}
+    {#            }#}
+    {#            ,#}
+    {#            animation: {#}
+    {#                duration: 2000#}
+    {#            }#}
+    {#        })#}
+    {#        ;#}
+    {#    </script>#}
 
 
 

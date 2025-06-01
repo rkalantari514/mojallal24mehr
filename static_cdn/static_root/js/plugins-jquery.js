@@ -48494,15 +48494,24 @@ function (a, b) {
 'use strict';
 
 window.chartColors = {
-	red: 'rgb(255, 99, 132)',
-	orange: 'rgb(255, 159, 64)',
-	yellow: 'rgb(255, 205, 86)',
-	green: 'rgb(75, 192, 192)',
-	blue: 'rgb(54, 162, 235)',
-	purple: 'rgb(153, 102, 255)',
-	grey: 'rgb(201, 203, 207)',
-	black: 'rgb(0,0,0)'
+    red: 'rgb(255, 99, 132)',
+    orange: 'rgb(255, 159, 64)',
+    yellow: 'rgb(255, 205, 86)',
+    green: 'rgb(75, 192, 192)',
+    blue: 'rgb(54, 162, 235)',
+    purple: 'rgb(153, 102, 255)',
+    cyan: 'rgb(0, 255, 255)',
+    pink: 'rgb(255, 20, 147)',
+    brown: 'rgb(165, 42, 42)',
+    lime: 'rgb(50, 205, 50)'
 };
+
+
+
+
+
+
+
 
 (function (global) {
 	var Months = [

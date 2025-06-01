@@ -1003,6 +1003,20 @@ def CategoryDetail(request, *args, **kwargs):
                 'count': total_sale
             })
 
+    sorted_items = sorted(donat_forosh_data, key=lambda x: x['count'], reverse=True)
+    main_items = sorted_items[:7]
+    other_count = sum(item['count'] for item in sorted_items[7:])
+    if other_count > 0:
+        main_items.append({'name': 'سایر موارد', 'count': other_count})
+    donat_forosh_data=main_items
+
+    sorted_items = sorted(donat_forosh_mablagh, key=lambda x: x['count'], reverse=True)
+    main_items = sorted_items[:7]
+    other_count = sum(item['count'] for item in sorted_items[7:])
+    if other_count > 0:
+        main_items.append({'name': 'سایر موارد', 'count': other_count})
+    donat_forosh_mablagh=main_items
+
     if cat_level==0:
         cat_id_1='0'
     else:
