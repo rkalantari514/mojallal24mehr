@@ -947,13 +947,20 @@ def CategoryDetail(request, *args, **kwargs):
                 'count': total_sale
             })
 
-    if cat_level==1:
+
+    if cat_level == 1:
+        # برای هر دسته در سطح 2
         for category in cat2:
+            # گرفتن کاله‌های زیرمجموعه دسته
             kalas_cat = Kala.objects.filter(category__parent=category)
+            # استخراج کدهای تاف کاله‌ها در لیست
             taf_list_cat = list(kalas_cat.values_list('kala_taf', flat=True).distinct())
+            # فیلتر فاکتورها بر اساس کاله‌های تاف
             fac_cat = FactorDetaile.objects.filter(kala__kala_taf__in=taf_list_cat)
-            total_sale = fac_cat.aggregate(total_count=Sum('count'))['total_count'] or 0
-            total_sale_mab = fac_cat.aggregate(total_count=Sum('mablagh_nahaee'))['total_count'] or 0
+            # جمع کردن تعداد فروش و مبلغ فروش
+            total_sale = fac_cat.aggregate(total=Sum('count'))['total'] or 0
+            total_sale_mab = fac_cat.aggregate(total=Sum('mablagh_nahaee'))['total'] or 0
+            # افزودن به لیست‌ها
             donat_forosh_mablagh.append({
                 'name': category.name,
                 'count': total_sale_mab
@@ -963,13 +970,14 @@ def CategoryDetail(request, *args, **kwargs):
                 'count': total_sale
             })
 
-    if cat_level==2:
+    elif cat_level == 2:
+        # برای هر دسته در سطح 3
         for category in cat3:
             kalas_cat = Kala.objects.filter(category=category)
             taf_list_cat = list(kalas_cat.values_list('kala_taf', flat=True).distinct())
             fac_cat = FactorDetaile.objects.filter(kala__kala_taf__in=taf_list_cat)
-            total_sale = fac_cat.aggregate(total_count=Sum('count'))['total_count'] or 0
-            total_sale_mab = fac_cat.aggregate(total_count=Sum('mablagh_nahaee'))['total_count'] or 0
+            total_sale = fac_cat.aggregate(total=Sum('count'))['total'] or 0
+            total_sale_mab = fac_cat.aggregate(total=Sum('mablagh_nahaee'))['total'] or 0
             donat_forosh_mablagh.append({
                 'name': category.name,
                 'count': total_sale_mab
@@ -979,17 +987,17 @@ def CategoryDetail(request, *args, **kwargs):
                 'count': total_sale
             })
 
-    if cat_level==3:
+    elif cat_level == 3:
+        # برای سطح دسته‌بندی خودش
         kalas_cat = Kala.objects.filter(category=cat)
         for kal in kalas_cat:
             fac_cat = FactorDetaile.objects.filter(kala=kal)
-            total_sale = fac_cat.aggregate(total_count=Sum('count'))['total_count'] or 0
-            total_sale_mab = fac_cat.aggregate(total_count=Sum('mablagh_nahaee'))['total_count'] or 0
+            total_sale = fac_cat.aggregate(total=Sum('count'))['total'] or 0
+            total_sale_mab = fac_cat.aggregate(total=Sum('mablagh_nahaee'))['total'] or 0
             donat_forosh_mablagh.append({
-                'name': category.name,
+                'name': kal.name,
                 'count': total_sale_mab
             })
-
             donat_forosh_data.append({
                 'name': kal.name,
                 'count': total_sale
