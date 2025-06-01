@@ -597,8 +597,446 @@ from collections import defaultdict
 from django.db.models import Sum, Avg
 import time
 import jdatetime
+import time
+from collections import defaultdict
+from django.db.models import Sum, Avg
+from decimal import Decimal
+import time
+from collections import defaultdict
+from django.db.models import Sum, Func, F
+from decimal import Decimal, InvalidOperation
 @login_required(login_url='/login')
 def CategoryDetail(request, *args, **kwargs):
+    name = 'دسته بندی کالاها'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
+    start_time2 = time.time()  # زمان شروع تابع
+    start_time = time.time()  # زمان شروع تابع
+    user=request.user
+
+    cat_id=int(kwargs['id'])
+    if cat_id==0:
+        cat='همه دسته بندی ها'
+        cat_level=0
+    else:
+        cat=Category.objects.filter(id=cat_id).last()
+        cat_level = cat.level
+
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(
+            user=user,
+            page='جزئیات دسته بندی',
+            code=cat_id,
+        )
+
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        name = 'دسته بندی کالاها'
+        result = page_permision(request, name)  # بررسی دسترسی
+        if result:  # اگر هدایت انجام شده است
+            return result
+        start_time2 = time.time()  # زمان شروع تابع
+        user = request.user
+
+        cat_id = int(kwargs['id'])
+        if cat_id == 0:
+            cat_level = 0
+        else:
+            cat = Category.objects.filter(id=cat_id).last()
+            cat_level = cat.level
+
+        if user.mobile_number != '09151006447':
+            UserLog.objects.create(
+                user=user,
+                page='جزئیات دسته بندی',
+                code=cat_id,
+            )
+
+        month = request.GET.get('month', None)
+        year = request.GET.get('year', None)
+        print("Query params - Year:", year, "Month:", month)
+
+
+        if month is not None and year is not None:
+            current_month = int(month)
+            current_year = int(year)
+        else:
+            today_jalali = JalaliDate.today()
+            current_year = today_jalali.year
+            current_month = today_jalali.month
+
+
+        months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+        month_name = months[current_month - 1]
+        if cat_level == 3:
+            kardex_data2 = Kardex.objects.filter(kala__category=cat, ktype__in=(1, 2))
+        if cat_level == 2:
+            kardex_data2 = Kardex.objects.filter(kala__category__parent=cat, ktype__in=(1, 2))
+        if cat_level == 1:
+            kardex_data2 = Kardex.objects.filter(kala__category__parent__parent=cat, ktype__in=(1, 2))
+        if cat_level == 0:
+            kardex_data2 = Kardex.objects.filter(ktype__in=(1, 2))
+        days_in_month = generate_calendar_data(current_month, current_year, kardex_data2)
+
+        context = {
+            'month': current_month,
+            'cat_id': f'{cat.id}',
+            'days_in_month': days_in_month,
+            'month_name': month_name,
+            'year': current_year,
+        }
+
+        total_time = time.time() - start_time2  # محاسبه زمان اجرا
+        print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+
+        return render(request, 'partial_category.html', context)
+
+#------------------------------------------------------------------------------------------
+    print(f"stage 10: {time.time() - start_time:.2f} ثانیه")
+    start_time = time.time()
+
+    month = request.GET.get('month', None)
+    year = request.GET.get('year', None)
+    print("Query params - Year:", year, "Month:", month)
+
+    month = request.GET.get('month', None)
+    year = request.GET.get('year', None)
+    print("Request GET params - Year:", year, "Month:", month)
+
+    if month is not None and year is not None:
+        current_month = int(month)
+        current_year = int(year)
+    else:
+        today_jalali = JalaliDate.today()
+        current_year = today_jalali.year
+        current_month = today_jalali.month
+
+    print("Current Year:", current_year, "Current Month:", current_month)
+    month_list = []
+    for i in range(12):
+        month = current_month - i
+        year = current_year
+        if month < 1:
+            month += 12
+            year -= 1
+        month_list.append((year, month))
+    month_list.reverse()  # ترتیب به صورت قدیمی به جدید
+    cat1 = Category.objects.filter(level=1).order_by('id')
+    print(f"stage 20: {time.time() - start_time:.2f} ثانیه")
+    start_time = time.time()
+    if cat_level == 3:
+        kalas = Kala.objects.filter(category=cat)
+        kardex = Kardex.objects.filter(kala__category=cat,ktype__in=(1,2)).order_by('date', 'radif')
+        kardex_data2 = Kardex.objects.filter(kala__category=cat,ktype__in=(1,2))
+        print('cat_level==3')
+        par2=cat.parent
+        par1=par2.parent
+        cat2=Category.objects.filter(parent=par1)
+        cat3=Category.objects.filter(parent=par2)
+        distinct_kalas = Mojodi.objects.filter(kala__category=cat).values('kala').distinct()
+
+    if cat_level==2:
+        kalas = Kala.objects.filter(category__parent=cat)
+        kardex = Kardex.objects.filter(kala__category__parent=cat,ktype__in=(1,2)).order_by('date', 'radif')
+        kardex_data2 = Kardex.objects.filter(kala__category__parent=cat,ktype__in=(1,2))
+        print('cat_level==2')
+        par1=cat.parent
+        par2=cat
+        cat2=Category.objects.filter(parent=par1)
+        cat3=Category.objects.filter(parent=cat)
+        distinct_kalas = Mojodi.objects.filter(kala__category__parent=cat).values('kala').distinct()
+
+    if cat_level==1:
+        kalas = Kala.objects.filter(category__parent__parent=cat)
+        kardex = Kardex.objects.filter(kala__category__parent__parent=cat,ktype__in=(1,2)).order_by('date', 'radif')
+        kardex_data2 = Kardex.objects.filter(kala__category__parent__parent=cat,ktype__in=(1,2))
+        print('cat_level==1')
+        par1=cat
+        par2=None
+        cat2=Category.objects.filter(parent=cat)
+        # cat3=Category.objects.filter(parent__parent=cat)
+        cat3=None
+        distinct_kalas = Mojodi.objects.filter(kala__category__parent__parent=cat).values('kala').distinct()
+
+    if cat_level==0:
+        kalas = Kala.objects.all()
+        kardex = Kardex.objects.filter(ktype__in=(1,2)).order_by('date', 'radif')
+        kardex_data2 = Kardex.objects.filter(ktype__in=(1,2))
+        print('cat_level==0')
+        par1=None
+        par2=None
+        cat2=None
+        # cat3=Category.objects.filter(parent__parent=cat)
+        cat3=None
+        distinct_kalas = Mojodi.objects.values('kala').distinct()
+
+
+    print(f"stage 30: {time.time() - start_time:.2f} ثانیه")
+    start_time = time.time()
+# چارت اول:-------------------------------------------------------------- فروش ماهانه تعداد
+
+
+
+    start_time = time.time()
+
+    # مرحله ۱: گرفتن لیست کاله‌های مرتبط
+    taf_list = list(kalas.values_list('kala_taf', flat=True).distinct())
+    print(f"stage 31: {time.time() - start_time:.2f} ثانیه")
+    start_time = time.time()
+
+    # مرحله ۲: فیلتر کردن فاکتورها بر اساس لیست کاله‌ها، با استفاده از کوئری‌های گروهی
+    fac = FactorDetaile.objects.filter(kala__kala_taf__in=taf_list)
+    print(f"stage 32: {time.time() - start_time:.2f} ثانیه")
+    start_time = time.time()
+
+    # ساختن نام ماه‌های جلالی
+    month_names_jalali = {
+        1: 'فروردین', 2: 'اردیبهشت', 3: 'خرداد', 4: 'تیر',
+        5: 'مرداد', 6: 'شهریور', 7: 'مهر', 8: 'آبان',
+        9: 'آذر', 10: 'دی', 11: 'بهمن', 12: 'اسفند'
+    }
+
+    # مرحله ۳: جمع‌آوری تعداد فروش بر اساس تاریخ (جمع‌آوری سریع‌تر با کوئری‌ گروهی)
+    sales_stats_count = fac.annotate(
+        year=Func(F('factor__pdate'), function='SUBSTRING', template="SUBSTRING(%(expressions)s, 1, 4)"),
+        month=Func(F('factor__pdate'), function='SUBSTRING', template="SUBSTRING(%(expressions)s, 6, 2)")
+    ).values('year', 'month').annotate(total=Sum('count'))
+
+    sales_by_year_month_count = defaultdict(lambda: defaultdict(int))
+    for item in sales_stats_count:
+        try:
+            year = int(item['year'])
+            month = int(item['month'])
+            sales_by_year_month_count[year][month] += item['total']
+        except (ValueError, KeyError, TypeError):
+            continue
+    print(f"stage 34: {time.time() - start_time:.2f} ثانیه")
+    start_time = time.time()
+
+    # لیست سال‌ها برای رسم نمودار
+    all_years = sorted(sales_by_year_month_count.keys())
+
+    # تهیه لیبل‌های ماه‌های جلالی
+    chart1_labels = list(month_names_jalali.values())
+
+    # ساخت داده‌های مربوط به فروش تعداد در هر سال و ماه‌ها
+    chart1_datasets = []
+    for year in all_years:
+        data_for_year = []
+        for month_num in range(1, 13):
+            data_for_year.append(sales_by_year_month_count[year][month_num])
+        chart1_datasets.append({
+            'label': f'فروش {year}',
+            'data': data_for_year,
+            'borderWidth': 1,
+            'categoryPercentage': 0.8,
+            'barPercentage': 0.9
+        })
+
+        # مرحله ۴: جمع‌آوری مبلغ فروش بر اساس تاریخ (کوتاه و سریع‌تر با کوئری گروهی)
+    sales_stats_amount = fac.annotate(
+        year=Func(F('factor__pdate'), function='SUBSTRING', template="SUBSTRING(%(expressions)s, 1, 4)"),
+        month=Func(F('factor__pdate'), function='SUBSTRING', template="SUBSTRING(%(expressions)s, 6, 2)")
+    ).values('year', 'month').annotate(total_amount=Sum('mablagh_nahaee'))
+
+    sales_by_year_month_amount = defaultdict(lambda: defaultdict(lambda: Decimal('0')))
+    for item in sales_stats_amount:
+        try:
+            year = int(item['year'])
+            month = int(item['month'])
+            amount = Decimal(str(item['total_amount'])) if item['total_amount'] is not None else Decimal('0')
+            sales_by_year_month_amount[year][month] += amount / 10000000000
+        except (InvalidOperation, ValueError, KeyError, TypeError):
+            continue
+    print(f"stage 42: {time.time() - start_time:.2f} ثانیه")
+    start_time = time.time()
+
+    # تهیه لیست سال‌های موجود برای نمودار مبلغ فروش
+    # تهیه لیست سال‌های موجود برای نمودار مبلغ فروش
+    all_years_amount = sorted(sales_by_year_month_amount.keys())
+
+    # ساخت داده‌های مربوط به مبلغ فروش در هر سال و ماه‌ها
+    chart2_labels = list(month_names_jalali.values())
+
+    chart2_datasets = []
+    for year in all_years_amount:
+        data_for_year = []
+        for month_num in range(1, 13):
+            data_for_year.append(sales_by_year_month_amount[year][month_num])
+        chart2_datasets.append({
+            'label': f'فروش {year}',
+            'data': data_for_year,
+            'borderWidth': 1,
+            'categoryPercentage': 0.8,
+            'barPercentage': 0.9
+        })
+
+
+
+
+
+    #----------------------------------------------------------------------------- دریافت اطلاعات کالا
+    print(f"stage 50: {time.time() - start_time:.2f} ثانیه")
+    start_time = time.time()
+
+    months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند']
+    month_name = months[current_month - 1]
+
+    days_in_month = generate_calendar_data(current_month, current_year, kardex_data2)
+
+    # ابتدا شناسه‌های کالای مورد نیاز را استخراج می‌کنیم
+    kala_ids = [item['kala'] for item in distinct_kalas]
+
+    mojodi_queryset = Mojodi.objects.filter(kala__in=kala_ids)
+
+    mojodi_data = mojodi_queryset.values('kala').annotate(
+        total_stock=Sum('total_stock'),
+        average_price=Avg('averageprice'),
+        mojodi_roz=Sum('mojodi_roz'),
+        mojodi_roz_arzesh=Sum('mojodi_roz_arzesh')
+    )
+    print(f"stage 60: {time.time() - start_time:.2f} ثانیه")
+    start_time = time.time()
+
+    totl_mojodi = sum([item['total_stock'] or 0 for item in mojodi_data])
+
+    total_arzesh = sum(
+        (item['total_stock'] or 0) * (item['average_price'] or 0) for item in mojodi_data
+    )
+    try:
+        total_sale = kardex.filter(ktype=1).aggregate(total_count=Sum('count'))['total_count'] * -1
+    except:
+        total_sale=0
+    kala_ids = [item['kala'] for item in distinct_kalas]
+    mojodi_qs = Mojodi.objects.filter(kala__in=kala_ids)
+    mojodi_data = mojodi_qs.values('kala').annotate(
+        mojodi_roz=Sum('mojodi_roz'),
+        mojodi_roz_arzesh=Sum('mojodi_roz_arzesh')
+    )
+    mojodi_dict = {item['kala']: item for item in mojodi_data}
+    mojodi_roz = sum([mojodi_dict.get(kala, {}).get('mojodi_roz', 0) for kala in kala_ids])
+    mojodi_roz_arzesh = sum([mojodi_dict.get(kala, {}).get('mojodi_roz_arzesh', 0) for kala in kala_ids])
+    s_m_ratio = total_sale / mojodi_roz * 100 if mojodi_roz != 0 else 0
+    master_data = {
+        'totl_mojodi': totl_mojodi,
+        'total_arzesh': total_arzesh,
+        'total_sale': total_sale,
+        's_m_ratio': s_m_ratio,
+        'mojodi_roz': mojodi_roz,
+        'mojodi_roz_arzesh': mojodi_roz_arzesh,
+    }
+    print(f"stage 70: {time.time() - start_time:.2f} ثانیه")
+    start_time = time.time()
+
+    donat_forosh_data=[]
+    donat_forosh_mablagh=[]
+    if cat_level==0:
+        for category in cat1:
+            kalas_cat = Kala.objects.filter(category__parent__parent=category)
+            taf_list_cat = list(kalas_cat.values_list('kala_taf', flat=True).distinct())
+            fac_cat = FactorDetaile.objects.filter(kala__kala_taf__in=taf_list_cat)
+            total_sale = fac_cat.aggregate(total_count=Sum('count'))['total_count'] or 0
+            total_sale_mab = fac_cat.aggregate(total_count=Sum('mablagh_nahaee'))['total_count'] or 0
+            donat_forosh_mablagh.append({
+                'name': category.name,
+                'count': total_sale_mab
+            })
+            donat_forosh_data.append({
+                'name': category.name,
+                'count': total_sale
+            })
+
+    if cat_level==1:
+        for category in cat2:
+            kalas_cat = Kala.objects.filter(category__parent=category)
+            taf_list_cat = list(kalas_cat.values_list('kala_taf', flat=True).distinct())
+            fac_cat = FactorDetaile.objects.filter(kala__kala_taf__in=taf_list_cat)
+            total_sale = fac_cat.aggregate(total_count=Sum('count'))['total_count'] or 0
+            total_sale_mab = fac_cat.aggregate(total_count=Sum('mablagh_nahaee'))['total_count'] or 0
+            donat_forosh_mablagh.append({
+                'name': category.name,
+                'count': total_sale_mab
+            })
+            donat_forosh_data.append({
+                'name': category.name,
+                'count': total_sale
+            })
+
+    if cat_level==2:
+        for category in cat3:
+            kalas_cat = Kala.objects.filter(category=category)
+            taf_list_cat = list(kalas_cat.values_list('kala_taf', flat=True).distinct())
+            fac_cat = FactorDetaile.objects.filter(kala__kala_taf__in=taf_list_cat)
+            total_sale = fac_cat.aggregate(total_count=Sum('count'))['total_count'] or 0
+            total_sale_mab = fac_cat.aggregate(total_count=Sum('mablagh_nahaee'))['total_count'] or 0
+            donat_forosh_mablagh.append({
+                'name': category.name,
+                'count': total_sale_mab
+            })
+            donat_forosh_data.append({
+                'name': category.name,
+                'count': total_sale
+            })
+
+    if cat_level==3:
+        kalas_cat = Kala.objects.filter(category=cat)
+        for kal in kalas_cat:
+            fac_cat = FactorDetaile.objects.filter(kala=kal)
+            total_sale = fac_cat.aggregate(total_count=Sum('count'))['total_count'] or 0
+            total_sale_mab = fac_cat.aggregate(total_count=Sum('mablagh_nahaee'))['total_count'] or 0
+            donat_forosh_mablagh.append({
+                'name': category.name,
+                'count': total_sale_mab
+            })
+
+            donat_forosh_data.append({
+                'name': kal.name,
+                'count': total_sale
+            })
+
+    if cat_level==0:
+        cat_id_1='0'
+    else:
+        cat_id_1=f'{cat.id}'
+    print(f"stage 90: {time.time() - start_time:.2f} ثانیه")
+    start_time = time.time()
+
+    context = {
+        'title': f'{cat}',
+        'cat_id': cat_id_1,
+        'cat_level': cat_level,
+        'user': user,
+        'cat': cat,
+        'cat1': cat1,
+        'cat2': cat2,
+        'cat3': cat3,
+        'par1': par1,
+        'par2': par2,
+        'master_data':master_data,
+        'donat_forosh_data': donat_forosh_data,
+        'donat_forosh_mablagh': donat_forosh_mablagh,
+        'days_in_month': days_in_month,
+        'month_name': month_name,
+        'year': current_year,
+        'month': current_month,
+        'kalas': kalas,
+        'chart1_labels': chart1_labels,
+        'chart1_datasets': chart1_datasets,
+        'chart2_labels': chart2_labels,
+        'chart2_datasets': chart2_datasets,
+    }
+
+    total_time = time.time() - start_time2  # محاسبه زمان اجرا
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+    return render(request, 'category_detail.html', context)
+
+
+
+
+
+
+def CategoryDetail1(request, *args, **kwargs):
     name = 'دسته بندی کالاها'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
