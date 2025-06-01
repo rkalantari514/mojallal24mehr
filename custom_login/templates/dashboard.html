@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>داشبورد گزارش بازدید</title>
-    <!-- اضافه کردن استایل‌های Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- اضافه کردن Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -33,7 +31,6 @@
                         <td>{{ user.percentage }}%</td>
                     </tr>
                     {% endfor %}
-                    <!-- سطر مجموع کل -->
                     <tr class="table-primary fw-bold">
                         <td colspan="2">مجموع کل</td>
                         <td>{{ total_visits }}</td>
@@ -43,57 +40,56 @@
             </table>
         </div>
 
-        <!-- نمودار دایره‌ای -->
-        <div class="mt-5">
-            <h2 class="text-center">نمودار تعداد بازدید کاربران</h2>
-            <canvas id="pieChart" width="400" height="400"></canvas>
+        <!-- جدول میانگین بازدید -->
+        <div class="mt-4">
+            <h2 class="text-center">میانگین بازدید</h2>
+            <table class="table table-bordered text-center">
+                <tr class="table-secondary">
+                    <th>روزانه</th>
+                    <th>هفتگی</th>
+                    <th>ماهانه</th>
+                </tr>
+                <tr>
+                    <td>{{ daily_avg }}</td>
+                    <td>{{ weekly_avg }}</td>
+                    <td>{{ monthly_avg }}</td>
+                </tr>
+            </table>
         </div>
+
+        <!-- نمودار دایره‌ای صفحات پرتکرار -->
+        <canvas id="popularPagesChart"></canvas>
+
+        <!-- نمودار میله‌ای پراکندگی ساعت‌های بازدید -->
+        <canvas id="visitHoursChart"></canvas>
     </div>
 
-    <!-- اسکریپت نمودار -->
+    <!-- اسکریپت نمودارها -->
     <script>
-        var ctx = document.getElementById('pieChart').getContext('2d');
-        var data = {
-            labels: [
-                {% for user in pie_chart_data %}
-                "{{ user.name }}",
-                {% endfor %}
-            ],
-            datasets: [{
-                data: [
-                    {% for user in pie_chart_data %}
-                    {{ user.value }},
-                    {% endfor %}
-                ],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
-        };
-
-        new Chart(ctx, {
+        var ctxPages = document.getElementById('popularPagesChart').getContext('2d');
+        new Chart(ctxPages, {
             type: 'pie',
-            data: data,
-            options: {
-                responsive: false,
-                maintainAspectRatio: true
+            data: {
+                labels: [{% for page in popular_pages %} "{{ page.name }}", {% endfor %}],
+                datasets: [{
+                    data: [{% for page in popular_pages %} {{ page.value }}, {% endfor %}],
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#9C27B0', '#FF9800', '#E91E63'],
+                }]
+            }
+        });
+
+        var ctxHours = document.getElementById('visitHoursChart').getContext('2d');
+        new Chart(ctxHours, {
+            type: 'bar',
+            data: {
+                labels: [{% for hour in visit_by_hour %} "{{ hour.hour }}", {% endfor %}],
+                datasets: [{
+                    label: "تعداد بازدید",
+                    data: [{% for hour in visit_by_hour %} {{ hour.count }}, {% endfor %}],
+                    backgroundColor: "#4CAF50"
+                }]
             }
         });
     </script>
-
 </body>
 </html>

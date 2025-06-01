@@ -78,6 +78,10 @@ from django.shortcuts import render
 from .models import CustomUser, UserLog
 from collections import Counter
 
+from collections import Counter
+from django.db.models import Count
+from django.utils.timezone import now, timedelta
+
 def dashboard_view(request):
     # پیدا کردن کاربران با نام خانوادگی شامل "وارسته"
     varaste_users = CustomUser.objects.filter(last_name__icontains="وارسته")
@@ -89,7 +93,7 @@ def dashboard_view(request):
     # محاسبه مجموع بازدیدها
     total_visits = sum(user_visit_counts.values())
 
-    # ایجاد داده‌ها برای نمایش در جدول
+    # داده‌های جدول کاربران
     table_data = [
         {
             "user": f"{user.first_name} {user.last_name}",
@@ -100,16 +104,39 @@ def dashboard_view(request):
         for user in varaste_users
     ]
 
-    # ایجاد داده‌ها برای نمودار دایره‌ای
+    # داده‌های نمودار دایره‌ای بازدید کاربران
     pie_chart_data = [
         {"name": f"{user.first_name} {user.last_name}", "value": user_visit_counts.get(user, 0)}
         for user in varaste_users
     ]
 
+    # **بیشترین صفحات بازدید شده**
+    page_counts = UserLog.objects.values('page').annotate(count=Count('page')).order_by('-count')[:7]
+    popular_pages = [{"name": page['page'], "value": page['count']} for page in page_counts]
+
+    # **پراکندگی ساعات بازدید**
+    visit_hours = [log.time.hour for log in user_logs]
+    hour_distribution = Counter(visit_hours)
+    visit_by_hour = [{"hour": k, "count": v} for k, v in sorted(hour_distribution.items())]
+
+    # **میانگین بازدید روزانه، هفتگی و ماهانه**
+    today = now().date()
+    week_ago = today - timedelta(days=7)
+    month_ago = today - timedelta(days=30)
+
+    daily_avg = UserLog.objects.filter(time__date=today).count()
+    weekly_avg = UserLog.objects.filter(time__date__gte=week_ago).count() / 7
+    monthly_avg = UserLog.objects.filter(time__date__gte=month_ago).count() / 30
+
     context = {
         "table_data": table_data,
         "pie_chart_data": pie_chart_data,
-        "total_visits": total_visits
+        "total_visits": total_visits,
+        "popular_pages": popular_pages,
+        "visit_by_hour": visit_by_hour,
+        "daily_avg": round(daily_avg, 2),
+        "weekly_avg": round(weekly_avg, 2),
+        "monthly_avg": round(monthly_avg, 2),
     }
     return render(request, 'dashboard.html', context)
 
