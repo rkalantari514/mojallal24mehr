@@ -115,61 +115,98 @@ from django.db.models import Count
 from django.utils.timezone import now, timedelta
 
 
+from django.shortcuts import render
+from django.utils.timezone import now
+from datetime import timedelta
+from django.db.models import Count
+import json
+from collections import defaultdict
+
 def dashboard_view(request):
-    managers = ["مجید وارسته", "مهدی وارسته", "رضا وارسته", "صادق وارسته"]
+    # داده‌های پایه و محاسبات اصلی
+    # فرض بر این است که مدیران بر اساس شناسه‌های مشخص هستند
+    manager_ids = [2, 3, 4,5]
+    managers = CustomUser.objects.filter(id__in=manager_ids)
+
+    # داده‌های مربوط به بازدیدکنندگان و کاربران
     varaste_users = CustomUser.objects.filter(last_name__icontains="وارسته")
     user_logs = UserLog.objects.filter(user__in=varaste_users)
-
-    # محاسبه مجموع و درصد بازدید هر مدیر
     user_visit_counts = Counter([log.user for log in user_logs])
     total_visits = sum(user_visit_counts.values())
+
     table_data = [
         {
             "user": f"{user.first_name} {user.last_name}",
+            "mobile": user.mobile_number,
             "visits": user_visit_counts.get(user, 0),
             "percentage": round((user_visit_counts.get(user, 0) / total_visits) * 100, 2) if total_visits > 0 else 0
-        }
+        } for user in varaste_users
+    ]
+
+    pie_chart_data = [
+        {"name": f"{user.first_name} {user.last_name}", "value": user_visit_counts.get(user, 0)}
         for user in varaste_users
     ]
 
-    # محاسبه بازدید صفحات برای هر مدیر
-    page_visit_counts = {manager: {} for manager in managers}
+    page_counts = UserLog.objects.values('page').annotate(count=Count('page')).order_by('-count')[:7]
+    popular_pages = [{"name": page['page'], "value": page['count']} for page in page_counts]
 
-    for user in varaste_users:
-        full_name = f"{user.first_name} {user.last_name}"
-        user_page_logs = user_logs.filter(user=user).values('page').annotate(count=Count('page'))
+    visit_hours = [log.time.hour for log in user_logs]
+    visit_by_hour = [{"hour": k, "count": v} for k, v in sorted(Counter(visit_hours).items())]
 
-        for entry in user_page_logs:
-            page_visit_counts[full_name][entry["page"]] = entry["count"]
+    today = now().date()
+    week_ago = today - timedelta(days=7)
+    month_ago = today - timedelta(days=30)
 
-    table_page_visits = [
-        {"manager": manager, "pages": page_visit_counts.get(manager, {})} for manager in managers
-    ]
+    daily_avg = UserLog.objects.filter(time__date=today).count()
+    weekly_avg = UserLog.objects.filter(time__date__gte=week_ago).count()
+    monthly_avg = UserLog.objects.filter(time__date__gte=month_ago).count()
 
-    # پراکندگی ساعت بازدید در ۸ بازه‌ی ۳ ساعته برای هر مدیر
-    time_slots = {"00-03": {}, "03-06": {}, "06-09": {}, "09-12": {}, "12-15": {}, "15-18": {}, "18-21": {},
-                  "21-24": {}}
+    # داده‌های مربوط به مدیران برای نمودار ساعت کارکرد
+    # جمع‌آوری ساعت کار هر مدیر
+    hours_range = range(24)
+    hourly_user_visits = {manager.id: [0]*24 for manager in managers}
 
-    for user in varaste_users:
-        full_name = f"{user.first_name} {user.last_name}"
-        visit_hours = user_logs.filter(user=user).values_list('time__hour', flat=True)
+    user_logs_managers = UserLog.objects.filter(user__in=managers)
+    for log in user_logs_managers:
+        user_id = log.user_id
+        hour = log.time.hour
+        if user_id in hourly_user_visits:
+            hourly_user_visits[user_id][hour] += 1
 
-        for hour in visit_hours:
-            for slot in time_slots.keys():
-                start, end = map(int, slot.split('-'))
-                if start <= hour < end:
-                    time_slots[slot][full_name] = time_slots[slot].get(full_name, 0) + 1
+    # میانگین بازدید روزانه هر مدیر
+    daily_avg_per_manager = {}
+    for user in managers:
+        count_today = UserLog.objects.filter(user=user, time__date=today).count()
+        daily_avg_per_manager[user.id] = count_today
 
-    visit_by_hour = [{"hour_range": k, "data": v} for k, v in time_slots.items()]
+    # تعداد بازدید هر مدیر از هر صفحه
+    manager_page_counts = UserLog.objects.filter(user__in=managers).values('user', 'page') \
+        .annotate(count=Count('page'))
+    manager_page_data = defaultdict(lambda: defaultdict(int))
+    for record in manager_page_counts:
+        manager_id = record['user']
+        page = record['page']
+        count = record['count']
+        manager_page_data[manager_id][page] = count
 
     context = {
         "table_data": table_data,
-        "table_page_visits": table_page_visits,
+        "pie_chart_data": pie_chart_data,
+        "total_visits": total_visits,
+        "popular_pages": popular_pages,
         "visit_by_hour": visit_by_hour,
-        "managers": managers
+        "daily_avg": round(daily_avg, 2),
+        "weekly_avg": round(weekly_avg, 2),
+        "monthly_avg": round(monthly_avg, 2),
+        # داده‌های برای نمودار ساعت کار مدیران
+        "hourly_user_visits_json": json.dumps(hourly_user_visits),
+        "managers": managers,
+        "daily_avg_per_manager": daily_avg_per_manager,
+        "manager_page_data": dict(manager_page_data),
     }
-    return render(request, 'dashboard.html', context)
 
+    return render(request, 'dashboard.html', context)
 
 from django.http import Http404  # برای هدایت به صفحه 404
 
