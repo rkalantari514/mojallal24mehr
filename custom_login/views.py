@@ -82,61 +82,62 @@ from collections import Counter
 from django.db.models import Count
 from django.utils.timezone import now, timedelta
 
-def dashboard_view(request):
-    # پیدا کردن کاربران با نام خانوادگی شامل "وارسته"
-    varaste_users = CustomUser.objects.filter(last_name__icontains="وارسته")
+from collections import Counter
+from django.db.models import Count
+from django.utils.timezone import now, timedelta
 
-    # جمع‌آوری اطلاعات بازدید برای کاربران
+
+def dashboard_view(request):
+    # پیدا کردن مدیران وارسته
+    varaste_users = CustomUser.objects.filter(last_name__icontains="وارسته")
     user_logs = UserLog.objects.filter(user__in=varaste_users)
     user_visit_counts = Counter([log.user for log in user_logs])
-
-    # محاسبه مجموع بازدیدها
     total_visits = sum(user_visit_counts.values())
 
-    # داده‌های جدول کاربران
+    # ✅ میانگین بازدید برای هر مدیر
+    avg_visits_per_user = {
+        user: round(user_visit_counts.get(user, 0) / 30, 2) for user in varaste_users
+    }
+
+    # ✅ جدول کاربران بدون شماره موبایل، شامل میانگین بازدید
     table_data = [
         {
             "user": f"{user.first_name} {user.last_name}",
-            "mobile": user.mobile_number,
             "visits": user_visit_counts.get(user, 0),
+            "average_visits": avg_visits_per_user.get(user, 0),
             "percentage": round((user_visit_counts.get(user, 0) / total_visits) * 100, 2) if total_visits > 0 else 0
         }
         for user in varaste_users
     ]
 
-    # داده‌های نمودار دایره‌ای بازدید کاربران
+    # ✅ داده‌های نمودار دونات مدیران
     pie_chart_data = [
         {"name": f"{user.first_name} {user.last_name}", "value": user_visit_counts.get(user, 0)}
         for user in varaste_users
     ]
 
-    # **بیشترین صفحات بازدید شده**
-    page_counts = UserLog.objects.values('page').annotate(count=Count('page')).order_by('-count')[:7]
-    popular_pages = [{"name": page['page'], "value": page['count']} for page in page_counts]
+    # ✅ بیشترین صفحات بازدید شده
+    popular_pages = UserLog.objects.values('page').annotate(count=Count('page')).order_by('-count')[:7]
+    page_chart_data = [{"name": page['page'], "value": page['count']} for page in popular_pages]
 
-    # **پراکندگی ساعات بازدید**
+    # ✅ پراکندگی ساعت بازدید با دسته‌بندی در بازه‌های **3 ساعته**
     visit_hours = [log.time.hour for log in user_logs]
-    hour_distribution = Counter(visit_hours)
-    visit_by_hour = [{"hour": k, "count": v} for k, v in sorted(hour_distribution.items())]
+    time_slots = {"00-03": 0, "03-06": 0, "06-09": 0, "09-12": 0, "12-15": 0, "15-18": 0, "18-21": 0, "21-24": 0}
 
-    # **میانگین بازدید روزانه، هفتگی و ماهانه**
-    today = now().date()
-    week_ago = today - timedelta(days=7)
-    month_ago = today - timedelta(days=30)
+    for hour in visit_hours:
+        for slot in time_slots.keys():
+            start, end = map(int, slot.split('-'))
+            if start <= hour < end:
+                time_slots[slot] += 1
 
-    daily_avg = UserLog.objects.filter(time__date=today).count()
-    weekly_avg = UserLog.objects.filter(time__date__gte=week_ago).count() / 7
-    monthly_avg = UserLog.objects.filter(time__date__gte=month_ago).count() / 30
+    visit_by_hour = [{"hour_range": k, "count": v} for k, v in time_slots.items()]
 
     context = {
         "table_data": table_data,
         "pie_chart_data": pie_chart_data,
         "total_visits": total_visits,
-        "popular_pages": popular_pages,
+        "page_chart_data": page_chart_data,
         "visit_by_hour": visit_by_hour,
-        "daily_avg": round(daily_avg, 2),
-        "weekly_avg": round(weekly_avg, 2),
-        "monthly_avg": round(monthly_avg, 2),
     }
     return render(request, 'dashboard.html', context)
 
