@@ -15,9 +15,8 @@
         <table class="table table-bordered table-striped">
             <thead class="table-dark">
                 <tr>
-                    <th>نام کاربر</th>
+                    <th>نام مدیر</th>
                     <th>تعداد بازدید</th>
-                    <th>میانگین روزانه</th>
                     <th>درصد کل</th>
                 </tr>
             </thead>
@@ -26,67 +25,79 @@
                 <tr>
                     <td>{{ user.user }}</td>
                     <td>{{ user.visits }}</td>
-                    <td>{{ user.average_visits }}</td>
                     <td>{{ user.percentage }}%</td>
                 </tr>
                 {% endfor %}
                 <tr class="table-primary fw-bold">
                     <td colspan="2">مجموع کل</td>
-                    <td>---</td>
                     <td>100%</td>
                 </tr>
             </tbody>
         </table>
 
-        <!-- نمودار دونات -->
-        <canvas id="pieChart" style="max-width: 50%;"></canvas>
+        <!-- جدول صفحات بازدید شده -->
+        <table class="table table-bordered table-striped mt-4">
+            <thead class="table-dark">
+                <tr>
+                    <th>مدیر</th>
+                    <th>صفحات بازدید شده</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for manager_data in table_page_visits %}
+                <tr>
+                    <td>{{ manager_data.manager }}</td>
+                    <td>
+                        <ul>
+                            {% for page, count in manager_data.pages.items %}
+                                <li>{{ page }} ({{ count }} بازدید)</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-        <!-- نمودار صفحات پرتکرار -->
-        <canvas id="popularPagesChart"></canvas>
+        <!-- نمودار دونات صفحات پربازدید -->
+        <div class="text-center mt-4">
+            <h3>صفحات پربازدید</h3>
+            <canvas id="popularPagesChart" style="max-width: 40%;"></canvas>
+        </div>
 
-        <!-- نمودار پراکندگی ساعت بازدید -->
-        <canvas id="visitHoursChart"></canvas>
+        <!-- نمودار میله‌ای پراکندگی بازدید ساعتی -->
+        <div class="text-center mt-4">
+            <h3>پراکندگی ساعت بازدید (۳ ساعته)</h3>
+            <canvas id="visitHoursChart"></canvas>
+        </div>
     </div>
 
     <!-- اسکریپت نمودارها -->
     <script>
-        var ctxPie = document.getElementById('pieChart').getContext('2d');
-        new Chart(ctxPie, {
-            type: 'doughnut',
-            data: {
-                labels: [{% for user in pie_chart_data %} "{{ user.name }}", {% endfor %}],
-                datasets: [{
-                    data: [{% for user in pie_chart_data %} {{ user.value }}, {% endfor %}],
-                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50'],
-                }]
-            },
-            options: { responsive: false, maintainAspectRatio: true }
-        });
-
-        var ctxPages = document.getElementById('popularPagesChart').getContext('2d');
-        new Chart(ctxPages, {
-            type: 'pie',
-            data: {
-                labels: [{% for page in page_chart_data %} "{{ page.name }}", {% endfor %}],
-                datasets: [{
-                    data: [{% for page in page_chart_data %} {{ page.value }}, {% endfor %}],
-                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50'],
-                }]
-            }
-        });
-
         var ctxHours = document.getElementById('visitHoursChart').getContext('2d');
         new Chart(ctxHours, {
             type: 'bar',
             data: {
                 labels: [{% for slot in visit_by_hour %} "{{ slot.hour_range }}", {% endfor %}],
-                datasets: [{
-                    label: "تعداد بازدید",
-                    data: [{% for slot in visit_by_hour %} {{ slot.count }}, {% endfor %}],
-                    backgroundColor: "#4CAF50"
-                }]
+                datasets: [
+                    {% for manager in managers %}
+                    {
+                        label: "{{ manager }}",
+                        data: [
+                            {% for slot in visit_by_hour %}
+                                {% if manager in slot.data %}
+                                    {{ slot.data.manager }},
+                                {% else %}
+                                    0,
+                                {% endif %}
+                            {% endfor %}
+                        ],
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50'][loop.index0]
+                    },
+                    {% endfor %}
+                ]
             },
-            options: { responsive: false, maintainAspectRatio: true }
+            options: { responsive: true, maintainAspectRatio: false }
         });
     </script>
 </body>
