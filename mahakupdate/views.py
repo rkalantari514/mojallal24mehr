@@ -2974,6 +2974,39 @@ def UpdateAccCoding(request):
             except Exception as e:
                 print(f"خطا در وارد کردن کد {moin_code}: {e}")
 
+    print('شروع آپدیت کدینگ حسابداری (سطح تفصیل) -----------------------')
+
+    file_path = os.path.join(settings.BASE_DIR, 'temp', 'tafsil.xlsx')
+    df = pd.read_excel(file_path)
+
+    with transaction.atomic():
+        for index, row in df.iterrows():
+            kol = int(row['kol'])
+            print(index,row['moin'])
+            moin = int(row['moin'])
+            tafsil_code = int(row['tafsil_code'])
+            tafsil_name = row['tafsil_name']
+            print(kol,moin,tafsil_code,tafsil_name)
+            try:
+                parent_acc = AccCoding.objects.filter(parent__code=kol,code=moin, level=2).last()
+                print(parent_acc,parent_acc.code)
+                print('------------------------')
+                acc_coding, created = AccCoding.objects.update_or_create(
+                    code=tafsil_code,
+                    level=3,
+                    parent=parent_acc,
+                    defaults={'name': tafsil_name}
+                )
+                if created:
+                    print(f"رکورد جدید {tafsil_name} با کد {tafsil_code} برای والد {moin} ایجاد شد.")
+                else:
+                    print(f"رکورد {tafsil_code} از قبل وجود دارد و به‌روزرسانی نمی‌شود.")
+            except AccCoding.DoesNotExist:
+                print(f"رکورد والد با کد {moin} یافت نشد.")
+            except Exception as e:
+                print(f"خطا در وارد کردن کد {tafsil_code}: {e}")
+
+
     tend = time.time()
     total_time = tend - t0
     db_time = t1 - t0

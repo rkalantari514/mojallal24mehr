@@ -78,3 +78,8 @@ ls <your_django_project>/Lib/site-packages/django/contrib/admin/migrations/
 بعد
 python manage.py migrate admin
 python manage.py migrate admin --fake
+
+
+103 معین
+PerGrp
+

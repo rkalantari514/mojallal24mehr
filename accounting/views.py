@@ -1273,11 +1273,15 @@ def LoanTotal(request, status, *args, **kwargs):
         UserLog.objects.create(user=user, page=' اقساط معوق', code=0)
 
     start_time = time.time()  # زمان شروع تابع
+    start_time2 = time.time()
 
     today = timezone.now().date()
     total_count = 0
     total_cost = 0
     total_mtday = 0
+
+    print(f"stage 1 : {time.time() - start_time2:.2f} ثانیه")
+    start_time2 = time.time()
 
     if status == 'overdue':
         title = 'گزارش اقساط معوق'
@@ -1286,6 +1290,8 @@ def LoanTotal(request, status, *args, **kwargs):
         total_count=person.count()
         total_cost=0
         total_mtday=0
+        print(f"stage 2 : {time.time() - start_time2:.2f} ثانیه")
+        start_time2 = time.time()
         for p in person:
             l_p = loans.filter(loan__person=p)
             try:
@@ -1359,7 +1365,8 @@ def LoanTotal(request, status, *args, **kwargs):
             total_cost += cost
             total_mtday += mtday * 1 / 10000000
 
-
+    print(f"stage 3 : {time.time() - start_time2:.2f} ثانیه")
+    start_time2 = time.time()
 
 
     print('loan_stats["total_cost"]')
@@ -1386,7 +1393,8 @@ def LoanTotal(request, status, *args, **kwargs):
         Q(message_id__isnull=False) &
         ~Q(status_code__in=[2, 3, 4])
     )
-
+    print(f"stage 4 : {time.time() - start_time2:.2f} ثانیه")
+    start_time2 = time.time()
     updated_objects = []
 
     for t in tracking:
@@ -1398,6 +1406,8 @@ def LoanTotal(request, status, *args, **kwargs):
         except Exception as e:
             print(f"خطا در پردازش {t.id}: {e}")  # مدیریت خطا برای اشکال‌زدایی
 
+    print(f"stage 5 : {time.time() - start_time2:.2f} ثانیه")
+    start_time2 = time.time()
     # به‌روزرسانی دسته‌ای برای بهبود عملکرد
     if updated_objects:
         Tracking.objects.bulk_update(updated_objects, ["status_code"])
