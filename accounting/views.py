@@ -655,8 +655,10 @@ def balance_sheet_tafsili(request,year, kol_code, moin_code):
     # ایجاد لیست level3
     for tafzili_code in tafzili_set:
         print(tafzili_code)
-        taf_name=AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code,code=tafzili_code).last() or " "
-
+        try:
+            taf_name=AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code,code=tafzili_code).last().name
+        except:
+            taf_name=' '
         level3.append(
             {
                 'code': tafzili_code,
@@ -740,11 +742,17 @@ def SanadTotal(request,year, *args, **kwargs):
     tafzili_set = sorted({s.tafzili for s in sanads2})
 
     # ایجاد لیست level3
-    for tafzili_code1 in tafzili_set:
+    for tafzili_code in tafzili_set:
+        print(tafzili_code)
+        try:
+            taf_name=AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code,code=tafzili_code).last().name
+        except:
+            taf_name=' '
         level3.append(
             {
-                'code': tafzili_code1,
-                'name': '',
+                'code': tafzili_code,
+                'name': taf_name,
+
             }
         )
 
