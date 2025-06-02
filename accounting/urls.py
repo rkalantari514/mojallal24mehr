@@ -33,12 +33,12 @@ urlpatterns = [
     path('acc/<col>/<moin>/<tafzili>', TarazKol, name='taraz-kol'),
 
     # Balance sheet paths
-    path('balance-sheet-kol/', balance_sheet_kol, name='balance_sheet_kol'),
-    path('balance-sheet-moin/<int:kol_code>/', balance_sheet_moin, name='balance_sheet_moin'),
-    path('balance-sheet-tafsili/<int:kol_code>/<int:moin_code>/', balance_sheet_tafsili, name='balance_sheet_tafsili'),
+    path('balance-sheet-kol/<year>', balance_sheet_kol, name='balance_sheet_kol'),
+    path('balance-sheet-moin/<year>/<int:kol_code>/', balance_sheet_moin, name='balance_sheet_moin'),
+    path('balance-sheet-tafsili/<year>/<int:kol_code>/<int:moin_code>/', balance_sheet_tafsili, name='balance_sheet_tafsili'),
 
     # Sanad Total path
-    path('sanad_total/<kol_code>/<moin_code>/<tafzili_code>/', SanadTotal, name='sanad_total'),
+    path('sanad_total/<year>/<kol_code>/<moin_code>/<tafzili_code>/', SanadTotal, name='sanad_total'),
 
     # path('dial/', dial_number, name='dial_number'),
 

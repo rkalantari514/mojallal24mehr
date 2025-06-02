@@ -59,8 +59,11 @@ def sidebar(request, *args, **kwargs):
     # سایر داده‌ها
     category_tree = get_category_tree()
     last_update_time = MasterInfo.objects.filter(is_active=True).last().last_update_time
+    years=[1403,1404]
+
 
     context = {
+        'years': years,
         'is_dark_mode': user.is_dark_mode,
         'category_tree': category_tree,
         'last_update_time': last_update_time,

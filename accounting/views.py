@@ -428,12 +428,13 @@ def ChequesPayTotal(request, *args, **kwargs):
 
 
 @login_required(login_url='/login')
-def balance_sheet_kol(request):
+def balance_sheet_kol(request, year):
     name = 'تراز آزمایشی | کل'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
         return result
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    acc_year = int(year)
     kol_codes = SanadDetail.objects.values('kol').distinct()
     balance_data = []
     total_bed = 0
@@ -478,6 +479,7 @@ def balance_sheet_kol(request):
         )
 
     context = {
+        'year': year,
         'balance_data': balance_data,
         'level': 1,
         'level1': level1,
@@ -490,12 +492,13 @@ def balance_sheet_kol(request):
     return render(request, 'balance_sheet.html', context)
 
 
-def balance_sheet_moin(request, kol_code):
+def balance_sheet_moin(request,year, kol_code):
     name = 'تراز آزمایشی | معین'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
         return result
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    acc_year = year
     moin_codes = SanadDetail.objects.filter(kol=kol_code).values('moin').distinct()
     balance_data = []
     total_bed = 0
@@ -558,6 +561,7 @@ def balance_sheet_moin(request, kol_code):
         )
 
     context = {
+        'year': year,
         'balance_data': balance_data,
         'level': 2,
         'level_name': 'معین',
@@ -579,12 +583,13 @@ def balance_sheet_moin(request, kol_code):
     return render(request, 'balance_sheet.html', context)
 
 
-def balance_sheet_tafsili(request, kol_code, moin_code):
+def balance_sheet_tafsili(request,year, kol_code, moin_code):
     name = 'تراز آزمایشی | تفصیلی'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
         return result
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    acc_year = year
     tafsili_codes = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).values('tafzili').distinct()
     balance_data = []
     total_bed = 0
@@ -639,17 +644,7 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
             }
         )
 
-    # فعلا خالی است
-    for l in AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code).order_by('code'):
-        print(l.code, l.name)
-        level3.append(
-            {
-                'code': l.code,
-                'name': l.name,
 
-            }
-        )
-    level3 = []
 
     # فیلتر کردن داده‌ها
     sanads = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, acc_year=acc_year)
@@ -660,14 +655,19 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
     # ایجاد لیست level3
     for tafzili_code in tafzili_set:
         print(tafzili_code)
+        taf_name=AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code,code=tafzili_code).last() or " "
+
         level3.append(
             {
                 'code': tafzili_code,
-                'name': '',
+                'name': taf_name,
+
             }
         )
 
+
     context = {
+        'year': year,
         'balance_data': balance_data,
         'level': 3,
         'moin_code': moin_code,
@@ -688,7 +688,7 @@ def balance_sheet_tafsili(request, kol_code, moin_code):
     return render(request, 'balance_sheet.html', context)
 
 
-def SanadTotal(request, *args, **kwargs):
+def SanadTotal(request,year, *args, **kwargs):
     name = 'کل اسناد'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
@@ -697,6 +697,7 @@ def SanadTotal(request, *args, **kwargs):
     moin_code = kwargs['moin_code']
     tafzili_code = kwargs['tafzili_code']
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    acc_year = year
     sanads = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafzili_code, acc_year=acc_year)
 
     level1 = []
@@ -762,6 +763,7 @@ def SanadTotal(request, *args, **kwargs):
             'curramount__sum']
 
     context = {
+        'year': year,
         'level': level,
         'sanads': sanads,
         'kol_code': int(kol_code),

@@ -22,7 +22,7 @@
                 {% if level == 1 %}
                     <button type="button" class="btn btn-primary category-btn">تراز کل</button>
                 {% else %}
-                    <a href="/balance-sheet-kol">
+                    <a href="/balance-sheet-kol/{{ year }}">
                         <button type="button" class="btn btn-success category-btn">تراز کل</button>
                     </a>
                 {% endif %}
@@ -35,12 +35,12 @@
                     <div class="text-center">
                         {% for l in level1 %}
                             {% if l.code == kol_code %}
-                                <a href="/balance-sheet-moin/{{ l.code }}">
+                                <a href="/balance-sheet-moin/{{ year }}/{{ l.code }}">
                                     <button type="button"
                                             class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
                                 </a>
                             {% else %}
-                                <a href="/balance-sheet-moin/{{ l.code }}">
+                                <a href="/balance-sheet-moin/{{ year }}/{{ l.code }}">
                                     <button type="button"
                                             class="btn btn-secondary category-btn">{{ l.code }}-{{ l.name }}</button>
                                 </a>
@@ -61,12 +61,12 @@
                         <div class="text-center">
                             {% for l in level2 %}
                                 {% if l.code == moin_code %}
-                                    <a href="/balance-sheet-tafsili/{{ kol_code }}/{{ l.code }}">
+                                    <a href="/balance-sheet-tafsili/{{ year }}/{{ kol_code }}/{{ l.code }}">
                                         <button type="button"
                                                 class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
                                     </a>
                                 {% else %}
-                                    <a href="/balance-sheet-tafsili/{{ kol_code }}/{{ l.code }}">
+                                    <a href="/balance-sheet-tafsili/{{ year }}/{{ kol_code }}/{{ l.code }}">
                                         <button type="button"
                                                 class="btn btn-secondary category-btn">{{ l.code }}-{{ l.name }}</button>
                                     </a>
@@ -88,7 +88,7 @@
                         <div class="text-center">
                             {% for l in level3 %}
 
-                                <a href="/sanad_total/{{ kol_code }}/{{ moin_code }}/{{ l.code }}">
+                                <a href="/sanad_total/{{ year }}/{{ kol_code }}/{{ moin_code }}/{{ l.code }}">
                                     <button type="button"
                                             class="btn btn-primary category-btn">{{ l.code }}-{{ l.name }}</button>
                                 </a>
@@ -184,13 +184,13 @@
                         <tr>
                             <td>
                                 {% if level == 1 %}
-                                    <a href="{% url 'balance_sheet_moin' item.kol_code %}"><h4>{{ item.kol_code }}</h4>
+                                    <a href="{% url 'balance_sheet_moin' year item.kol_code %}"><h4>{{ item.kol_code }}</h4>
                                     </a>
                                 {% elif level == 2 %}
-                                    <a href="{% url 'balance_sheet_tafsili' parent_code item.moin_code %}">
+                                    <a href="{% url 'balance_sheet_tafsili' year parent_code item.moin_code %}">
                                         <h4>{{ item.moin_code }}</h4></a>
                                 {% else %}
-                                    <a href="/sanad_total/{{ kol_code }}/{{ moin_code }}/{{ item.tafzili_code }}">
+                                    <a href="/sanad_total/{{ year }}/{{ kol_code }}/{{ moin_code }}/{{ item.tafzili_code }}">
                                         <h4>{{ item.tafzili_code }}</h4></a>
                                 {% endif %}
                             </td>

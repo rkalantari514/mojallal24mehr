@@ -118,7 +118,9 @@
                 <ul id="calendar-menu" class="collapse" data-parent="#sidebarnav">
 
                     {% if "balance_sheet_kol" in allowed_view %}
-                        <li><a href="{% url 'balance_sheet_kol' %}">تراز آزمایشی</a></li>
+                        {% for year in years %}
+                        <li><a href="{% url 'balance_sheet_kol' year %}"> تراز آزمایشی سال {{ year }}</a></li>
+                        {% endfor %}
                     {% endif %}
                     {% if "cheques-recieve-total" in allowed_view %}
 
