@@ -168,6 +168,21 @@
 {#                    {% endif %}#}
 
                 </ul>
+            </li> 
+            <!-- منو بودجه-->
+            <li>
+                <a href="javascript:void(0);" data-toggle="collapse" data-target="#budget-menu">
+                    <div class="pull-left"><i class="ti-wallet"></i><span class="right-nav-text">بودجه سالانه</span></div>
+                    <div class="pull-right"><i class="ti-plus"></i></div>
+                    <div class="clearfix"></div>
+                </a>
+                <ul id="budget-menu" class="collapse" data-parent="#sidebarnav">
+
+{#                    {% if "balance_sheet_kol" in allowed_view %}#}
+                        <li><a href="{% url 'budget_total' %}">کلیات بودجه </a></li>
+{#                    {% endif %}#}
+
+                </ul>
             </li>
             <br>
             <br>

@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'loantracker',
     'payment',
     'festival',
+    'budget',
 
 ]
 
