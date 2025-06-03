@@ -2982,21 +2982,24 @@ def UpdateAccCoding(request):
     with transaction.atomic():
         for index, row in df.iterrows():
             kol = int(row['kol'])
-            print(index,row['moin'])
             moin = int(row['moin'])
             tafsil_code = int(row['tafsil_code'])
             tafsil_name = row['tafsil_name']
-            print(kol,moin,tafsil_code,tafsil_name)
+            is_budget = row['is_budget']
+            budget_rate = row['budget_rate']
             try:
                 parent_acc = AccCoding.objects.filter(parent__code=kol,code=moin, level=2).last()
-                print(parent_acc,parent_acc.code)
-                print('------------------------')
                 acc_coding, created = AccCoding.objects.update_or_create(
                     code=tafsil_code,
                     level=3,
                     parent=parent_acc,
-                    defaults={'name': tafsil_name}
+                    defaults={
+                        'name': tafsil_name,
+                        'is_budget': is_budget,
+                        'budget_rate': budget_rate,
+                    }
                 )
+
                 if created:
                     print(f"رکورد جدید {tafsil_name} با کد {tafsil_code} برای والد {moin} ایجاد شد.")
                 else:

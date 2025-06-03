@@ -618,6 +618,8 @@ class AccCoding(models.Model):
     level = models.PositiveSmallIntegerField(choices=LEVEL_CHOICES, verbose_name='سطح')
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='children',
                                verbose_name='پدر')
+    is_budget = models.BooleanField(default=False, verbose_name='بودجه است؟')
+    budget_rate = models.FloatField(blank=True, null=True, verbose_name='ضریب بودجه')
 
     class Meta:
         verbose_name = 'کدینگ حسابداری'

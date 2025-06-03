@@ -149,11 +149,11 @@ class SanadDetailAdmin(admin.ModelAdmin):
 
 
 class AccCodingAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'code', 'name', 'level', 'parent']
-    list_filter = ['level']
+    list_display = ['__str__', 'code', 'name', 'level', 'parent','is_budget','budget_rate']
+    list_filter = ['level', 'parent','is_budget']
 
-    # list_editable = ['name','parent','level']
-    # search_fields = ['name','lname','group']
+    list_editable = ['name', 'level', 'parent','is_budget','budget_rate']
+    search_fields = ['code', 'name', 'level', 'is_budget','budget_rate']
 
     class Meta:
         model = AccCoding

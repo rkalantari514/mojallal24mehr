@@ -742,15 +742,15 @@ def SanadTotal(request,year, *args, **kwargs):
     tafzili_set = sorted({s.tafzili for s in sanads2})
 
     # ایجاد لیست level3
-    for tafzili_code in tafzili_set:
+    for tafzili_code1 in tafzili_set:
         print(tafzili_code)
         try:
-            taf_name=AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code,code=tafzili_code).last().name
+            taf_name=AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code,code=tafzili_code1).last().name
         except:
             taf_name=' '
         level3.append(
             {
-                'code': tafzili_code,
+                'code': tafzili_code1,
                 'name': taf_name,
 
             }
