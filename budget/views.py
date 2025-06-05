@@ -91,6 +91,10 @@ def BudgetTotal(request, *args, **kwargs):
         item['code']: item['budget_rate'] for item in all_acc_coding
         if item['level'] == 3 and item['parent__parent__code'] == 501 and item['is_budget']
     }
+    first_sanad_day = SanadDetail.objects.filter(is_active=True, kol=501, acc_year=acc_year).first().date
+    days_from_start=(today-first_sanad_day).days
+    day_rate=days_from_start/365
+    print('day_rate', day_rate)
 
     table3 = []
     for (tafzili_code, moin_code), data in aggregated_by_lookup.items():
@@ -107,14 +111,32 @@ def BudgetTotal(request, *args, **kwargs):
         total_budget_cy_today = '-'
         total_budget_by = '-'
 
+        amalkard_by_year='-'
+        amalkard_by_year_ratio='-'
+        amalkard1=True
+        amalkard2=True
+        amalkard_by_day='-'
+        amalkard_by_day_ratio='-'
+
         if is_budge and budget_rate != '-':
             try:
                 rate = Decimal(budget_rate)
                 total_budget_cy = total_sanad_by * rate * -1
                 total_budget_cy_today = total_sanad_by_today * rate  * -1
                 total_budget_by=total_sanad_by * -1
+                amalkard_by_year=(total_budget_cy_today+total_sanad_cy_today)*-1
+                amalkard_by_year_ratio=(amalkard_by_year/total_budget_cy_today)*100
+                if amalkard_by_year > 0:
+                    amalkard1 = False
+                # amalkard_by_day=(total_budget_by*day_rate)-total_sanad_cy_today
+                amalkard_by_day=((float(total_budget_cy)*day_rate)+float(total_sanad_cy_today))*-1
+                print('amalkard_by_day',amalkard_by_day)
+                amalkard_by_day_ratio=amalkard_by_day/(float(total_budget_cy)*day_rate)
+                if amalkard_by_day > 0:
+                    amalkard2 = False
             except Exception as e:
                 pass # در صورت بروز خطا در تبدیل نرخ، از نمایش آن جلوگیری می‌کند
+
 
         table3.append({
             'moin_code': moin_code,
@@ -129,6 +151,18 @@ def BudgetTotal(request, *args, **kwargs):
             'total_sanad_by_today': total_sanad_by_today  * -1,
             'total_budget_cy_today': total_budget_cy_today,
             'total_sanad_cy_today': total_sanad_cy_today  * -1,
+
+            'amalkard_by_year': amalkard_by_year,
+            'amalkard_by_year_ratio': amalkard_by_year_ratio,
+            'amalkard1': amalkard1,
+
+
+            'amalkard_by_day': amalkard_by_day,
+            'amalkard_by_day_ratio': amalkard_by_day_ratio,
+            'amalkard2': amalkard2,
+
+
+
         })
 
 #-------------------------------- ایجاد جدول 2-----------------------

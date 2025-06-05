@@ -86,6 +86,7 @@
                                                 data-sortable="true" data-sorter="numericOnly"
                                                 data-footer-formatter="priceFormatter">عملکرد {{ acc_year }}تا امروز
                                             </th>
+
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -104,6 +105,7 @@
                                                     style="direction: ltr">{{ item.total_budget_cy_today|floatformat:0|intcomma:False }}</td>
                                                 <td class="card-text text-center"
                                                     style="direction: ltr">{{ item.total_sanad_cy_today|floatformat:0|intcomma:False }}</td>
+
 
                                             </tr>
                                         {% endfor %}
@@ -205,6 +207,22 @@
                                                 data-sortable="true" data-sorter="numericOnly"
                                                 data-footer-formatter="priceFormatter">عملکرد {{ acc_year }}تا امروز
                                             </th>
+                                            <th data-field="amalkard_by_year" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter">عملکرد با آهنگ پارسال
+                                            </th>
+                                            <th data-field="amalkard_by_year_ratio" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                            >درصد عملکرد با آهنگ پارسال
+                                            </th>
+                                            <th data-field="amalkard_by_day" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter">عملکرد نسبی روزانه
+                                            </th>
+                                            <th data-field="amalkard_by_day_ratio" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                            >درصد عملکرد نسبی روزانه
+                                            </th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -236,7 +254,33 @@
                                                     style="direction: ltr">{{ item.total_budget_cy_today|floatformat:0|intcomma:False }}</td>
                                                 <td class="card-text text-center"
                                                     style="direction: ltr">{{ item.total_sanad_cy_today|floatformat:0|intcomma:False }}</td>
+                                                {% if item.amalkard1 %}
+                                                    <td class="card-text text-center text-success"
+                                                        style="direction: ltr">{{ item.amalkard_by_year|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center text-success"
+                                                        style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:2 }}%
+                                                    </td>
+                                                {% else %}
+                                                    <td class="card-text text-center text-danger"
+                                                        style="direction: ltr">{{ item.amalkard_by_year|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center text-danger"
+                                                        style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:2 }}%
+                                                    </td>
+                                                {% endif %}
 
+                                                {% if item.amalkard2 %}
+                                                    <td class="card-text text-center text-success"
+                                                        style="direction: ltr">{{ item.amalkard_by_day|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center text-success"
+                                                        style="direction: ltr">{{ item.amalkard_by_day_ratio|floatformat:2 }}%
+                                                    </td>
+                                                {% else %}
+                                                    <td class="card-text text-center text-danger"
+                                                        style="direction: ltr">{{ item.amalkard_by_day|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center text-danger"
+                                                        style="direction: ltr">{{ item.amalkard_by_day_ratio|floatformat:2 }}%
+                                                    </td>
+                                                {% endif %}
                                             </tr>
                                         {% endfor %}
                                         </tbody>
