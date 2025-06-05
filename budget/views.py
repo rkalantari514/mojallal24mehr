@@ -162,16 +162,15 @@ def BudgetTotal(request, *args, **kwargs):
                 return 0.0
 
         # در حلقه جمع‌بندی، از تابع بالا استفاده کن:
-        grouped_data[moin_code]['total_sanad_by'] += safe_float(entry['total_sanad_by'])
-        grouped_data[moin_code]['total_budget_cy'] += safe_float(entry['total_budget_cy'])
-        grouped_data[moin_code]['total_budget_by'] += safe_float(entry['total_budget_by'])
-        grouped_data[moin_code]['total_sanad_by_today'] += safe_float(entry['total_sanad_by_today'])
-        grouped_data[moin_code]['total_budget_cy_today'] += safe_float(entry['total_budget_cy_today'])
-        grouped_data[moin_code]['total_sanad_cy_today'] += safe_float(entry['total_sanad_cy_today'])
+        if entry['is_budge']:
+            grouped_data[moin_code]['total_sanad_by'] += safe_float(entry['total_sanad_by'])
+            grouped_data[moin_code]['total_budget_cy'] += safe_float(entry['total_budget_cy'])
+            grouped_data[moin_code]['total_budget_by'] += safe_float(entry['total_budget_by'])
+            grouped_data[moin_code]['total_sanad_by_today'] += safe_float(entry['total_sanad_by_today'])
+            grouped_data[moin_code]['total_budget_cy_today'] += safe_float(entry['total_budget_cy_today'])
+            grouped_data[moin_code]['total_sanad_cy_today'] += safe_float(entry['total_sanad_cy_today'])
 
-    # حالا لیست نهایی table2 را بر اساس جمع‌بندی می‌سازیم
     table2 = []
-
     for moin_code, data in grouped_data.items():
         table2.append({
             'moin_code': moin_code,
