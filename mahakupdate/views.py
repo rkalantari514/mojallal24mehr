@@ -577,12 +577,41 @@ def UpdateFactor(request):
 
 
 
+from django.db.models import Count
 
 
 # آپدیت کاردکس
 def UpdateKardex(request):
     t0 = time.time()
     print('شروع آپدیت کاردکس----------------------------------------')
+
+
+    # گروه‌بندی بر اساس کلید مورد نظر و شمارش تعداد
+    duplicates = Kardex.objects.values('pdate', 'code_kala', 'stock', 'radif') \
+        .annotate(count_id=Count('id')) \
+        .filter(count_id__gt=1)
+    print('duplicates.count()')
+    print(duplicates.count())
+    for dupe in duplicates:
+        # فیلتر کردن ریزهای برای هر کلید تکراری
+        entries = Kardex.objects.filter(
+            pdate=dupe['pdate'],
+            code_kala=dupe['code_kala'],
+            stock=dupe['stock'],
+            radif=dupe['radif']
+        )
+        # نگه داشتن اولین ردیف و حذف بقیه
+        to_keep = entries.first()
+        to_delete = entries.exclude(id=to_keep.id)
+
+        # حذف ردیف‌های اضافی
+        to_delete.delete()
+
+        # بروزرسانی sync_mojodi ردیف نگهداری‌شده
+        to_keep.sync_mojodi = False
+        to_keep.save()
+
+
     conn = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
