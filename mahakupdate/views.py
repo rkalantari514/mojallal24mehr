@@ -1879,6 +1879,7 @@ def UpdateMojodi(request):
             kardex_entries = kardex_dict[(code_kala, warehousecode)]
             last_kardex_entry = kardex_entries[-1]
             last_kardex_entry2 = Kardex.objects.filter(code_kala=code_kala).order_by('date', 'radif').last()
+            last_kardex_entry3 = Kardex.objects.filter(code_kala=code_kala,warehousecode=warehousecode).order_by('date', 'radif').last()
 
             if last_kardex_entry2:
                 total_count = sum(k.count for k in kardex_entries)
@@ -1888,7 +1889,8 @@ def UpdateMojodi(request):
                     'total_stock': last_kardex_entry2.stock,
                     'averageprice': last_kardex_entry2.averageprice,
                     'arzesh': total_count * last_kardex_entry2.averageprice,
-                    'stock': total_count,
+                    # 'stock': total_count,
+                    'stock': last_kardex_entry3.stock,
                 }
 
                 # محاسبه mojodi_roz

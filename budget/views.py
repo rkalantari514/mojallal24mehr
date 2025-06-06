@@ -30,16 +30,222 @@ from decimal import Decimal
 import time
 from django.shortcuts import render
 
-def BudgetTotal(request, *args, **kwargs):
+def BudgetCostTotal(request, *args, **kwargs):
     start_time = time.time()
-    name = 'کلیات بودجه'
+    name = 'کلیات بودجه هزینه ای'
     result = page_permision(request, name)
     if result:
         return result
 
     user = request.user
     if user.mobile_number != '09151006447':
-        UserLog.objects.create(user=user, page='کلیات بودجه', code=0)
+        UserLog.objects.create(user=user, page='کلیات بودجه هزینه ای', code=0)
+
+    master_info = MasterInfo.objects.filter(is_active=True).last()
+    if not master_info:
+        return render(request, 'error_page.html', {'message': 'سال مالی فعالی یافت نشد.'})
+
+    acc_year = master_info.acc_year
+    base_year = acc_year - 1
+    today = date.today()
+    one_year_ago = today - relativedelta(years=1)
+
+    sanads_qs_base_year = SanadDetail.objects.filter(is_active=True, kol=501, acc_year=base_year)
+
+    aggregated_sanads_base_year = sanads_qs_base_year.values('tafzili', 'moin').annotate(
+        total_sanad_by=Sum('curramount'),
+        total_sanad_by_today=Sum('curramount', filter=Q(date__lte=one_year_ago))
+    )
+
+    sanads_qs_current_year = SanadDetail.objects.filter(
+        is_active=True, kol=501, acc_year=acc_year, date__lte=today
+    ).values('tafzili', 'moin').annotate(
+        total_sanad_cy_today=Sum('curramount')
+    )
+
+    aggregated_by_lookup = {}
+    for item in aggregated_sanads_base_year:
+        key = (item['tafzili'], item['moin'])
+        aggregated_by_lookup[key] = {
+            'total_sanad_by': item['total_sanad_by'] or 0,
+            'total_sanad_by_today': item['total_sanad_by_today'] or 0
+        }
+
+    aggregated_cy_lookup = {}
+    for item in sanads_qs_current_year:
+        key = (item['tafzili'], item['moin'])
+        aggregated_cy_lookup[key] = item['total_sanad_cy_today'] or 0
+
+    unique_tafzili_codes = sanads_qs_base_year.values_list('tafzili', flat=True).distinct()
+    unique_moin_codes = sanads_qs_base_year.values_list('moin', flat=True).distinct()
+
+    all_acc_coding = AccCoding.objects.filter(
+        Q(level=3, parent__parent__code=501, code__in=unique_tafzili_codes) |
+        Q(level=2, parent__code=501, code__in=unique_moin_codes) |
+        Q(level=3, parent__parent__code=501, is_budget=True)
+    ).values('code', 'name', 'level', 'parent__code', 'parent__parent__code', 'is_budget', 'budget_rate')
+
+    tafzili_names = {item['code']: item['name'] for item in all_acc_coding if item['level'] == 3 and item['parent__parent__code'] == 501}
+    moin_names = {item['code']: item['name'] for item in all_acc_coding if item['level'] == 2 and item['parent__code'] == 501}
+    budget_taf_info = {
+        item['code']: item['budget_rate'] for item in all_acc_coding
+        if item['level'] == 3 and item['parent__parent__code'] == 501 and item['is_budget']
+    }
+    first_sanad_day = SanadDetail.objects.filter(is_active=True, kol=501, acc_year=acc_year).first().date
+    days_from_start=(today-first_sanad_day).days
+    day_rate=days_from_start/365
+    print('day_rate', day_rate)
+
+    table3 = []
+    for (tafzili_code, moin_code), data in aggregated_by_lookup.items():
+        total_sanad_by = data['total_sanad_by']
+        total_sanad_by_today = data['total_sanad_by_today']
+        total_sanad_cy_today = aggregated_cy_lookup.get((tafzili_code, moin_code), 0)
+
+        moin_name = moin_names.get(moin_code, ' ')
+        tafzili_name = tafzili_names.get(tafzili_code, ' ')
+
+        is_budge = tafzili_code in budget_taf_info
+        budget_rate = budget_taf_info.get(tafzili_code, '-')
+        total_budget_cy = '-'
+        total_budget_cy_today = '-'
+        total_budget_by = '-'
+
+        amalkard_by_year='-'
+        amalkard_by_year_ratio='-'
+        amalkard1=True
+        amalkard2=True
+        amalkard_by_day='-'
+        amalkard_by_day_ratio='-'
+
+        if is_budge and budget_rate != '-':
+            try:
+                rate = Decimal(budget_rate)
+                total_budget_cy = total_sanad_by * rate * -1
+                total_budget_cy_today = total_sanad_by_today * rate  * -1
+                total_budget_by=total_sanad_by * -1
+                amalkard_by_year=(total_budget_cy_today+total_sanad_cy_today)*-1
+                amalkard_by_year_ratio=(amalkard_by_year/total_budget_cy_today)*100
+                if amalkard_by_year > 0:
+                    amalkard1 = False
+                # amalkard_by_day=(total_budget_by*day_rate)-total_sanad_cy_today
+                amalkard_by_day=((float(total_budget_cy)*day_rate)+float(total_sanad_cy_today))*-1
+                print('amalkard_by_day',amalkard_by_day)
+                amalkard_by_day_ratio=amalkard_by_day/(float(total_budget_cy)*day_rate)
+                if amalkard_by_day > 0:
+                    amalkard2 = False
+            except Exception as e:
+                pass # در صورت بروز خطا در تبدیل نرخ، از نمایش آن جلوگیری می‌کند
+
+
+        table3.append({
+            'moin_code': moin_code,
+            'moin_name': moin_name,
+            'tafzili_code': tafzili_code,
+            'tafzili_name': tafzili_name,
+            'is_budge': is_budge,
+            'budget_rate': budget_rate,
+            'total_sanad_by': total_sanad_by  * -1,
+            'total_budget_cy': total_budget_cy,
+            'total_budget_by': total_budget_by,
+            'total_sanad_by_today': total_sanad_by_today  * -1,
+            'total_budget_cy_today': total_budget_cy_today,
+            'total_sanad_cy_today': total_sanad_cy_today  * -1,
+
+            'amalkard_by_year': amalkard_by_year,
+            'amalkard_by_year_ratio': amalkard_by_year_ratio,
+            'amalkard1': amalkard1,
+
+
+            'amalkard_by_day': amalkard_by_day,
+            'amalkard_by_day_ratio': amalkard_by_day_ratio,
+            'amalkard2': amalkard2,
+
+
+
+        })
+
+#-------------------------------- ایجاد جدول 2-----------------------
+
+    # دیکشنری کمکی برای نگهداری جمع مقادیر بر اساس moin_code
+    grouped_data = {}
+
+    for entry in table3:
+        moin_code = entry['moin_code']
+        moin_name = entry['moin_name']
+
+        # اگر moin_code در دیکشنری نیست، آن را اضافه کن و مقدارهای اولیه بده
+        if moin_code not in grouped_data:
+            grouped_data[moin_code] = {
+                'moin_name': moin_name,
+                'total_sanad_by': 0,
+                'total_budget_cy': 0,
+                'total_budget_by': 0,
+                'total_sanad_by_today': 0,
+                'total_budget_cy_today': 0,
+                'total_sanad_cy_today': 0,
+            }
+
+        def safe_float(value):
+            try:
+                val = str(value).strip()
+                if val == '-' or val == '':
+                    return 0.0
+                return float(val)
+            except ValueError:
+                return 0.0
+
+        # در حلقه جمع‌بندی، از تابع بالا استفاده کن:
+        if entry['is_budge']:
+            grouped_data[moin_code]['total_sanad_by'] += safe_float(entry['total_sanad_by'])
+            grouped_data[moin_code]['total_budget_cy'] += safe_float(entry['total_budget_cy'])
+            grouped_data[moin_code]['total_budget_by'] += safe_float(entry['total_budget_by'])
+            grouped_data[moin_code]['total_sanad_by_today'] += safe_float(entry['total_sanad_by_today'])
+            grouped_data[moin_code]['total_budget_cy_today'] += safe_float(entry['total_budget_cy_today'])
+            grouped_data[moin_code]['total_sanad_cy_today'] += safe_float(entry['total_sanad_cy_today'])
+
+    table2 = []
+    for moin_code, data in grouped_data.items():
+        table2.append({
+            'moin_code': moin_code,
+            'moin_name': data['moin_name'],
+            'total_sanad_by': data['total_sanad_by'],
+            'total_budget_cy': data['total_budget_cy'],
+            'total_budget_by': data['total_budget_by'],
+            'total_sanad_by_today': data['total_sanad_by_today'],
+            'total_budget_cy_today': data['total_budget_cy_today'],
+            'total_sanad_cy_today': data['total_sanad_cy_today'],
+        })
+
+
+
+
+    context = {
+        'acc_year': acc_year,
+        'base_year': base_year,
+        'user': user,
+        'table3': table3,
+        'table2': table2,
+    }
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+    return render(request, 'budget_total.html', context)
+
+
+
+
+
+
+def BudgetCostDetail(request,level,code, *args, **kwargs):
+    start_time = time.time()
+    name = 'جزئیات بودجه هزینه ای'
+    result = page_permision(request, name)
+    if result:
+        return result
+
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='جزئیات بودجه هزینه ای', code=code)
 
     master_info = MasterInfo.objects.filter(is_active=True).last()
     if not master_info:
