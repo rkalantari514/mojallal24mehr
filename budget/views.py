@@ -42,13 +42,15 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
     tafzil = None
     moin_code = None
     tafzili_code = None
-    budget_rate = 1.35  # نرخ بودجه پیش‌فرض
+    budget_rate = 0  # نرخ بودجه پیش‌فرض
 
     if level == '3':
         tafzili_code = int(code)
         tafzil = AccCoding.objects.filter(code=tafzili_code, parent__parent__code=501).last()
         if tafzil:
             moin_code = tafzil.parent.code
+            budget_rate = tafzil.budget_rate
+
             if hasattr(tafzil, 'budget_rate') and tafzil.budget_rate is not None and tafzil.budget_rate != 0:
                 budget_rate = tafzil.budget_rate
         else:
