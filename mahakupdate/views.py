@@ -1848,7 +1848,7 @@ def UpdateMojodi(request):
     false_kardex_list = list(Kardex.objects.filter(sync_mojodi=False,acc_year=acc_year).values_list('code_kala', flat=True))
 
     # بارگذاری رکوردهای Kardex مورد نظر فقط یک بار
-    kardex_to_update = Kardex.objects.filter(code_kala__in=false_kardex_list)
+    kardex_to_update = Kardex.objects.filter(code_kala__in=false_kardex_list,acc_year=acc_year)
     # kardex_to_update = Kardex.objects.filter(code_kala=70179)
 
     # بارگذاری کادرکس‌ها که sync_mojodi آنها True است
@@ -1889,9 +1889,9 @@ def UpdateMojodi(request):
                     'total_stock': last_kardex_entry2.stock,
                     'averageprice': last_kardex_entry2.averageprice,
                     'arzesh': total_count * last_kardex_entry2.averageprice,
-                    # 'stock': total_count,
-                    'stock': last_kardex_entry3.stock,
-                }
+                    'stock': total_count,
+                    # 'stock': last_kardex_entry3.stock,
+                # }
 
                 # محاسبه mojodi_roz
 
