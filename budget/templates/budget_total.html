@@ -253,7 +253,12 @@
                                                 <td class="card-text text-center"
                                                     style="direction: ltr">{{ item.total_budget_cy_today|floatformat:0|intcomma:False }}</td>
                                                 <td class="card-text text-center"
-                                                    style="direction: ltr">{{ item.total_sanad_cy_today|floatformat:0|intcomma:False }}</td>
+                                                    style="direction: ltr">
+                                                    <a href="/budget/cost/detail/3/{{ item.tafzili_code }}"
+                                                       target="_blank">
+                                                        {{ item.total_sanad_cy_today|floatformat:0|intcomma:False }}
+                                                    </a>
+                                                </td>
                                                 {% if item.amalkard1 %}
                                                     <td class="card-text text-center text-success"
                                                         style="direction: ltr">{{ item.amalkard_by_year|floatformat:0|intcomma:False }}</td>

@@ -1,0 +1,126 @@
+{% extends 'shared/_MainLayout.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+    <style>
+        /* این استایل ها فقط برای این صفحه اعمال می شوند */
+        .category-btn {
+            width: 300px; /* عرض دکمه‌ها را تنظیم می‌کند */
+            margin-bottom: 10px; /* فاصله بین خطوط را تنظیم می‌کند */
+        }
+
+        /* CSS برای کنترل اندازه نمودار */
+        .chart-container {
+            position: relative;
+            width: 100%; /* می تواند عرض ثابتی هم باشد */
+            height: 450px; /* ارتفاع دلخواه برای نمودار ترکیبی */
+            margin-bottom: 30px;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        /* اگر فونت IRANSans را سراسری در _MainLayout تنظیم نکرده‌اید، اینجا اضافه کنید */
+        body {
+            font-family: 'IRANSans', Tahoma, sans-serif;
+            /* direction: rtl;  این احتمالا در _MainLayout تنظیم شده است */
+            /* text-align: right; این احتمالا در _MainLayout تنظیم شده است */
+        }
+
+        h5.card-title, h6.card-title {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+    </style>
+
+
+    <div class="content-wrapper">
+
+        <div class="row">
+            <div class="col-md-12 mb-30">
+                <div class="col-xl-12 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="table-responsive mt-15 ">
+                                <h5 class="card-title pb-0 border-0">عملکرد بودجه هزینه ای برای: {{ tafzil_name }}</h5>
+                                <h6 class="card-title pb-0 border-0">مقایسه سال {{ base_year }} با سال {{ acc_year }} تا
+                                    به امروز</h6>
+                            </div>
+
+                            {# کانتینر نمودار #}
+                            <div class="chart-container">
+                                {# این تگ canvas، نمودار ترکیبی را نمایش خواهد داد #}
+                                <canvas id="budgetChart"></canvas>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+{% endblock %}
+
+{% block myjs %}
+    <script>
+        // دریافت داده‌ها از View
+        var chartLabels = {{ chart_labels|safe }};
+        var chart1Data = {{ chart1_data|safe }};
+        var chart2Data = {{ chart2_data|safe }};
+        var chart3Data = {{ chart3_data|safe }};
+        var chart4Data = {{ chart4_data|safe }};
+
+        var ctx = document.getElementById('budgetChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: [
+                    {
+                        label: "عملکرد سال گذشته",
+                        data: chart1Data,
+                        borderColor: "blue",
+                        fill: false,
+                        pointRadius: 0 // حذف دایره‌های داده
+                    },
+                    {
+                        label: "عملکرد سال جاری",
+                        data: chart2Data,
+                        borderColor: "green",
+                        fill: false,
+                        pointRadius: 0 // حذف دایره‌های داده
+                    },
+                    {
+                        label: "بودجه با آهنگ سال گذشته",
+                        data: chart3Data,
+                        borderColor: "red",
+                        fill: false,
+                        pointRadius: 0 // حذف دایره‌های داده
+                    },
+                    {
+                        label: "بودجه بر اساس زمان",
+                        data: chart4Data,
+                        borderColor: "teal",
+                        fill: false,
+                        pointRadius: 0 // حذف دایره‌های داده
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {title: {display: true, text: "تاریخ"}},
+                    y: {title: {display: true, text: "مقدار تجمعی"}}
+                }
+            }
+        });
+    </script>
+{% endblock %}
