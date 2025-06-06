@@ -4,150 +4,32 @@ from custom_login.models import UserLog
 from custom_login.views import page_permision
 from dashboard.models import MasterInfo
 from mahakupdate.models import SanadDetail, AccCoding
+import time
+from django.db.models import Sum, F, DecimalField
 from datetime import date
+from dateutil.relativedelta import relativedelta
+from decimal import Decimal
+import datetime
+
+# Create your views here.
+from django.db.models import Sum, F
+from datetime import date
+from dateutil.relativedelta import relativedelta
 from decimal import Decimal
 import time
-from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
-from django.db.models import Sum, Min, Max
-from django.db.models import Q
-from django.shortcuts import render
 
-from django.shortcuts import render
-from custom_login.models import UserLog
-from custom_login.views import page_permision
-from dashboard.models import MasterInfo
-from mahakupdate.models import SanadDetail, AccCoding
-from datetime import date, datetime, timedelta
+from django.db.models import Sum, F
+from datetime import date
+from dateutil.relativedelta import relativedelta
 from decimal import Decimal
 import time
+
+from django.db.models import Sum, F, Q
+from datetime import date
 from dateutil.relativedelta import relativedelta
-import jdatetime
-from django.db.models import Sum, Min, Max, Q
-
-
-def BudgetCostDetail(request, level, code, *args, **kwargs):
-    start_time = time.time()
-    name = 'جزئیات بودجه هزینه ای'
-    result = page_permision(request, name)
-    if result:
-        return result
-
-    user = request.user
-    UserLog.objects.create(user=user, page='جزئیات بودجه هزینه ای', code=code)
-
-    master_info = MasterInfo.objects.filter(is_active=True).last()
-    acc_year = master_info.acc_year
-    base_year = acc_year - 1
-    tafzil = None
-    moin_code = None
-    tafzili_code = None
-    budget_rate = 0  # نرخ بودجه پیش‌فرض
-
-    if level == '3':
-        tafzili_code = int(code)
-        tafzil = AccCoding.objects.filter(code=tafzili_code, parent__parent__code=501).last()
-        if tafzil:
-            moin_code = tafzil.parent.code
-            budget_rate = tafzil.budget_rate
-
-            if hasattr(tafzil, 'budget_rate') and tafzil.budget_rate is not None and tafzil.budget_rate != 0:
-                budget_rate = tafzil.budget_rate
-        else:
-            return render(request, 'budget_cost_detail.html', {
-                'acc_year': acc_year, 'base_year': base_year, 'user': user,
-                'tafzil_name': 'نامشخص', 'budget_rate': budget_rate,
-                'chart_labels': [], 'chart1_data': [], 'chart2_data': [],
-                'chart3_data': [], 'chart4_data': []
-            })
-
-        # دریافت داده‌های مالی برای سال پایه و سال جاری
-        sanad_base_year_qs = SanadDetail.objects.filter(
-            is_active=True, kol=501, moin=moin_code, tafzili=tafzili_code, acc_year=base_year
-        )
-        sanad_acc_year_qs = SanadDetail.objects.filter(
-            is_active=True, kol=501, moin=moin_code, tafzili=tafzili_code, acc_year=acc_year
-        )
-
-        # استخراج حداقل و حداکثر تاریخ
-        start_date = sanad_base_year_qs.aggregate(min_date=Min('date'))['min_date']
-        end_date = sanad_base_year_qs.aggregate(max_date=Max('date'))['max_date']
-
-        # بررسی مقداردهی صحیح `start_date` و `end_date`
-        if not start_date or not end_date:
-            return render(request, 'budget_cost_detail.html', {
-                'acc_year': acc_year, 'base_year': base_year, 'user': user,
-                'tafzil_name': tafzil.name if tafzil else 'نامشخص', 'budget_rate': budget_rate,
-                'chart_labels': [], 'chart1_data': [], 'chart2_data': [], 'chart3_data': [], 'chart4_data': []
-            })
-
-        # تولید لیست تاریخ‌ها
-        date_list = [(start_date + timedelta(days=i)).strftime('%Y-%m-%d') for i in
-                     range((end_date - start_date).days + 1)]
-
-        # تبدیل تاریخ‌ها به شمسی با فرمت موردنظر
-        month_names = {
-            1: "فروردین", 2: "اردیبهشت", 3: "خرداد", 4: "تیر",
-            5: "مرداد", 6: "شهریور", 7: "مهر", 8: "آبان",
-            9: "آذر", 10: "دی", 11: "بهمن", 12: "اسفند"
-        }
-
-        chart_labels_shamsi = []
-        for date in date_list:
-            miladi_date = datetime.strptime(date, '%Y-%m-%d')
-            shamsi_date = jdatetime.date.fromgregorian(day=miladi_date.day, month=miladi_date.month,
-                                                       year=miladi_date.year)
-
-            if shamsi_date.day == 1:
-                label = month_names[shamsi_date.month]  # نام ماه در روز اول
-            elif shamsi_date.day == 15:
-                label = shamsi_date.strftime('%Y-%m-%d')  # تاریخ کامل در روز ۱۵
-            else:
-                label = ""
-
-            chart_labels_shamsi.append(label)
-
-        # پردازش داده‌های مالی برای نمودارها
-        chart_labels = chart_labels_shamsi
-        chart1_data, chart2_data, chart3_data, chart4_data = [], [], [], []
-        cumulative_base_year, cumulative_acc_year = 0, 0
-        today = datetime.today().strftime('%Y-%m-%d')
-
-        for day in date_list:
-            by_date = datetime.strptime(day, '%Y-%m-%d') + relativedelta(years=-1)
-
-            # داده‌های تجمعی سال پایه
-            if str(by_date.date()) in sanad_base_year_qs.values_list('date', flat=True):
-                cumulative_base_year += \
-                sanad_base_year_qs.filter(date=by_date.date()).aggregate(total=Sum('curramount'))['total'] or 0
-            chart1_data.append(cumulative_base_year)
-            chart3_data.append(cumulative_base_year * budget_rate)
-
-            # داده‌های تجمعی سال جاری
-            if day in sanad_acc_year_qs.values_list('date', flat=True) and day <= today:
-                cumulative_acc_year += sanad_acc_year_qs.filter(date=day).aggregate(total=Sum('curramount'))[
-                                           'total'] or 0
-                chart2_data.append(cumulative_acc_year)
-
-        # محاسبه بودجه بر اساس زمان
-        last_value_chart1 = chart1_data[-1] if chart1_data else 0
-        count_acc_date_list = len(date_list)
-        s = (last_value_chart1 / count_acc_date_list) * budget_rate
-        ch4 = 0
-
-        for _ in date_list:
-            chart4_data.append(ch4)
-            ch4 += s
-
-    context = {
-        'acc_year': acc_year, 'base_year': base_year, 'user': user,
-        'tafzil_name': tafzil.name if tafzil else 'نامشخص', 'budget_rate': budget_rate,
-        'chart_labels': chart_labels, 'chart1_data': chart1_data, 'chart2_data': chart2_data,
-        'chart3_data': chart3_data, 'chart4_data': chart4_data
-    }
-
-    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
-    return render(request, 'budget_cost_detail.html', context)
+from decimal import Decimal
+import time
+from django.shortcuts import render
 
 
 def BudgetCostTotal(request, *args, **kwargs):
@@ -345,6 +227,225 @@ def BudgetCostTotal(request, *args, **kwargs):
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
     return render(request, 'budget_total.html', context)
+
+
+import time
+import datetime
+from django.db.models import Sum, Min, Max
+from django.db.models import Q
+from django.shortcuts import render
+# from dateutil.relativedelta import relativedelta # اگر از این استفاده می کنید، مطمئن شوید نصب شده باشد
+# from datetime import date # اگر از این استفاده می کنید، مطمئن شوید import شده باشد
+
+
+import time
+import datetime
+from django.db.models import Sum, Min, Max
+from django.db.models import Q
+from django.shortcuts import render
+
+import time
+import datetime
+import jdatetime  # <--- حتماً این کتابخانه را نصب کنید: pip install jdatetime
+from django.db.models import Sum, Min, Max
+from django.db.models import Q
+from django.shortcuts import render
+
+import time
+import datetime
+from django.db.models import Sum, Min, Max
+from django.db.models import Q
+from django.shortcuts import render
+
+import time
+import datetime
+# jdatetime را حذف کنید اگر قرار نیست شمسی باشد
+# import jdatetime # <--- این خط را حذف کنید
+
+from django.db.models import Sum, Min, Max
+from django.db.models import Q
+from django.shortcuts import render
+
+import time
+import datetime
+from django.db.models import Sum, Min, Max
+from django.db.models import Q
+from django.shortcuts import render
+from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta
+import jdatetime
+from datetime import datetime
+import jdatetime
+from datetime import datetime
+def BudgetCostDetail(request, level, code, *args, **kwargs):
+    start_time = time.time()
+    name = 'جزئیات بودجه هزینه ای'
+    result = page_permision(request, name)
+    if result:
+        return result
+
+    user = request.user
+    UserLog.objects.create(user=user, page='جزئیات بودجه هزینه ای', code=code)
+
+    master_info = MasterInfo.objects.filter(is_active=True).last()
+    acc_year = master_info.acc_year
+    base_year = acc_year - 1
+    tafzil = None
+    moin_code = None
+    tafzili_code = None
+    budget_rate = 0  # نرخ بودجه پیش‌فرض
+
+    if level == '3':
+        tafzili_code = int(code)
+        tafzil = AccCoding.objects.filter(code=tafzili_code, parent__parent__code=501).last()
+        if tafzil:
+            moin_code = tafzil.parent.code
+            budget_rate=tafzil.budget_rate
+            if hasattr(tafzil, 'budget_rate') and tafzil.budget_rate is not None and tafzil.budget_rate != 0:
+                budget_rate = tafzil.budget_rate
+        else:
+            print(f"Error: Tafzili with code {tafzili_code} not found for level 3.")
+            context = {  # مقداردهی اولیه به context حتی در صورت خطا
+                'acc_year': acc_year, 'base_year': base_year, 'user': user,
+                'tafzil_name': 'نامشخص', 'budget_rate': budget_rate,
+                'chart_labels': [], 'chart_original_base_year_data': [],
+                'chart_multiplied_base_year_data': [], 'chart_current_year_data': []
+            }
+            return render(request, 'budget_cost_detail.html', context)
+
+        # --- ۱. کوئری‌های مربوط به سال پایه (Base Year) ---
+        sanad_base_year_qs = SanadDetail.objects.filter(
+            is_active=True,
+            kol=501,
+            moin=moin_code,
+            tafzili=tafzili_code,
+            acc_year=base_year
+        )
+        daily_totals_base_year = {}
+        if sanad_base_year_qs.exists():
+            for item in sanad_base_year_qs.values('date').annotate(total=Sum('curramount')).order_by('date'):
+                daily_totals_base_year[str(item['date'])] = -float(item['total'] or 0)
+
+        # --- ۲. کوئری‌های مربوط به سال جاری (Current Year) ---
+        sanad_acc_year_qs = SanadDetail.objects.filter(
+            is_active=True,
+            kol=501,
+            moin=moin_code,
+            tafzili=tafzili_code,
+            acc_year=acc_year
+        )
+        daily_totals_acc_year = {}
+        if sanad_acc_year_qs.exists():
+            for item in sanad_acc_year_qs.values('date').annotate(total=Sum('curramount')).order_by('date'):
+                daily_totals_acc_year[str(item['date'])] = -float(item['total'] or 0)
+
+        start_date = sanad_base_year_qs.aggregate(min_date=Min('date'))['min_date']
+        end_date = sanad_base_year_qs.aggregate(max_date=Max('date'))['max_date']
+
+
+        start_date = SanadDetail.objects.filter(is_active=True,acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
+        end_date = SanadDetail.objects.filter(is_active=True,acc_year=base_year).aggregate(max_date=Max('date'))['max_date']
+        # ایجاد لیست روزها
+        date_list = []
+        current_date = start_date
+        while current_date <= end_date:
+            date_list.append(current_date.strftime('%Y-%m-%d'))  # قالب تاریخ به YYYY-MM-DD
+            current_date += timedelta(days=1)
+
+        for d in date_list:
+            print(d)
+
+        print('==============================================================')
+
+        acc_date_list = [datetime.strptime(date, '%Y-%m-%d') + relativedelta(years=1) for date in date_list]
+        acc_date_list = [date.strftime('%Y-%m-%d') for date in acc_date_list]
+
+        for d in acc_date_list:
+            print(d)
+
+
+        month_names = {
+            1: "فروردین", 2: "اردیبهشت", 3: "خرداد", 4: "تیر",
+            5: "مرداد", 6: "شهریور", 7: "مهر", 8: "آبان",
+            9: "آذر", 10: "دی", 11: "بهمن", 12: "اسفند"
+        }
+
+        chart_labels_shamsi = []
+        for date in acc_date_list:
+            try:
+                miladi_date = datetime.strptime(date, '%Y-%m-%d')  # تبدیل میلادی به datetime
+                shamsi_date = jdatetime.date.fromgregorian(day=miladi_date.day, month=miladi_date.month,
+                                                           year=miladi_date.year)
+                print(shamsi_date,shamsi_date.day)
+                # تنظیم نمایش لیبل‌ها بر اساس شرط‌های تعیین‌شده
+                if shamsi_date.day == 1:  # نمایش نام ماه برای اولین روز ماه
+                    label = month_names[shamsi_date.month]
+                    print(')))))))))))))))))))))',label)
+                elif shamsi_date.day == 15:  # نمایش تاریخ کامل برای روز ۱۵ هر ماه
+                    label = shamsi_date.strftime('%Y-%m-%d')
+                else:  # سایر موارد خالی باشند
+                    label = shamsi_date.day
+
+                chart_labels_shamsi.append(shamsi_date.strftime('%Y-%m-%d'))
+
+            except ValueError as e:
+                print(f"خطای تبدیل تاریخ: {date}, {e}")  # نمایش خطا در صورت وجود مشکل
+
+        for c in chart_labels_shamsi:
+            print(c)
+
+        chart_labels = chart_labels_shamsi  # برچسب‌های نمودار همان لیست تاریخ‌ها
+        chart1_data = []
+        chart2_data = []
+        chart3_data = []
+        chart4_data = []
+
+        cumulative_base_year = 0
+        cumulative_acc_year = 0
+        today = datetime.today().strftime('%Y-%m-%d')  # تاریخ امروز به فرمت YYYY-MM-DD
+        for day in acc_date_list:
+            by_date = datetime.strptime(day, '%Y-%m-%d') + relativedelta(years=-1)  # تاریخ مربوط به سال پایه
+
+            # مقدار روز جاری از سال پایه را دریافت و تجمعی محاسبه کن
+            if str(by_date.date()) in daily_totals_base_year:
+                cumulative_base_year += daily_totals_base_year[str(by_date.date())]  # علامت منفی برای تصحیح
+            chart1_data.append(cumulative_base_year)
+            chart3_data.append(cumulative_base_year * budget_rate)
+
+            # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
+            if day in daily_totals_acc_year:
+                cumulative_acc_year += daily_totals_acc_year[day]  # علامت منفی برای تصحیح
+            if day < today or day == today:
+                chart2_data.append(cumulative_acc_year)
+
+        last_value_chart1 = chart1_data[-1] if chart1_data else None
+        count_acc_date_list = len(acc_date_list)
+        s=last_value_chart1/count_acc_date_list * budget_rate
+        ch4=0
+        for day in acc_date_list:
+            chart4_data.append(ch4)
+            ch4 += s
+
+
+
+
+    context = {
+        'acc_year': acc_year,
+        'base_year': base_year,
+        'user': user,
+        'tafzil_name': tafzil.name if tafzil else 'نامشخص',
+        'budget_rate': budget_rate,
+        'chart_labels': chart_labels,  # لیبل‌های نمودار
+        'chart1_data': chart1_data,
+        'chart2_data': chart2_data,
+        'chart3_data': chart3_data,
+        'chart4_data': chart4_data,
+
+    }
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+
+    return render(request, 'budget_cost_detail.html', context)
 
 
 def BudgetCostDetail2(request, level, code, *args, **kwargs):
