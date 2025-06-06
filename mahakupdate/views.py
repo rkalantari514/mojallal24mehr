@@ -1842,9 +1842,10 @@ def UpdateMojodi(request):
     # Kardex.objects.all().update(sync_mojodi=False)
     # return redirect('/updatedb')
     start_time = time.time()
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
 
     # دریافت لیست کد کالاهایی که sync_mojodi=False هستند
-    false_kardex_list = list(Kardex.objects.filter(sync_mojodi=False).values_list('code_kala', flat=True))
+    false_kardex_list = list(Kardex.objects.filter(sync_mojodi=False,acc_year=acc_year).values_list('code_kala', flat=True))
 
     # بارگذاری رکوردهای Kardex مورد نظر فقط یک بار
     kardex_to_update = Kardex.objects.filter(code_kala__in=false_kardex_list)
