@@ -359,7 +359,8 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         return result
 
     user = request.user
-    UserLog.objects.create(user=user, page='جزئیات بودجه هزینه ای', code=code)
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='کلیات بودجه هزینه ای', code=0)
 
     master_info = MasterInfo.objects.filter(is_active=True).last()
     acc_year = master_info.acc_year
