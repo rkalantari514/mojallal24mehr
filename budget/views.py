@@ -184,6 +184,8 @@ def BudgetCostTotal(request, *args, **kwargs):
                 'total_sanad_by_today': 0,
                 'total_budget_cy_today': 0,
                 'total_sanad_cy_today': 0,
+                'amalkard_by_year': 0,
+                'amalkard_by_day': 0,
             }
 
         def safe_float(value):
@@ -203,9 +205,18 @@ def BudgetCostTotal(request, *args, **kwargs):
             grouped_data[moin_code]['total_sanad_by_today'] += safe_float(entry['total_sanad_by_today'])
             grouped_data[moin_code]['total_budget_cy_today'] += safe_float(entry['total_budget_cy_today'])
             grouped_data[moin_code]['total_sanad_cy_today'] += safe_float(entry['total_sanad_cy_today'])
+            grouped_data[moin_code]['amalkard_by_year'] += safe_float(entry['amalkard_by_year'])
+            grouped_data[moin_code]['amalkard_by_day'] += safe_float(entry['amalkard_by_day'])
 
     table2 = []
     for moin_code, data in grouped_data.items():
+        amalkard1 = True
+        if data['amalkard_by_year'] > 0:
+            amalkard1 = False
+        amalkard2 =True
+        if data['amalkard_by_day'] > 0:
+            amalkard2 = False
+
         table2.append({
             'moin_code': moin_code,
             'moin_name': data['moin_name'],
@@ -215,7 +226,69 @@ def BudgetCostTotal(request, *args, **kwargs):
             'total_sanad_by_today': data['total_sanad_by_today'],
             'total_budget_cy_today': data['total_budget_cy_today'],
             'total_sanad_cy_today': data['total_sanad_cy_today'],
+            'amalkard_by_year': data['amalkard_by_year'],
+            'amalkard_by_year_ratio': data['amalkard_by_year'] / data['total_budget_cy_today'] * 100 ,
+            'amalkard1': amalkard1,
+            'amalkard_by_day': data['amalkard_by_day'],
+            'amalkard_by_day_ratio':  (data['amalkard_by_day'] / (float(data['total_budget_cy']) * day_rate)) * 100,
+            'amalkard2': amalkard2,
+
         })
+#----------------------------------ساخت جدول 1 ----------------------------
+
+    # دیکشنری کمکی برای نگهداری جمع کل داده‌ها
+    summary_data = {
+        'total_sanad_by': 0,
+        'total_budget_cy': 0,
+        'total_budget_by': 0,
+        'total_sanad_by_today': 0,
+        'total_budget_cy_today': 0,
+        'total_sanad_cy_today': 0,
+        'amalkard_by_year': 0,
+        'amalkard_by_day': 0,
+    }
+    table1 = []
+
+    # جمع‌بندی مقادیر از table2
+    for entry in table2:
+        summary_data['total_sanad_by'] += entry['total_sanad_by']
+        summary_data['total_budget_cy'] += entry['total_budget_cy']
+        summary_data['total_budget_by'] += entry['total_budget_by']
+        summary_data['total_sanad_by_today'] += entry['total_sanad_by_today']
+        summary_data['total_budget_cy_today'] += entry['total_budget_cy_today']
+        summary_data['total_sanad_cy_today'] += entry['total_sanad_cy_today']
+        summary_data['amalkard_by_year'] += entry['amalkard_by_year']
+        summary_data['amalkard_by_day'] += entry['amalkard_by_day']
+
+    # محاسبه نسبت‌های عملکرد
+    amalkard1 = summary_data['amalkard_by_year'] <= 0
+    amalkard2 = summary_data['amalkard_by_day'] <= 0
+
+    summary_data['amalkard_by_year_ratio'] = (
+        summary_data['amalkard_by_year'] / summary_data['total_budget_cy_today'] * 100
+        if summary_data['total_budget_cy_today'] != 0 else 0
+    )
+
+    summary_data['amalkard_by_day_ratio'] = (
+        (summary_data['amalkard_by_day'] / (float(summary_data['total_budget_cy']) * day_rate)) * 100
+        if summary_data['total_budget_cy'] != 0 else 0
+    )
+
+    # اضافه کردن داده‌های خلاصه‌شده به table1
+    table1.append({
+        'total_sanad_by': summary_data['total_sanad_by'],
+        'total_budget_cy': summary_data['total_budget_cy'],
+        'total_budget_by': summary_data['total_budget_by'],
+        'total_sanad_by_today': summary_data['total_sanad_by_today'],
+        'total_budget_cy_today': summary_data['total_budget_cy_today'],
+        'total_sanad_cy_today': summary_data['total_sanad_cy_today'],
+        'amalkard_by_year': summary_data['amalkard_by_year'],
+        'amalkard_by_year_ratio': summary_data['amalkard_by_year_ratio'],
+        'amalkard1': amalkard1,
+        'amalkard_by_day': summary_data['amalkard_by_day'],
+        'amalkard_by_day_ratio': summary_data['amalkard_by_day_ratio'],
+        'amalkard2': amalkard2,
+    })
 
     context = {
         'acc_year': acc_year,
@@ -223,6 +296,7 @@ def BudgetCostTotal(request, *args, **kwargs):
         'user': user,
         'table3': table3,
         'table2': table2,
+        'table1': table1,
     }
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")

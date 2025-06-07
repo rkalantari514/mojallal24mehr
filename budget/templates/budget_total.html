@@ -13,6 +13,153 @@
 
     <div class="content-wrapper">
 
+            <!-- ردیف خلاصه بودجه کل -->
+        <div class="row">
+            <div class="col-md-12 mb-30">
+                <div class="col-xl-12 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="table-responsive mt-15 ">
+                                <h5 class="card-title pb-0 border-0">بر اساس کل 501</h5>
+                                <h6 class="card-title pb-0 border-0">عملکرد هزینه سال {{ acc_year }}</h6>
+                                <div class="table-responsive">
+                                    <table id="table"
+                                           class="table-striped"
+                                           data-toggle="table"
+                                           data-locale="fa-IR"
+                                           data-search="true"
+                                           data-show-columns="true"
+                                           data-show-export="true"
+                                           data-show-refresh="true"
+                                           data-show-columns-toggle-all="true"
+                                           data-show-pagination-switch="true"
+                                           data-show-toggle="true"
+                                           data-show-fullscreen="true"
+                                           data-buttons="buttons"
+                                           data-search-align="left"
+                                           data-buttons-class="primary"
+                                           data-pagination="true"
+                                           data-show-columns-search="true"
+                                           data-show-footer="true"
+                                           data-page-size="100"
+                                           data-remember-order="true"
+                                           data-sortable="true"
+                                           data-show-search-clear-button="true"
+                                           data-sort-name="moin_code"
+                                           data-sort-order="asc"
+                                            {#                                           data-sort-order="desc"#}
+                                           data-filter-control="true"
+                                           data-show-print="true"
+                                           data-export-data-type="all"
+                                           data-export-types='["excel"]'>
+                                        <thead>
+                                        <tr class="tr-class-1">
+
+
+
+
+                                            <th data-field="total_sanad_by" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter"> کل عملکرد{{ base_year }}</th>
+                                            <th data-field="total_budget_by" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter"> مشمول بودجه{{ base_year }}</th>
+
+                                            <th data-field="total_budget_cy" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter">کل بودجه{{ acc_year }}</th>
+                                            <th data-field="total_sanad_by_today" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter">عملکرد سال {{ base_year }}تا
+                                                امروز
+                                            </th>
+                                            <th data-field="total_budget_cy_today" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter">بودجه {{ acc_year }}تا امروز
+                                            </th>
+                                            <th data-field="total_sanad_cy_today" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter">عملکرد {{ acc_year }}تا امروز
+                                            </th>
+                                            <th data-field="amalkard_by_year" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter">عملکرد با آهنگ پارسال
+                                            </th>
+                                            <th data-field="amalkard_by_year_ratio" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                            >درصد عملکرد با آهنگ پارسال
+                                            </th>
+                                            <th data-field="amalkard_by_day" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter">عملکرد نسبی روزانه
+                                            </th>
+                                            <th data-field="amalkard_by_day_ratio" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                            >درصد عملکرد نسبی روزانه
+                                            </th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for item in table1 %}
+                                            <tr>
+
+                                                <td class="card-text text-center"
+                                                    style="direction: ltr">{{ item.total_sanad_by|floatformat:0|intcomma:False }}</td>
+                                                <td class="card-text text-center">{{ item.total_budget_by|floatformat:0|intcomma:False }}</td>
+                                                <td class="card-text text-center"
+                                                    style="direction: ltr">{{ item.total_budget_cy|floatformat:0|intcomma:False }}</td>
+                                                <td class="card-text text-center"
+                                                    style="direction: ltr">{{ item.total_sanad_by_today|floatformat:0|intcomma:False }}</td>
+                                                <td class="card-text text-center"
+                                                    style="direction: ltr">{{ item.total_budget_cy_today|floatformat:0|intcomma:False }}</td>
+                                                <td class="card-text text-center"
+                                                    style="direction: ltr">{{ item.total_sanad_cy_today|floatformat:0|intcomma:False }}</td>
+{% if item.amalkard1 %}
+                                                    <td class="card-text text-center text-success"
+                                                        style="direction: ltr">{{ item.amalkard_by_year|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center text-success"
+                                                        style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:2 }}%
+                                                    </td>
+                                                {% else %}
+                                                    <td class="card-text text-center text-danger"
+                                                        style="direction: ltr">{{ item.amalkard_by_year|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center text-danger"
+                                                        style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:2 }}%
+                                                    </td>
+                                                {% endif %}
+
+                                                {% if item.amalkard2 %}
+                                                    <td class="card-text text-center text-success"
+                                                        style="direction: ltr">{{ item.amalkard_by_day|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center text-success"
+                                                        style="direction: ltr">{{ item.amalkard_by_day_ratio|floatformat:2 }}%
+                                                    </td>
+                                                {% else %}
+                                                    <td class="card-text text-center text-danger"
+                                                        style="direction: ltr">{{ item.amalkard_by_day|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center text-danger"
+                                                        style="direction: ltr">{{ item.amalkard_by_day_ratio|floatformat:2 }}%
+                                                    </td>
+                                                {% endif %}
+
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
         <!-- ردیف خلاصه بودجه معین -->
         <div class="row">
             <div class="col-md-12 mb-30">
@@ -86,7 +233,22 @@
                                                 data-sortable="true" data-sorter="numericOnly"
                                                 data-footer-formatter="priceFormatter">عملکرد {{ acc_year }}تا امروز
                                             </th>
-
+                                            <th data-field="amalkard_by_year" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter">عملکرد با آهنگ پارسال
+                                            </th>
+                                            <th data-field="amalkard_by_year_ratio" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                            >درصد عملکرد با آهنگ پارسال
+                                            </th>
+                                            <th data-field="amalkard_by_day" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter">عملکرد نسبی روزانه
+                                            </th>
+                                            <th data-field="amalkard_by_day_ratio" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                            >درصد عملکرد نسبی روزانه
+                                            </th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -105,7 +267,33 @@
                                                     style="direction: ltr">{{ item.total_budget_cy_today|floatformat:0|intcomma:False }}</td>
                                                 <td class="card-text text-center"
                                                     style="direction: ltr">{{ item.total_sanad_cy_today|floatformat:0|intcomma:False }}</td>
+{% if item.amalkard1 %}
+                                                    <td class="card-text text-center text-success"
+                                                        style="direction: ltr">{{ item.amalkard_by_year|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center text-success"
+                                                        style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:2 }}%
+                                                    </td>
+                                                {% else %}
+                                                    <td class="card-text text-center text-danger"
+                                                        style="direction: ltr">{{ item.amalkard_by_year|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center text-danger"
+                                                        style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:2 }}%
+                                                    </td>
+                                                {% endif %}
 
+                                                {% if item.amalkard2 %}
+                                                    <td class="card-text text-center text-success"
+                                                        style="direction: ltr">{{ item.amalkard_by_day|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center text-success"
+                                                        style="direction: ltr">{{ item.amalkard_by_day_ratio|floatformat:2 }}%
+                                                    </td>
+                                                {% else %}
+                                                    <td class="card-text text-center text-danger"
+                                                        style="direction: ltr">{{ item.amalkard_by_day|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center text-danger"
+                                                        style="direction: ltr">{{ item.amalkard_by_day_ratio|floatformat:2 }}%
+                                                    </td>
+                                                {% endif %}
 
                                             </tr>
                                         {% endfor %}
