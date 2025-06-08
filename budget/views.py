@@ -382,7 +382,7 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
     if level == '3':
         tafzili_code = int(code)
         tafzil = AccCoding.objects.filter(code=tafzili_code, parent__parent__code=501).last()
-        detail_name=f'سطح تفضیل - {tafzil.name}'
+        detail_name=f'سطح تفضیل - {tafzil.name}-{tafzili_code}'
         if tafzil:
             moin_code = tafzil.parent.code
             budget_rate=tafzil.budget_rate
@@ -514,7 +514,7 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
     if level == '2':
         moin_code = int(code)
         moin = AccCoding.objects.filter(level=2, code=moin_code, parent__code=501).last()
-        detail_name=f'سطح معین - {moin.name}'
+        detail_name=f'سطح معین - {moin.name}-{moin_code}'
 
         budget_rate = moin.budget_rate
 
@@ -642,7 +642,7 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
     if level == '1':
         kol_code = int(code)
         kol = AccCoding.objects.filter(level=1, code=kol_code).last()
-        detail_name=f'سطح کل - {kol.name}'
+        detail_name=f'سطح کل - {kol.name}-{kol_code}'
 
         budget_rate = kol.budget_rate
 
