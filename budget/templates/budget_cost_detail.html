@@ -37,30 +37,125 @@
 
 
     <div class="content-wrapper">
+        <div class="page-title">
 
-        <div class="row">
-            <div class="col-md-12 mb-30">
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="d-block">
+                        <h4 class="card-title text-facebook pb-0 border-0">گزارش جزئیات بودجه هزینه
+                            سال {{ acc_year }} - {{ detail_name }}</h4>
+                    </div>
+
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
+                        <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
+                        <li class="breadcrumb-item active">گزارش کلیات بودجه هزینه سال {{ acc_year }}</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- دکمه سطوح -->
+
+            <div class="col-xl-12 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">سطح کل</h5>
+                        <div class="text-center">
+                            {% for l in level1 %}
+                                    <a href="/budget/cost/detail/1/{{ l.code }}">
+                                        <button type="button"
+                                                class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
+                                    </a>
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
                 <div class="col-xl-12 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="card-body">
-                            <div class="table-responsive mt-15 ">
-                                <h5 class="card-title pb-0 border-0">عملکرد بودجه هزینه ای برای: {{ detail_name }}</h5>
-{#                                <h6 class="card-title pb-0 border-0">مقایسه سال {{ base_year }} با سال {{ acc_year }} تا#}
-{#                                    به امروز</h6>#}
+                            <h5 class="card-title">سطح معین</h5>
+                            <div class="text-center">
+                                {% for l in level2 %}
+                                    {% if l.code == moin_code %}
+                                        <a href="/budget/cost/detail/2/{{ l.code }}">
+                                            <button type="button"
+                                                    class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
+                                        </a>
+                                    {% else %}
+                                        <a href="/budget/cost/detail/2/{{ l.code }}">
+                                            <button type="button"
+                                                    class="btn btn-secondary category-btn">{{ l.code }}-{{ l.name }}</button>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+
                             </div>
 
-                            {# کانتینر نمودار #}
-                            <div class="chart-container">
-                                {# این تگ canvas، نمودار ترکیبی را نمایش خواهد داد #}
-                                <canvas id="budgetChart"></canvas>
+                        </div>
+
+                    </div>
+                </div>
+{#            {% endif %}#}
+            {% if level > 1 %}
+                <div class="col-xl-12 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">سطح تفضیلی</h5>
+                            <div class="text-center">
+                                {% for l in level3 %}
+                                   {% if l.code == tafzili_code %}
+                                     <a href="/budget/cost/detail/3/{{ l.code }}">
+                                        <button type="button"
+                                                class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
+                                    </a>
+                                    {% else %}
+                                     <a href="/budget/cost/detail/3/{{ l.code }}">
+                                        <button type="button"
+                                                class="btn btn-secondary category-btn">{{ l.code }}-{{ l.name }}</button>
+                                    </a>
+                                    {% endif %}
+                                {% endfor %}
+
                             </div>
 
+                        </div>
+
+                    </div>
+                </div>
+            {% endif %}
+
+
+            <div class="row">
+                <div class="col-md-12 mb-30">
+                    <div class="col-xl-12 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="card-body">
+                                <div class="table-responsive mt-15 ">
+                                    <h5 class="card-title pb-0 border-0">عملکرد بودجه هزینه ای
+                                        برای: {{ detail_name }}</h5>
+                                    {#                                <h6 class="card-title pb-0 border-0">مقایسه سال {{ base_year }} با سال {{ acc_year }} تا#}
+                                    {#                                    به امروز</h6>#}
+                                </div>
+
+                                {# کانتینر نمودار #}
+                                <div class="chart-container">
+                                    {# این تگ canvas، نمودار ترکیبی را نمایش خواهد داد #}
+                                    <canvas id="budgetChart"></canvas>
+                                </div>
+
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
+        </div>
     </div>
 
 

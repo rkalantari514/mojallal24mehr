@@ -378,11 +378,22 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
     moin_code = None
     tafzili_code = None
     budget_rate = 0  # نرخ بودجه پیش‌فرض
+    level1=AccCoding.objects.filter(level=1,code=501)
+    kol_code=None
+    moin_code=None
+    level2=AccCoding.objects.filter(level=2,parent__code=501)
+    level3=None
+    tafzili_code=None
+
+
 
     if level == '3':
         tafzili_code = int(code)
         tafzil = AccCoding.objects.filter(code=tafzili_code, parent__parent__code=501).last()
         detail_name=f'سطح تفضیل - {tafzil.name}-{tafzili_code}'
+        moin_code=int(tafzil.parent.code)
+        level3 = AccCoding.objects.filter(level=3, parent__parent__code=501 ,parent__code=moin_code, is_budget=True)
+
         if tafzil:
             moin_code = tafzil.parent.code
             budget_rate=tafzil.budget_rate
@@ -515,6 +526,7 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         moin_code = int(code)
         moin = AccCoding.objects.filter(level=2, code=moin_code, parent__code=501).last()
         detail_name=f'سطح معین - {moin.name}-{moin_code}'
+        level3 = AccCoding.objects.filter(level=3, parent__parent__code=501 ,parent__code=moin_code, is_budget=True)
 
         budget_rate = moin.budget_rate
 
@@ -641,6 +653,7 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
 
     if level == '1':
         kol_code = int(code)
+
         kol = AccCoding.objects.filter(level=1, code=kol_code).last()
         detail_name=f'سطح کل - {kol.name}-{kol_code}'
 
@@ -777,6 +790,15 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         'chart2_data': chart2_data,
         'chart3_data': chart3_data,
         'chart4_data': chart4_data,
+
+
+        'level': int(level),
+        'level1': level1,
+        'level2': level2,
+        'level3': level3,
+        'kol_code': kol_code,
+        'moin_code': moin_code,
+        'tafzili_code': tafzili_code,
 
     }
 
