@@ -521,6 +521,14 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         for day in acc_date_list:
             chart4_data.append(ch4)
             ch4 += s
+        last_value_chart2 = chart2_data[-1] if chart2_data else None
+        master_dat={
+            'by_sanads':last_value_chart1/10,
+            'cy_budget':last_value_chart1/10*budget_rate,
+            'budget_rate':budget_rate,
+            'cy_sanads': last_value_chart2 / 10
+
+        }
 
     if level == '2':
         moin_code = int(code)
@@ -649,7 +657,15 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
             chart4_data.append(ch4)
             ch4 += s
 
+        last_value_chart2 = chart2_data[-1] if chart2_data else None
+        last_value_chart1 = chart1_data[-1] if chart1_data else None
+        master_dat = {
+            'by_sanads': last_value_chart1 / 10,
+            'cy_budget': last_value_chart1 / 10 * budget_rate,
+            'budget_rate': budget_rate,
+            'cy_sanads': last_value_chart2 / 10
 
+        }
 
     if level == '1':
         kol_code = int(code)
@@ -775,7 +791,15 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         for day in acc_date_list:
             chart4_data.append(ch4)
             ch4 += s
+        last_value_chart2 = chart2_data[-1] if chart2_data else None
+        last_value_chart1 = chart1_data[-1] if chart1_data else None
+        master_dat = {
+            'by_sanads': last_value_chart1 / 10,
+            'cy_budget': last_value_chart1 / 10 * budget_rate,
+            'budget_rate': budget_rate,
+            'cy_sanads': last_value_chart2 / 10
 
+        }
 
 
 
@@ -799,6 +823,11 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         'kol_code': kol_code,
         'moin_code': moin_code,
         'tafzili_code': tafzili_code,
+
+
+        'master_dat': master_dat,
+
+
 
     }
 

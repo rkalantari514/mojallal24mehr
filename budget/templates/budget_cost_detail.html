@@ -57,17 +57,16 @@
             </div>
 
             <!-- دکمه سطوح -->
-
             <div class="col-xl-12 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body">
-                        <h5 class="card-title">سطح کل</h5>
+                        {#                        <h5 class="card-title">سطح کل</h5>#}
                         <div class="text-center">
                             {% for l in level1 %}
-                                    <a href="/budget/cost/detail/1/{{ l.code }}">
-                                        <button type="button"
-                                                class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
-                                    </a>
+                                <a href="/budget/cost/detail/1/{{ l.code }}">
+                                    <button type="button"
+                                            class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
+                                </a>
                             {% endfor %}
 
                         </div>
@@ -76,19 +75,45 @@
 
                 </div>
             </div>
+            <div class="col-xl-12 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        {#                            <h5 class="card-title">سطح معین</h5>#}
+                        <div class="text-center">
+                            {% for l in level2 %}
+                                {% if l.code == moin_code %}
+                                    <a href="/budget/cost/detail/2/{{ l.code }}">
+                                        <button type="button"
+                                                class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
+                                    </a>
+                                {% else %}
+                                    <a href="/budget/cost/detail/2/{{ l.code }}">
+                                        <button type="button"
+                                                class="btn btn-secondary category-btn">{{ l.code }}-{{ l.name }}</button>
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+            {% if level > 1 %}
                 <div class="col-xl-12 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="card-body">
-                            <h5 class="card-title">سطح معین</h5>
+                            {#                            <h5 class="card-title">سطح تفضیلی</h5>#}
                             <div class="text-center">
-                                {% for l in level2 %}
-                                    {% if l.code == moin_code %}
-                                        <a href="/budget/cost/detail/2/{{ l.code }}">
+                                {% for l in level3 %}
+                                    {% if l.code == tafzili_code %}
+                                        <a href="/budget/cost/detail/3/{{ l.code }}">
                                             <button type="button"
                                                     class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
                                         </a>
                                     {% else %}
-                                        <a href="/budget/cost/detail/2/{{ l.code }}">
+                                        <a href="/budget/cost/detail/3/{{ l.code }}">
                                             <button type="button"
                                                     class="btn btn-secondary category-btn">{{ l.code }}-{{ l.name }}</button>
                                         </a>
@@ -101,36 +126,82 @@
 
                     </div>
                 </div>
-{#            {% endif %}#}
-            {% if level > 1 %}
-                <div class="col-xl-12 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">سطح تفضیلی</h5>
-                            <div class="text-center">
-                                {% for l in level3 %}
-                                   {% if l.code == tafzili_code %}
-                                     <a href="/budget/cost/detail/3/{{ l.code }}">
-                                        <button type="button"
-                                                class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
-                                    </a>
-                                    {% else %}
-                                     <a href="/budget/cost/detail/3/{{ l.code }}">
-                                        <button type="button"
-                                                class="btn btn-secondary category-btn">{{ l.code }}-{{ l.name }}</button>
-                                    </a>
-                                    {% endif %}
-                                {% endfor %}
-
-                            </div>
-
-                        </div>
-
-                    </div>
-                </div>
             {% endif %}
 
+            <!-- ردیف خلاصه -->
+            <div class="row">
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-primary rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-calendar highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark">کل عملکرد سال قبل</p>
+                                    <h4>{{ master_dat.by_sanads|intword}} تومان </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-danger rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-flag-checkered highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark">کل بودجه امسال</p>
+                                    <h4>{{ master_dat.cy_budget|intword}} تومان </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-info rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-info highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark"> ضریب بودجه </p>
+                                    <h4>{{ master_dat.budget_rate|floatformat:2|intcomma:False }} </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-success rounded-circle">
+    <span class="text-white">
+    <i class="fa fa- fa-spinner fa-spin highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark"> عملکرد امسال </p>
+{#                                    <h4>{{ master_dat.cy_sanads|floatformat:1|intcomma:False }} میلیون تومان </h4>#}
+                                    <h4>{{ master_dat.cy_sanads|intword}} تومان </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <!-- ردیف نمودار -->
             <div class="row">
                 <div class="col-md-12 mb-30">
                     <div class="col-xl-12 mb-30">
@@ -139,13 +210,9 @@
                                 <div class="table-responsive mt-15 ">
                                     <h5 class="card-title pb-0 border-0">عملکرد بودجه هزینه ای
                                         برای: {{ detail_name }}</h5>
-                                    {#                                <h6 class="card-title pb-0 border-0">مقایسه سال {{ base_year }} با سال {{ acc_year }} تا#}
-                                    {#                                    به امروز</h6>#}
                                 </div>
 
-                                {# کانتینر نمودار #}
-                                <div class="chart-container">
-                                    {# این تگ canvas، نمودار ترکیبی را نمایش خواهد داد #}
+                                <div class="chart-container ">
                                     <canvas id="budgetChart"></canvas>
                                 </div>
 
