@@ -201,7 +201,28 @@
                 </div>
             </div>
 
-            <!-- ردیف نمودار -->
+            <!-- ردیف گیج -->
+{#            <div class="row">#}
+{#                <div class="col-md-12 mb-30">#}
+{#                    <div class="col-xl-12 mb-30">#}
+{#                        <div class="card card-statistics h-100">#}
+{#                            <div class="card-body">#}
+{#                                <div class="table-responsive mt-15 ">#}
+{#                                    <h5 class="card-title pb-0 border-0">عملکرد بودجه هزینه ای#}
+{#                                        برای: {{ detail_name }}</h5>#}
+{#                                </div>#}
+{##}
+{#<canvas id="gaugeChart" width="200" height="200"></canvas>#}
+{##}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+
+
+                    <!-- ردیف نمودار -->
+
             <div class="row">
                 <div class="col-md-12 mb-30">
                     <div class="col-xl-12 mb-30">
@@ -285,4 +306,48 @@
             }
         });
     </script>
+
+
+<script>
+        // تنظیمات نمودار گیج
+        const gaugeCanvas = document.getElementById('gaugeChart');
+        const gaugeCtx = gaugeCanvas.getContext('2d');
+
+        const gaugeChart = new Chart(gaugeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['مصرف', 'باقیمانده'],
+                datasets: [{
+                    data: [60, 40], // مقدار فعلی گیج (مثلاً 60٪ مصرف شده)
+                    backgroundColor: ['#FF5733', '#DDDDDD'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                cutout: '80%', // تنظیم برش داخلی برای ایجاد گیج
+                rotation: -90, // شروع از زاویه 270 درجه
+                circumference: 180, // نمایش فقط نیمه بالایی برای گیج
+                plugins: {
+                    tooltip: { enabled: false }
+                }
+            }
+        });
+
+        // تابع برای رسم عقربه روی نمودار
+        function drawNeedle(ctx, value, centerX, centerY, radius) {
+            const angle = Math.PI * (1 - (value / 100)); // محاسبه زاویه (بین 0 و 180 درجه)
+
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY); // نقطه شروع از مرکز نمودار
+            ctx.lineTo(centerX + radius * Math.cos(angle), centerY - radius * Math.sin(angle)); // نقطه انتهایی عقربه
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "#333"; // رنگ عقربه
+            ctx.stroke();
+        }
+
+        // رسم عقربه روی نمودار (مثلاً مقدار 75٪)
+        drawNeedle(gaugeCtx, 75, gaugeCanvas.width / 2, gaugeCanvas.height / 2, 50);
+    </script>
+
+
 {% endblock %}
