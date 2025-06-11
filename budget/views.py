@@ -377,6 +377,11 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
     tafzil = None
     moin_code = None
     tafzili_code = None
+    g1=-70
+    g2=43
+    today_bay_by = 0
+    today_actual = 0
+    today_by_time = 0
     budget_rate = 0  # نرخ بودجه پیش‌فرض
     level1=AccCoding.objects.filter(level=1,code=501)
     kol_code=None
@@ -507,12 +512,16 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
                 cumulative_base_year += daily_totals_base_year[str(by_date.date())]  # علامت منفی برای تصحیح
             chart1_data.append(cumulative_base_year)
             chart3_data.append(cumulative_base_year * budget_rate)
+            if day == today:
+                today_bay_by=cumulative_base_year * budget_rate
 
             # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
             if day in daily_totals_acc_year:
                 cumulative_acc_year += daily_totals_acc_year[day]  # علامت منفی برای تصحیح
-            if day < today or day == today:
+            if day <= today:
                 chart2_data.append(cumulative_acc_year)
+                if day == today:
+                    today_actual=cumulative_acc_year
 
         last_value_chart1 = chart1_data[-1] if chart1_data else None
         count_acc_date_list = len(acc_date_list)
@@ -520,6 +529,9 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         ch4=0
         for day in acc_date_list:
             chart4_data.append(ch4)
+            if day == today:
+                today_by_time=ch4
+
             ch4 += s
         last_value_chart2 = chart2_data[-1] if chart2_data else None
         master_dat={
@@ -529,6 +541,13 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
             'cy_sanads': last_value_chart2 / 10
 
         }
+
+        print('today_bay_by,today_actual,today_by_time')
+        print(today_bay_by,today_actual,today_by_time)
+
+        g1=(today_actual-today_bay_by)/today_bay_by*100
+        g2=(today_actual-today_by_time)/today_by_time*100
+        print(g1,g2)
 
     if level == '2':
         moin_code = int(code)
@@ -640,12 +659,16 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
                 cumulative_base_year += daily_totals_base_year[str(by_date.date())]  # علامت منفی برای تصحیح
             chart1_data.append(cumulative_base_year)
             chart3_data.append(cumulative_base_year * budget_rate)
+            if day == today:
+                today_bay_by=cumulative_base_year * budget_rate
 
             # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
             if day in daily_totals_acc_year:
                 cumulative_acc_year += daily_totals_acc_year[day]  # علامت منفی برای تصحیح
-            if day < today or day == today:
+            if day <= today:
                 chart2_data.append(cumulative_acc_year)
+                if day == today:
+                    today_actual=cumulative_acc_year
 
 
 
@@ -655,6 +678,8 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         ch4=0
         for day in acc_date_list:
             chart4_data.append(ch4)
+            if day == today:
+                today_by_time=ch4
             ch4 += s
 
         last_value_chart2 = chart2_data[-1] if chart2_data else None
@@ -666,6 +691,13 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
             'cy_sanads': last_value_chart2 / 10
 
         }
+
+        print('today_bay_by,today_actual,today_by_time')
+        print(today_bay_by,today_actual,today_by_time)
+
+        g1=(today_actual-today_bay_by)/today_bay_by*100
+        g2=(today_actual-today_by_time)/today_by_time*100
+        print(g1,g2)
 
     if level == '1':
         kol_code = int(code)
@@ -758,10 +790,12 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
             print(c)
 
         chart_labels = chart_labels_shamsi  # برچسب‌های نمودار همان لیست تاریخ‌ها
-        chart1_data = []
-        chart2_data = []
-        chart3_data = []
-        chart4_data = []
+        chart1_data = [] #عکلکرد سال گذشته
+        chart2_data = [] # عملکرد امسال تا امروز
+        chart3_data = [] # بودجه با آهنگ پارسال
+        chart4_data = [] # بودجه با تناسب زمان
+
+
 
         cumulative_base_year = 0
         cumulative_acc_year = 0
@@ -775,12 +809,16 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
                 cumulative_base_year += daily_totals_base_year[str(by_date.date())]  # علامت منفی برای تصحیح
             chart1_data.append(cumulative_base_year)
             chart3_data.append(cumulative_base_year * budget_rate)
+            if day == today:
+                today_bay_by=cumulative_base_year * budget_rate
 
             # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
             if day in daily_totals_acc_year:
                 cumulative_acc_year += daily_totals_acc_year[day]  # علامت منفی برای تصحیح
-            if day < today or day == today:
+            if day <= today:
                 chart2_data.append(cumulative_acc_year)
+                if day == today:
+                    today_actual=cumulative_acc_year
 
 
 
@@ -790,6 +828,8 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         ch4=0
         for day in acc_date_list:
             chart4_data.append(ch4)
+            if day == today:
+                today_by_time=ch4
             ch4 += s
         last_value_chart2 = chart2_data[-1] if chart2_data else None
         last_value_chart1 = chart1_data[-1] if chart1_data else None
@@ -800,6 +840,16 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
             'cy_sanads': last_value_chart2 / 10
 
         }
+
+        print('today_bay_by,today_actual,today_by_time')
+        print(today_bay_by,today_actual,today_by_time)
+
+        g1=(today_actual-today_bay_by)/today_bay_by*100
+        g2=(today_actual-today_by_time)/today_by_time*100
+        print(g1,g2)
+
+
+
 
 
 
@@ -826,6 +876,9 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
 
 
         'master_dat': master_dat,
+
+        'g1':g1,
+        'g2':g2,
 
 
 
