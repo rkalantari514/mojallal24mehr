@@ -276,50 +276,69 @@
 
         var ctx = document.getElementById('budgetChart').getContext('2d');
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: chartLabels,
-                datasets: [
-                    {
-                        label: "عملکرد سال گذشته",
-                        data: chart1Data,
-                        borderColor: "blue",
-                        fill: false,
-                        pointRadius: 0 // حذف دایره‌های داده
-                    },
-                    {
-                        label: "عملکرد سال جاری",
-                        data: chart2Data,
-                        borderColor: "green",
-                        fill: false,
-                        pointRadius: 0 // حذف دایره‌های داده
-                    },
-                    {
-                        label: "بودجه با آهنگ سال گذشته",
-                        data: chart3Data,
-                        borderColor: "red",
-                        fill: false,
-                        pointRadius: 0 // حذف دایره‌های داده
-                    },
-                    {
-                        label: "بودجه بر اساس زمان",
-                        data: chart4Data,
-                        borderColor: "teal",
-                        fill: false,
-                        pointRadius: 0 // حذف دایره‌های داده
-                    }
-                ]
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: chartLabels,
+        datasets: [
+            {
+                label: "عملکرد سال گذشته",
+                data: chart1Data,
+                borderColor: "blue",
+                fill: false,
+                pointRadius: 0
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {title: {display: true, text: "تاریخ"}},
-                    y: {title: {display: true, text: "مقدار تجمعی"}}
+            {
+                label: "عملکرد سال جاری",
+                data: chart2Data,
+                borderColor: "green",
+                fill: false,
+                pointRadius: 0
+            },
+            {
+                label: "بودجه با آهنگ سال گذشته",
+                data: chart3Data,
+                borderColor: "red",
+                fill: false,
+                pointRadius: 0
+            },
+            {
+                label: "بودجه بر اساس زمان",
+                data: chart4Data,
+                borderColor: "teal",
+                fill: false,
+                pointRadius: 0
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {title: {display: true, text: "تاریخ"}},
+            y: {title: {display: true, text: "مقدار تجمعی"}}
+        },
+        plugins: {
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                    label: function(context) {
+                        // تقسیم بر 10 میلیون، با یک رقم اعشار و افزودن " میلیون تومان"
+                        var value = context.parsed.y / 10000000;
+                        return context.dataset.label + ': ' + value.toFixed(1) + ' میلیون تومان';
+                    },
+                    title: function(tooltipItems) {
+                        return 'تاریخ: ' + tooltipItems[0].label;
+                    }
                 }
             }
-        });
+        }
+    }
+});
+
+
+
     </script>
 
 
