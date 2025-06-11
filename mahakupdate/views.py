@@ -200,12 +200,13 @@ def Updateall(request):
     else:
         print(f' ساعت غیر  کاری: {now.hour}')
         send_to_admin(f' ساعت غیر کاری: {now.hour}')
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
 
-    if now.hour == 1:
+    if now.hour == 1 or now.hour == 2:
         # بررسی اینکه آیا امروز دوشنبه است (0: دوشنبه، 6: یکشنبه)
         if now.weekday() == 1:
             send_to_admin('شروع آپدیت کل با ریست کاردکس')
-            Kardex.objects.all().update(sync_mojodi=False)
+            Kardex.objects.filer(acc_year=acc_year).update(sync_mojodi=False)
 
     t0 = time.time()
     send_to_admin('شروع آپدیت کل')
