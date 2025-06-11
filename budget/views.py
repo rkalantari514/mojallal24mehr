@@ -848,9 +848,8 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         g2=(today_actual-today_by_time)/today_by_time*100
         print(g1,g2)
 
-
-
-
+    g1 = max(-100, min(g1, 100))
+    g2 = max(-100, min(g2, 100))
 
 
     context = {
