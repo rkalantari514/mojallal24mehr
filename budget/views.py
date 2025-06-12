@@ -545,8 +545,8 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         print('today_bay_by,today_actual,today_by_time')
         print(today_bay_by,today_actual,today_by_time)
 
-        g1=(today_actual-today_bay_by)/today_bay_by*100
-        g2=(today_actual-today_by_time)/today_by_time*100
+        g1 = ((today_actual - today_bay_by) / today_bay_by * 100) if today_bay_by != 0 else 100
+        g2 = ((today_actual - today_by_time) / today_by_time * 100) if today_by_time != 0 else 100
         print(g1,g2)
 
     if level == '2':
@@ -695,8 +695,8 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         print('today_bay_by,today_actual,today_by_time')
         print(today_bay_by,today_actual,today_by_time)
 
-        g1=(today_actual-today_bay_by)/today_bay_by*100
-        g2=(today_actual-today_by_time)/today_by_time*100
+        g1 = ((today_actual - today_bay_by) / today_bay_by * 100) if today_bay_by != 0 else 100
+        g2 = ((today_actual - today_by_time) / today_by_time * 100) if today_by_time != 0 else 100
         print(g1,g2)
 
     if level == '1':
@@ -844,8 +844,9 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         print('today_bay_by,today_actual,today_by_time')
         print(today_bay_by,today_actual,today_by_time)
 
-        g1=(today_actual-today_bay_by)/today_bay_by*100
-        g2=(today_actual-today_by_time)/today_by_time*100
+
+        g1 = ((today_actual - today_bay_by) / today_bay_by * 100) if today_bay_by != 0 else 100
+        g2 = ((today_actual - today_by_time) / today_by_time * 100) if today_by_time != 0 else 100
         print(g1,g2)
 
     g1 = max(-100, min(g1, 100))
