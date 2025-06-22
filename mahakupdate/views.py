@@ -6,7 +6,7 @@ from dashboard.models import MasterInfo
 from dashboard.views import CreateReport, CreateMonthlyReport, CreateTotalReport
 from festival.views import Calculate_and_award_points
 from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category, Sanad, SanadDetail, AccCoding, ChequesPay, \
-    Bank, Loan, LoanDetil
+    Bank, Loan, LoanDetil, BackFactor, BackFactorDetail
 from .models import FactorDetaile
 from django.contrib.auth.decorators import login_required
 from .models import Kala, Storagek
@@ -162,6 +162,8 @@ def Updatedb(request):
         'Bank': 'update/bank',
         'Loan': 'update/loan',
         'LoanDetail': 'update/loandetail',
+        'BackForosh': 'update/backfactor',
+        'BackFact_Detail': 'update/back-factor-detail',
 
     }
 
@@ -204,9 +206,9 @@ def Updateall(request):
 
     if now.hour == 1 or now.hour == 2:
         # بررسی اینکه آیا امروز دوشنبه است (0: دوشنبه، 6: یکشنبه)
-        if now.weekday() == 1:
-            send_to_admin('شروع آپدیت کل با ریست کاردکس')
-            Kardex.objects.filer(acc_year=acc_year).update(sync_mojodi=False)
+        # if now.weekday() == 1:
+        send_to_admin('شروع آپدیت کل با ریست کاردکس')
+        Kardex.objects.filer(acc_year=acc_year).update(sync_mojodi=False)
 
     t0 = time.time()
     send_to_admin('شروع آپدیت کل')
@@ -228,6 +230,8 @@ def Updateall(request):
         'Bank': UpdateBank,
         'Loan': UpdateLoan,
         'LoanDetail': UpdateLoanDetail,
+        'BackForosh': UpdateBackFactor,
+        'BackFact_Detail': UpdateBackFactorDetail,
     }
 
     responses = []
@@ -575,6 +579,141 @@ def UpdateFactor(request):
         conn.close()
     print('پایان آپدیت فاکتور--------------------------------------')
     return redirect('/updatedb')
+
+
+
+def UpdateBackFactor(request):
+    t0 = time.time()
+    print('شروع آپدیت فاکتوربرگشتی ---------------------------------')
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    t1 = time.time()
+    cursor.execute("SELECT [code],[type],[shakhs_code],[tarikh],[sharh], [takhfif] FROM BackForosh")
+    mahakt_data = cursor.fetchall()
+    existing_in_mahak_codes = {row[0] for row in mahakt_data}
+
+    factors_to_create = []
+    factors_to_update = []
+    factors_to_update_map = {}
+
+    # دریافت سال مالی فعال
+    try:
+        acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    except MasterInfo.DoesNotExist:
+        print("هشدار: هیچ سال مالی فعالی یافت نشد.")
+        return redirect('/updatedb')  # یا هندل کردن مناسب دیگر
+
+    # فیلتر فاکتورها بر اساس سال مالی و ساخت دیکشنری برای دسترسی سریع
+    current_factors = {
+        (factor.code, factor.acc_year): factor
+        for factor in BackFactor.objects.filter(acc_year=acc_year).select_related('person').iterator()
+    }
+    existing_django_codes = set(f[0] for f in current_factors.keys())
+
+    person_cache = {}  # کش برای افراد
+
+    for row in mahakt_data:
+        code = row[0]
+        type = int(row[1]) or 0
+        per_code_mahak = row[2]
+        pdate_jalali = row[3]
+        sharh = row[4] or ""
+        takhfif = Decimal(row[5]) if row[5] is not None else Decimal(0)
+
+
+        defaults = {
+            'pdate': pdate_jalali,
+            'takhfif': takhfif,
+            'acc_year': acc_year,
+            'per_code': per_code_mahak,
+            'type': type,
+            'sharh': sharh,
+        }
+
+        try:
+            defaults['date'] = jalali_to_gregorian(pdate_jalali) if pdate_jalali else None
+        except Exception as e:
+            print(f"خطا در تبدیل تاریخ شمسی '{pdate_jalali}': {e}")
+            defaults['date'] = None
+
+        # یافتن یا ایجاد شی Person
+        person = None
+        if per_code_mahak is not None:
+            if per_code_mahak in person_cache:
+                person = person_cache[per_code_mahak]
+            else:
+                try:
+                    person = Person.objects.get(code=per_code_mahak)
+                    person_cache[per_code_mahak] = person
+                except Person.DoesNotExist:
+                    print(f"هشدار: شخص با کد '{per_code_mahak}' یافت نشد.")
+                    pass  # در صورت عدم وجود، person همچنان None خواهد بود
+        defaults['person'] = person
+
+        key = (code, acc_year)
+
+        if key in current_factors:
+            factor = current_factors[key]
+            updated = False
+            for attr, value in defaults.items():
+                current_value = getattr(factor, attr)
+                if attr in ['takhfif']:
+                    if Decimal(current_value).quantize(Decimal('0.00')) != Decimal(value).quantize(Decimal('0.00')):
+                        setattr(factor, attr, value)
+                        updated = True
+                elif isinstance(current_value, str) and current_value != str(value):
+                    setattr(factor, attr, value)
+                    updated = True
+                elif not isinstance(current_value, str) and current_value != value:
+                    setattr(factor, attr, value)
+                    updated = True
+
+            if updated:
+                factors_to_update.append(factor)
+                factors_to_update_map[key] = factor
+        else:
+            factors_to_create.append(BackFactor(code=code, **defaults))
+
+    with transaction.atomic():
+        if factors_to_create:
+            BackFactor.objects.bulk_create(factors_to_create)
+        if factors_to_update:
+            BackFactor.objects.bulk_update(
+                factors_to_update,
+                ['pdate', 'takhfif', 'acc_year', 'date', 'per_code', 'person', 'sharh', 'type']
+            )
+
+        # حذف فاکتورهایی که در Mahak نیستند
+        codes_in_django_to_delete = existing_django_codes - existing_in_mahak_codes
+        BackFactor.objects.filter(code__in=codes_in_django_to_delete, acc_year=acc_year).delete()
+
+    tend = time.time()
+    print(f"زمان کل: {tend - t0:.2f} ثانیه")
+    print(f" اتصال به دیتابیس: {t1 - t0:.2f} ثانیه")
+    print(f" زمان آپدیت جدول: {tend - t1:.2f} ثانیه")
+
+    try:
+        cursor.execute(f"SELECT COUNT(*) FROM BackForosh")
+        row_count = cursor.fetchone()[0]
+        cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'BackForosh'")
+        column_count = cursor.fetchone()[0]
+
+        table = Mtables.objects.filter(name='BackForosh').last()
+        if table:
+            table.last_update_time = timezone.now()
+            table.update_duration = tend - t1
+            table.row_count = row_count
+            table.column_count = column_count
+            table.save()
+    except Exception as e:
+        print(f"خطا در به‌روزرسانی جدول Mtables: {e}")
+
+    if conn:
+        conn.close()
+    print('پایان آپدیت فاکتور--------------------------------------')
+    return redirect('/updatedb')
+
+
 
 
 
@@ -1063,6 +1202,162 @@ def UpdateFactorDetail(request):
     if conn:
         conn.close()
     print('پایان آپدیت جزئیات فاکتور-------------------------------------------------')
+    return redirect('/updatedb')
+
+
+
+
+def UpdateBackFactorDetail(request):
+    t0 = time.time()
+    print('شروع آپدیت جزئیات فاکتور برگشتی------------------------------------------')
+
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    cursor.execute("SELECT [code], [radif],[type], [kala_code], [meghdar], [naghdi] FROM [mahak].[dbo].[BackFact_Detail]")
+    mahakt_data = cursor.fetchall()
+
+    t1 = time.time()
+    print('اتصال به دیتابیس انجام شد', t1 - t0)
+
+    # دریافت سال مالی فعال
+    try:
+        acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    except MasterInfo.DoesNotExist:
+        print("هشدار: هیچ سال مالی فعالی یافت نشد.")
+        if conn:
+            conn.close()
+        return redirect('/updatedb')
+
+    # بارگذاری فاکتورها و کالاها به صورت دسته‌ای
+    factor_codes_from_mahak = {row[0] for row in mahakt_data}
+    kala_codes_from_mahak = {row[3] for row in mahakt_data if row[3] is not None}
+
+    factors = {f.code: f for f in BackFactor.objects.filter(code__in=factor_codes_from_mahak, acc_year=acc_year)}
+    kalas = {k.code: k for k in Kala.objects.filter(code__in=kala_codes_from_mahak)}
+
+    existing_details = {
+        (detail.code_factor, detail.radif, detail.acc_year): detail
+        for detail in BackFactorDetail.objects.filter(
+            code_factor__in=factor_codes_from_mahak,
+            acc_year=acc_year
+        ).select_related('backfactor', 'kala')
+    }
+
+    details_to_create = []
+    details_to_update = []
+    existing_in_mahak_keys = set()
+
+    created_count = 0
+    updated_count = 0
+
+    for row in mahakt_data:
+        code_factor_mahak = row[0]
+        radif_mahak = row[1]
+        type_mahak = row[2]
+        kala_code_mahak = row[3]
+        count_mahak = row[4]
+        naghdi_mahak = row[5]
+
+        key_mahak = (code_factor_mahak, radif_mahak, acc_year)
+        existing_in_mahak_keys.add((code_factor_mahak, radif_mahak))
+
+        factor = factors.get(code_factor_mahak)
+        kala = kalas.get(kala_code_mahak)
+
+        if factor:
+            defaults = {
+                'code_kala': kala_code_mahak,
+                'count': count_mahak if count_mahak is not None else 0,
+                'naghdi': naghdi_mahak if naghdi_mahak is not None else 0,
+                'type': type_mahak if type_mahak is not None else 0,
+                'acc_year': acc_year,
+                'backfactor': factor,
+                'kala': kala,
+            }
+
+            if key_mahak in existing_details:
+                detail = existing_details[key_mahak]
+                updated = False
+                for attr, value in defaults.items():
+                    current_value = getattr(detail, attr)
+                    if isinstance(current_value, (int, float, Decimal)) and isinstance(value, (int, float, Decimal)):
+                        if Decimal(str(current_value)).quantize(Decimal('0.000001')) != Decimal(str(value)).quantize(Decimal('0.000001')):
+                            print(f"تفاوت (عددی) در فیلد '{attr}' برای فاکتور '{detail.code_factor}' و ردیف '{detail.radif}':")
+                            print(f"  مقدار فعلی (جنگو): {current_value}")
+                            print(f"  مقدار جدید (Mahak): {value}")
+                            setattr(detail, attr, value)
+                            updated = True
+                    elif current_value != value:
+                        print(f"تفاوت (غیر عددی) در فیلد '{attr}' برای فاکتور '{detail.code_factor}' و ردیف '{detail.radif}':")
+                        print(f"  مقدار فعلی (جنگو): {current_value} ({type(current_value)})")
+                        print(f"  مقدار جدید (Mahak): {value} ({type(value)})")
+                        setattr(detail, attr, value)
+                        updated = True
+                if updated:
+                    details_to_update.append(detail)
+                    updated_count += 1
+            else:
+                details_to_create.append(BackFactorDetail(
+                    code_factor=code_factor_mahak,
+                    radif=radif_mahak,
+                    **defaults
+                ))
+                created_count += 1
+
+    deleted_count = 0
+    with transaction.atomic():
+        if details_to_create:
+            BackFactorDetail.objects.bulk_create(details_to_create, ignore_conflicts=True)
+        if details_to_update:
+            BackFactorDetail.objects.bulk_update(details_to_update, ['code_kala', 'count', 'naghdi','type', 'acc_year', 'backfactor', 'kala'])
+
+        deleted_count = BackFactorDetail.objects.filter(
+            acc_year=acc_year
+        ).exclude(
+            code_factor__in=[k[0] for k in existing_in_mahak_keys],
+            radif__in=[k[1] for k in existing_in_mahak_keys],
+        ).delete()[0] if BackFactorDetail.objects.filter(
+            acc_year=acc_year
+        ).exclude(
+            code_factor__in=[k[0] for k in existing_in_mahak_keys],
+            radif__in=[k[1] for k in existing_in_mahak_keys],
+        ).exists() else 0
+
+    t2 = time.time()
+    print('آپدیت انجام شد', t2 - t1)
+
+    tend = time.time()
+
+    total_time = tend - t0
+    db_time = t1 - t0
+    up_time = t2 - t1
+
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    print(f" اتصال به دیتابیس: {db_time:.2f} ثانیه")
+    print(f" ایجاد شده: {created_count} ردیف")
+    print(f" به‌روزرسانی شده: {updated_count} ردیف")
+    print(f" حذف شده: {deleted_count} ردیف")
+    print(f" عملیات اصلی آپدیت: {up_time:.2f} ثانیه")
+
+    try:
+        cursor.execute(f"SELECT COUNT(*) FROM Fact_Fo_Detail")
+        row_count = cursor.fetchone()[0]
+        cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'BackFact_Detail'")
+        column_count = cursor.fetchone()[0]
+
+        table = Mtables.objects.filter(name='BackFact_Detail').last()
+        if table:
+            table.last_update_time = timezone.now()
+            table.update_duration = total_time
+            table.row_count = row_count
+            table.cloumn_count = column_count
+            table.save()
+    except Exception as e:
+        print(f"خطا در به‌روزرسانی جدول Mtables: {e}")
+
+    if conn:
+        conn.close()
+    print('پایان آپدیت جزئیات فاکتور برگشتی-------------------------------------------------')
     return redirect('/updatedb')
 
 

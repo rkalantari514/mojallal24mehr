@@ -2,7 +2,8 @@ from django.contrib import admin
 
 from accounting.models import BedehiMoshtari
 from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo, \
-    Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve, MyCondition, ChequesPay, Bank, Loan, LoanDetil
+    Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve, MyCondition, ChequesPay, Bank, Loan, LoanDetil, \
+    BackFactor, BackFactorDetail
 
 
 # Register your models here.
@@ -11,7 +12,7 @@ from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, 
 class MtablesAdmin(admin.ModelAdmin):
     list_display = ['__str__', 'name', 'description', 'in_use', 'update_priority', 'last_update_time', 'row_count',
                     'cloumn_count']
-    # list_filter = ['description','name', 'in_use']
+    list_filter = ['in_use']
     list_editable = ['description', 'in_use', 'update_priority']
     search_fields = ['name', 'description', 'in_use', 'update_priority']
 
@@ -50,6 +51,19 @@ class FactorDetaileAdmin(admin.ModelAdmin):
 
     class Meta:
         model = FactorDetaile
+
+
+
+class BackFactorDetailAdmin(admin.ModelAdmin):
+    list_display = ['acc_year','code_factor', 'kala', 'count', 'naghdi']
+    list_filter = ['acc_year']
+
+    # list_filter = ['name','code']
+    # list_editable = ['description', 'in_use']
+    # search_fields = ['name', 'code']
+
+    class Meta:
+        model = BackFactorDetail
 
 
 class WordCountAdmin(admin.ModelAdmin):
@@ -230,10 +244,24 @@ class BedehiMoshtariAdmin(admin.ModelAdmin):
 
 
 
+# your_app_name/admin.py
+
+
+@admin.register(BackFactor)
+class BackFactorAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'acc_year','code','type','per_code','person','pdate','date','takhfif','sharh',)
+    list_filter = ('acc_year','type','person','date',)
+    search_fields = ('code','per_code','pdate','sharh', 'person__name',)
+
+
+
+
+
 admin.site.register(Mtables, MtablesAdmin)
 admin.site.register(Kala, KalaAdmin)
 admin.site.register(Factor, FactorAdmin)
 admin.site.register(FactorDetaile, FactorDetaileAdmin)
+admin.site.register(BackFactorDetail, BackFactorDetailAdmin)
 admin.site.register(WordCount, WordCountAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Kardex, KardexAdmin)

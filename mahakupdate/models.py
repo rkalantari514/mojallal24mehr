@@ -301,6 +301,48 @@ class FactorDetaile(models.Model):
         return str(self.code_factor)  # تصحیح به str
 
 
+class BackFactor(models.Model):
+    acc_year = models.IntegerField(default=1403,verbose_name='سال مالی')
+    code = models.IntegerField(blank=True, null=True, default=0, verbose_name='شماره فاکتور برگشتی')
+    type = models.IntegerField(blank=True, null=True, default=0, verbose_name='نوع فاکتور برگشتی')
+    per_code = models.IntegerField(blank=True, null=True, verbose_name='کد شخص')
+    person = models.ForeignKey('Person', on_delete=models.SET_NULL, blank=True, null=True)
+    pdate = models.CharField(blank=True, null=True, max_length=150, verbose_name='تاریخ شمسی')
+    date = models.DateField(blank=True, null=True, verbose_name='تاریخ میلادی')
+    sharh = models.CharField(blank=True, null=True, max_length=300, verbose_name='شرح ')
+    takhfif = models.FloatField(blank=True, null=True, default=0, verbose_name='تخفیف')
+
+
+    class Meta:
+        verbose_name = 'فاکتور برگشتی'
+        verbose_name_plural = 'فاکتورهای برگشتی'
+
+    def __str__(self):
+        return f'({self.code}-{self.pdate})'
+
+
+class BackFactorDetail(models.Model):
+    acc_year = models.IntegerField(default=1403,verbose_name='سال مالی')
+    code_factor = models.IntegerField(blank=True, null=True, default=0, verbose_name='شماره فاکتور')
+    radif = models.IntegerField(blank=True, null=True, default=0, verbose_name='ردیف')
+    type = models.IntegerField(blank=True, null=True, default=0, verbose_name='نوع فاکتور برگشتی')
+    backfactor = models.ForeignKey(BackFactor, on_delete=models.SET_NULL, related_name='details', null=True, blank=True)
+    code_kala = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد کالا')
+    kala = models.ForeignKey(Kala, on_delete=models.SET_NULL, null=True)
+    count = models.FloatField(blank=True, null=True, default=0, verbose_name='تعداد')
+    naghdi = models.FloatField(blank=True, null=True, default=0, verbose_name='مبلغ ')
+
+    class Meta:
+        verbose_name = 'جزئیات فاکتور برگشتی'
+        verbose_name_plural = 'جزئیات فاکتور های برگشتی'
+
+    def __str__(self):
+        return str(self.code_factor)  # تصحیح به str
+
+
+
+
+
 class Storagek(models.Model):
     code = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد انبار')
     name = models.CharField(max_length=150, blank=True, null=True, default="-", verbose_name='نام انبار')

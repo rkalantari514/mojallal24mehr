@@ -3,7 +3,7 @@ from mahakupdate.views import Update_from_mahak, Kala_group, Updatedb, \
     UpdateFactor, UpdateKala, UpdateFactorDetail, Updateall, UpdateKardex, UpdatePerson, UpdateKalaGroupinfo, \
     CreateKalaGroup, UpdateKalaGroup, UpdateStorage, UpdateMojodi, Update_Sales_Mojodi_Ratio, UpdateSanad, \
     UpdateSanadDetail, UpdateAccCoding, Cheques_Recieve, UpdateSanadConditions, Cheque_Pay, UpdateBank, UpdateLoan, \
-    UpdateLoanDetail, UpdateBedehiMoshtari, CompleLoan, UpdateMyCondition
+    UpdateLoanDetail, UpdateBedehiMoshtari, CompleLoan, UpdateMyCondition, UpdateBackFactor, UpdateBackFactorDetail
 
 urlpatterns = [
     path('1', Update_from_mahak, name="update"),
@@ -11,7 +11,9 @@ urlpatterns = [
     path('updateall', Updateall, name="updateall"),
 
     path('update/factor', UpdateFactor, name="updatefactor"),
+    path('update/backfactor', UpdateBackFactor, name="updatebackfactor"),
     path('update/factor-detail', UpdateFactorDetail, name="updatefactordetail"),
+    path('update/back-factor-detail', UpdateBackFactorDetail, name="updatebackfactordetail"),
     path('update/kala', UpdateKala, name="updatekala"),
     path('update/storage', UpdateStorage, name="updatestorage"),
     path('update/person', UpdatePerson, name="updateperson"),
