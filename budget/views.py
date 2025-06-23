@@ -931,7 +931,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
 
 
         if cy_today_budget != 0:
-            amalkard_by_year_ratio=((Decimal(cy_factor)/cy_today_budget)-1.0)*100.0
+            amalkard_by_year_ratio=((Decimal(cy_factor)/cy_today_budget)-Decimal(1.0))*Decimal(100.0)
         else:
             amalkard_by_year_ratio=0
 
