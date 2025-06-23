@@ -907,14 +907,9 @@ def BudgetSaleTotal(request, *args, **kwargs):
     one_year_ago = today - relativedelta(years=1)
     table3 = []
     for cat in level3:
-        kala_id = []
-        for k in Kala.objects.filter(category=cat):
-            kala_id.append(int(k.id))
-        print(cat.name,len(kala_id))
-        # by_factor=FactorDetaile.objects.filter(code_kala__in=kala_id,acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
         by_factor=FactorDetaile.objects.filter(kala__category=cat,acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
-        cy_factor=FactorDetaile.objects.filter(code_kala__in=kala_id,acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
-        by_today_factor=FactorDetaile.objects.filter(code_kala__in=kala_id,acc_year=base_year,factor__date__lte=one_year_ago).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
+        cy_factor=FactorDetaile.objects.filter(kala__category=cat,acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
+        by_today_factor=FactorDetaile.objects.filter(kala__category=cat,acc_year=base_year,factor__date__lte=one_year_ago).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
         budget_rate = 0
         category1 = cat
         for _ in range(3):  # بررسی cat و دو سطح از والدها
