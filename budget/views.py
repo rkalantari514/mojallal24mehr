@@ -928,8 +928,11 @@ def BudgetSaleTotal(request, *args, **kwargs):
         cy_today_budget = (Decimal(by_today_factor) if by_today_factor is not None else Decimal(0)) * (
             Decimal(budget_rate) if budget_rate is not None else Decimal(0))
 
+
+
+
         try:
-            amalkard_by_year_ratio=((cy_factor/cy_today_budget)-1)*100
+            amalkard_by_year_ratio=((cy_factor/cy_today_budget))
         except:
             amalkard_by_year_ratio=0
 
