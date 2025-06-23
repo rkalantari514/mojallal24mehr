@@ -1,9 +1,11 @@
 from custom_login.models import UserLog
 from custom_login.views import page_permision
 from dashboard.models import MasterInfo
-from mahakupdate.models import SanadDetail, AccCoding, FactorDetaile, Category, Kala
+from mahakupdate.models import SanadDetail, AccCoding, FactorDetaile, Category, Kala, Factor
 from datetime import date
 from decimal import Decimal
+
+from mahakupdate.views import jalali_to_gregorian
 
 
 def BudgetCostTotal(request, *args, **kwargs):
@@ -846,63 +848,10 @@ def BudgetSaleTotal(request, *args, **kwargs):
     one_year_ago = today - relativedelta(years=1)
 
 
-    factors_qs_base_year = FactorDetaile.objects.filter(acc_year=base_year)
-
-
-    aggregated_factors_base_year = factors_qs_base_year.values('code_kala').annotate(
-            total_factor_by=Sum('mablagh_nahaee'),
-            total_factor_by_today=Sum('mablagh_nahaee', filter=Q(factor__date__lte=one_year_ago))
-        )
-
-
-    factors_qs_current_year = FactorDetaile.objects.filter(acc_year=acc_year, factor__date__lte=today).values('code_kala').annotate(
-        total_factor_cy_today=Sum('mablagh_nahaee')
-    )
-
-    aggregated_by_lookup = {}
-    for item in aggregated_factors_base_year:
-        key = (item['code_kala'])
-        aggregated_by_lookup[key] = {
-            'total_factor_by': item['total_factor_by'] or 0,
-            'total_factor_by_today': item['total_factor_by_today'] or 0
-        }
-
-
-    aggregated_cy_lookup = {}
-    for item in factors_qs_current_year:
-        key = (item['code_kala'])
-        aggregated_cy_lookup[key] = item['total_factor_cy_today'] or 0
-
-
-
-
-    # unique_tafzili_codes = sanads_qs_base_year.values_list('tafzili', flat=True).distinct()
-    # unique_moin_codes = sanads_qs_base_year.values_list('moin', flat=True).distinct()
-    #
-    # all_acc_coding = AccCoding.objects.filter(
-    #     Q(level=3, parent__parent__code=501, code__in=unique_tafzili_codes) |
-    #     Q(level=2, parent__code=501, code__in=unique_moin_codes) |
-    #     Q(level=3, parent__parent__code=501, is_budget=True)
-    # ).values('code', 'name', 'level', 'parent__code', 'parent__parent__code', 'is_budget', 'budget_rate')
-    #
-    # tafzili_names = {item['code']: item['name'] for item in all_acc_coding if
-    #                  item['level'] == 3 and item['parent__parent__code'] == 501}
-    # moin_names = {item['code']: item['name'] for item in all_acc_coding if
-    #               item['level'] == 2 and item['parent__code'] == 501}
-    # budget_taf_info = {
-    #     item['code']: item['budget_rate'] for item in all_acc_coding
-    #     if item['level'] == 3 and item['parent__parent__code'] == 501 and item['is_budget']
-    # }
-
-
-
     first_factor_day = FactorDetaile.objects.filter(acc_year=acc_year).first().factor.date
     days_from_start = (today - first_factor_day).days
     day_rate = days_from_start / 365
-    print('day_rate', day_rate)
-    print('تا اینجا آمدیم')
     level3=Category.objects.filter(level=3)
-
     today = date.today()
     one_year_ago = today - relativedelta(years=1)
     table3 = []
@@ -927,13 +876,17 @@ def BudgetSaleTotal(request, *args, **kwargs):
 
         cy_today_budget = (Decimal(by_today_factor) if by_today_factor is not None else Decimal(0)) * (
             Decimal(budget_rate) if budget_rate is not None else Decimal(0))
-
-
-
         if cy_today_budget != 0:
             amalkard_by_year_ratio=((Decimal(cy_factor)/cy_today_budget)-Decimal(1.0))*Decimal(100.0)
         else:
             amalkard_by_year_ratio=0
+
+
+        amalkard1 = False
+
+        if amalkard_by_year_ratio > 0:
+            amalkard1=True
+
 
         table3.append({
             'l1':cat.parent.parent.name,
@@ -946,6 +899,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
             'cy_today_budget':cy_today_budget,
             'cy_factor':cy_factor,
             'amalkard_by_year_ratio':amalkard_by_year_ratio,
+            'amalkard1':amalkard1,
 
         }
 

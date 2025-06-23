@@ -450,19 +450,17 @@
 
                                                 <th data-field="cy_today_budget" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">بودجه{{ acc_year }}تا امروز</th>
-                                                    <th data-field="cy_factor" class="card-text text-center"
+                                                    data-footer-formatter="priceFormatter">بودجه{{ acc_year }}تا امروز
+                                                </th>
+                                                <th data-field="cy_factor" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">فروش{{ acc_year }}تا امروز</th>
+                                                    data-footer-formatter="priceFormatter">فروش{{ acc_year }}تا امروز
+                                                </th>
 
- <th data-field="amalkard_by_year_ratio" class="card-text text-center"
+                                                <th data-field="amalkard_by_year_ratio" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
-                                                    >عملکرد نسبت به بودجه (آهنگ پارسال)</th>
-
-
-
-
-
+                                                >عملکرد نسبت به بودجه (آهنگ پارسال)
+                                                </th>
 
 
                                             </tr>
@@ -502,9 +500,18 @@
                                                     <td class="card-text text-center">{{ item.cy_budget|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.cy_today_budget|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.cy_factor|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center" style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:2 }}</td>
 
+                                                    {% if item.amalkard1 %}
 
+                                                        <td class="card-text text-center text-success"
+                                                            style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:0 }}%
+                                                        </td>
+                                                    {% else %}
+                                                        <td class="card-text text-center text-danger"
+                                                            style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:0 }}%
+                                                        </td>
+
+                                                    {% endif %}
                                                 </tr>
                                             {% endfor %}
                                             </tbody>
