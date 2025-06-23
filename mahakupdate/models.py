@@ -62,6 +62,7 @@ class Category(models.Model):
                                verbose_name='دسته‌بندی والد')
     level = models.PositiveSmallIntegerField(choices=LEVEL_CHOICES, verbose_name='سطح')
     code_mahak = models.IntegerField(blank=True, null=True, verbose_name='کد گروه بندی محک')
+    budget_rate = models.DecimalField(max_digits=5, decimal_places=2,blank=True, null=True, verbose_name='ضریب بودجه')
 
     class Meta:
         verbose_name = 'دسته‌بندی'

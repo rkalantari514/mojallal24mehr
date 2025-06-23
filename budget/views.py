@@ -1,10 +1,9 @@
 from custom_login.models import UserLog
 from custom_login.views import page_permision
 from dashboard.models import MasterInfo
-from mahakupdate.models import SanadDetail, AccCoding, FactorDetaile
+from mahakupdate.models import SanadDetail, AccCoding, FactorDetaile, Category, Kala
 from datetime import date
 from decimal import Decimal
-
 
 
 def BudgetCostTotal(request, *args, **kwargs):
@@ -846,36 +845,19 @@ def BudgetSaleTotal(request, *args, **kwargs):
     today = date.today()
     one_year_ago = today - relativedelta(years=1)
 
-    sanads_qs_base_year = SanadDetail.objects.filter(is_active=True, kol=501, acc_year=base_year)   #حذف
 
     factors_qs_base_year = FactorDetaile.objects.filter(acc_year=base_year)
 
-    aggregated_sanads_base_year = sanads_qs_base_year.values('tafzili', 'moin').annotate(            #حذف
-        total_sanad_by=Sum('curramount'),
-        total_sanad_by_today=Sum('curramount', filter=Q(date__lte=one_year_ago))
-    )
 
     aggregated_factors_base_year = factors_qs_base_year.values('code_kala').annotate(
             total_factor_by=Sum('mablagh_nahaee'),
             total_factor_by_today=Sum('mablagh_nahaee', filter=Q(factor__date__lte=one_year_ago))
         )
 
-    sanads_qs_current_year = SanadDetail.objects.filter(                          #حذف
-        is_active=True, kol=501, acc_year=acc_year, date__lte=today
-    ).values('tafzili', 'moin').annotate(
-        total_sanad_cy_today=Sum('curramount')
-    )
+
     factors_qs_current_year = FactorDetaile.objects.filter(acc_year=acc_year, factor__date__lte=today).values('code_kala').annotate(
         total_factor_cy_today=Sum('mablagh_nahaee')
     )
-
-    aggregated_by_lookup2 = {}                              #حذف
-    for item in aggregated_sanads_base_year:
-        key = (item['tafzili'], item['moin'])
-        aggregated_by_lookup2[key] = {
-            'total_sanad_by': item['total_sanad_by'] or 0,
-            'total_sanad_by_today': item['total_sanad_by_today'] or 0
-        }
 
     aggregated_by_lookup = {}
     for item in aggregated_factors_base_year:
@@ -884,11 +866,6 @@ def BudgetSaleTotal(request, *args, **kwargs):
             'total_factor_by': item['total_factor_by'] or 0,
             'total_factor_by_today': item['total_factor_by_today'] or 0
         }
-
-    aggregated_cy_lookup2 = {}                      #حذف
-    for item in sanads_qs_current_year:
-        key = (item['tafzili'], item['moin'])
-        aggregated_cy_lookup2[key] = item['total_sanad_cy_today'] or 0
 
 
     aggregated_cy_lookup = {}
@@ -899,244 +876,85 @@ def BudgetSaleTotal(request, *args, **kwargs):
 
 
 
-    unique_tafzili_codes = sanads_qs_base_year.values_list('tafzili', flat=True).distinct()
-    unique_moin_codes = sanads_qs_base_year.values_list('moin', flat=True).distinct()
+    # unique_tafzili_codes = sanads_qs_base_year.values_list('tafzili', flat=True).distinct()
+    # unique_moin_codes = sanads_qs_base_year.values_list('moin', flat=True).distinct()
+    #
+    # all_acc_coding = AccCoding.objects.filter(
+    #     Q(level=3, parent__parent__code=501, code__in=unique_tafzili_codes) |
+    #     Q(level=2, parent__code=501, code__in=unique_moin_codes) |
+    #     Q(level=3, parent__parent__code=501, is_budget=True)
+    # ).values('code', 'name', 'level', 'parent__code', 'parent__parent__code', 'is_budget', 'budget_rate')
+    #
+    # tafzili_names = {item['code']: item['name'] for item in all_acc_coding if
+    #                  item['level'] == 3 and item['parent__parent__code'] == 501}
+    # moin_names = {item['code']: item['name'] for item in all_acc_coding if
+    #               item['level'] == 2 and item['parent__code'] == 501}
+    # budget_taf_info = {
+    #     item['code']: item['budget_rate'] for item in all_acc_coding
+    #     if item['level'] == 3 and item['parent__parent__code'] == 501 and item['is_budget']
+    # }
 
-    all_acc_coding = AccCoding.objects.filter(
-        Q(level=3, parent__parent__code=501, code__in=unique_tafzili_codes) |
-        Q(level=2, parent__code=501, code__in=unique_moin_codes) |
-        Q(level=3, parent__parent__code=501, is_budget=True)
-    ).values('code', 'name', 'level', 'parent__code', 'parent__parent__code', 'is_budget', 'budget_rate')
-
-    tafzili_names = {item['code']: item['name'] for item in all_acc_coding if
-                     item['level'] == 3 and item['parent__parent__code'] == 501}
-    moin_names = {item['code']: item['name'] for item in all_acc_coding if
-                  item['level'] == 2 and item['parent__code'] == 501}
-    budget_taf_info = {
-        item['code']: item['budget_rate'] for item in all_acc_coding
-        if item['level'] == 3 and item['parent__parent__code'] == 501 and item['is_budget']
-    }
 
 
-
-    first_sanad_day = SanadDetail.objects.filter(is_active=True, kol=501, acc_year=acc_year).first().date
     first_factor_day = FactorDetaile.objects.filter(acc_year=acc_year).first().factor.date
     days_from_start = (today - first_factor_day).days
     day_rate = days_from_start / 365
     print('day_rate', day_rate)
     print('تا اینجا آمدیم')
+    level3=Category.objects.filter(level=3)
+
+    today = date.today()
+    one_year_ago = today - relativedelta(years=1)
 
     table3 = []
-    for (tafzili_code, moin_code), data in aggregated_by_lookup2.items():
-        total_sanad_by = data['total_sanad_by']
-        total_sanad_by_today = data['total_sanad_by_today']
-        total_sanad_cy_today = aggregated_cy_lookup2.get((tafzili_code, moin_code), 0)
+    for cat in level3:
+        kala_id = []
+        for k in Kala.objects.filter(category=cat):
+            kala_id.append(k.id)
 
-        moin_name = moin_names.get(moin_code, ' ')
-        tafzili_name = tafzili_names.get(tafzili_code, ' ')
+        by_factor=FactorDetaile.objects.filter(code_kala__in=kala_id,acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
+        cy_factor=FactorDetaile.objects.filter(code_kala__in=kala_id,acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
+        by_today_factor=FactorDetaile.objects.filter(code_kala__in=kala_id,acc_year=base_year,factor__date__lte=one_year_ago).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
+        budget_rate = 0
+        category1 = cat
+        for _ in range(3):  # بررسی cat و دو سطح از والدها
+            br = getattr(category1, 'budget_rate', 0)
+            if br and br > 0:
+                budget_rate = br
+                break
+            category1 = getattr(category1, 'parent', None)
+            if category1 is None:
+                break
 
-        is_budge = tafzili_code in budget_taf_info
-        budget_rate = budget_taf_info.get(tafzili_code, '-')
-        total_budget_cy = '-'
-        total_budget_cy_today = '-'
-        total_budget_by = '-'
 
-        amalkard_by_year = '-'
-        amalkard_by_year_ratio = '-'
-        amalkard1 = True
-        amalkard2 = True
-        amalkard_by_day = '-'
-        amalkard_by_day_ratio = '-'
+        cy_budget = (Decimal(by_factor) if by_factor is not None else Decimal(0)) * (
+            Decimal(budget_rate) if budget_rate is not None else Decimal(0))
 
-        if is_budge and budget_rate != '-':
-            try:
-                rate = Decimal(budget_rate)
-                total_budget_cy = total_sanad_by * rate * -1
-                total_budget_cy_today = total_sanad_by_today * rate * -1
-                total_budget_by = total_sanad_by * -1
-                amalkard_by_year = (total_budget_cy_today + total_sanad_cy_today) * -1
-                amalkard_by_year_ratio = (amalkard_by_year / total_budget_cy_today) * 100
-                if amalkard_by_year > 0:
-                    amalkard1 = False
-                # amalkard_by_day=(total_budget_by*day_rate)-total_sanad_cy_today
-                amalkard_by_day = ((float(total_budget_cy) * day_rate) + float(total_sanad_cy_today)) * -1
-                # print('amalkard_by_day', amalkard_by_day)
-                amalkard_by_day_ratio = (amalkard_by_day / (float(total_budget_cy) * day_rate)) * 100
-                if amalkard_by_day > 0:
-                    amalkard2 = False
-            except Exception as e:
-                pass  # در صورت بروز خطا در تبدیل نرخ، از نمایش آن جلوگیری می‌کند
+        cy_today_budget = (Decimal(by_today_factor) if by_today_factor is not None else Decimal(0)) * (
+            Decimal(budget_rate) if budget_rate is not None else Decimal(0))
 
         table3.append({
-            'moin_code': moin_code,
-            'moin_name': moin_name,
-            'tafzili_code': tafzili_code,
-            'tafzili_name': tafzili_name,
-            'is_budge': is_budge,
-            'budget_rate': budget_rate,
-            'total_sanad_by': total_sanad_by * -1,
-            'total_budget_cy': total_budget_cy,
-            'total_budget_by': total_budget_by,
-            'total_sanad_by_today': total_sanad_by_today * -1,
-            'total_budget_cy_today': total_budget_cy_today,
-            'total_sanad_cy_today': total_sanad_cy_today * -1,
+            'l1':cat.parent.parent.name,
+            'l2':cat.parent.name,
+            'l3':cat.name,
+            'by_factor':by_factor,
+            'cy_budget':cy_budget,
 
-            'amalkard_by_year': amalkard_by_year,
-            'amalkard_by_year_ratio': amalkard_by_year_ratio,
-            'amalkard1': amalkard1,
+            'cy_today_budget':cy_today_budget,
+            'cy_factor':cy_factor,
 
-            'amalkard_by_day': amalkard_by_day,
-            'amalkard_by_day_ratio': amalkard_by_day_ratio,
-            'amalkard2': amalkard2,
+        }
 
-        })
+        )
 
-    # -------------------------------- ایجاد جدول 2-----------------------
-
-    # دیکشنری کمکی برای نگهداری جمع مقادیر بر اساس moin_code
-    grouped_data = {}
-
-    for entry in table3:
-        moin_code = entry['moin_code']
-        moin_name = entry['moin_name']
-
-        # اگر moin_code در دیکشنری نیست، آن را اضافه کن و مقدارهای اولیه بده
-        if moin_code not in grouped_data:
-            grouped_data[moin_code] = {
-                'moin_name': moin_name,
-                'total_sanad_by': 0,
-                'total_budget_cy': 0,
-                'total_budget_by': 0,
-                'total_sanad_by_today': 0,
-                'total_budget_cy_today': 0,
-                'total_sanad_cy_today': 0,
-                'amalkard_by_year': 0,
-                'amalkard_by_day': 0,
-            }
-
-        def safe_float(value):
-            try:
-                val = str(value).strip()
-                if val == '-' or val == '':
-                    return 0.0
-                return float(val)
-            except ValueError:
-                return 0.0
-
-        # در حلقه جمع‌بندی، از تابع بالا استفاده کن:
-        if entry['is_budge']:
-            grouped_data[moin_code]['total_sanad_by'] += safe_float(entry['total_sanad_by'])
-            grouped_data[moin_code]['total_budget_cy'] += safe_float(entry['total_budget_cy'])
-            grouped_data[moin_code]['total_budget_by'] += safe_float(entry['total_budget_by'])
-            grouped_data[moin_code]['total_sanad_by_today'] += safe_float(entry['total_sanad_by_today'])
-            grouped_data[moin_code]['total_budget_cy_today'] += safe_float(entry['total_budget_cy_today'])
-            grouped_data[moin_code]['total_sanad_cy_today'] += safe_float(entry['total_sanad_cy_today'])
-            grouped_data[moin_code]['amalkard_by_year'] += safe_float(entry['amalkard_by_year'])
-            grouped_data[moin_code]['amalkard_by_day'] += safe_float(entry['amalkard_by_day'])
-
-    table2 = []
-    for moin_code, data in grouped_data.items():
-        amalkard1 = True
-        if data['amalkard_by_year'] > 0:
-            amalkard1 = False
-        amalkard2 =True
-        if data['amalkard_by_day'] > 0:
-            amalkard2 = False
-
-        table2.append({
-            'moin_code': moin_code,
-            'moin_name': data['moin_name'],
-            'total_sanad_by': data['total_sanad_by'],
-            'total_budget_cy': data['total_budget_cy'],
-            'total_budget_by': data['total_budget_by'],
-            'total_sanad_by_today': data['total_sanad_by_today'],
-            'total_budget_cy_today': data['total_budget_cy_today'],
-            'total_sanad_cy_today': data['total_sanad_cy_today'],
-            'amalkard_by_year': data['amalkard_by_year'],
-            'amalkard_by_year_ratio': data['amalkard_by_year'] / data['total_budget_cy_today'] * 100 ,
-            'amalkard1': amalkard1,
-            'amalkard_by_day': data['amalkard_by_day'],
-            'amalkard_by_day_ratio':  (data['amalkard_by_day'] / (float(data['total_budget_cy']) * day_rate)) * 100,
-            'amalkard2': amalkard2,
-
-        })
-
-        acc_code_2=AccCoding.objects.filter(level=2,code=moin_code,parent__code=501).last()
-        br=data['total_budget_cy']/data['total_sanad_by']
-        if acc_code_2.budget_rate != br:
-            acc_code_2.budget_rate = br
-            acc_code_2.save()
-
-#----------------------------------ساخت جدول 1 ----------------------------
-
-    # دیکشنری کمکی برای نگهداری جمع کل داده‌ها
-    summary_data = {
-        'total_sanad_by': 0,
-        'total_budget_cy': 0,
-        'total_budget_by': 0,
-        'total_sanad_by_today': 0,
-        'total_budget_cy_today': 0,
-        'total_sanad_cy_today': 0,
-        'amalkard_by_year': 0,
-        'amalkard_by_day': 0,
-    }
-    table1 = []
-
-    # جمع‌بندی مقادیر از table2
-    for entry in table2:
-        summary_data['total_sanad_by'] += entry['total_sanad_by']
-        summary_data['total_budget_cy'] += entry['total_budget_cy']
-        summary_data['total_budget_by'] += entry['total_budget_by']
-        summary_data['total_sanad_by_today'] += entry['total_sanad_by_today']
-        summary_data['total_budget_cy_today'] += entry['total_budget_cy_today']
-        summary_data['total_sanad_cy_today'] += entry['total_sanad_cy_today']
-        summary_data['amalkard_by_year'] += entry['amalkard_by_year']
-        summary_data['amalkard_by_day'] += entry['amalkard_by_day']
-
-    # محاسبه نسبت‌های عملکرد
-    amalkard1 = summary_data['amalkard_by_year'] <= 0
-    amalkard2 = summary_data['amalkard_by_day'] <= 0
-
-    summary_data['amalkard_by_year_ratio'] = (
-        summary_data['amalkard_by_year'] / summary_data['total_budget_cy_today'] * 100
-        if summary_data['total_budget_cy_today'] != 0 else 0
-    )
-
-    summary_data['amalkard_by_day_ratio'] = (
-        (summary_data['amalkard_by_day'] / (float(summary_data['total_budget_cy']) * day_rate)) * 100
-        if summary_data['total_budget_cy'] != 0 else 0
-    )
-
-    # اضافه کردن داده‌های خلاصه‌شده به table1
-    table1.append({
-        'total_sanad_by': summary_data['total_sanad_by'],
-        'total_budget_cy': summary_data['total_budget_cy'],
-        'total_budget_by': summary_data['total_budget_by'],
-        'total_sanad_by_today': summary_data['total_sanad_by_today'],
-        'total_budget_cy_today': summary_data['total_budget_cy_today'],
-        'total_sanad_cy_today': summary_data['total_sanad_cy_today'],
-        'amalkard_by_year': summary_data['amalkard_by_year'],
-        'amalkard_by_year_ratio': summary_data['amalkard_by_year_ratio'],
-        'amalkard1': amalkard1,
-        'amalkard_by_day': summary_data['amalkard_by_day'],
-        'amalkard_by_day_ratio': summary_data['amalkard_by_day_ratio'],
-        'amalkard2': amalkard2,
-    })
-
-    acc_code_1 = AccCoding.objects.filter(level=1, code=501).last()
-    br = data['total_budget_cy'] / data['total_sanad_by']
-    if acc_code_1.budget_rate != br:
-        acc_code_1.budget_rate = br
-        acc_code_1.save()
 
     context = {
         'acc_year': acc_year,
         'base_year': base_year,
         'user': user,
         'table3': table3,
-        'table2': table2,
-        'table1': table1,
+
     }
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
-    return render(request, 'budget_cost_total.html', context)
+    return render(request, 'budget_sale_total.html', context)

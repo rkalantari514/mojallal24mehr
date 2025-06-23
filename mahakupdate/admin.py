@@ -77,9 +77,9 @@ class WordCountAdmin(admin.ModelAdmin):
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'name', 'parent', 'level','code_mahak']
+    list_display = ['__str__', 'name', 'parent', 'level','code_mahak','budget_rate']
     list_filter = ['level', 'parent', ]
-    list_editable = ['name', 'parent', 'level']
+    list_editable = ['name', 'parent', 'level','budget_rate']
     search_fields = ['name', 'level']
 
     class Meta:
