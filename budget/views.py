@@ -905,14 +905,14 @@ def BudgetSaleTotal(request, *args, **kwargs):
 
     today = date.today()
     one_year_ago = today - relativedelta(years=1)
-
     table3 = []
     for cat in level3:
         kala_id = []
         for k in Kala.objects.filter(category=cat):
-            kala_id.append(k.id)
-
-        by_factor=FactorDetaile.objects.filter(code_kala__in=kala_id,acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
+            kala_id.append(int(k.id))
+        print(cat.name,len(kala_id))
+        # by_factor=FactorDetaile.objects.filter(code_kala__in=kala_id,acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
+        by_factor=FactorDetaile.objects.filter(kala__category=cat,acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
         cy_factor=FactorDetaile.objects.filter(code_kala__in=kala_id,acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
         by_today_factor=FactorDetaile.objects.filter(code_kala__in=kala_id,acc_year=base_year,factor__date__lte=one_year_ago).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
         budget_rate = 0
@@ -939,6 +939,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
             'l3':cat.name,
             'by_factor':by_factor,
             'cy_budget':cy_budget,
+            'budget_rate':budget_rate,
 
             'cy_today_budget':cy_today_budget,
             'cy_factor':cy_factor,
