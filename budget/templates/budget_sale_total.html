@@ -451,10 +451,13 @@
                                                 <th data-field="cy_today_budget" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter">بودجه{{ acc_year }}تا امروز</th>
-
-<th data-field="cy_factor" class="card-text text-center"
+                                                    <th data-field="cy_factor" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter">فروش{{ acc_year }}تا امروز</th>
+
+ <th data-field="amalkard_by_year_ratio" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                    >عملکرد نسبت به سال{{ base_year }}</th>
 
 
 
@@ -494,12 +497,12 @@
                                                     <td class="card-text text-center">{{ item.l1 }}</td>
                                                     <td class="card-text text-center">{{ item.l2 }}</td>
                                                     <td class="card-text text-center">{{ item.l3 }}</td>
-                                                    <td class="card-text text-center"
-                                                        style="direction: ltr">{{ item.by_factor|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.by_factor|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.budget_rate }}</td>
                                                     <td class="card-text text-center">{{ item.cy_budget|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.cy_today_budget|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.cy_factor|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center" style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:2 }}</td>
 
 
                                                 </tr>
