@@ -908,7 +908,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
     table3 = []
     for cat in level3:
         by_factor=FactorDetaile.objects.filter(kala__category=cat,acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
-        cy_factor=FactorDetaile.objects.filter(kala__category=cat,acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
+        cy_factor=FactorDetaile.objects.filter(kala__category=cat,acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh'] or 0
         by_today_factor=FactorDetaile.objects.filter(kala__category=cat,acc_year=base_year,factor__date__lte=one_year_ago).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
         budget_rate = 0
         category1 = cat
