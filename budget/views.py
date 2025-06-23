@@ -930,10 +930,9 @@ def BudgetSaleTotal(request, *args, **kwargs):
 
 
 
-
-        try:
-            amalkard_by_year_ratio=((cy_factor/cy_today_budget))
-        except:
+        if cy_today_budget != 0:
+            amalkard_by_year_ratio=(cy_factor/cy_today_budget)
+        else:
             amalkard_by_year_ratio=0
 
         table3.append({
