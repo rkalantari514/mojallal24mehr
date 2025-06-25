@@ -37,6 +37,171 @@
             </div>
 
 
+
+                    <!-- ردیف خلاصه فروش سطح 0 -->
+            <div class="row">
+                <div class="col-md-12 mb-30">
+                    <div class="col-xl-12 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="card-body">
+                                <div class="table-responsive mt-15 ">
+                                    <h6 class="card-title pb-0 border-0">عملکرد فروش سال {{ acc_year }}</h6>
+                                    <div class="table-responsive">
+                                        <table id="table"
+                                               class="table-striped"
+                                               data-toggle="table"
+                                               data-locale="fa-IR"
+                                               data-search="true"
+                                               data-show-columns="true"
+                                               data-show-export="true"
+                                               data-show-refresh="true"
+                                               data-show-columns-toggle-all="true"
+                                               data-show-pagination-switch="true"
+                                               data-show-toggle="true"
+                                               data-show-fullscreen="true"
+                                               data-buttons="buttons"
+                                               data-search-align="left"
+                                               data-buttons-class="primary"
+                                               data-pagination="true"
+                                               data-show-columns-search="true"
+                                               data-show-footer="true"
+                                               data-page-size="100"
+                                               data-remember-order="true"
+                                               data-sortable="true"
+                                               data-show-search-clear-button="true"
+                                               data-sort-name="total_sanad_cy_today"
+                                                {#                                               data-sort-order="asc"#}
+                                               data-sort-order="desc"
+                                               data-filter-control="true"
+                                               data-show-print="true"
+                                               data-export-data-type="all"
+                                               data-export-types='["excel"]'>
+                                            <thead>
+                                            <tr class="tr-class-1">
+
+                                                <th></th>
+
+
+                                                <th data-field="by_factor" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter"> کل
+                                                    فروش{{ base_year }}</th>
+                                                <th data-field="budget_rate">ضریب بودجه</th>
+                                                <th data-field="cy_budget" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">
+                                                    بودجه{{ acc_year }}</th>
+
+                                                <th data-field="cy_factor" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">فروش{{ acc_year }}تا امروز
+                                                </th>
+
+                                                <th data-field="cy_today_budget" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">بودجه{{ acc_year }} با آهنگ
+                                                    پارسال تا امروز
+                                                </th>
+
+
+                                                <th data-field="amalkard_by_year_ratio" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                >عملکرد نسبت به بودجه (آهنگ پارسال)
+                                                </th>
+
+                                                <th data-field="cy_today_budget_line" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">بودجه{{ acc_year }}
+                                                    بصورت خطی تا امروز
+                                                </th>
+
+
+                                                <th data-field="amalkard_by_line_ratio" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                >عملکرد نسبت به بودجه (خطی)
+                                                </th>
+
+
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for item in table0 %}
+                                                <tr>
+
+                                                    <td>
+                                                        <a href="/budget/cost/detail/3/{{ item.tafzili_code }}"
+                                                           target="_blank">
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-success btn-fixed-width">
+                                                                <i class="ti-bar-chart pr-1"></i> نمودار عملکرد
+                                                            </button>
+                                                        </a>
+                                                        <a href="/sanad_total/{{ acc_year }}/501/{{ item.moin_code }}/{{ item.tafzili_code }}"
+                                                           target="_blank">
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-danger btn-fixed-width">
+                                                                <i class="ti-wallet pr-1"></i> تراز {{ acc_year }}
+                                                            </button>
+                                                        </a>
+                                                        <a href="/sanad_total/{{ base_year }}/501/{{ item.moin_code }}/{{ item.tafzili_code }}"
+                                                           target="_blank">
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-primary btn-fixed-width">
+                                                                <i class="ti-wallet pr-1"></i> تراز {{ base_year }}
+                                                            </button>
+                                                        </a>
+                                                    </td>
+                                                    <td class="card-text text-center">{{ item.by_factor|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.budget_rate|floatformat:2 }}</td>
+                                                    <td class="card-text text-center">{{ item.cy_budget|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.cy_factor|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.cy_today_budget|floatformat:0|intcomma:False }}</td>
+
+                                                    {% if item.amalkard1 %}
+
+                                                        <td class="card-text text-center text-success"
+                                                            style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:0 }}%
+                                                        </td>
+                                                    {% else %}
+                                                        <td class="card-text text-center text-danger"
+                                                            style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:0 }}%
+                                                        </td>
+
+                                                    {% endif %}
+
+                                                    <td class="card-text text-center">{{ item.cy_today_budget_line|floatformat:0|intcomma:False }}</td>
+
+                                                    {% if item.amalkard2 %}
+
+                                                        <td class="card-text text-center text-success"
+                                                            style="direction: ltr">{{ item.amalkard_by_line_ratio|floatformat:0 }}%
+                                                        </td>
+                                                    {% else %}
+                                                        <td class="card-text text-center text-danger"
+                                                            style="direction: ltr">{{ item.amalkard_by_line_ratio|floatformat:0 }}%
+                                                        </td>
+
+                                                    {% endif %}
+
+
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
             <!-- ردیف خلاصه فروش سطح 1 -->
             <div class="row">
                 <div class="col-md-12 mb-30">
@@ -64,14 +229,14 @@
                                                data-buttons-class="primary"
                                                data-pagination="true"
                                                data-show-columns-search="true"
-                                                {#                                           data-show-footer="true"#}
+                                               data-show-footer="true"
                                                data-page-size="100"
                                                data-remember-order="true"
                                                data-sortable="true"
                                                data-show-search-clear-button="true"
-                                               data-sort-name="moin_code"
-                                               data-sort-order="asc"
-                                                {#                                           data-sort-order="desc"#}
+                                               data-sort-name="total_sanad_cy_today"
+                                                {#                                               data-sort-order="asc"#}
+                                               data-sort-order="desc"
                                                data-filter-control="true"
                                                data-show-print="true"
                                                data-export-data-type="all"
@@ -79,69 +244,77 @@
                                             <thead>
                                             <tr class="tr-class-1">
 
-
                                                 <th></th>
-                                                <th data-field="total_sanad_by" class="card-text text-center"
+                                                <th data-field="l1" class="card-text text-center"
+                                                    data-sortable="true" data-filter-control="select">سطح 1
+                                                </th>
+
+
+
+
+
+                                                <th data-field="by_factor" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter"> کل
-                                                    عملکرد{{ base_year }}</th>
-                                                <th data-field="total_budget_by" class="card-text text-center"
+                                                    فروش{{ base_year }}</th>
+                                                <th data-field="budget_rate">ضریب بودجه</th>
+                                                <th data-field="cy_budget" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter"> مشمول
-                                                    بودجه{{ base_year }}</th>
+                                                    data-footer-formatter="priceFormatter">
+                                                    بودجه{{ acc_year }}</th>
 
-                                                <th data-field="total_budget_cy" class="card-text text-center"
+                                                <th data-field="cy_factor" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">کل بودجه{{ acc_year }}</th>
-                                                <th data-field="total_sanad_by_today" class="card-text text-center"
-                                                    data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">عملکرد سال {{ base_year }}تا
-                                                    امروز
+                                                    data-footer-formatter="priceFormatter">فروش{{ acc_year }}تا امروز
                                                 </th>
-                                                <th data-field="total_budget_cy_today" class="card-text text-center"
+
+                                                <th data-field="cy_today_budget" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">بودجه {{ acc_year }}تا امروز
+                                                    data-footer-formatter="priceFormatter">بودجه{{ acc_year }} با آهنگ
+                                                    پارسال تا امروز
                                                 </th>
-                                                <th data-field="total_sanad_cy_today" class="card-text text-center"
-                                                    data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">عملکرد {{ acc_year }}تا امروز
-                                                </th>
-                                                <th data-field="amalkard_by_year" class="card-text text-center"
-                                                    data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">عملکرد با آهنگ پارسال
-                                                </th>
+
+
                                                 <th data-field="amalkard_by_year_ratio" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
-                                                >درصد عملکرد با آهنگ پارسال
+                                                >عملکرد نسبت به بودجه (آهنگ پارسال)
                                                 </th>
-                                                <th data-field="amalkard_by_day" class="card-text text-center"
+
+                                                <th data-field="cy_today_budget_line" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">عملکرد نسبی روزانه
+                                                    data-footer-formatter="priceFormatter">بودجه{{ acc_year }}
+                                                    بصورت خطی تا امروز
                                                 </th>
-                                                <th data-field="amalkard_by_day_ratio" class="card-text text-center"
+
+
+                                                <th data-field="amalkard_by_line_ratio" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
-                                                >درصد عملکرد نسبی روزانه
+                                                >عملکرد نسبت به بودجه (خطی)
                                                 </th>
+
+
                                             </tr>
                                             </thead>
                                             <tbody>
                                             {% for item in table1 %}
                                                 <tr>
+
                                                     <td>
-                                                        <a href="/budget/cost/detail/1/501" target="_blank">
+                                                        <a href="/budget/cost/detail/3/{{ item.tafzili_code }}"
+                                                           target="_blank">
                                                             <button type="button"
                                                                     class="btn btn-sm btn-success btn-fixed-width">
                                                                 <i class="ti-bar-chart pr-1"></i> نمودار عملکرد
                                                             </button>
                                                         </a>
-                                                        <a href="/balance-sheet-moin/{{ acc_year }}/501/"
+                                                        <a href="/sanad_total/{{ acc_year }}/501/{{ item.moin_code }}/{{ item.tafzili_code }}"
                                                            target="_blank">
                                                             <button type="button"
                                                                     class="btn btn-sm btn-danger btn-fixed-width">
                                                                 <i class="ti-wallet pr-1"></i> تراز {{ acc_year }}
                                                             </button>
                                                         </a>
-                                                        <a href="/balance-sheet-moin/{{ base_year }}/501/"
+                                                        <a href="/sanad_total/{{ base_year }}/501/{{ item.moin_code }}/{{ item.tafzili_code }}"
                                                            target="_blank">
                                                             <button type="button"
                                                                     class="btn btn-sm btn-primary btn-fixed-width">
@@ -149,44 +322,39 @@
                                                             </button>
                                                         </a>
                                                     </td>
-                                                    <td class="card-text text-center"
-                                                        style="direction: ltr">{{ item.total_sanad_by|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center">{{ item.total_budget_by|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center"
-                                                        style="direction: ltr">{{ item.total_budget_cy|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center"
-                                                        style="direction: ltr">{{ item.total_sanad_by_today|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center"
-                                                        style="direction: ltr">{{ item.total_budget_cy_today|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center"
-                                                        style="direction: ltr">{{ item.total_sanad_cy_today|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.l1 }}</td>
+                                                    <td class="card-text text-center">{{ item.by_factor|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.budget_rate|floatformat:2 }}</td>
+                                                    <td class="card-text text-center">{{ item.cy_budget|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.cy_factor|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.cy_today_budget|floatformat:0|intcomma:False }}</td>
+
                                                     {% if item.amalkard1 %}
+
                                                         <td class="card-text text-center text-success"
-                                                            style="direction: ltr">{{ item.amalkard_by_year|floatformat:0|intcomma:False }}</td>
-                                                        <td class="card-text text-center text-success"
-                                                            style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:2 }}%
+                                                            style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:0 }}%
                                                         </td>
                                                     {% else %}
                                                         <td class="card-text text-center text-danger"
-                                                            style="direction: ltr">{{ item.amalkard_by_year|floatformat:0|intcomma:False }}</td>
-                                                        <td class="card-text text-center text-danger"
-                                                            style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:2 }}%
+                                                            style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:0 }}%
                                                         </td>
+
                                                     {% endif %}
 
+                                                    <td class="card-text text-center">{{ item.cy_today_budget_line|floatformat:0|intcomma:False }}</td>
+
                                                     {% if item.amalkard2 %}
+
                                                         <td class="card-text text-center text-success"
-                                                            style="direction: ltr">{{ item.amalkard_by_day|floatformat:0|intcomma:False }}</td>
-                                                        <td class="card-text text-center text-success"
-                                                            style="direction: ltr">{{ item.amalkard_by_day_ratio|floatformat:2 }}%
+                                                            style="direction: ltr">{{ item.amalkard_by_line_ratio|floatformat:0 }}%
                                                         </td>
                                                     {% else %}
                                                         <td class="card-text text-center text-danger"
-                                                            style="direction: ltr">{{ item.amalkard_by_day|floatformat:0|intcomma:False }}</td>
-                                                        <td class="card-text text-center text-danger"
-                                                            style="direction: ltr">{{ item.amalkard_by_day_ratio|floatformat:2 }}%
+                                                            style="direction: ltr">{{ item.amalkard_by_line_ratio|floatformat:0 }}%
                                                         </td>
+
                                                     {% endif %}
+
 
                                                 </tr>
                                             {% endfor %}
@@ -236,85 +404,89 @@
                                                data-remember-order="true"
                                                data-sortable="true"
                                                data-show-search-clear-button="true"
-                                               data-sort-name="moin_code"
-                                               data-sort-order="asc"
-                                                {#                                           data-sort-order="desc"#}
+                                               data-sort-name="total_sanad_cy_today"
+                                                {#                                               data-sort-order="asc"#}
+                                               data-sort-order="desc"
                                                data-filter-control="true"
                                                data-show-print="true"
                                                data-export-data-type="all"
                                                data-export-types='["excel"]'>
                                             <thead>
                                             <tr class="tr-class-1">
+
                                                 <th></th>
-                                                <th data-field="moin_code" class="card-text text-center"
-                                                    data-sortable="true">کد معین
-                                                </th>
-                                                <th data-field="moin_name" class="card-text text-center"
-                                                    data-sortable="true">نام معین
+                                                <th data-field="l1" class="card-text text-center"
+                                                    data-sortable="true" data-filter-control="select">سطح 1
                                                 </th>
 
-                                                <th data-field="total_sanad_by" class="card-text text-center"
+                                                <th data-field="l2" class="card-text text-center"
+                                                    data-sortable="true" data-filter-control="select">سطح 2
+                                                </th>
+
+
+
+                                                <th data-field="by_factor" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter"> کل
-                                                    عملکرد{{ base_year }}</th>
-                                                <th data-field="total_budget_by" class="card-text text-center"
+                                                    فروش{{ base_year }}</th>
+                                                <th data-field="budget_rate">ضریب بودجه</th>
+                                                <th data-field="cy_budget" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter"> مشمول
-                                                    بودجه{{ base_year }}</th>
+                                                    data-footer-formatter="priceFormatter">
+                                                    بودجه{{ acc_year }}</th>
 
-                                                <th data-field="total_budget_cy" class="card-text text-center"
+                                                <th data-field="cy_factor" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">کل بودجه{{ acc_year }}</th>
-                                                <th data-field="total_sanad_by_today" class="card-text text-center"
-                                                    data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">عملکرد سال {{ base_year }}تا
-                                                    امروز
+                                                    data-footer-formatter="priceFormatter">فروش{{ acc_year }}تا امروز
                                                 </th>
-                                                <th data-field="total_budget_cy_today" class="card-text text-center"
+
+                                                <th data-field="cy_today_budget" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">بودجه {{ acc_year }}تا امروز
+                                                    data-footer-formatter="priceFormatter">بودجه{{ acc_year }} با آهنگ
+                                                    پارسال تا امروز
                                                 </th>
-                                                <th data-field="total_sanad_cy_today" class="card-text text-center"
-                                                    data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">عملکرد {{ acc_year }}تا امروز
-                                                </th>
-                                                <th data-field="amalkard_by_year" class="card-text text-center"
-                                                    data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">عملکرد با آهنگ پارسال
-                                                </th>
+
+
                                                 <th data-field="amalkard_by_year_ratio" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
-                                                >درصد عملکرد با آهنگ پارسال
+                                                >عملکرد نسبت به بودجه (آهنگ پارسال)
                                                 </th>
-                                                <th data-field="amalkard_by_day" class="card-text text-center"
+
+                                                <th data-field="cy_today_budget_line" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">عملکرد نسبی روزانه
+                                                    data-footer-formatter="priceFormatter">بودجه{{ acc_year }}
+                                                    بصورت خطی تا امروز
                                                 </th>
-                                                <th data-field="amalkard_by_day_ratio" class="card-text text-center"
+
+
+                                                <th data-field="amalkard_by_line_ratio" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
-                                                >درصد عملکرد نسبی روزانه
+                                                >عملکرد نسبت به بودجه (خطی)
                                                 </th>
+
+
                                             </tr>
                                             </thead>
                                             <tbody>
                                             {% for item in table2 %}
                                                 <tr>
+
                                                     <td>
-                                                        <a href="/budget/cost/detail/2/{{ item.moin_code }}"
+                                                        <a href="/budget/cost/detail/3/{{ item.tafzili_code }}"
                                                            target="_blank">
                                                             <button type="button"
                                                                     class="btn btn-sm btn-success btn-fixed-width">
                                                                 <i class="ti-bar-chart pr-1"></i> نمودار عملکرد
                                                             </button>
                                                         </a>
-                                                        <a href="/balance-sheet-tafsili/{{ acc_year }}/501/{{ item.moin_code }}/"
+                                                        <a href="/sanad_total/{{ acc_year }}/501/{{ item.moin_code }}/{{ item.tafzili_code }}"
                                                            target="_blank">
                                                             <button type="button"
                                                                     class="btn btn-sm btn-danger btn-fixed-width">
                                                                 <i class="ti-wallet pr-1"></i> تراز {{ acc_year }}
                                                             </button>
                                                         </a>
-                                                        <a href="/balance-sheet-tafsili/{{ base_year }}/501/{{ item.moin_code }}/"
+                                                        <a href="/sanad_total/{{ base_year }}/501/{{ item.moin_code }}/{{ item.tafzili_code }}"
                                                            target="_blank">
                                                             <button type="button"
                                                                     class="btn btn-sm btn-primary btn-fixed-width">
@@ -322,46 +494,40 @@
                                                             </button>
                                                         </a>
                                                     </td>
-                                                    <td class="card-text text-center">{{ item.moin_code }}</td>
-                                                    <td class="card-text text-center">{{ item.moin_name }}</td>
-                                                    <td class="card-text text-center"
-                                                        style="direction: ltr">{{ item.total_sanad_by|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center">{{ item.total_budget_by|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center"
-                                                        style="direction: ltr">{{ item.total_budget_cy|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center"
-                                                        style="direction: ltr">{{ item.total_sanad_by_today|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center"
-                                                        style="direction: ltr">{{ item.total_budget_cy_today|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center"
-                                                        style="direction: ltr">{{ item.total_sanad_cy_today|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.l1 }}</td>
+                                                    <td class="card-text text-center">{{ item.l2 }}</td>
+                                                    <td class="card-text text-center">{{ item.by_factor|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.budget_rate|floatformat:2 }}</td>
+                                                    <td class="card-text text-center">{{ item.cy_budget|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.cy_factor|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.cy_today_budget|floatformat:0|intcomma:False }}</td>
+
                                                     {% if item.amalkard1 %}
+
                                                         <td class="card-text text-center text-success"
-                                                            style="direction: ltr">{{ item.amalkard_by_year|floatformat:0|intcomma:False }}</td>
-                                                        <td class="card-text text-center text-success"
-                                                            style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:2 }}%
+                                                            style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:0 }}%
                                                         </td>
                                                     {% else %}
                                                         <td class="card-text text-center text-danger"
-                                                            style="direction: ltr">{{ item.amalkard_by_year|floatformat:0|intcomma:False }}</td>
-                                                        <td class="card-text text-center text-danger"
-                                                            style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:2 }}%
+                                                            style="direction: ltr">{{ item.amalkard_by_year_ratio|floatformat:0 }}%
                                                         </td>
+
                                                     {% endif %}
 
+                                                    <td class="card-text text-center">{{ item.cy_today_budget_line|floatformat:0|intcomma:False }}</td>
+
                                                     {% if item.amalkard2 %}
+
                                                         <td class="card-text text-center text-success"
-                                                            style="direction: ltr">{{ item.amalkard_by_day|floatformat:0|intcomma:False }}</td>
-                                                        <td class="card-text text-center text-success"
-                                                            style="direction: ltr">{{ item.amalkard_by_day_ratio|floatformat:2 }}%
+                                                            style="direction: ltr">{{ item.amalkard_by_line_ratio|floatformat:0 }}%
                                                         </td>
                                                     {% else %}
                                                         <td class="card-text text-center text-danger"
-                                                            style="direction: ltr">{{ item.amalkard_by_day|floatformat:0|intcomma:False }}</td>
-                                                        <td class="card-text text-center text-danger"
-                                                            style="direction: ltr">{{ item.amalkard_by_day_ratio|floatformat:2 }}%
+                                                            style="direction: ltr">{{ item.amalkard_by_line_ratio|floatformat:0 }}%
                                                         </td>
+
                                                     {% endif %}
+
 
                                                 </tr>
                                             {% endfor %}
@@ -447,19 +613,33 @@
                                                     data-footer-formatter="priceFormatter">
                                                     بودجه{{ acc_year }}</th>
 
-
-                                                <th data-field="cy_today_budget" class="card-text text-center"
-                                                    data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">بودجه{{ acc_year }}تا امروز
-                                                </th>
                                                 <th data-field="cy_factor" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter">فروش{{ acc_year }}تا امروز
                                                 </th>
 
+                                                <th data-field="cy_today_budget" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">بودجه{{ acc_year }} با آهنگ
+                                                    پارسال تا امروز
+                                                </th>
+
+
                                                 <th data-field="amalkard_by_year_ratio" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
                                                 >عملکرد نسبت به بودجه (آهنگ پارسال)
+                                                </th>
+
+                                                <th data-field="cy_today_budget_line" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">بودجه{{ acc_year }}
+                                                    بصورت خطی تا امروز
+                                                </th>
+
+
+                                                <th data-field="amalkard_by_line_ratio" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                >عملکرد نسبت به بودجه (خطی)
                                                 </th>
 
 
@@ -498,8 +678,8 @@
                                                     <td class="card-text text-center">{{ item.by_factor|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.budget_rate }}</td>
                                                     <td class="card-text text-center">{{ item.cy_budget|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center">{{ item.cy_today_budget|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.cy_factor|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.cy_today_budget|floatformat:0|intcomma:False }}</td>
 
                                                     {% if item.amalkard1 %}
 
@@ -512,6 +692,22 @@
                                                         </td>
 
                                                     {% endif %}
+
+                                                    <td class="card-text text-center">{{ item.cy_today_budget_line|floatformat:0|intcomma:False }}</td>
+
+                                                    {% if item.amalkard2 %}
+
+                                                        <td class="card-text text-center text-success"
+                                                            style="direction: ltr">{{ item.amalkard_by_line_ratio|floatformat:0 }}%
+                                                        </td>
+                                                    {% else %}
+                                                        <td class="card-text text-center text-danger"
+                                                            style="direction: ltr">{{ item.amalkard_by_line_ratio|floatformat:0 }}%
+                                                        </td>
+
+                                                    {% endif %}
+
+
                                                 </tr>
                                             {% endfor %}
                                             </tbody>

@@ -851,6 +851,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
     first_factor_day = FactorDetaile.objects.filter(acc_year=acc_year).first().factor.date
     days_from_start = (today - first_factor_day).days
     day_rate = days_from_start / 365
+
     level3=Category.objects.filter(level=3)
     today = date.today()
     one_year_ago = today - relativedelta(years=1)
@@ -882,10 +883,26 @@ def BudgetSaleTotal(request, *args, **kwargs):
             amalkard_by_year_ratio=0
 
 
+
         amalkard1 = False
 
         if amalkard_by_year_ratio > 0:
             amalkard1=True
+
+        cy_today_budget_line= Decimal(day_rate) * cy_budget
+        if cy_today_budget_line != 0:
+            amalkard_by_line_ratio=((Decimal(cy_factor)/cy_today_budget_line)-Decimal(1.0))*Decimal(100.0)
+        else:
+            amalkard_by_line_ratio=0
+
+
+
+        amalkard2 = False
+
+        if amalkard_by_line_ratio > 0:
+            amalkard2=True
+
+
 
 
         table3.append({
@@ -897,13 +914,266 @@ def BudgetSaleTotal(request, *args, **kwargs):
             'budget_rate':budget_rate,
 
             'cy_today_budget':cy_today_budget,
+            'cy_today_budget_line':cy_today_budget_line,
             'cy_factor':cy_factor,
             'amalkard_by_year_ratio':amalkard_by_year_ratio,
+            'amalkard_by_line_ratio':amalkard_by_line_ratio,
             'amalkard1':amalkard1,
+            'amalkard2':amalkard2,
 
         }
 
         )
+#==============================================  table2
+    # دیکشنری کمکی برای نگهداری جمع مقادیر بر اساس لایه‌های l1 و l2
+    grouped_data = {}
+
+    for entry in table3:
+        l1 = entry['l1']
+        l2 = entry['l2']
+        by_factor = entry['by_factor']
+
+        # کلید گروه‌بندی ترکیبی از l1 و l2
+        group_key = (l1, l2)
+
+        if group_key not in grouped_data:
+            grouped_data[group_key] = {
+                'l1': l1,
+                'l2': l2,
+                'by_factor': 0,
+                'cy_budget': 0,
+                'cy_today_budget': 0,
+                'cy_today_budget_line': 0,
+                'cy_factor': 0,
+            }
+
+        def safe_float(value):
+            try:
+                val = str(value).strip()
+                if val == '-' or val == '':
+                    return 0.0
+                return float(val)
+            except ValueError:
+                return 0.0
+
+        # جمع کردن مقادیر بر اساس شرط
+        # if entry['by_factor'] != 0:
+        grouped_data[group_key]['by_factor'] += safe_float(entry['by_factor'])
+        grouped_data[group_key]['cy_budget'] += safe_float(entry['cy_budget'])
+        grouped_data[group_key]['cy_today_budget'] += safe_float(entry['cy_today_budget'])
+        grouped_data[group_key]['cy_today_budget_line'] += safe_float(entry['cy_today_budget_line'])
+        grouped_data[group_key]['cy_factor'] += safe_float(entry['cy_factor'])
+
+    # ساخت جدول نهایی
+    table2 = []
+
+    for key, data in grouped_data.items():
+        # محاسبه نسبت budget_rate
+        budget_rate = data['cy_budget'] / data['by_factor'] if data['by_factor'] != 0 else 0
+
+
+        if data['cy_today_budget'] != 0:
+            amalkard_by_year_ratio=((Decimal(data['cy_factor'])/Decimal(data['cy_today_budget']))-Decimal(1.0))*Decimal(100.0)
+        else:
+            amalkard_by_year_ratio=0
+
+
+
+        amalkard1 = False
+
+        if amalkard_by_year_ratio > 0:
+            amalkard1=True
+
+        cy_today_budget_line= Decimal(day_rate) * Decimal(data['cy_budget'])
+        if cy_today_budget_line != 0:
+            amalkard_by_line_ratio=((Decimal(data['cy_factor'])/cy_today_budget_line)-Decimal(1.0))*Decimal(100.0)
+        else:
+            amalkard_by_line_ratio=0
+
+
+
+        amalkard2 = False
+
+        if amalkard_by_line_ratio > 0:
+            amalkard2=True
+
+
+        table2.append({
+            'l1': data['l1'],
+            'l2': data['l2'],
+            'by_factor': data['by_factor'],
+            'cy_budget': data['cy_budget'],
+            'budget_rate': budget_rate,
+            'cy_today_budget': data['cy_today_budget'],
+            'cy_today_budget_line': data['cy_today_budget_line'],
+            'cy_factor': data['cy_factor'],
+
+            'amalkard_by_year_ratio': amalkard_by_year_ratio,
+            'amalkard_by_line_ratio': amalkard_by_line_ratio,
+            'amalkard1': amalkard1,
+            'amalkard2': amalkard2,
+        })
+
+
+
+#=======================================table1
+    # دیکشنری کمکی برای نگهداری جمع مقادیر بر اساس لایه‌های l1
+    grouped_data = {}
+
+    for entry in table3:
+        l1 = entry['l1']
+        # حذف l2
+        # l2 = entry['l2']
+        by_factor = entry['by_factor']
+
+        # کلید گروه‌بندی فقط بر اساس l1
+        group_key = l1
+
+        if group_key not in grouped_data:
+            grouped_data[group_key] = {
+                'l1': l1,
+                'by_factor': 0,
+                'cy_budget': 0,
+                'cy_today_budget': 0,
+                'cy_today_budget_line': 0,
+                'cy_factor': 0,
+            }
+
+        def safe_float(value):
+            try:
+                val = str(value).strip()
+                if val == '-' or val == '':
+                    return 0.0
+                return float(val)
+            except ValueError:
+                return 0.0
+
+        # جمع کردن مقادیر بر اساس شرط
+        grouped_data[group_key]['by_factor'] += safe_float(entry['by_factor'])
+        grouped_data[group_key]['cy_budget'] += safe_float(entry['cy_budget'])
+        grouped_data[group_key]['cy_today_budget'] += safe_float(entry['cy_today_budget'])
+        grouped_data[group_key]['cy_today_budget_line'] += safe_float(entry['cy_today_budget_line'])
+        grouped_data[group_key]['cy_factor'] += safe_float(entry['cy_factor'])
+
+    # ساخت جدول نهایی
+    table1 = []
+
+    for key, data in grouped_data.items():
+        # محاسبه نسبت budget_rate
+        budget_rate = data['cy_budget'] / data['by_factor'] if data['by_factor'] != 0 else 0
+
+        if data['cy_today_budget'] != 0:
+            amalkard_by_year_ratio = ((Decimal(data['cy_factor']) / Decimal(data['cy_today_budget'])) - Decimal(
+                1.0)) * Decimal(100.0)
+        else:
+            amalkard_by_year_ratio = 0
+
+        amalkard1 = False
+        if amalkard_by_year_ratio > 0:
+            amalkard1 = True
+
+        cy_today_budget_line = Decimal(day_rate) * Decimal(data['cy_budget'])
+        if cy_today_budget_line != 0:
+            amalkard_by_line_ratio = ((Decimal(data['cy_factor']) / cy_today_budget_line) - Decimal(1.0)) * Decimal(
+                100.0)
+        else:
+            amalkard_by_line_ratio = 0
+
+        amalkard2 = False
+        if amalkard_by_line_ratio > 0:
+            amalkard2 = True
+
+        table1.append({
+            'l1': data['l1'],
+            # حذف 'l2'
+            'by_factor': data['by_factor'],
+            'cy_budget': data['cy_budget'],
+            'budget_rate': budget_rate,
+            'cy_today_budget': data['cy_today_budget'],
+            'cy_today_budget_line': data['cy_today_budget_line'],
+            'cy_factor': data['cy_factor'],
+            'amalkard_by_year_ratio': amalkard_by_year_ratio,
+            'amalkard_by_line_ratio': amalkard_by_line_ratio,
+            'amalkard1': amalkard1,
+            'amalkard2': amalkard2,
+        })
+
+#=========================================  table0
+    # دیکشنری کمکی برای نگهداری جمع مقادیر بدون هیچ گروه‌بندی خاصی
+    grouped_data = {
+        'by_factor': 0,
+        'cy_budget': 0,
+        'cy_today_budget': 0,
+        'cy_today_budget_line': 0,
+        'cy_factor': 0,
+    }
+
+    for entry in table3:
+        def safe_float(value):
+            try:
+                val = str(value).strip()
+                if val == '-' or val == '':
+                    return 0.0
+                return float(val)
+            except ValueError:
+                return 0.0
+
+        grouped_data['by_factor'] += safe_float(entry['by_factor'])
+        grouped_data['cy_budget'] += safe_float(entry['cy_budget'])
+        grouped_data['cy_today_budget'] += safe_float(entry['cy_today_budget'])
+        grouped_data['cy_today_budget_line'] += safe_float(entry['cy_today_budget_line'])
+        grouped_data['cy_factor'] += safe_float(entry['cy_factor'])
+
+    # ساخت جدول نهایی (table0)
+    table0 = []
+
+    # محاسبه نسبت budget_rate
+    budget_rate = grouped_data['cy_budget'] / grouped_data['by_factor'] if grouped_data['by_factor'] != 0 else 0
+
+    if grouped_data['cy_today_budget'] != 0:
+        amalkard_by_year_ratio = ((Decimal(grouped_data['cy_factor']) / Decimal(
+            grouped_data['cy_today_budget'])) - Decimal(1.0)) * Decimal(100.0)
+    else:
+        amalkard_by_year_ratio = 0
+
+    amalkard1 = False
+    if amalkard_by_year_ratio > 0:
+        amalkard1 = True
+
+    cy_today_budget_line = Decimal(day_rate) * Decimal(grouped_data['cy_budget'])
+    if cy_today_budget_line != 0:
+        amalkard_by_line_ratio = ((Decimal(grouped_data['cy_factor']) / cy_today_budget_line) - Decimal(1.0)) * Decimal(
+            100.0)
+    else:
+        amalkard_by_line_ratio = 0
+
+    amalkard2 = False
+    if amalkard_by_line_ratio > 0:
+        amalkard2 = True
+
+    # افزودن رکورد نهایی بدون هیچ لایه‌ای به جدول
+    table0.append({
+        # حذف 'l1', 'l2'
+        'by_factor': grouped_data['by_factor'],
+        'cy_budget': grouped_data['cy_budget'],
+        'budget_rate': budget_rate,
+        'cy_today_budget': grouped_data['cy_today_budget'],
+        'cy_today_budget_line': grouped_data['cy_today_budget_line'],
+        'cy_factor': grouped_data['cy_factor'],
+        'amalkard_by_year_ratio': amalkard_by_year_ratio,
+        'amalkard_by_line_ratio': amalkard_by_line_ratio,
+        'amalkard1': amalkard1,
+        'amalkard2': amalkard2,
+    })
+
+
+
+
+
+
+
+
+
 
 
     context = {
@@ -911,8 +1181,14 @@ def BudgetSaleTotal(request, *args, **kwargs):
         'base_year': base_year,
         'user': user,
         'table3': table3,
+        'table2': table2,
+        'table1': table1,
+        'table0': table0,
 
     }
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
     return render(request, 'budget_sale_total.html', context)
+
+
+
