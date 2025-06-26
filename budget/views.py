@@ -1167,9 +1167,9 @@ def BudgetSaleTotal(request, *args, **kwargs):
     })
 
     # فرض بر این است که این کد در ویو Django یا فریمورک مشابه است
-    table10 = [{'l1': item['l1'], 'cy_factor': item['cy_factor']} for item in table1 if item.get('cy_factor', 0) > 0]
-    table20 = [{'l1': item['l1'], 'l2': item['l2'], 'cy_factor': item['cy_factor']} for item in table2 if item.get('cy_factor', 0) > 0]
-    table30 = [{'l1': item['l1'], 'l2': item['l2'], 'l3': item['l3'], 'cy_factor': item['cy_factor']} for item
+    table10 = [{'l1': item['l1'], 'cy_factor': item['cy_factor']/10000000} for item in table1 if item.get('cy_factor', 0) > 0]
+    table20 = [{'l1': item['l1'], 'l2': item['l2'], 'cy_factor': item['cy_factor']/10000000} for item in table2 if item.get('cy_factor', 0) > 0]
+    table30 = [{'l1': item['l1'], 'l2': item['l2'], 'l3': item['l3'], 'cy_factor': item['cy_factor']/10000000} for item
                        in table3 if item.get('cy_factor', 0) > 0]
 
     context = {
