@@ -822,9 +822,23 @@
 
 
 <!-- Resources -->
-<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/hierarchy.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+        <script src="{% static 'js/amcharts/index.js' %}"></script>
+        <script src="{% static 'js/amcharts/hierarchy.js' %}"></script>
+
+    <script src="{% static 'js/amcharts/Animated.js' %}"></script>
+
+
+
+
+{##}
+{#<script src="https://cdn.amcharts.com/lib/5/index.js"></script>#}
+{#<script src="https://cdn.amcharts.com/lib/5/hierarchy.js"></script>#}
+{#<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>#}
+
+
+
+
+
 
 <script>
 am5.ready(function () {
