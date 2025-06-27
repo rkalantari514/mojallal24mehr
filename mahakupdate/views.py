@@ -1206,6 +1206,24 @@ def UpdateFactorDetail(request):
 
     if conn:
         conn.close()
+
+
+    objects_to_update = []
+    fields_to_update = ['date']
+
+    for fac in FactorDetaile.objects.all():
+        d1 = fac.date
+        try:
+            d2 = fac.factor.date
+        except:
+            d2=None
+        if d2 and d1 != d2:
+            fac.date = d2
+            objects_to_update.append(fac)
+
+    if objects_to_update:
+        FactorDetaile.objects.bulk_update(objects_to_update, fields_to_update)
+
     print('پایان آپدیت جزئیات فاکتور-------------------------------------------------')
     return redirect('/updatedb')
 
