@@ -1096,6 +1096,7 @@ def UpdateFactorDetail(request):
     updated_count = 0
 
     for row in mahakt_data:
+        print( row[0],row[1])
         code_factor_mahak = row[0]
         radif_mahak = row[1]
         kala_code_mahak = row[2]
