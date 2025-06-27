@@ -42,7 +42,7 @@ class FactorAdmin(admin.ModelAdmin):
 
 
 class FactorDetaileAdmin(admin.ModelAdmin):
-    list_display = ['acc_year','code_factor', 'kala', 'count', 'mablagh_vahed', 'mablagh_nahaee']
+    list_display = ['acc_year','date','code_factor', 'kala', 'count', 'mablagh_vahed', 'mablagh_nahaee']
     list_filter = ['acc_year']
 
     # list_filter = ['name','code']

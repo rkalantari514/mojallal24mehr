@@ -1345,7 +1345,7 @@ def UpdateBackFactorDetail(request):
     print(f" عملیات اصلی آپدیت: {up_time:.2f} ثانیه")
 
     try:
-        cursor.execute(f"SELECT COUNT(*) FROM Fact_Fo_Detail")
+        cursor.execute(f"SELECT COUNT(*) FROM BackFact_Detail")
         row_count = cursor.fetchone()[0]
         cursor.execute(f"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'BackFact_Detail'")
         column_count = cursor.fetchone()[0]
