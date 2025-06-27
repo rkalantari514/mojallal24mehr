@@ -1185,10 +1185,38 @@ def BudgetSaleTotal(request, *args, **kwargs):
     })
 
     # فرض بر این است که این کد در ویو Django یا فریمورک مشابه است
-    table10 = [{'l1': item['l1'], 'cy_factor': item['cy_factor']/10000000} for item in table1 if item.get('cy_factor', 0) > 0]
-    table20 = [{'l1': item['l1'], 'l2': item['l2'], 'cy_factor': item['cy_factor']/10000000} for item in table2 if item.get('cy_factor', 0) > 0]
-    table30 = [{'l1': item['l1'], 'l2': item['l2'], 'l3': item['l3'], 'cy_factor': item['cy_factor']/10000000} for item
+    table100 = [{'l1': item['l1'], 'cy_factor': item['cy_factor']/10000000} for item in table1 if item.get('cy_factor', 0) > 0]
+    table200 = [{'l1': item['l1'], 'l2': item['l2'], 'cy_factor': item['cy_factor']/10000000} for item in table2 if item.get('cy_factor', 0) > 0]
+    table300 = [{'l1': item['l1'], 'l2': item['l2'], 'l3': item['l3'], 'cy_factor': item['cy_factor']/10000000} for item
                        in table3 if item.get('cy_factor', 0) > 0]
+
+    for item in table100:
+        print(item['l1'])
+
+    change_name = [
+        ('لوازم آشپزخانه (طیقه اول)', 'طبقه اول'),
+        ('موبایل و کالای دیجیتال', 'موبایل'),
+        # می توانید موارد دیگر را اینجا اضافه کنید
+        # ('نام_طولانی_دیگر', 'نام_کوتاه_آن'),
+    ]
+
+    name_map = {original: short for original, short in change_name}
+
+    def apply_short_names(item):
+        if 'l1' in item and item['l1'] in name_map:
+            item['l1'] = name_map[item['l1']]
+        if 'l2' in item and item['l2'] in name_map:
+            item['l2'] = name_map[item['l2']]
+        if 'l3' in item and item['l3'] in name_map:
+            item['l3'] = name_map[item['l3']]
+        return item
+
+    table10 = [apply_short_names(item.copy()) for item in table100]
+    table20 = [apply_short_names(item.copy()) for item in table200]
+    table30 = [apply_short_names(item.copy()) for item in table300]
+
+
+
 
     context = {
         'acc_year': acc_year,
