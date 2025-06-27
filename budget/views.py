@@ -902,7 +902,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
         if amalkard_by_line_ratio > 0:
             amalkard2=True
 
-
+        actual_ratio_by_year=Decimal(cy_factor)/Decimal(by_today_factor) if by_today_factor and by_today_factor != 0 else 0.0
 
 
         table3.append({
@@ -912,6 +912,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
             'by_factor':by_factor,
             'cy_budget':cy_budget,
             'budget_rate':budget_rate,
+            'by_today_factor':by_today_factor,
 
             'cy_today_budget':cy_today_budget,
             'cy_today_budget_line':cy_today_budget_line,
@@ -920,6 +921,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
             'amalkard_by_line_ratio':amalkard_by_line_ratio,
             'amalkard1':amalkard1,
             'amalkard2':amalkard2,
+            'actual_ratio_by_year':actual_ratio_by_year,
 
         }
 
@@ -945,6 +947,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
                 'cy_today_budget': 0,
                 'cy_today_budget_line': 0,
                 'cy_factor': 0,
+                'by_today_factor': 0,
             }
 
         def safe_float(value):
@@ -963,6 +966,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
         grouped_data[group_key]['cy_today_budget'] += safe_float(entry['cy_today_budget'])
         grouped_data[group_key]['cy_today_budget_line'] += safe_float(entry['cy_today_budget_line'])
         grouped_data[group_key]['cy_factor'] += safe_float(entry['cy_factor'])
+        grouped_data[group_key]['by_today_factor'] += safe_float(entry['by_today_factor'])
 
     # ساخت جدول نهایی
     table2 = []
@@ -997,6 +1001,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
         if amalkard_by_line_ratio > 0:
             amalkard2=True
 
+        actual_ratio_by_year=Decimal(data['cy_factor'])/Decimal(data['by_today_factor']) if data['by_today_factor'] and data['by_today_factor'] != 0 else 0.0
 
         table2.append({
             'l1': data['l1'],
@@ -1007,11 +1012,13 @@ def BudgetSaleTotal(request, *args, **kwargs):
             'cy_today_budget': data['cy_today_budget'],
             'cy_today_budget_line': data['cy_today_budget_line'],
             'cy_factor': data['cy_factor'],
+            'by_today_factor': data['by_today_factor'],
 
             'amalkard_by_year_ratio': amalkard_by_year_ratio,
             'amalkard_by_line_ratio': amalkard_by_line_ratio,
             'amalkard1': amalkard1,
             'amalkard2': amalkard2,
+            'actual_ratio_by_year': actual_ratio_by_year,
         })
 
 
@@ -1037,6 +1044,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
                 'cy_today_budget': 0,
                 'cy_today_budget_line': 0,
                 'cy_factor': 0,
+                'by_today_factor': 0,
             }
 
         def safe_float(value):
@@ -1054,6 +1062,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
         grouped_data[group_key]['cy_today_budget'] += safe_float(entry['cy_today_budget'])
         grouped_data[group_key]['cy_today_budget_line'] += safe_float(entry['cy_today_budget_line'])
         grouped_data[group_key]['cy_factor'] += safe_float(entry['cy_factor'])
+        grouped_data[group_key]['by_today_factor'] += safe_float(entry['by_today_factor'])
 
     # ساخت جدول نهایی
     table1 = []
@@ -1082,6 +1091,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
         amalkard2 = False
         if amalkard_by_line_ratio > 0:
             amalkard2 = True
+        actual_ratio_by_year=Decimal(data['cy_factor'])/Decimal(data['by_today_factor']) if data['by_today_factor'] and data['by_today_factor'] != 0 else 0.0
 
         table1.append({
             'l1': data['l1'],
@@ -1096,6 +1106,8 @@ def BudgetSaleTotal(request, *args, **kwargs):
             'amalkard_by_line_ratio': amalkard_by_line_ratio,
             'amalkard1': amalkard1,
             'amalkard2': amalkard2,
+            'by_today_factor': by_today_factor,
+            'actual_ratio_by_year': actual_ratio_by_year,
         })
 
 #=========================================  table0
@@ -1106,6 +1118,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
         'cy_today_budget': 0,
         'cy_today_budget_line': 0,
         'cy_factor': 0,
+        'by_today_factor': 0,
     }
 
     for entry in table3:
@@ -1123,6 +1136,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
         grouped_data['cy_today_budget'] += safe_float(entry['cy_today_budget'])
         grouped_data['cy_today_budget_line'] += safe_float(entry['cy_today_budget_line'])
         grouped_data['cy_factor'] += safe_float(entry['cy_factor'])
+        grouped_data['by_today_factor'] += safe_float(entry['by_today_factor'])
 
     # ساخت جدول نهایی (table0)
     table0 = []
@@ -1150,7 +1164,9 @@ def BudgetSaleTotal(request, *args, **kwargs):
     amalkard2 = False
     if amalkard_by_line_ratio > 0:
         amalkard2 = True
-
+    actual_ratio_by_year = Decimal(grouped_data['cy_factor']) / Decimal(grouped_data['by_today_factor']) if grouped_data['by_today_factor'] and \
+                                                                                            grouped_data[
+                                                                                                'by_today_factor'] != 0 else 0.0
     # افزودن رکورد نهایی بدون هیچ لایه‌ای به جدول
     table0.append({
         # حذف 'l1', 'l2'
@@ -1164,6 +1180,8 @@ def BudgetSaleTotal(request, *args, **kwargs):
         'amalkard_by_line_ratio': amalkard_by_line_ratio,
         'amalkard1': amalkard1,
         'amalkard2': amalkard2,
+        'by_today_factor': by_today_factor,
+        'actual_ratio_by_year': actual_ratio_by_year,
     })
 
     # فرض بر این است که این کد در ویو Django یا فریمورک مشابه است

@@ -61,7 +61,7 @@
                                 <div class="table-responsive mt-15 ">
                                     <h6 class="card-title pb-0 border-0">عملکرد فروش سال {{ acc_year }}</h6>
                                     <div id="chartdiv" style="width: 100%; height: 500px;"></div>
-<button id="homeButtonHtml" style="
+                                    <button id="homeButtonHtml" style="
     margin-top: 10px;
     padding: 10px 20px;
     font-size: 16px;
@@ -70,8 +70,8 @@
     color: white;
     border: none;
     border-radius: 5px;
-">خانه</button>
-
+">خانه
+                                    </button>
 
 
                                 </div>
@@ -132,7 +132,12 @@
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter"> کل
                                                     فروش{{ base_year }}</th>
-                                                <th data-field="budget_rate">ضریب بودجه</th>
+                                                <th data-field="budget_rate" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly">ضریب بودجه
+                                                </th>
+                                                <th data-field="actual_ratio_by_year" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly">ضریب واقعی
+                                                </th>
                                                 <th data-field="cy_budget" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter">
@@ -199,6 +204,7 @@
                                                     </td>
                                                     <td class="card-text text-center">{{ item.by_factor|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.budget_rate|floatformat:2 }}</td>
+                                                    <td class="card-text text-center">{{ item.actual_ratio_by_year|floatformat:2 }}</td>
                                                     <td class="card-text text-center">{{ item.cy_budget|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.cy_factor|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.cy_today_budget|floatformat:0|intcomma:False }}</td>
@@ -298,7 +304,12 @@
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter"> کل
                                                     فروش{{ base_year }}</th>
-                                                <th data-field="budget_rate">ضریب بودجه</th>
+                                                <th data-field="budget_rate" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly">ضریب بودجه
+                                                </th>
+                                                <th data-field="actual_ratio_by_year" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly">ضریب واقعی
+                                                </th>
                                                 <th data-field="cy_budget" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter">
@@ -366,6 +377,8 @@
                                                     <td class="card-text text-center">{{ item.l1 }}</td>
                                                     <td class="card-text text-center">{{ item.by_factor|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.budget_rate|floatformat:2 }}</td>
+                                                    <td class="card-text text-center">{{ item.actual_ratio_by_year|floatformat:2 }}</td>
+
                                                     <td class="card-text text-center">{{ item.cy_budget|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.cy_factor|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.cy_today_budget|floatformat:0|intcomma:False }}</td>
@@ -469,7 +482,12 @@
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter"> کل
                                                     فروش{{ base_year }}</th>
-                                                <th data-field="budget_rate">ضریب بودجه</th>
+                                                <th data-field="budget_rate" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly">ضریب بودجه
+                                                </th>
+                                                <th data-field="actual_ratio_by_year" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly">ضریب واقعی
+                                                </th>
                                                 <th data-field="cy_budget" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter">
@@ -538,6 +556,7 @@
                                                     <td class="card-text text-center">{{ item.l2 }}</td>
                                                     <td class="card-text text-center">{{ item.by_factor|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.budget_rate|floatformat:2 }}</td>
+                                                    <td class="card-text text-center">{{ item.actual_ratio_by_year|floatformat:2 }}</td>
                                                     <td class="card-text text-center">{{ item.cy_budget|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.cy_factor|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.cy_today_budget|floatformat:0|intcomma:False }}</td>
@@ -647,7 +666,12 @@
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter"> کل
                                                     فروش{{ base_year }}</th>
-                                                <th data-field="budget_rate">ضریب بودجه</th>
+                                                <th data-field="budget_rate" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly">ضریب بودجه
+                                                </th>
+                                                <th data-field="actual_ratio_by_year" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly">ضریب واقعی
+                                                </th>
                                                 <th data-field="cy_budget" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter">
@@ -717,6 +741,7 @@
                                                     <td class="card-text text-center">{{ item.l3 }}</td>
                                                     <td class="card-text text-center">{{ item.by_factor|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.budget_rate }}</td>
+                                                    <td class="card-text text-center">{{ item.actual_ratio_by_year|floatformat:2 }}</td>
                                                     <td class="card-text text-center">{{ item.cy_budget|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.cy_factor|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.cy_today_budget|floatformat:0|intcomma:False }}</td>
@@ -821,286 +846,268 @@
 
 
 
-<!-- Resources -->
-        <script src="{% static 'js/amcharts/index.js' %}"></script>
-        <script src="{% static 'js/amcharts/hierarchy.js' %}"></script>
-
+    <!-- Resources -->
+    <script src="{% static 'js/amcharts/index.js' %}"></script>
+    <script src="{% static 'js/amcharts/hierarchy.js' %}"></script>
     <script src="{% static 'js/amcharts/Animated.js' %}"></script>
+    <script>
+        am5.ready(function () {
+            console.log("AmCharts ready function started.");
 
+            var table10 = {{ table10|safe }};
+            var table20 = {{ table20|safe }};
+            var table30 = {{ table30|safe }};
 
+            console.log("Raw table10 data:", table10);
+            console.log("Raw table20 data:", table20);
+            console.log("Raw table30 data:", table30);
 
+            function filterAndParseColumns(dataArray) {
+                return dataArray.map(item => ({
+                    l1: item.l1,
+                    l2: item.l2,
+                    l3: item.l3,
+                    cy_factor: parseFloat(item.cy_factor) || 0
+                }));
+            }
 
-{##}
-{#<script src="https://cdn.amcharts.com/lib/5/index.js"></script>#}
-{#<script src="https://cdn.amcharts.com/lib/5/hierarchy.js"></script>#}
-{#<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>#}
+            var t1 = filterAndParseColumns(table10);
+            var t2 = filterAndParseColumns(table20);
+            var t3 = filterAndParseColumns(table30);
 
+            function buildHierarchy(table10, table20, table30) {
+                const l1Map = new Map(table10.map(item => [item.l1, item.cy_factor]));
+                const l2Map = new Map(table20.map(item => [`${item.l1}|${item.l2}`, item.cy_factor]));
+                const l3Map = new Map(table30.map(item => [`${item.l1}|${item.l2}|${item.l3}`, item.cy_factor]));
 
+                let rootCyFactor = 0;
+                table10.forEach(item => {
+                    rootCyFactor += item.cy_factor || 0;
+                });
+                const rootNode = {name: "همه دسته‌ها", children: [], value: rootCyFactor};
 
+                table10.forEach(item1 => {
+                    const l1Name = item1.l1;
+                    const l1Value = l1Map.get(l1Name);
 
-
-
-<script>
-am5.ready(function () {
-    console.log("AmCharts ready function started.");
-
-    var table10 = {{ table10|safe }};
-    var table20 = {{ table20|safe }};
-    var table30 = {{ table30|safe }};
-
-    console.log("Raw table10 data:", table10);
-    console.log("Raw table20 data:", table20);
-    console.log("Raw table30 data:", table30);
-
-    function filterAndParseColumns(dataArray) {
-        return dataArray.map(item => ({
-            l1: item.l1,
-            l2: item.l2,
-            l3: item.l3,
-            cy_factor: parseFloat(item.cy_factor) || 0
-        }));
-    }
-
-    var t1 = filterAndParseColumns(table10);
-    var t2 = filterAndParseColumns(table20);
-    var t3 = filterAndParseColumns(table30);
-
-    function buildHierarchy(table10, table20, table30) {
-        const l1Map = new Map(table10.map(item => [item.l1, item.cy_factor]));
-        const l2Map = new Map(table20.map(item => [`${item.l1}|${item.l2}`, item.cy_factor]));
-        const l3Map = new Map(table30.map(item => [`${item.l1}|${item.l2}|${item.l3}`, item.cy_factor]));
-
-        let rootCyFactor = 0;
-        table10.forEach(item => {
-            rootCyFactor += item.cy_factor || 0;
-        });
-        const rootNode = { name: "همه دسته‌ها", children: [], value: rootCyFactor };
-
-        table10.forEach(item1 => {
-            const l1Name = item1.l1;
-            const l1Value = l1Map.get(l1Name);
-
-            if (l1Value > 0) {
-                let level1Node = {
-                    name: l1Name,
-                    value: l1Value,
-                    children: []
-                };
-                rootNode.children.push(level1Node);
-
-                const relatedLevel2 = table20.filter(t => t.l1 === l1Name);
-                relatedLevel2.forEach(item2 => {
-                    const l2Name = item2.l2;
-                    const l2Value = l2Map.get(`${l1Name}|${l2Name}`);
-
-                    if (l2Value > 0) {
-                        let level2Node = {
-                            name: l2Name,
-                            value: l2Value,
+                    if (l1Value > 0) {
+                        let level1Node = {
+                            name: l1Name,
+                            value: l1Value,
                             children: []
                         };
-                        level1Node.children.push(level2Node);
+                        rootNode.children.push(level1Node);
 
-                        const relatedLevel3 = table30.filter(t => t.l1 === l1Name && t.l2 === l2Name);
-                        relatedLevel3.forEach(item3 => {
-                            const l3Name = item3.l3;
-                            const l3Value = l3Map.get(`${l1Name}|${l2Name}|${l3Name}`);
+                        const relatedLevel2 = table20.filter(t => t.l1 === l1Name);
+                        relatedLevel2.forEach(item2 => {
+                            const l2Name = item2.l2;
+                            const l2Value = l2Map.get(`${l1Name}|${l2Name}`);
 
-                            if (l3Value > 0) {
-                                level2Node.children.push({
-                                    name: l3Name,
-                                    value: l3Value
+                            if (l2Value > 0) {
+                                let level2Node = {
+                                    name: l2Name,
+                                    value: l2Value,
+                                    children: []
+                                };
+                                level1Node.children.push(level2Node);
+
+                                const relatedLevel3 = table30.filter(t => t.l1 === l1Name && t.l2 === l2Name);
+                                relatedLevel3.forEach(item3 => {
+                                    const l3Name = item3.l3;
+                                    const l3Value = l3Map.get(`${l1Name}|${l2Name}|${l3Name}`);
+
+                                    if (l3Value > 0) {
+                                        level2Node.children.push({
+                                            name: l3Name,
+                                            value: l3Value
+                                        });
+                                    }
                                 });
                             }
                         });
                     }
                 });
+                return rootNode;
             }
-        });
-        return rootNode;
-    }
 
-    const hierarchyData = [buildHierarchy(t1, t2, t3)];
+            const hierarchyData = [buildHierarchy(t1, t2, t3)];
 
-    console.log("Final Hierarchy Data:", JSON.stringify(hierarchyData, null, 2));
-    console.log("Is hierarchyData empty?", hierarchyData.length === 0 || (hierarchyData.length > 0 && (!hierarchyData[0].children || hierarchyData[0].children.length === 0)));
+            console.log("Final Hierarchy Data:", JSON.stringify(hierarchyData, null, 2));
+            console.log("Is hierarchyData empty?", hierarchyData.length === 0 || (hierarchyData.length > 0 && (!hierarchyData[0].children || hierarchyData[0].children.length === 0)));
 
 
-    var root = am5.Root.new("chartdiv");
+            var root = am5.Root.new("chartdiv");
 
-    const myRTLTheme = am5.Theme.new(root);
-    myRTLTheme.rule("Root").set("rtl", true);
+            const myRTLTheme = am5.Theme.new(root);
+            myRTLTheme.rule("Root").set("rtl", true);
 
-    root.setThemes([
-      am5themes_Animated.new(root),
-      myRTLTheme
-    ]);
+            root.setThemes([
+                am5themes_Animated.new(root),
+                myRTLTheme
+            ]);
 
-    var valueFormatter = am5.NumberFormatter.new(root, {
-        numberFormat: "#,###."
-    });
-
-    var zoomableContainer = root.container.children.push(
-        am5.ZoomableContainer.new(root, {
-            width: am5.p100,
-            height: am5.p100,
-            wheelable: true,
-            pinchZoom: true
-        })
-    );
-
-    // سری Treemap را تعریف کنید
-    var series = zoomableContainer.contents.children.push(
-        am5hierarchy.Treemap.new(root, {
-            maskContent: false,
-            sort: "descending",
-            singleBranchOnly: false,
-            downDepth: 1,
-            upDepth: 0,
-            initialDepth: 1, // Treemap در ابتدا سطح 1 را نشان دهد
-            valueField: "value",
-            categoryField: "name",
-            childDataField: "children"
-        })
-    );
-
-    // **تنظیمات Tooltip و Labelهای گره‌ها (بدون تغییر از آخرین نسخه شما)**
-    series.nodes.template.setAll({
-        tooltipText: "[bold]{value.formatNumber('#,###.')}[/]",
-        tooltip: am5.Tooltip.new(root, {
-            getFillFromSprite: true,
-            label: am5.Label.new(root, {
-                text: ""
-            })
-        })
-    });
-
-    series.labels.template.set("forceHidden", true);
-
-
-    // **رنگ‌بندی پویا برای سطوح ۲ و ۳ (بدون تغییر از آخرین نسخه شما)**
-    series.nodes.template.adapters.add("fill", function(fill, target) {
-        var dataItem = target.dataItem;
-        if (dataItem) {
-            var depth = dataItem.get("depth");
-
-            if (depth === 0) { // گره ریشه "همه دسته‌ها"
-                return am5.color(0x6A0DAD); // بنفش
-            } else if (depth === 1) { // سطح 1 (فرزندان ریشه)
-                return fill; // از رنگ‌های پیش‌فرض AmCharts برای این سطح استفاده کن (متنوع)
-            } else if (depth === 2) { // سطح 2 (فرزندان سطح 1)
-                return am5.color(0xADD8E6); // آبی روشن (Light Blue)
-            } else if (depth === 3) { // سطح 3 (فرزندان سطح 2 - برگ‌ها)
-                return am5.color(0xFFB6C1); // صورتی روشن (Light Pink)
-            }
-        }
-        return fill;
-    });
-
-    series.data.setAll(hierarchyData);
-    series.set("selectedDataItem", series.dataItems[0]);
-
-    // افزودن Bullet برای نمایش نام‌ها (بدون تغییر از آخرین نسخه شما)
-    series.bullets.push(function (root, series, dataItem) {
-        console.log("Attempting to create Bullet for:", dataItem.dataContext.name, "Depth:", dataItem.get("depth"));
-
-        var depth = dataItem.get("depth");
-
-        if (depth >= 1 && depth <= 3) {
-            var label = am5.Label.new(root, {
-                text: dataItem.dataContext.name,
-                oversizedBehavior: "truncate",
-                truncate: true,
-                maxRight: am5.percent(95),
-                maxLeft: am5.percent(5),
-                centerX: am5.p50,
-                centerY: am5.p50,
-                textAlign: "center",
-                paddingLeft: 2,
-                paddingRight: 2,
-                paddingTop: 2,
-                paddingBottom: 2,
+            var valueFormatter = am5.NumberFormatter.new(root, {
+                numberFormat: "#,###."
             });
 
-            if (depth === 1) {
-                label.setAll({
-                    fill: am5.color(0xffffff),
-                    fontSize: 18,
-                    fontWeight: "bold"
+            var zoomableContainer = root.container.children.push(
+                am5.ZoomableContainer.new(root, {
+                    width: am5.p100,
+                    height: am5.p100,
+                    wheelable: true,
+                    pinchZoom: true
+                })
+            );
+
+            // سری Treemap را تعریف کنید
+            var series = zoomableContainer.contents.children.push(
+                am5hierarchy.Treemap.new(root, {
+                    maskContent: false,
+                    sort: "descending",
+                    singleBranchOnly: false,
+                    downDepth: 1,
+                    upDepth: 0,
+                    initialDepth: 1, // Treemap در ابتدا سطح 1 را نشان دهد
+                    valueField: "value",
+                    categoryField: "name",
+                    childDataField: "children"
+                })
+            );
+
+            // **تنظیمات Tooltip و Labelهای گره‌ها (بدون تغییر از آخرین نسخه شما)**
+            series.nodes.template.setAll({
+                tooltipText: "[bold]{value.formatNumber('#,###.')}[/]",
+                tooltip: am5.Tooltip.new(root, {
+                    getFillFromSprite: true,
+                    label: am5.Label.new(root, {
+                        text: ""
+                    })
+                })
+            });
+
+            series.labels.template.set("forceHidden", true);
+
+
+            // **رنگ‌بندی پویا برای سطوح ۲ و ۳ (بدون تغییر از آخرین نسخه شما)**
+            series.nodes.template.adapters.add("fill", function (fill, target) {
+                var dataItem = target.dataItem;
+                if (dataItem) {
+                    var depth = dataItem.get("depth");
+
+                    if (depth === 0) { // گره ریشه "همه دسته‌ها"
+                        return am5.color(0x6A0DAD); // بنفش
+                    } else if (depth === 1) { // سطح 1 (فرزندان ریشه)
+                        return fill; // از رنگ‌های پیش‌فرض AmCharts برای این سطح استفاده کن (متنوع)
+                    } else if (depth === 2) { // سطح 2 (فرزندان سطح 1)
+                        return am5.color(0xADD8E6); // آبی روشن (Light Blue)
+                    } else if (depth === 3) { // سطح 3 (فرزندان سطح 2 - برگ‌ها)
+                        return am5.color(0xFFB6C1); // صورتی روشن (Light Pink)
+                    }
+                }
+                return fill;
+            });
+
+            series.data.setAll(hierarchyData);
+            series.set("selectedDataItem", series.dataItems[0]);
+
+            // افزودن Bullet برای نمایش نام‌ها (بدون تغییر از آخرین نسخه شما)
+            series.bullets.push(function (root, series, dataItem) {
+                console.log("Attempting to create Bullet for:", dataItem.dataContext.name, "Depth:", dataItem.get("depth"));
+
+                var depth = dataItem.get("depth");
+
+                if (depth >= 1 && depth <= 3) {
+                    var label = am5.Label.new(root, {
+                        text: dataItem.dataContext.name,
+                        oversizedBehavior: "truncate",
+                        truncate: true,
+                        maxRight: am5.percent(95),
+                        maxLeft: am5.percent(5),
+                        centerX: am5.p50,
+                        centerY: am5.p50,
+                        textAlign: "center",
+                        paddingLeft: 2,
+                        paddingRight: 2,
+                        paddingTop: 2,
+                        paddingBottom: 2,
+                    });
+
+                    if (depth === 1) {
+                        label.setAll({
+                            fill: am5.color(0xffffff),
+                            fontSize: 18,
+                            fontWeight: "bold"
+                        });
+                    } else if (depth === 2) {
+                        label.setAll({
+                            fill: am5.color(0x000000),
+                            fontSize: 14
+                        });
+                    } else if (depth === 3) {
+                        label.setAll({
+                            fill: am5.color(0x000000),
+                            fontSize: 12
+                        });
+                    }
+                    return am5.Bullet.new(root, {sprite: label});
+                }
+                return undefined;
+            });
+
+            // تنظیم رویداد کلیک برای زوم (بدون تغییر از آخرین نسخه شما)
+            series.nodes.template.events.on("click", function (ev) {
+                var dataItem = ev.target.dataItem;
+                var depth = dataItem.get("depth");
+                var children = dataItem.get("children");
+
+                console.log("Clicked DataItem:", dataItem.dataContext.name);
+                console.log("Category from dataItem.get('category'):", dataItem.get("category"));
+                console.log("Value from dataItem.get('value'):", dataItem.get("value"));
+
+
+                if (depth === 0) {
+                    series.set("downDepth", 1);
+                    series.selectDataItem(dataItem);
+                } else if (depth === 1) {
+                    if (children && children.length > 0) {
+                        series.set("downDepth", 2);
+                        series.selectDataItem(dataItem);
+                    } else {
+                        console.log("No children (Level 2) to zoom into for this node:", dataItem.dataContext.name);
+                    }
+                } else if (depth === 2) {
+                    if (children && children.length > 0) {
+                        series.set("downDepth", 3);
+                        series.selectDataItem(dataItem);
+                    } else {
+                        console.log("No children (Level 3) to zoom into for this node:", dataItem.dataContext.name);
+                    }
+                } else if (depth === 3) {
+                    if (dataItem.get("parent")) {
+                        series.set("downDepth", 2);
+                        series.selectDataItem(dataItem.get("parent"));
+                    }
+                }
+            });
+
+            console.log("AmCharts ready function finished.");
+
+            // **شروع تغییرات: مدیریت دکمه Home از HTML (رفع خطای goHome)**
+            var htmlHomeButton = document.getElementById("homeButtonHtml");
+            if (htmlHomeButton) {
+                htmlHomeButton.addEventListener("click", function () {
+                    console.log("HTML Home button clicked. Resetting chart view using selectDataItem.");
+                    // **تنها این دو خط برای بازگشت به حالت اولیه Treemap کافی هستند**
+                    series.set("downDepth", 1); // اطمینان از اینکه بعد از Home، سطح 1 نمایش داده شود (اگر initialDepth 1 باشد)
+                    series.selectDataItem(series.dataItems[0]); // انتخاب مجدد گره ریشه (همه دسته‌ها)
                 });
-            } else if (depth === 2) {
-                label.setAll({
-                    fill: am5.color(0x000000),
-                    fontSize: 14
-                });
-            } else if (depth === 3) {
-                label.setAll({
-                    fill: am5.color(0x000000),
-                    fontSize: 12
-                });
-            }
-            return am5.Bullet.new(root, { sprite: label });
-        }
-        return undefined;
-    });
-
-    // تنظیم رویداد کلیک برای زوم (بدون تغییر از آخرین نسخه شما)
-    series.nodes.template.events.on("click", function (ev) {
-        var dataItem = ev.target.dataItem;
-        var depth = dataItem.get("depth");
-        var children = dataItem.get("children");
-
-        console.log("Clicked DataItem:", dataItem.dataContext.name);
-        console.log("Category from dataItem.get('category'):", dataItem.get("category"));
-        console.log("Value from dataItem.get('value'):", dataItem.get("value"));
-
-
-        if (depth === 0) {
-            series.set("downDepth", 1);
-            series.selectDataItem(dataItem);
-        }
-        else if (depth === 1) {
-            if (children && children.length > 0) {
-                series.set("downDepth", 2);
-                series.selectDataItem(dataItem);
             } else {
-                console.log("No children (Level 2) to zoom into for this node:", dataItem.dataContext.name);
+                console.error("Error: HTML Home button with ID 'homeButtonHtml' not found. Make sure it's in your HTML.");
             }
-        }
-        else if (depth === 2) {
-            if (children && children.length > 0) {
-                series.set("downDepth", 3);
-                series.selectDataItem(dataItem);
-            } else {
-                console.log("No children (Level 3) to zoom into for this node:", dataItem.dataContext.name);
-            }
-        }
-        else if (depth === 3) {
-            if (dataItem.get("parent")) {
-                series.set("downDepth", 2);
-                series.selectDataItem(dataItem.get("parent"));
-            }
-        }
-    });
+            // **پایان تغییرات: مدیریت دکمه Home از HTML**
 
-    console.log("AmCharts ready function finished.");
-
-    // **شروع تغییرات: مدیریت دکمه Home از HTML (رفع خطای goHome)**
-    var htmlHomeButton = document.getElementById("homeButtonHtml");
-    if (htmlHomeButton) {
-        htmlHomeButton.addEventListener("click", function() {
-            console.log("HTML Home button clicked. Resetting chart view using selectDataItem.");
-            // **تنها این دو خط برای بازگشت به حالت اولیه Treemap کافی هستند**
-            series.set("downDepth", 1); // اطمینان از اینکه بعد از Home، سطح 1 نمایش داده شود (اگر initialDepth 1 باشد)
-            series.selectDataItem(series.dataItems[0]); // انتخاب مجدد گره ریشه (همه دسته‌ها)
-        });
-    } else {
-        console.error("Error: HTML Home button with ID 'homeButtonHtml' not found. Make sure it's in your HTML.");
-    }
-    // **پایان تغییرات: مدیریت دکمه Home از HTML**
-
-}); // end am5.ready()
-</script>
+        }); // end am5.ready()
+    </script>
 
 
 
@@ -1108,242 +1115,239 @@ am5.ready(function () {
 
 
 <script>
-am5.ready(function () {
-    console.log("AmCharts ready function started.");
+    am5.ready(function () {
+        console.log("AmCharts ready function started.");
 
-    var table10 = {{ table10|safe }};
-    var table20 = {{ table20|safe }};
-    var table30 = {{ table30|safe }};
+        var table10 = {{ table10|safe }};
+        var table20 = {{ table20|safe }};
+        var table30 = {{ table30|safe }};
 
-    console.log("Raw table10 data:", table10);
-    console.log("Raw table20 data:", table20);
-    console.log("Raw table30 data:", table30);
+        console.log("Raw table10 data:", table10);
+        console.log("Raw table20 data:", table20);
+        console.log("Raw table30 data:", table30);
 
-    function filterAndParseColumns(dataArray) {
-        return dataArray.map(item => ({
-            l1: item.l1,
-            l2: item.l2,
-            l3: item.l3,
-            cy_factor: parseFloat(item.cy_factor) || 0
-        }));
-    }
+        function filterAndParseColumns(dataArray) {
+            return dataArray.map(item => ({
+                l1: item.l1,
+                l2: item.l2,
+                l3: item.l3,
+                cy_factor: parseFloat(item.cy_factor) || 0
+            }));
+        }
 
-    var t1 = filterAndParseColumns(table10);
-    var t2 = filterAndParseColumns(table20);
-    var t3 = filterAndParseColumns(table30);
+        var t1 = filterAndParseColumns(table10);
+        var t2 = filterAndParseColumns(table20);
+        var t3 = filterAndParseColumns(table30);
 
-    function buildHierarchy(table10, table20, table30) {
-        const l1Map = new Map(table10.map(item => [item.l1, item.cy_factor]));
-        const l2Map = new Map(table20.map(item => [`${item.l1}|${item.l2}`, item.cy_factor]));
-        const l3Map = new Map(table30.map(item => [`${item.l1}|${item.l2}|${item.l3}`, item.cy_factor]));
+        function buildHierarchy(table10, table20, table30) {
+            const l1Map = new Map(table10.map(item => [item.l1, item.cy_factor]));
+            const l2Map = new Map(table20.map(item => [`${item.l1}|${item.l2}`, item.cy_factor]));
+            const l3Map = new Map(table30.map(item => [`${item.l1}|${item.l2}|${item.l3}`, item.cy_factor]));
 
-        let rootCyFactor = 0;
-        table10.forEach(item => {
-            rootCyFactor += item.cy_factor || 0;
-        });
-        const rootNode = { name: "همه دسته‌ها", children: [], value: rootCyFactor };
-
-        table10.forEach(item1 => {
-            const l1Name = item1.l1;
-            const l1Value = l1Map.get(l1Name);
-
-            if (l1Value > 0) {
-                let level1Node = {
-                    name: l1Name,
-                    value: l1Value,
-                    children: []
-                };
-                rootNode.children.push(level1Node);
-
-                const relatedLevel2 = table20.filter(t => t.l1 === l1Name);
-                relatedLevel2.forEach(item2 => {
-                    const l2Name = item2.l2;
-                    const l2Value = l2Map.get(`${l1Name}|${l2Name}`);
-
-                    if (l2Value > 0) {
-                        let level2Node = {
-                            name: l2Name,
-                            value: l2Value,
-                            children: []
-                        };
-                        level1Node.children.push(level2Node);
-
-                        const relatedLevel3 = table30.filter(t => t.l1 === l1Name && t.l2 === l2Name);
-                        relatedLevel3.forEach(item3 => {
-                            const l3Name = item3.l3;
-                            const l3Value = l3Map.get(`${l1Name}|${l2Name}|${l3Name}`);
-
-                            if (l3Value > 0) {
-                                level2Node.children.push({
-                                    name: l3Name,
-                                    value: l3Value
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        });
-        return rootNode;
-    }
-
-    const hierarchyData = [buildHierarchy(t1, t2, t3)];
-
-    console.log("Final Hierarchy Data:", JSON.stringify(hierarchyData, null, 2));
-    console.log("Is hierarchyData empty?", hierarchyData.length === 0 || (hierarchyData.length > 0 && (!hierarchyData[0].children || hierarchyData[0].children.length === 0)));
-
-
-    var root = am5.Root.new("chartdiv");
-
-    const myRTLTheme = am5.Theme.new(root);
-    myRTLTheme.rule("Root").set("rtl", true);
-
-    // این خط را حذف یا کامنت نگه می‌داریم، چون هدف‌گیری آن برای Labelها خیلی کلی بود.
-    // myRTLTheme.rule("Label").setAll({ forceHidden: true });
-
-    root.setThemes([
-      am5themes_Animated.new(root),
-      myRTLTheme
-    ]);
-
-    var valueFormatter = am5.NumberFormatter.new(root, {
-        numberFormat: "#,###."
-    });
-
-    var zoomableContainer = root.container.children.push(
-        am5.ZoomableContainer.new(root, {
-            width: am5.p100,
-            height: am5.p100,
-            wheelable: true,
-            pinchZoom: true
-        })
-    );
-
-    var zoomTools = zoomableContainer.children.push(am5.ZoomTools.new(root, {
-      target: zoomableContainer
-    }));
-
-    var series = zoomableContainer.contents.children.push(
-        am5hierarchy.Treemap.new(root, {
-            maskContent: false,
-            sort: "descending",
-            singleBranchOnly: false,
-            downDepth: 1,
-            upDepth: 0,
-            initialDepth: 1,
-            valueField: "value",
-            categoryField: "name",
-            childDataField: "children"
-        })
-    );
-
-    // **تنظیمات نهایی و بهینه شده Tooltip و Labelهای گره‌ها**
-    series.nodes.template.setAll({
-        // محتوای Tooltip: فقط مقدار نمایش داده شود
-        tooltipText: "[bold]{value.formatNumber('#,###.')}[/]",
-        tooltip: am5.Tooltip.new(root, {
-            getFillFromSprite: true, // مهم: این را true کنید تا رنگ Tooltip از گره گرفته شود
-            // **این خط را اضافه کردیم:** Label پیش فرض داخل Tooltip را مخفی می‌کند
-            // (تا متن تکراری خارج از کادر نمایش داده نشود).
-            // به جای forceHidden: true، محتوای label.text را خالی می‌کنیم تا مطمئن شویم چیزی نمایش داده نمی‌شود.
-            label: am5.Label.new(root, {
-                text: "" // مهم: متن Label داخلی Tooltip را خالی کنید
-            })
-        })
-    });
-
-    // **این خط جدید اضافه شده است:** Labelهای پیش‌فرض سری (که روی خود گره‌ها نمایش داده می‌شوند) را مخفی می‌کند.
-    series.labels.template.set("forceHidden", true);
-
-
-    series.data.setAll(hierarchyData);
-    series.set("selectedDataItem", series.dataItems[0]);
-
-    // افزودن Bullet برای نمایش نام‌ها (این بخش باید Labelهای سفارشی شما را نمایش دهد)
-    series.bullets.push(function (root, series, dataItem) {
-        console.log("Attempting to create Bullet for:", dataItem.dataContext.name, "Depth:", dataItem.get("depth"));
-
-        var depth = dataItem.get("depth");
-
-        // فقط برای سطوح 1، 2 و 3 Label ایجاد کن
-        if (depth >= 1 && depth <= 3) {
-            var label = am5.Label.new(root, {
-                text: dataItem.dataContext.name,
-                oversizedBehavior: "truncate",
-                truncate: true,
-                maxRight: am5.percent(95),
-                maxLeft: am5.percent(5),
-                centerX: am5.p50,
-                centerY: am5.p50,
-                textAlign: "center",
-                paddingLeft: 2,
-                paddingRight: 2,
-                paddingTop: 2,
-                paddingBottom: 2,
+            let rootCyFactor = 0;
+            table10.forEach(item => {
+                rootCyFactor += item.cy_factor || 0;
             });
+            const rootNode = {name: "همه دسته‌ها", children: [], value: rootCyFactor};
 
-            // تنظیم رنگ و اندازه فونت بر اساس عمق
-            if (depth === 1) {
-                label.setAll({
-                    fill: am5.color(0xffffff), // رنگ سفید برای سطح 1
-                    fontSize: 18,
-                    fontWeight: "bold"
+            table10.forEach(item1 => {
+                const l1Name = item1.l1;
+                const l1Value = l1Map.get(l1Name);
+
+                if (l1Value > 0) {
+                    let level1Node = {
+                        name: l1Name,
+                        value: l1Value,
+                        children: []
+                    };
+                    rootNode.children.push(level1Node);
+
+                    const relatedLevel2 = table20.filter(t => t.l1 === l1Name);
+                    relatedLevel2.forEach(item2 => {
+                        const l2Name = item2.l2;
+                        const l2Value = l2Map.get(`${l1Name}|${l2Name}`);
+
+                        if (l2Value > 0) {
+                            let level2Node = {
+                                name: l2Name,
+                                value: l2Value,
+                                children: []
+                            };
+                            level1Node.children.push(level2Node);
+
+                            const relatedLevel3 = table30.filter(t => t.l1 === l1Name && t.l2 === l2Name);
+                            relatedLevel3.forEach(item3 => {
+                                const l3Name = item3.l3;
+                                const l3Value = l3Map.get(`${l1Name}|${l2Name}|${l3Name}`);
+
+                                if (l3Value > 0) {
+                                    level2Node.children.push({
+                                        name: l3Name,
+                                        value: l3Value
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+            return rootNode;
+        }
+
+        const hierarchyData = [buildHierarchy(t1, t2, t3)];
+
+        console.log("Final Hierarchy Data:", JSON.stringify(hierarchyData, null, 2));
+        console.log("Is hierarchyData empty?", hierarchyData.length === 0 || (hierarchyData.length > 0 && (!hierarchyData[0].children || hierarchyData[0].children.length === 0)));
+
+
+        var root = am5.Root.new("chartdiv");
+
+        const myRTLTheme = am5.Theme.new(root);
+        myRTLTheme.rule("Root").set("rtl", true);
+
+        // این خط را حذف یا کامنت نگه می‌داریم، چون هدف‌گیری آن برای Labelها خیلی کلی بود.
+        // myRTLTheme.rule("Label").setAll({ forceHidden: true });
+
+        root.setThemes([
+            am5themes_Animated.new(root),
+            myRTLTheme
+        ]);
+
+        var valueFormatter = am5.NumberFormatter.new(root, {
+            numberFormat: "#,###."
+        });
+
+        var zoomableContainer = root.container.children.push(
+            am5.ZoomableContainer.new(root, {
+                width: am5.p100,
+                height: am5.p100,
+                wheelable: true,
+                pinchZoom: true
+            })
+        );
+
+        var zoomTools = zoomableContainer.children.push(am5.ZoomTools.new(root, {
+            target: zoomableContainer
+        }));
+
+        var series = zoomableContainer.contents.children.push(
+            am5hierarchy.Treemap.new(root, {
+                maskContent: false,
+                sort: "descending",
+                singleBranchOnly: false,
+                downDepth: 1,
+                upDepth: 0,
+                initialDepth: 1,
+                valueField: "value",
+                categoryField: "name",
+                childDataField: "children"
+            })
+        );
+
+        // **تنظیمات نهایی و بهینه شده Tooltip و Labelهای گره‌ها**
+        series.nodes.template.setAll({
+            // محتوای Tooltip: فقط مقدار نمایش داده شود
+            tooltipText: "[bold]{value.formatNumber('#,###.')}[/]",
+            tooltip: am5.Tooltip.new(root, {
+                getFillFromSprite: true, // مهم: این را true کنید تا رنگ Tooltip از گره گرفته شود
+                // **این خط را اضافه کردیم:** Label پیش فرض داخل Tooltip را مخفی می‌کند
+                // (تا متن تکراری خارج از کادر نمایش داده نشود).
+                // به جای forceHidden: true، محتوای label.text را خالی می‌کنیم تا مطمئن شویم چیزی نمایش داده نمی‌شود.
+                label: am5.Label.new(root, {
+                    text: "" // مهم: متن Label داخلی Tooltip را خالی کنید
+                })
+            })
+        });
+
+        // **این خط جدید اضافه شده است:** Labelهای پیش‌فرض سری (که روی خود گره‌ها نمایش داده می‌شوند) را مخفی می‌کند.
+        series.labels.template.set("forceHidden", true);
+
+
+        series.data.setAll(hierarchyData);
+        series.set("selectedDataItem", series.dataItems[0]);
+
+        // افزودن Bullet برای نمایش نام‌ها (این بخش باید Labelهای سفارشی شما را نمایش دهد)
+        series.bullets.push(function (root, series, dataItem) {
+            console.log("Attempting to create Bullet for:", dataItem.dataContext.name, "Depth:", dataItem.get("depth"));
+
+            var depth = dataItem.get("depth");
+
+            // فقط برای سطوح 1، 2 و 3 Label ایجاد کن
+            if (depth >= 1 && depth <= 3) {
+                var label = am5.Label.new(root, {
+                    text: dataItem.dataContext.name,
+                    oversizedBehavior: "truncate",
+                    truncate: true,
+                    maxRight: am5.percent(95),
+                    maxLeft: am5.percent(5),
+                    centerX: am5.p50,
+                    centerY: am5.p50,
+                    textAlign: "center",
+                    paddingLeft: 2,
+                    paddingRight: 2,
+                    paddingTop: 2,
+                    paddingBottom: 2,
                 });
+
+                // تنظیم رنگ و اندازه فونت بر اساس عمق
+                if (depth === 1) {
+                    label.setAll({
+                        fill: am5.color(0xffffff), // رنگ سفید برای سطح 1
+                        fontSize: 18,
+                        fontWeight: "bold"
+                    });
+                } else if (depth === 2) {
+                    label.setAll({
+                        fill: am5.color(0x000000), // رنگ سیاه برای سطح 2
+                        fontSize: 14
+                    });
+                } else if (depth === 3) {
+                    label.setAll({
+                        fill: am5.color(0x000000), // رنگ سیاه برای سطح 3
+                        fontSize: 12
+                    });
+                }
+                return am5.Bullet.new(root, {sprite: label});
+            }
+            return undefined;
+        });
+
+        // تنظیم رویداد کلیک برای زوم
+        series.nodes.template.events.on("click", function (ev) {
+            var dataItem = ev.target.dataItem;
+            var depth = dataItem.get("depth");
+            var children = dataItem.get("children");
+
+            console.log("Clicked DataItem:", dataItem.dataContext.name);
+            console.log("Category from dataItem.get('category'):", dataItem.get("category"));
+            console.log("Value from dataItem.get('value'):", dataItem.get("value"));
+
+
+            if (depth === 0) {
+                series.set("downDepth", 1);
+                series.selectDataItem(dataItem);
+            } else if (depth === 1) {
+                if (children && children.length > 0) {
+                    series.set("downDepth", 2);
+                    series.selectDataItem(dataItem);
+                } else {
+                    console.log("No children (Level 2) to zoom into for this node:", dataItem.dataContext.name);
+                }
             } else if (depth === 2) {
-                label.setAll({
-                    fill: am5.color(0x000000), // رنگ سیاه برای سطح 2
-                    fontSize: 14
-                });
+                if (children && children.length > 0) {
+                    series.set("downDepth", 3);
+                    series.selectDataItem(dataItem);
+                } else {
+                    console.log("No children (Level 3) to zoom into for this node:", dataItem.dataContext.name);
+                }
             } else if (depth === 3) {
-                label.setAll({
-                    fill: am5.color(0x000000), // رنگ سیاه برای سطح 3
-                    fontSize: 12
-                });
+                if (dataItem.get("parent")) {
+                    series.set("downDepth", 2);
+                    series.selectDataItem(dataItem.get("parent"));
+                }
             }
-            return am5.Bullet.new(root, { sprite: label });
-        }
-        return undefined;
-    });
+        });
 
-    // تنظیم رویداد کلیک برای زوم
-    series.nodes.template.events.on("click", function (ev) {
-        var dataItem = ev.target.dataItem;
-        var depth = dataItem.get("depth");
-        var children = dataItem.get("children");
-
-        console.log("Clicked DataItem:", dataItem.dataContext.name);
-        console.log("Category from dataItem.get('category'):", dataItem.get("category"));
-        console.log("Value from dataItem.get('value'):", dataItem.get("value"));
-
-
-        if (depth === 0) {
-            series.set("downDepth", 1);
-            series.selectDataItem(dataItem);
-        }
-        else if (depth === 1) {
-            if (children && children.length > 0) {
-                series.set("downDepth", 2);
-                series.selectDataItem(dataItem);
-            } else {
-                console.log("No children (Level 2) to zoom into for this node:", dataItem.dataContext.name);
-            }
-        }
-        else if (depth === 2) {
-            if (children && children.length > 0) {
-                series.set("downDepth", 3);
-                series.selectDataItem(dataItem);
-            } else {
-                console.log("No children (Level 3) to zoom into for this node:", dataItem.dataContext.name);
-            }
-        }
-        else if (depth === 3) {
-            if (dataItem.get("parent")) {
-                series.set("downDepth", 2);
-                series.selectDataItem(dataItem.get("parent"));
-            }
-        }
-    });
-
-    console.log("AmCharts ready function finished.");
-}); // end am5.ready()
+        console.log("AmCharts ready function finished.");
+    }); // end am5.ready()
 </script>
