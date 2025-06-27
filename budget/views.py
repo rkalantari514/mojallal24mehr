@@ -1,3 +1,5 @@
+from unicodedata import category
+
 from custom_login.models import UserLog
 from custom_login.views import page_permision
 from dashboard.models import MasterInfo
@@ -909,6 +911,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
             'l1':cat.parent.parent.name,
             'l2':cat.parent.name,
             'l3':cat.name,
+            'cat_id':cat.id,
             'by_factor':by_factor,
             'cy_budget':cy_budget,
             'budget_rate':budget_rate,
@@ -1237,3 +1240,225 @@ def BudgetSaleTotal(request, *args, **kwargs):
 
 
 
+def BudgetSaleDetail(request, level, code, *args, **kwargs):
+    start_time = time.time()
+    name = 'جزئیات بودجه فروش'
+    result = page_permision(request, name)
+    if result:
+        return result
+
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='کلیات بودجه فروش', code=0)
+
+    master_info = MasterInfo.objects.filter(is_active=True).last()
+    acc_year = master_info.acc_year
+    base_year = acc_year - 1
+
+    tafzil = None
+    moin_code = None
+    tafzili_code = None
+    g1=-70
+    g2=43
+    today_bay_by = 0
+    today_actual = 0
+    today_by_time = 0
+    budget_rate = 0  # نرخ بودجه پیش‌فرض
+    level1=AccCoding.objects.filter(level=1,code=501)
+    kol_code=None
+    moin_code=None
+    level2=AccCoding.objects.filter(level=2,parent__code=501)
+    level3=None
+    tafzili_code=None
+
+
+
+    if level == '3':
+        cat_id=int(code)
+        category=Category.objects.filter(id=cat_id,level=3).last()
+        detail_name=f'دسته - {category.name}-{cat_id}'
+        parent_cat=category.parent
+        parent_parent_cat=category.parent.parent
+        level3=Category.objects.filter(level=3,parent=parent_cat)
+        if category.budget_rate is not None and category.budget_rat != 0:
+            budget_rate = category.budget_rate
+        elif parent_cat.budget_rate is not None and parent_cat.budget_rate != 0:
+            budget_rate=parent_cat.budget_rate
+        else:
+            budget_rate=parent_parent_cat.budget_rate
+        budget_rate=float(budget_rate)
+
+        print(detail_name)
+
+        # --- ۱. کوئری‌های مربوط به سال پایه (Base Year) ---
+        factor_base_year_qs = FactorDetaile.objects.filter(
+            kala__category=category,
+            acc_year=base_year
+        )
+        print('factor_base_year_qs.count()')
+        print(factor_base_year_qs.count())
+
+        daily_totals_base_year = {}
+        if factor_base_year_qs.exists():
+            for item in factor_base_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
+                daily_totals_base_year[str(item['date'])] = float(item['total'] or 0)
+
+        print(len(daily_totals_base_year))
+        # --- ۲. کوئری‌های مربوط به سال جاری (Current Year) ---
+        facor_acc_year_qs = FactorDetaile.objects.filter(
+            kala__category=category,
+            acc_year=acc_year
+        )
+
+        daily_totals_acc_year = {}
+        if facor_acc_year_qs.exists():
+            for item in facor_acc_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
+                daily_totals_acc_year[str(item['date'])] = float(item['total'] or 0)
+
+
+
+        start_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
+        end_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(max_date=Max('date'))['max_date']
+        print(detail_name)
+        print('#############################################')
+
+        # ایجاد لیست روزها
+        date_list = []
+        current_date = start_date
+        while current_date <= end_date:
+            date_list.append(current_date.strftime('%Y-%m-%d'))  # قالب تاریخ به YYYY-MM-DD
+            current_date += timedelta(days=1)
+
+
+
+        acc_date_list = [datetime.strptime(date, '%Y-%m-%d') + relativedelta(years=1) for date in date_list]
+        acc_date_list = [date.strftime('%Y-%m-%d') for date in acc_date_list]
+
+
+
+        month_names = {
+            1: "فروردین", 2: "اردیبهشت", 3: "خرداد", 4: "تیر",
+            5: "مرداد", 6: "شهریور", 7: "مهر", 8: "آبان",
+            9: "آذر", 10: "دی", 11: "بهمن", 12: "اسفند"
+        }
+
+        chart_labels_shamsi = []
+        for date in acc_date_list:
+            try:
+                miladi_date = datetime.strptime(date, '%Y-%m-%d')  # تبدیل میلادی به datetime
+                shamsi_date = jdatetime.date.fromgregorian(day=miladi_date.day, month=miladi_date.month,
+                                                           year=miladi_date.year)
+                # تنظیم نمایش لیبل‌ها بر اساس شرط‌های تعیین‌شده
+                if shamsi_date.day == 1:  # نمایش نام ماه برای اولین روز ماه
+                    label = month_names[shamsi_date.month]
+                elif shamsi_date.day == 15:  # نمایش تاریخ کامل برای روز ۱۵ هر ماه
+                    label = shamsi_date.strftime('%Y-%m-%d')
+                else:  # سایر موارد خالی باشند
+                    label = shamsi_date.day
+
+                chart_labels_shamsi.append(shamsi_date.strftime('%Y-%m-%d'))
+
+            except ValueError as e:
+                print(f"خطای تبدیل تاریخ: {date}, {e}")  # نمایش خطا در صورت وجود مشکل
+
+
+        chart_labels = chart_labels_shamsi  # برچسب‌های نمودار همان لیست تاریخ‌ها
+        print('==============================================================')
+
+        chart1_data = []
+        chart2_data = []
+        chart3_data = []
+        chart4_data = []
+
+        cumulative_base_year = 0
+        cumulative_acc_year = 0
+        today = datetime.today().strftime('%Y-%m-%d')  # تاریخ امروز به فرمت YYYY-MM-DD
+        for day in acc_date_list:
+            by_date = datetime.strptime(day, '%Y-%m-%d') + relativedelta(years=-1)  # تاریخ مربوط به سال پایه
+            # مقدار روز جاری از سال پایه را دریافت و تجمعی محاسبه کن
+            if str(by_date.date()) in daily_totals_base_year:
+                cumulative_base_year += daily_totals_base_year[str(by_date.date())]  # علامت منفی برای تصحیح
+            chart1_data.append(cumulative_base_year)
+            for_chart3_data=((cumulative_base_year) * budget_rate)
+            for_chart3_data=float(for_chart3_data)
+            chart3_data.append(for_chart3_data)
+            if day == today:
+                today_bay_by=(cumulative_base_year) * budget_rate
+
+            # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
+            if day in daily_totals_acc_year:
+                cumulative_acc_year += daily_totals_acc_year[day]  # علامت منفی برای تصحیح
+            if day <= today:
+                chart2_data.append(cumulative_acc_year)
+                if day == today:
+                    today_actual=cumulative_acc_year
+
+        last_value_chart1 = chart1_data[-1] if chart1_data else None
+        count_acc_date_list = len(acc_date_list)
+        s=(last_value_chart1)/count_acc_date_list * budget_rate
+        ch4=0
+        for day in acc_date_list:
+            chart4_data.append(ch4)
+            if day == today:
+                today_by_time=ch4
+
+            ch4 += s
+        last_value_chart2 = chart2_data[-1] if chart2_data else None
+        master_dat={
+            'by_sanads':last_value_chart1/10,
+            'cy_budget':(last_value_chart1)/10*budget_rate,
+            'budget_rate':budget_rate,
+            'cy_sanads': last_value_chart2 / 10
+
+        }
+
+        print('today_bay_by,today_actual,today_by_time')
+        print(today_bay_by,today_actual,today_by_time)
+        today_actual=Decimal(today_actual)
+        today_bay_by=Decimal(today_bay_by)
+        today_by_time=Decimal(today_by_time)
+        g1 = ((today_actual - today_bay_by) / today_bay_by * 100) if today_bay_by != 0 else 100
+        g2 = ((today_actual - today_by_time) / today_by_time * 100) if today_by_time != 0 else 100
+        print(g1,g2)
+
+
+
+    g1 = max(-100, min(g1, 100))
+    g2 = max(-100, min(g2, 100))
+    for item in chart1_data:
+        print(item)
+
+    context = {
+        'acc_year': acc_year,
+        'base_year': base_year,
+        'user': user,
+        'detail_name': detail_name,
+        'budget_rate': budget_rate,
+        'chart_labels': chart_labels,  # لیبل‌های نمودار
+        'chart1_data': chart1_data,
+        'chart2_data': chart2_data,
+        'chart3_data': chart3_data,
+        'chart4_data': chart4_data,
+
+
+        'level': int(level),
+        'level1': level1,
+        'level2': level2,
+        'level3': level3,
+        'kol_code': kol_code,
+        'moin_code': moin_code,
+        'tafzili_code': tafzili_code,
+
+
+        'master_dat': master_dat,
+
+        'g1':g1,
+        'g2':g2,
+
+
+
+    }
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+
+    return render(request, 'budget_sale_detail.html', context)

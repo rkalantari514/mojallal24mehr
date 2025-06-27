@@ -1107,6 +1107,10 @@ def UpdateFactorDetail(request):
 
         factor = factors.get(code_factor_mahak)
         kala = kalas.get(kala_code_mahak)
+        if factor:
+            date = factor.date
+        else:
+            date = None
 
         if factor:
             defaults = {
@@ -1117,6 +1121,7 @@ def UpdateFactorDetail(request):
                 'acc_year': acc_year,
                 'factor': factor,
                 'kala': kala,
+                'date': date,
             }
 
             if key_mahak in existing_details:
@@ -1153,7 +1158,7 @@ def UpdateFactorDetail(request):
         if details_to_create:
             FactorDetaile.objects.bulk_create(details_to_create, ignore_conflicts=True)
         if details_to_update:
-            FactorDetaile.objects.bulk_update(details_to_update, ['code_kala', 'count', 'mablagh_vahed', 'mablagh_nahaee', 'acc_year', 'factor', 'kala'])
+            FactorDetaile.objects.bulk_update(details_to_update, ['code_kala', 'count', 'mablagh_vahed', 'mablagh_nahaee', 'acc_year', 'factor', 'kala', 'date'])
 
         deleted_count = FactorDetaile.objects.filter(
             acc_year=acc_year
