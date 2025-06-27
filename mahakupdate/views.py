@@ -48,6 +48,7 @@ def connect_to_mahak():
         }
 
     if acc_year==1404:
+        print('acc_year=1404')
         connections = {
             'DESKTOP-ITU3EHV': ('DESKTOP-ITU3EHV\\MAHAK14', 'mahak'),
             'TECH_MANAGER': ('TECH_MANAGER\\RKALANTARI', 'mahak'),
