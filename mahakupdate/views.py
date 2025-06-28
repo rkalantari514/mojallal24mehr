@@ -1216,7 +1216,7 @@ def UpdateFactorDetail(request):
     for fac in FactorDetaile.objects.all():
         d1 = fac.date
         try:
-            d2 = fac.factor.date
+            d2 = Factor.objects.filter(acc_year=acc_year,code=fac.code).last().date
         except:
             d2=None
         if d2 and d1 != d2:
