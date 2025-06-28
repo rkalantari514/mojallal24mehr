@@ -404,7 +404,7 @@ def TsesFactorDuplicatte(request):
     # یافتن کدهای تکراری
     cursor.execute("""
         SELECT [Code], COUNT([Code]) AS count
-        FROM [mahak].[dbo].[Fact_Fo]
+        FROM [Fact_Fo]
         GROUP BY [Code]
         HAVING COUNT([Code]) > 1
     """)
@@ -423,7 +423,7 @@ def TsesFactorDuplicatte(request):
         # مقایسه 5 نمونه از ردیف های تکراری برای هر کد
         cursor.execute(f"""
             SELECT TOP 5 *
-            FROM [mahak].[dbo].[Fact_Fo]
+            FROM  [Fact_Fo]
             WHERE [Code] = ?
         """, (code,))
         duplicate_rows = cursor.fetchall()
@@ -1059,7 +1059,7 @@ def UpdateFactorDetail(request):
 
     conn = connect_to_mahak()
     cursor = conn.cursor()
-    cursor.execute("SELECT [code], [radif], [kala_code], [meghdar], [naghdi], [TotalCost] FROM [mahak].[dbo].[Fact_Fo_Detail]")
+    cursor.execute("SELECT [code], [radif], [kala_code], [meghdar], [naghdi], [TotalCost] FROM [Fact_Fo_Detail]")
     mahakt_data = cursor.fetchall()
 
     t1 = time.time()
@@ -1238,7 +1238,7 @@ def UpdateBackFactorDetail(request):
 
     conn = connect_to_mahak()
     cursor = conn.cursor()
-    cursor.execute("SELECT [code], [radif],[type], [kala_code], [meghdar], [naghdi] FROM [mahak].[dbo].[BackFact_Detail]")
+    cursor.execute("SELECT [code], [radif],[type], [kala_code], [meghdar], [naghdi] FROM [BackFact_Detail]")
     mahakt_data = cursor.fetchall()
 
     t1 = time.time()
