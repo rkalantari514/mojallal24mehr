@@ -1233,6 +1233,7 @@ def UpdateFactorDetail(request):
     if objects_to_update:
         FactorDetaile.objects.bulk_update(objects_to_update, fields_to_update)
 
+
     print('پایان آپدیت جزئیات فاکتور-------------------------------------------------')
     return redirect('/updatedb')
 
@@ -4933,17 +4934,15 @@ def UpdateMyCondition(request):
     return redirect('/updatedb')  # یا هر آدرسی که می‌خواهید بعد از به‌روزرسانی به آن منتقل شوید
 
 
+from django.db.models import Count, Max
 
 
 def DeleteDublicateData(request):
     import time
     t0 = time.time()
-    print('حذف دیتاهای تکراری---------------------')
-
     print('حذف کالاهای تکراری---------------------')
 
     # گروه‌بندی بر اساس code و شمارش هر گروه
-    from django.db.models import Count, Max
 
     duplicates = Kala.objects.values('code').annotate(
         count=Count('id'),
@@ -4961,7 +4960,38 @@ def DeleteDublicateData(request):
 
     print(f'{counter} کالای تکراری حذف شد')
 
-    print('حذف فاکتور تکراری---------------------')
+    print('حذف جزئیات فاکتور تکراری---------------------')
+    # گروه‌بندی بر اساس سه فیلد و یافتن آخرین ID هر گروه
+    duplicates = FactorDetaile.objects.values('acc_year', 'code_factor', 'radif').annotate(
+        count=Count('id'),
+        last_id=Max('id')
+    ).filter(count__gt=1)
+
+    objects_to_delete = []
+    for duplicate in duplicates:
+        acc_year = duplicate['acc_year']
+        code_factor = duplicate['code_factor']
+        radif = duplicate['radif']
+        last_id = duplicate['last_id']
+
+        # حذف رکوردهای تکراری به جز آخرین
+        deleted_qs = FactorDetaile.objects.filter(
+            acc_year=acc_year,
+            code_factor=code_factor,
+            radif=radif
+        ).exclude(id=last_id)
+
+        # افزودن به لیست حذف برای اجرای bulk_delete
+        objects_to_delete.extend(deleted_qs)
+
+    # حذف دسته جمعی با bulk_delete
+    if objects_to_delete:
+        count_deleted, _ = FactorDetaile.objects.filter(
+            id__in=[obj.id for obj in objects_to_delete]
+        ).delete()
+        print(f"تعداد رکوردهای تکراری حذف شده: {count_deleted}")
+    else:
+        print('رکورد تکراری یافت نشد.')
 
     tend = time.time()
     total_time = tend - t0
