@@ -1041,6 +1041,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
 
     for entry in table3:
         l1 = entry['l1']
+        cat_par_par_id = entry['cat_par_par_id']
         # حذف l2
         # l2 = entry['l2']
         by_factor = entry['by_factor']
@@ -1051,6 +1052,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
         if group_key not in grouped_data:
             grouped_data[group_key] = {
                 'l1': l1,
+                'cat_par_par_id': cat_par_par_id,
                 'by_factor': 0,
                 'cy_budget': 0,
                 'cy_today_budget': 0,
@@ -1107,6 +1109,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
 
         table1.append({
             'l1': data['l1'],
+            'cat_id': data['cat_par_par_id'],
             # حذف 'l2'
             'by_factor': data['by_factor'],
             'cy_budget': data['cy_budget'],

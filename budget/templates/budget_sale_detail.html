@@ -458,17 +458,15 @@ new Chart(ctx, {
 
     // نوارهای رنگی برای نمودار اول
 var bandsData = [
-  // --- بخش سبز (از -100 تا 0) ---
-  { title: "بسیار عالی", color: "#006400", lowScore: -100, highScore: -75 }, // سبز تیره (DarkGreen)
-  { title: "عالی", color: "#228B22", lowScore: -75, highScore: -50 },     // سبز جنگلی (ForestGreen)
-  { title: "خیلی خوب", color: "#32CD32", lowScore: -50, highScore: -25 },  // سبز لیمویی (LimeGreen)
-  { title: "خوب", color: "#ADFF2F", lowScore: -25, highScore: 0 },       // سبز زرد (GreenYellow) - نقطه پایان طیف سبز به زرد
+  { title: "بسیار عالی", color: "#006400", lowScore: 75, highScore: 100 }, // سبز تیره (DarkGreen)
+  { title: "عالی", color: "#228B22", lowScore: 50, highScore: 75 },     // سبز جنگلی (ForestGreen)
+  { title: "خیلی خوب", color: "#32CD32", lowScore: 25, highScore: 50 },  // سبز لیمویی (LimeGreen)
+  { title: "خوب", color: "#ADFF2F", lowScore: 0, highScore: 25 },       // سبز زرد (GreenYellow) - نقطه پایان طیف سبز به زرد
 
-  // --- بخش قرمز (از 0 تا 100) ---
-  { title: "اخطار", color: "#FFD700", lowScore: 0, highScore: 25 },       // زرد طلایی (Gold) - نقطه شروع طیف زرد به قرمز
-  { title: "ضعیف", color: "#FFA500", lowScore: 25, highScore: 50 },       // نارنجی (Orange)
-  { title: "بحرانی", color: "#FF4500", lowScore: 50, highScore: 75 },     // نارنجی-قرمز (OrangeRed)
-  { title: "فاجعه", color: "#DC143C", lowScore: 75, highScore: 100 }      // قرمز تیره (Crimson)
+  { title: "اخطار", color: "#FFD700", lowScore: -25, highScore: 0 },       // زرد طلایی (Gold) - نقطه شروع طیف زرد به قرمز
+  { title: "ضعیف", color: "#FFA500", lowScore: -50, highScore: -25 },       // نارنجی (Orange)
+  { title: "بحرانی", color: "#FF4500", lowScore: -75, highScore: -50 },     // نارنجی-قرمز (OrangeRed)
+  { title: "فاجعه", color: "#DC143C", lowScore: -100, highScore: -75 }      // قرمز تیره (Crimson)
 ];
 
 
