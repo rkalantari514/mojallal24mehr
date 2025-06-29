@@ -836,6 +836,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
     start_time = time.time()
     name = 'کلیات بودجه فروش'
     result = page_permision(request, name)
+
     if result:
         return result
     user = request.user

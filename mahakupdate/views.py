@@ -4924,3 +4924,36 @@ def UpdateMyCondition(request):
         )
 
     return redirect('/updatedb')  # یا هر آدرسی که می‌خواهید بعد از به‌روزرسانی به آن منتقل شوید
+
+
+
+
+def DeleteDublicateData(request):
+    t0 = time.time()
+    print('حذف دیتاهای تکراری---------------------')
+
+
+    print('حذف کالاهای تکراری---------------------')
+    kala=Kala.objects.all()
+    key=('code')
+    counter=0
+    for k in kala:
+        c=k.code
+        if Kala.objects.filter(code=c).count() > 1:
+            a=Kala.objects.filter(code=c).count()
+            to_keep_id=Kala.objects.filter(code=c).last().id
+            Kala.objects.filter(code=c).exclude(id=to_keep_id).delete()
+            counter +=1
+            print(a-1,'delete')
+    print(counter ,'kala is dublicate and delete')
+
+
+    print('حذف فاکتور تکراری---------------------')
+
+
+    tend = time.time()
+    total_time = tend - t0
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    return redirect('/updatedb')
+
+
