@@ -1109,10 +1109,7 @@ def UpdateFactorDetail(request):
 
         factor = factors.get(code_factor_mahak)
         kala = kalas.get(kala_code_mahak)
-        if factor:
-            date = factor.date
-        else:
-            date = None
+
 
         if factor:
             defaults = {
@@ -1123,7 +1120,6 @@ def UpdateFactorDetail(request):
                 'acc_year': acc_year,
                 'factor': factor,
                 'kala': kala,
-                'date': date,
             }
 
             if key_mahak in existing_details:
@@ -4929,31 +4925,35 @@ def UpdateMyCondition(request):
 
 
 def DeleteDublicateData(request):
+    import time
     t0 = time.time()
     print('حذف دیتاهای تکراری---------------------')
 
-
     print('حذف کالاهای تکراری---------------------')
-    kala=Kala.objects.all()
-    key=('code')
-    counter=0
-    for k in kala:
-        c=k.code
-        if Kala.objects.filter(code=c).count() > 1:
-            a=Kala.objects.filter(code=c).count()
-            to_keep_id=Kala.objects.filter(code=c).last().id
-            Kala.objects.filter(code=c).exclude(id=to_keep_id).delete()
-            counter +=1
-            print(a-1,'delete')
-    print(counter ,'kala is dublicate and delete')
 
+    # گروه‌بندی بر اساس code و شمارش هر گروه
+    from django.db.models import Count, Max
+
+    duplicates = Kala.objects.values('code').annotate(
+        count=Count('id'),
+        last_id=Max('id')
+    ).filter(count__gt=1)
+
+    counter = 0
+    for duplicate in duplicates:
+        code = duplicate['code']
+        last_id = duplicate['last_id']
+        # حذف رکوردهای تکراری به جز رکورد آخر
+        deleted_count, _ = Kala.objects.filter(code=code).exclude(id=last_id).delete()
+        counter += deleted_count
+        print(deleted_count, 'delete')
+
+    print(f'{counter} کالای تکراری حذف شد')
 
     print('حذف فاکتور تکراری---------------------')
-
 
     tend = time.time()
     total_time = tend - t0
     print(f"زمان کل: {total_time:.2f} ثانیه")
     return redirect('/updatedb')
-
 
