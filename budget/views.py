@@ -912,6 +912,8 @@ def BudgetSaleTotal(request, *args, **kwargs):
             'l2':cat.parent.name,
             'l3':cat.name,
             'cat_id':cat.id,
+            'cat_par_id':cat.parent.id,
+            'cat_par_par_id':cat.parent.parent.id,
             'by_factor':by_factor,
             'cy_budget':cy_budget,
             'budget_rate':budget_rate,
@@ -936,6 +938,8 @@ def BudgetSaleTotal(request, *args, **kwargs):
     for entry in table3:
         l1 = entry['l1']
         l2 = entry['l2']
+        cat_par_id = entry['cat_par_id']
+        cat_par_par_id = entry['cat_par_par_id']
         by_factor = entry['by_factor']
 
         # کلید گروه‌بندی ترکیبی از l1 و l2
@@ -951,6 +955,8 @@ def BudgetSaleTotal(request, *args, **kwargs):
                 'cy_today_budget_line': 0,
                 'cy_factor': 0,
                 'by_today_factor': 0,
+                'cat_par_id': cat_par_id,
+                'cat_par_par_id': cat_par_par_id,
             }
 
         def safe_float(value):
@@ -1009,6 +1015,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
         table2.append({
             'l1': data['l1'],
             'l2': data['l2'],
+            'cat_id': data['cat_par_id'],
             'by_factor': data['by_factor'],
             'cy_budget': data['cy_budget'],
             'budget_rate': budget_rate,
@@ -1016,6 +1023,8 @@ def BudgetSaleTotal(request, *args, **kwargs):
             'cy_today_budget_line': data['cy_today_budget_line'],
             'cy_factor': data['cy_factor'],
             'by_today_factor': data['by_today_factor'],
+            'cat_par_par_id': data['cat_par_par_id'],
+
 
             'amalkard_by_year_ratio': amalkard_by_year_ratio,
             'amalkard_by_line_ratio': amalkard_by_line_ratio,
@@ -1307,6 +1316,436 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
         # --- ۲. کوئری‌های مربوط به سال جاری (Current Year) ---
         facor_acc_year_qs = FactorDetaile.objects.filter(
             kala__category=category,
+            acc_year=acc_year
+        )
+
+        daily_totals_acc_year = {}
+        if facor_acc_year_qs.exists():
+            for item in facor_acc_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
+                daily_totals_acc_year[str(item['date'])] = float(item['total'] or 0)
+
+
+
+        start_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
+        end_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(max_date=Max('date'))['max_date']
+        print(detail_name)
+        print('#############################################')
+
+        # ایجاد لیست روزها
+        date_list = []
+        current_date = start_date
+        while current_date <= end_date:
+            date_list.append(current_date.strftime('%Y-%m-%d'))  # قالب تاریخ به YYYY-MM-DD
+            current_date += timedelta(days=1)
+
+
+
+        acc_date_list = [datetime.strptime(date, '%Y-%m-%d') + relativedelta(years=1) for date in date_list]
+        acc_date_list = [date.strftime('%Y-%m-%d') for date in acc_date_list]
+
+
+
+        month_names = {
+            1: "فروردین", 2: "اردیبهشت", 3: "خرداد", 4: "تیر",
+            5: "مرداد", 6: "شهریور", 7: "مهر", 8: "آبان",
+            9: "آذر", 10: "دی", 11: "بهمن", 12: "اسفند"
+        }
+
+        chart_labels_shamsi = []
+        for date in acc_date_list:
+            try:
+                miladi_date = datetime.strptime(date, '%Y-%m-%d')  # تبدیل میلادی به datetime
+                shamsi_date = jdatetime.date.fromgregorian(day=miladi_date.day, month=miladi_date.month,
+                                                           year=miladi_date.year)
+                # تنظیم نمایش لیبل‌ها بر اساس شرط‌های تعیین‌شده
+                if shamsi_date.day == 1:  # نمایش نام ماه برای اولین روز ماه
+                    label = month_names[shamsi_date.month]
+                elif shamsi_date.day == 15:  # نمایش تاریخ کامل برای روز ۱۵ هر ماه
+                    label = shamsi_date.strftime('%Y-%m-%d')
+                else:  # سایر موارد خالی باشند
+                    label = shamsi_date.day
+
+                chart_labels_shamsi.append(shamsi_date.strftime('%Y-%m-%d'))
+
+            except ValueError as e:
+                print(f"خطای تبدیل تاریخ: {date}, {e}")  # نمایش خطا در صورت وجود مشکل
+
+
+        chart_labels = chart_labels_shamsi  # برچسب‌های نمودار همان لیست تاریخ‌ها
+        print('==============================================================')
+
+        chart1_data = []
+        chart2_data = []
+        chart3_data = []
+        chart4_data = []
+
+        cumulative_base_year = 0
+        cumulative_acc_year = 0
+        today = datetime.today().strftime('%Y-%m-%d')  # تاریخ امروز به فرمت YYYY-MM-DD
+        for day in acc_date_list:
+            by_date = datetime.strptime(day, '%Y-%m-%d') + relativedelta(years=-1)  # تاریخ مربوط به سال پایه
+            # مقدار روز جاری از سال پایه را دریافت و تجمعی محاسبه کن
+            if str(by_date.date()) in daily_totals_base_year:
+                cumulative_base_year += daily_totals_base_year[str(by_date.date())]  # علامت منفی برای تصحیح
+            chart1_data.append(cumulative_base_year)
+            for_chart3_data=((cumulative_base_year) * budget_rate)
+            for_chart3_data=float(for_chart3_data)
+            chart3_data.append(for_chart3_data)
+            if day == today:
+                today_bay_by=(cumulative_base_year) * budget_rate
+
+            # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
+            if day in daily_totals_acc_year:
+                cumulative_acc_year += daily_totals_acc_year[day]  # علامت منفی برای تصحیح
+            if day <= today:
+                chart2_data.append(cumulative_acc_year)
+                if day == today:
+                    today_actual=cumulative_acc_year
+
+        last_value_chart1 = chart1_data[-1] if chart1_data else None
+        count_acc_date_list = len(acc_date_list)
+        s=(last_value_chart1)/count_acc_date_list * budget_rate
+        ch4=0
+        for day in acc_date_list:
+            chart4_data.append(ch4)
+            if day == today:
+                today_by_time=ch4
+
+            ch4 += s
+        last_value_chart2 = chart2_data[-1] if chart2_data else None
+        master_dat={
+            'by_sanads':last_value_chart1/10,
+            'cy_budget':(last_value_chart1)/10*budget_rate,
+            'budget_rate':budget_rate,
+            'cy_sanads': last_value_chart2 / 10
+
+        }
+
+        print('today_bay_by,today_actual,today_by_time')
+        print(today_bay_by,today_actual,today_by_time)
+        today_actual=Decimal(today_actual)
+        today_bay_by=Decimal(today_bay_by)
+        today_by_time=Decimal(today_by_time)
+        g1 = ((today_actual - today_bay_by) / today_bay_by * 100) if today_bay_by != 0 else 100
+        g2 = ((today_actual - today_by_time) / today_by_time * 100) if today_by_time != 0 else 100
+        print(g1,g2)
+
+    if level == '2':
+        cat_id=int(code)
+        category=Category.objects.filter(id=cat_id,level=2).last()
+        detail_name=f'دسته - {category.name}-{cat_id}'
+        parent_cat=category.parent
+        level3=Category.objects.filter(level=3,parent=category)
+        level2=Category.objects.filter(level=2,parent=parent_cat)
+        if category.budget_rate is not None and category.budget_rat != 0:
+            budget_rate = category.budget_rate
+        else:
+            budget_rate=parent_cat.budget_rate
+
+        budget_rate=float(budget_rate)
+
+        print(detail_name)
+
+        # --- ۱. کوئری‌های مربوط به سال پایه (Base Year) ---
+        factor_base_year_qs = FactorDetaile.objects.filter(
+            kala__category__parent=category,
+            acc_year=base_year
+        )
+        print('factor_base_year_qs.count()')
+        print(factor_base_year_qs.count())
+
+        daily_totals_base_year = {}
+        if factor_base_year_qs.exists():
+            for item in factor_base_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
+                daily_totals_base_year[str(item['date'])] = float(item['total'] or 0)
+
+        print(len(daily_totals_base_year))
+        # --- ۲. کوئری‌های مربوط به سال جاری (Current Year) ---
+        facor_acc_year_qs = FactorDetaile.objects.filter(
+            kala__category__parent=category,
+            acc_year=acc_year
+        )
+
+        daily_totals_acc_year = {}
+        if facor_acc_year_qs.exists():
+            for item in facor_acc_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
+                daily_totals_acc_year[str(item['date'])] = float(item['total'] or 0)
+
+
+
+        start_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
+        end_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(max_date=Max('date'))['max_date']
+        print(detail_name)
+        print('#############################################')
+
+        # ایجاد لیست روزها
+        date_list = []
+        current_date = start_date
+        while current_date <= end_date:
+            date_list.append(current_date.strftime('%Y-%m-%d'))  # قالب تاریخ به YYYY-MM-DD
+            current_date += timedelta(days=1)
+
+
+
+        acc_date_list = [datetime.strptime(date, '%Y-%m-%d') + relativedelta(years=1) for date in date_list]
+        acc_date_list = [date.strftime('%Y-%m-%d') for date in acc_date_list]
+
+
+
+        month_names = {
+            1: "فروردین", 2: "اردیبهشت", 3: "خرداد", 4: "تیر",
+            5: "مرداد", 6: "شهریور", 7: "مهر", 8: "آبان",
+            9: "آذر", 10: "دی", 11: "بهمن", 12: "اسفند"
+        }
+
+        chart_labels_shamsi = []
+        for date in acc_date_list:
+            try:
+                miladi_date = datetime.strptime(date, '%Y-%m-%d')  # تبدیل میلادی به datetime
+                shamsi_date = jdatetime.date.fromgregorian(day=miladi_date.day, month=miladi_date.month,
+                                                           year=miladi_date.year)
+                # تنظیم نمایش لیبل‌ها بر اساس شرط‌های تعیین‌شده
+                if shamsi_date.day == 1:  # نمایش نام ماه برای اولین روز ماه
+                    label = month_names[shamsi_date.month]
+                elif shamsi_date.day == 15:  # نمایش تاریخ کامل برای روز ۱۵ هر ماه
+                    label = shamsi_date.strftime('%Y-%m-%d')
+                else:  # سایر موارد خالی باشند
+                    label = shamsi_date.day
+
+                chart_labels_shamsi.append(shamsi_date.strftime('%Y-%m-%d'))
+
+            except ValueError as e:
+                print(f"خطای تبدیل تاریخ: {date}, {e}")  # نمایش خطا در صورت وجود مشکل
+
+
+        chart_labels = chart_labels_shamsi  # برچسب‌های نمودار همان لیست تاریخ‌ها
+        print('==============================================================')
+
+        chart1_data = []
+        chart2_data = []
+        chart3_data = []
+        chart4_data = []
+
+        cumulative_base_year = 0
+        cumulative_acc_year = 0
+        today = datetime.today().strftime('%Y-%m-%d')  # تاریخ امروز به فرمت YYYY-MM-DD
+        for day in acc_date_list:
+            by_date = datetime.strptime(day, '%Y-%m-%d') + relativedelta(years=-1)  # تاریخ مربوط به سال پایه
+            # مقدار روز جاری از سال پایه را دریافت و تجمعی محاسبه کن
+            if str(by_date.date()) in daily_totals_base_year:
+                cumulative_base_year += daily_totals_base_year[str(by_date.date())]  # علامت منفی برای تصحیح
+            chart1_data.append(cumulative_base_year)
+            for_chart3_data=((cumulative_base_year) * budget_rate)
+            for_chart3_data=float(for_chart3_data)
+            chart3_data.append(for_chart3_data)
+            if day == today:
+                today_bay_by=(cumulative_base_year) * budget_rate
+
+            # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
+            if day in daily_totals_acc_year:
+                cumulative_acc_year += daily_totals_acc_year[day]  # علامت منفی برای تصحیح
+            if day <= today:
+                chart2_data.append(cumulative_acc_year)
+                if day == today:
+                    today_actual=cumulative_acc_year
+
+        last_value_chart1 = chart1_data[-1] if chart1_data else None
+        count_acc_date_list = len(acc_date_list)
+        s=(last_value_chart1)/count_acc_date_list * budget_rate
+        ch4=0
+        for day in acc_date_list:
+            chart4_data.append(ch4)
+            if day == today:
+                today_by_time=ch4
+
+            ch4 += s
+        last_value_chart2 = chart2_data[-1] if chart2_data else None
+        master_dat={
+            'by_sanads':last_value_chart1/10,
+            'cy_budget':(last_value_chart1)/10*budget_rate,
+            'budget_rate':budget_rate,
+            'cy_sanads': last_value_chart2 / 10
+
+        }
+
+        print('today_bay_by,today_actual,today_by_time')
+        print(today_bay_by,today_actual,today_by_time)
+        today_actual=Decimal(today_actual)
+        today_bay_by=Decimal(today_bay_by)
+        today_by_time=Decimal(today_by_time)
+        g1 = ((today_actual - today_bay_by) / today_bay_by * 100) if today_bay_by != 0 else 100
+        g2 = ((today_actual - today_by_time) / today_by_time * 100) if today_by_time != 0 else 100
+        print(g1,g2)
+
+    if level == '1':
+        cat_id=int(code)
+        category=Category.objects.filter(id=cat_id,level=1).last()
+        detail_name=f'دسته - {category.name}-{cat_id}'
+        level2=Category.objects.filter(level=2,parent=category)
+
+        budget_rate=category.budget_rate
+
+        budget_rate=float(budget_rate)
+
+        print(detail_name)
+
+        # --- ۱. کوئری‌های مربوط به سال پایه (Base Year) ---
+        factor_base_year_qs = FactorDetaile.objects.filter(
+            kala__category__parent__parent=category,
+            acc_year=base_year
+        )
+        print('factor_base_year_qs.count()')
+        print(factor_base_year_qs.count())
+
+        daily_totals_base_year = {}
+        if factor_base_year_qs.exists():
+            for item in factor_base_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
+                daily_totals_base_year[str(item['date'])] = float(item['total'] or 0)
+
+        print(len(daily_totals_base_year))
+        # --- ۲. کوئری‌های مربوط به سال جاری (Current Year) ---
+        facor_acc_year_qs = FactorDetaile.objects.filter(
+            kala__category__parent__parent=category,
+            acc_year=acc_year
+        )
+
+        daily_totals_acc_year = {}
+        if facor_acc_year_qs.exists():
+            for item in facor_acc_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
+                daily_totals_acc_year[str(item['date'])] = float(item['total'] or 0)
+
+
+
+        start_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
+        end_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(max_date=Max('date'))['max_date']
+        print(detail_name)
+        print('#############################################')
+
+        # ایجاد لیست روزها
+        date_list = []
+        current_date = start_date
+        while current_date <= end_date:
+            date_list.append(current_date.strftime('%Y-%m-%d'))  # قالب تاریخ به YYYY-MM-DD
+            current_date += timedelta(days=1)
+
+
+
+        acc_date_list = [datetime.strptime(date, '%Y-%m-%d') + relativedelta(years=1) for date in date_list]
+        acc_date_list = [date.strftime('%Y-%m-%d') for date in acc_date_list]
+
+
+
+        month_names = {
+            1: "فروردین", 2: "اردیبهشت", 3: "خرداد", 4: "تیر",
+            5: "مرداد", 6: "شهریور", 7: "مهر", 8: "آبان",
+            9: "آذر", 10: "دی", 11: "بهمن", 12: "اسفند"
+        }
+
+        chart_labels_shamsi = []
+        for date in acc_date_list:
+            try:
+                miladi_date = datetime.strptime(date, '%Y-%m-%d')  # تبدیل میلادی به datetime
+                shamsi_date = jdatetime.date.fromgregorian(day=miladi_date.day, month=miladi_date.month,
+                                                           year=miladi_date.year)
+                # تنظیم نمایش لیبل‌ها بر اساس شرط‌های تعیین‌شده
+                if shamsi_date.day == 1:  # نمایش نام ماه برای اولین روز ماه
+                    label = month_names[shamsi_date.month]
+                elif shamsi_date.day == 15:  # نمایش تاریخ کامل برای روز ۱۵ هر ماه
+                    label = shamsi_date.strftime('%Y-%m-%d')
+                else:  # سایر موارد خالی باشند
+                    label = shamsi_date.day
+
+                chart_labels_shamsi.append(shamsi_date.strftime('%Y-%m-%d'))
+
+            except ValueError as e:
+                print(f"خطای تبدیل تاریخ: {date}, {e}")  # نمایش خطا در صورت وجود مشکل
+
+
+        chart_labels = chart_labels_shamsi  # برچسب‌های نمودار همان لیست تاریخ‌ها
+        print('==============================================================')
+
+        chart1_data = []
+        chart2_data = []
+        chart3_data = []
+        chart4_data = []
+
+        cumulative_base_year = 0
+        cumulative_acc_year = 0
+        today = datetime.today().strftime('%Y-%m-%d')  # تاریخ امروز به فرمت YYYY-MM-DD
+        for day in acc_date_list:
+            by_date = datetime.strptime(day, '%Y-%m-%d') + relativedelta(years=-1)  # تاریخ مربوط به سال پایه
+            # مقدار روز جاری از سال پایه را دریافت و تجمعی محاسبه کن
+            if str(by_date.date()) in daily_totals_base_year:
+                cumulative_base_year += daily_totals_base_year[str(by_date.date())]  # علامت منفی برای تصحیح
+            chart1_data.append(cumulative_base_year)
+            for_chart3_data=((cumulative_base_year) * budget_rate)
+            for_chart3_data=float(for_chart3_data)
+            chart3_data.append(for_chart3_data)
+            if day == today:
+                today_bay_by=(cumulative_base_year) * budget_rate
+
+            # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
+            if day in daily_totals_acc_year:
+                cumulative_acc_year += daily_totals_acc_year[day]  # علامت منفی برای تصحیح
+            if day <= today:
+                chart2_data.append(cumulative_acc_year)
+                if day == today:
+                    today_actual=cumulative_acc_year
+
+        last_value_chart1 = chart1_data[-1] if chart1_data else None
+        count_acc_date_list = len(acc_date_list)
+        s=(last_value_chart1)/count_acc_date_list * budget_rate
+        ch4=0
+        for day in acc_date_list:
+            chart4_data.append(ch4)
+            if day == today:
+                today_by_time=ch4
+
+            ch4 += s
+        last_value_chart2 = chart2_data[-1] if chart2_data else None
+        master_dat={
+            'by_sanads':last_value_chart1/10,
+            'cy_budget':(last_value_chart1)/10*budget_rate,
+            'budget_rate':budget_rate,
+            'cy_sanads': last_value_chart2 / 10
+
+        }
+
+        print('today_bay_by,today_actual,today_by_time')
+        print(today_bay_by,today_actual,today_by_time)
+        today_actual=Decimal(today_actual)
+        today_bay_by=Decimal(today_bay_by)
+        today_by_time=Decimal(today_by_time)
+        g1 = ((today_actual - today_bay_by) / today_bay_by * 100) if today_bay_by != 0 else 100
+        g2 = ((today_actual - today_by_time) / today_by_time * 100) if today_by_time != 0 else 100
+        print(g1,g2)
+
+
+    if level == '0':
+        detail_name='همه کالاها'
+        level1=Category.objects.filter(level=1)
+
+        budget_rate=1.5
+
+        budget_rate=float(budget_rate)
+
+        print(detail_name)
+
+        # --- ۱. کوئری‌های مربوط به سال پایه (Base Year) ---
+        factor_base_year_qs = FactorDetaile.objects.filter(
+            acc_year=base_year
+        )
+        print('factor_base_year_qs.count()')
+        print(factor_base_year_qs.count())
+
+        daily_totals_base_year = {}
+        if factor_base_year_qs.exists():
+            for item in factor_base_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
+                daily_totals_base_year[str(item['date'])] = float(item['total'] or 0)
+
+        print(len(daily_totals_base_year))
+        # --- ۲. کوئری‌های مربوط به سال جاری (Current Year) ---
+        facor_acc_year_qs = FactorDetaile.objects.filter(
             acc_year=acc_year
         )
 
