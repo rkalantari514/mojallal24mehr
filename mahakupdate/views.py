@@ -1210,9 +1210,10 @@ def UpdateFactorDetail(request):
     fields_to_update = ['date']
 
     for fac in FactorDetaile.objects.all():
+
         d1 = fac.date
         try:
-            d2 = Factor.objects.filter(acc_year=acc_year,code=fac.code_factor).last().date
+            d2 = Factor.objects.filter(acc_year=fac.acc_year,code=fac.code_factor).last().date
         except:
             d2=None
         print(d1,d2)
