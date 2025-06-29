@@ -1209,16 +1209,24 @@ def UpdateFactorDetail(request):
     objects_to_update = []
     fields_to_update = ['date']
 
-    for fac in FactorDetaile.objects.all():
+    # جمع‌آوری آخرین تاریخ‌ها برای هر (acc_year, code)
+    latest_dates = Factor.objects.values('acc_year', 'code').annotate(last_date=Max('date'))
 
+    # ساخت دیکشنری برای دسترسی سریع
+    date_map = {
+        (item['acc_year'], item['code']): item['last_date']
+        for item in latest_dates
+        if item['last_date'] is not None
+    }
+
+    # عملیات به‌روزرسانی روی شیءهای FactorDetaile
+    for fac in FactorDetaile.objects.all():
+        key = (fac.acc_year, fac.code_factor)
+        d2 = date_map.get(key)
         d1 = fac.date
-        try:
-            d2 = Factor.objects.filter(acc_year=fac.acc_year,code=fac.code_factor).last().date
-        except:
-            d2=None
-        print(d1,d2)
+        print(d1, d2)
         if d2 and d1 != d2:
-            print('------fac.code_factor ')
+            print('------',fac.code_factor)
             fac.date = d2
             objects_to_update.append(fac)
 
