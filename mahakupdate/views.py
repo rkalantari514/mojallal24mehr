@@ -4,6 +4,7 @@ from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
 from dashboard.models import MasterInfo
 from dashboard.views import CreateReport, CreateMonthlyReport, CreateTotalReport
+from festival.models import CustomerPoints
 from festival.views import Calculate_and_award_points
 from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category, Sanad, SanadDetail, AccCoding, ChequesPay, \
     Bank, Loan, LoanDetil, BackFactor, BackFactorDetail
@@ -4992,6 +4993,45 @@ def DeleteDublicateData(request):
         print(f"تعداد رکوردهای تکراری حذف شده: {count_deleted}")
     else:
         print('رکورد تکراری یافت نشد.')
+
+    print('حذف جشنواره  تکراری---------------------')
+    # یافتن گروه‌های تکراری بر اساس سه فیلد و نگهداری آخرین ID هر گروه
+    duplicates = CustomerPoints.objects.values('festival', 'customer', 'factor').annotate(
+        count=Count('id'),
+        last_id=Max('id')
+    ).filter(count__gt=1)
+
+    objects_to_delete = []
+
+    for duplicate in duplicates:
+        festival_id = duplicate['festival']
+        customer_id = duplicate['customer']
+        factor_id = duplicate['factor']
+        last_id = duplicate['last_id']
+
+        # پیدا کردن رکوردهای تکراری به جز آخرین
+        queryset = CustomerPoints.objects.filter(
+            festival_id=festival_id,
+            customer_id=customer_id,
+            factor_id=factor_id
+        ).exclude(id=last_id)
+
+        # افزودن این رکوردها به لیست حذف
+        objects_to_delete.extend(queryset)
+
+    # حذف دسته جمعی این رکوردها
+    if objects_to_delete:
+        ids_to_delete = [obj.id for obj in objects_to_delete]
+        delete_count, _ = CustomerPoints.objects.filter(id__in=ids_to_delete).delete()
+        print(f"تعداد رکوردهای تکراری حذف شده: {delete_count}")
+    else:
+        print('رکورد تکراری یافت نشد.')
+
+
+
+
+
+
 
     tend = time.time()
     total_time = tend - t0
