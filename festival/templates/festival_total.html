@@ -148,6 +148,11 @@
                                                     data-sorter="numericOnly">مشتری
                                                 </th>
 
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="fac_number" data-filter-control="select"
+                                                    data-sorter="numericOnly">شماره فاکتور
+                                                </th>
+
 
                                                 <th class="card-text text-center" data-sortable="true" data-field="cost"
                                                     data-sorter="numericOnly"
@@ -176,15 +181,15 @@
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="phones"
-                                                    >تلفنها
+                                                >تلفنها
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="phone_number"
-                                                    >شماره تلفن
+                                                >شماره تلفن
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="condiition" data-filter-control="select"
-                                                    >وضعیت پیامک
+                                                >وضعیت پیامک
                                                 </th>
 
 
@@ -206,6 +211,7 @@
                                                             {{ p.customer.clname }}
                                                         </a>
                                                     </td>
+                                                    <td class="card-text text-center">{{ p.factor.code }}</td>
                                                     <td class="card-text text-center">{{ p.factor.pdate }}</td>
                                                     <td class="card-text text-center">{{ p.mablagh_k|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ p.points_awarded }}</td>

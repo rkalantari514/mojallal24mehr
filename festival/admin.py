@@ -13,7 +13,7 @@ class FestivalAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerPoints)
 class CustomerPointsAdmin(admin.ModelAdmin):
-    list_display = ('festival', 'customer', 'factor', 'points_awarded', 'award_date')
+    list_display = ('festival', 'customer', 'factor','factor__code', 'points_awarded', 'award_date')
     list_filter = ('festival', 'award_date')
     search_fields = ('customer__name', 'customer__lname', 'factor__code', 'festival__name')
     ordering = ('-award_date',)
