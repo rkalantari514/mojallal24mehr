@@ -1200,6 +1200,65 @@ def BudgetSaleTotal(request, *args, **kwargs):
         'actual_ratio_by_year': actual_ratio_by_year,
     })
 
+
+    #ساخت دوباره جدول صفر ============================
+    table0 = []
+    by_factor=FactorDetaile.objects.filter(acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
+    cy_factor=FactorDetaile.objects.filter(acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh'] or 0
+    by_today_factor=FactorDetaile.objects.filter(acc_year=base_year,factor__date__lte=one_year_ago).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
+
+    cy_budget = (Decimal(by_factor) if by_factor is not None else Decimal(0)) * (
+        Decimal(budget_rate) if budget_rate is not None else Decimal(0))
+
+    cy_today_budget = (Decimal(by_today_factor) if by_today_factor is not None else Decimal(0)) * (
+        Decimal(budget_rate) if budget_rate is not None else Decimal(0))
+    if cy_today_budget != 0:
+        amalkard_by_year_ratio=((Decimal(cy_factor)/cy_today_budget)-Decimal(1.0))*Decimal(100.0)
+    else:
+        amalkard_by_year_ratio=0
+
+
+
+    amalkard1 = False
+
+    if amalkard_by_year_ratio > 0:
+        amalkard1=True
+
+    cy_today_budget_line= Decimal(day_rate) * cy_budget
+    if cy_today_budget_line != 0:
+        amalkard_by_line_ratio=((Decimal(cy_factor)/cy_today_budget_line)-Decimal(1.0))*Decimal(100.0)
+    else:
+        amalkard_by_line_ratio=0
+
+
+
+    amalkard2 = False
+
+    if amalkard_by_line_ratio > 0:
+        amalkard2=True
+
+    actual_ratio_by_year=Decimal(cy_factor)/Decimal(by_today_factor) if by_today_factor and by_today_factor != 0 else 0.0
+
+
+    table0.append({
+        'by_factor': by_factor,
+        'cy_budget': cy_budget,
+        'budget_rate': budget_rate,
+        'cy_today_budget': cy_today_budget,
+        'cy_today_budget_line': cy_today_budget_line,
+        'cy_factor': cy_factor,
+        'amalkard_by_year_ratio': amalkard_by_year_ratio,
+        'amalkard_by_line_ratio': amalkard_by_line_ratio,
+        'amalkard1': amalkard1,
+        'amalkard2': amalkard2,
+        'by_today_factor': by_today_factor,
+        'actual_ratio_by_year': actual_ratio_by_year,
+
+    }
+
+    )
+
+
     # فرض بر این است که این کد در ویو Django یا فریمورک مشابه است
     table100 = [{'l1': item['l1'], 'cy_factor': item['cy_factor']/10000000} for item in table1 if item.get('cy_factor', 0) > 0]
     table200 = [{'l1': item['l1'], 'l2': item['l2'], 'cy_factor': item['cy_factor']/10000000} for item in table2 if item.get('cy_factor', 0) > 0]
