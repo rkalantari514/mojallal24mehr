@@ -68,10 +68,17 @@
                         {#                        <h5 class="card-title">سطح کل</h5>#}
                         <div class="text-center">
                             {% for l in level1 %}
-                                <a href="/budget/cost/detail/1/{{ l.code }}">
-                                    <button type="button"
-                                            class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
-                                </a>
+                                {% if l == cat1 %}
+                                    <a href="/budget/sale/factor/{{ year }}/1/{{ l.id }}">
+                                        <button type="button"
+                                                class="btn btn-success category-btn">{{ l.name }}</button>
+                                    </a>
+                                {% else %}
+                                    <a href="/budget/sale/factor/{{ year }}/1/{{ l.id }}">
+                                        <button type="button"
+                                                class="btn btn-secondary category-btn">{{ l.name }}</button>
+                                    </a>
+                                {% endif %}
                             {% endfor %}
 
                         </div>
@@ -83,22 +90,20 @@
             <div class="col-xl-12 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body">
-                        {#                            <h5 class="card-title">سطح معین</h5>#}
                         <div class="text-center">
                             {% for l in level2 %}
-                                {% if l.code == moin_code %}
-                                    <a href="/budget/cost/detail/2/{{ l.code }}">
+                                {% if l == cat2 %}
+                                    <a href="/budget/sale/factor/{{ year }}/2/{{ l.id }}">
                                         <button type="button"
-                                                class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
+                                                class="btn btn-success category-btn">{{ l.name }}</button>
                                     </a>
                                 {% else %}
-                                    <a href="/budget/cost/detail/2/{{ l.code }}">
+                                    <a href="/budget/sale/factor/{{ year }}/2/{{ l.id }}">
                                         <button type="button"
-                                                class="btn btn-secondary category-btn">{{ l.code }}-{{ l.name }}</button>
+                                                class="btn btn-secondary category-btn">{{ l.name }}</button>
                                     </a>
                                 {% endif %}
                             {% endfor %}
-
                         </div>
 
                     </div>
@@ -109,18 +114,17 @@
                 <div class="col-xl-12 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="card-body">
-                            {#                            <h5 class="card-title">سطح تفضیلی</h5>#}
                             <div class="text-center">
                                 {% for l in level3 %}
-                                    {% if l.code == tafzili_code %}
-                                        <a href="/budget/cost/detail/3/{{ l.code }}">
+                                    {% if l == cat3 %}
+                                        <a href="/budget/sale/factor/{{ year }}/3/{{ l.id }}">
                                             <button type="button"
-                                                    class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
+                                                    class="btn btn-success category-btn">{{ l.name }}</button>
                                         </a>
                                     {% else %}
-                                        <a href="/budget/cost/detail/3/{{ l.code }}">
+                                        <a href="/budget/sale/factor/{{ year }}/3/{{ l.id }}">
                                             <button type="button"
-                                                    class="btn btn-secondary category-btn">{{ l.code }}-{{ l.name }}</button>
+                                                    class="btn btn-secondary category-btn">{{ l.name }}</button>
                                         </a>
                                     {% endif %}
                                 {% endfor %}
@@ -252,8 +256,8 @@
                                             <tr class="tr-class-1">
 
                                                 {% if is_b_year %}
-                                                <th data-field="today" class="card-text text-center"
-                                                    data-sortable="true" data-filter-control="select"></th>
+                                                    <th data-field="today" class="card-text text-center"
+                                                        data-sortable="true" data-filter-control="select"></th>
                                                 {% endif %}
 
                                                 <th data-field="code_factor" class="card-text text-center"
@@ -310,13 +314,13 @@
                                             {% for item in factors %}
                                                 <tr>
                                                     {% if is_b_year %}
-                                                    <td class="card-text text-center text-success" >
-                                                        {% if item.factor.date < one_year_ago %}
-                                                        تا امروز
-                                                        {% endif %}
+                                                        <td class="card-text text-center text-success">
+                                                            {% if item.factor.date < one_year_ago %}
+                                                                تا امروز
+                                                            {% endif %}
 
-                                                    </td>
-                                                {% endif %}
+                                                        </td>
+                                                    {% endif %}
 
                                                     <td class="card-text text-center">{{ item.code_factor }}</td>
                                                     <td class="card-text text-center">{{ item.radif }}</td>

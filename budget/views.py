@@ -2017,22 +2017,36 @@ def BudgetSaleFactorDetail(request,year, level, code, *args, **kwargs):
     is_b_year=False
     if int(year) == acc_year-1:
         is_b_year=True
+    level1=Category.objects.filter(level=1)
+    level2=None
+    level3=None
+    cat1=None
+    cat2=None
+    cat3=None
+
 
     if int(level)==3:
         cat3=Category.objects.filter(id=int(code),level=3).last()
+        cat2=cat3.parent
+        cat1=cat2.parent
         detail_name=cat3.name
+        level3 = Category.objects.filter(level=3,parent=cat3.parent)
+        level2 = Category.objects.filter(level=2,parent=cat3.parent.parent)
         factors=FactorDetaile.objects.filter(kala__category=cat3,acc_year=int(year))
 
     if int(level)==2:
         cat2=Category.objects.filter(id=int(code),level=2).last()
+        cat1=cat2.parent
         detail_name=cat2.name
+        level2 = Category.objects.filter(level=2,parent=cat2.parent)
+        level3 = Category.objects.filter(level=3,parent=cat2)
 
         factors=FactorDetaile.objects.filter(kala__category__parent=cat2,acc_year=int(year))
 
     if int(level)==1:
         cat1=Category.objects.filter(id=int(code),level=1).last()
         detail_name=cat1.name
-
+        level2 = Category.objects.filter(level=2,parent=cat1)
         factors=FactorDetaile.objects.filter(kala__category__parent__parent=cat1,acc_year=int(year))
 
     today = date.today()
@@ -2040,6 +2054,14 @@ def BudgetSaleFactorDetail(request,year, level, code, *args, **kwargs):
 
     context = {
         'user': user,
+        'level': int(level),
+        'level1':level1,
+        'level2':level2,
+        'level3':level3,
+        'cat1':cat1,
+        'cat2':cat2,
+        'cat3':cat3,
+
         'year': year,
         'factors': factors,
         'detail_name': detail_name,
