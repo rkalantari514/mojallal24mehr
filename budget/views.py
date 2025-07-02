@@ -2013,7 +2013,7 @@ def BudgetSaleFactorDetail(request,year, level, code, *args, **kwargs):
         UserLog.objects.create(user=user, page='جزئیات فاکتور های فروش', code=int(code))
 
 
-    if int(level)==3:
+    if int(level)==1:
         cat3=Category.objects.filter(id=int(code)).last()
         factors=FactorDetaile.objects.filter(kala__category=cat3,acc_year=int(year))
 
@@ -2021,7 +2021,7 @@ def BudgetSaleFactorDetail(request,year, level, code, *args, **kwargs):
         cat3=Category.objects.filter(parent__id=int(code)).last()
         factors=FactorDetaile.objects.filter(kala__category=cat3,acc_year=int(year))
 
-    if int(level)==1:
+    if int(level)==3:
         cat3=Category.objects.filter(parent__parent__id=int(code)).last()
         factors=FactorDetaile.objects.filter(kala__category=cat3,acc_year=int(year))
 
