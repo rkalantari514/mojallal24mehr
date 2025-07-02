@@ -1,6 +1,6 @@
 from django.urls import path
 
-from budget.views import BudgetCostTotal, BudgetCostDetail, BudgetSaleTotal, BudgetSaleDetail
+from budget.views import BudgetCostTotal, BudgetCostDetail, BudgetSaleTotal, BudgetSaleDetail, BudgetSaleFactorDetail
 
 urlpatterns = [
 
@@ -10,5 +10,9 @@ urlpatterns = [
 
 
     path('budget/sale/detail/<level>/<code>', BudgetSaleDetail, name='budget_sale_detail'),
+
+
+
+    path('budget/sale/factor/<year>/<level>/<code>', BudgetSaleFactorDetail, name='budget_sale_factor_detail'),
 
 ]

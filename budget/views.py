@@ -1994,3 +1994,49 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
     return render(request, 'budget_sale_detail.html', context)
+
+
+
+
+
+
+
+def BudgetSaleFactorDetail(request,year, level, code, *args, **kwargs):
+    start_time = time.time()
+    name = 'جزئیات فاکتور های فروش'
+    result = page_permision(request, name)
+    if result:
+        return result
+
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='جزئیات فاکتور های فروش', code=int(code))
+
+
+    if int(level)==3:
+        cat3=Category.objects.filter(id=int(code)).last()
+        factors=FactorDetaile.objects.filter(kala__category=cat3,acc_year=int(year))
+
+    if int(level)==2:
+        cat3=Category.objects.filter(parent__id=int(code)).last()
+        factors=FactorDetaile.objects.filter(kala__category=cat3,acc_year=int(year))
+
+    if int(level)==3:
+        cat3=Category.objects.filter(parent__parent_idid=int(code)).last()
+        factors=FactorDetaile.objects.filter(kala__category=cat3,acc_year=int(year))
+
+
+
+
+    context = {
+        'user': user,
+        'year': year,
+        'factors': factors,
+
+
+
+    }
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+
+    return render(request, 'budget_sale_factor_detail.html', context)
