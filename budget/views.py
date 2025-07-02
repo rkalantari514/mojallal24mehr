@@ -2019,11 +2019,13 @@ def BudgetSaleFactorDetail(request,year, level, code, *args, **kwargs):
 
     if int(level)==2:
         cat3=Category.objects.filter(parent__id=int(code)).last()
-        factors=FactorDetaile.objects.filter(kala__category=cat3,acc_year=int(year))
+        par_cat=cat3.parent
+        factors=FactorDetaile.objects.filter(kala__category=par_cat,acc_year=int(year))
 
     if int(level)==1:
         cat3=Category.objects.filter(parent__parent__id=int(code)).last()
-        factors=FactorDetaile.objects.filter(kala__category=cat3,acc_year=int(year))
+        par_cat = cat3.parent.parent
+        factors=FactorDetaile.objects.filter(kala__category=par_cat,acc_year=int(year))
 
 
 
