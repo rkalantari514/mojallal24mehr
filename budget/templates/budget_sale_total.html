@@ -73,7 +73,7 @@
     border: none;
     border-radius: 5px;
 ">
-    <i class="fa fa-home" aria-hidden="true"></i> </button>
+                                        <i class="fa fa-home" aria-hidden="true"></i></button>
 
                                 </div>
 
@@ -133,6 +133,11 @@
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter"> کل
                                                     فروش{{ base_year }}</th>
+                                                <th data-field="by_today_factor" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">
+                                                    فروش{{ base_year }} تا امروز
+                                                </th>
                                                 <th data-field="budget_rate" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly">ضریب بودجه
                                                 </th>
@@ -188,22 +193,24 @@
                                                                 <i class="ti-bar-chart pr-1"></i> نمودار عملکرد
                                                             </button>
                                                         </a>
-{#                                                        <a href="/sanad_total/{{ acc_year }}/501/{{ item.moin_code }}/{{ item.tafzili_code }}"#}
-{#                                                           target="_blank">#}
-{#                                                            <button type="button"#}
-{#                                                                    class="btn btn-sm btn-danger btn-fixed-width">#}
-{#                                                                <i class="ti-wallet pr-1"></i> تراز {{ acc_year }}#}
-{#                                                            </button>#}
-{#                                                        </a>#}
-{#                                                        <a href="/sanad_total/{{ base_year }}/501/{{ item.moin_code }}/{{ item.tafzili_code }}"#}
-{#                                                           target="_blank">#}
-{#                                                            <button type="button"#}
-{#                                                                    class="btn btn-sm btn-primary btn-fixed-width">#}
-{#                                                                <i class="ti-wallet pr-1"></i> تراز {{ base_year }}#}
-{#                                                            </button>#}
-{#                                                        </a>#}
+                                                        {#                                                        <a href="/sanad_total/{{ acc_year }}/501/{{ item.moin_code }}/{{ item.tafzili_code }}"#}
+                                                        {#                                                           target="_blank">#}
+                                                        {#                                                            <button type="button"#}
+                                                        {#                                                                    class="btn btn-sm btn-danger btn-fixed-width">#}
+                                                        {#                                                                <i class="ti-wallet pr-1"></i> تراز {{ acc_year }}#}
+                                                        {#                                                            </button>#}
+                                                        {#                                                        </a>#}
+                                                        {#                                                        <a href="/sanad_total/{{ base_year }}/501/{{ item.moin_code }}/{{ item.tafzili_code }}"#}
+                                                        {#                                                           target="_blank">#}
+                                                        {#                                                            <button type="button"#}
+                                                        {#                                                                    class="btn btn-sm btn-primary btn-fixed-width">#}
+                                                        {#                                                                <i class="ti-wallet pr-1"></i> تراز {{ base_year }}#}
+                                                        {#                                                            </button>#}
+                                                        {#                                                        </a>#}
                                                     </td>
                                                     <td class="card-text text-center">{{ item.by_factor|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.by_today_factor|floatformat:0|intcomma:False }}</td>
+
                                                     <td class="card-text text-center">{{ item.budget_rate|floatformat:2 }}</td>
                                                     <td class="card-text text-center">{{ item.actual_ratio_by_year|floatformat:2 }}</td>
                                                     <td class="card-text text-center">{{ item.cy_budget|floatformat:0|intcomma:False }}</td>
@@ -305,6 +312,11 @@
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter"> کل
                                                     فروش{{ base_year }}</th>
+                                                <th data-field="by_today_factor" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">
+                                                    فروش{{ base_year }} تا امروز
+                                                </th>
                                                 <th data-field="budget_rate" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly">ضریب بودجه
                                                 </th>
@@ -377,6 +389,7 @@
                                                     </td>
                                                     <td class="card-text text-center">{{ item.l1 }}</td>
                                                     <td class="card-text text-center">{{ item.by_factor|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.by_today_factor|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ item.budget_rate|floatformat:2 }}</td>
                                                     <td class="card-text text-center">{{ item.actual_ratio_by_year|floatformat:2 }}</td>
 
@@ -483,6 +496,11 @@
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter"> کل
                                                     فروش{{ base_year }}</th>
+                                                <th data-field="by_today_factor" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">
+                                                    فروش{{ base_year }} تا امروز
+                                                </th>
                                                 <th data-field="budget_rate" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly">ضریب بودجه
                                                 </th>
@@ -556,6 +574,8 @@
                                                     <td class="card-text text-center">{{ item.l1 }}</td>
                                                     <td class="card-text text-center">{{ item.l2 }}</td>
                                                     <td class="card-text text-center">{{ item.by_factor|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.by_today_factor|floatformat:0|intcomma:False }}</td>
+
                                                     <td class="card-text text-center">{{ item.budget_rate|floatformat:2 }}</td>
                                                     <td class="card-text text-center">{{ item.actual_ratio_by_year|floatformat:2 }}</td>
                                                     <td class="card-text text-center">{{ item.cy_budget|floatformat:0|intcomma:False }}</td>
@@ -667,6 +687,11 @@
                                                     data-sortable="true" data-sorter="numericOnly"
                                                     data-footer-formatter="priceFormatter"> کل
                                                     فروش{{ base_year }}</th>
+                                                <th data-field="by_today_factor" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">
+                                                    فروش{{ base_year }} تا امروز
+                                                </th>
                                                 <th data-field="budget_rate" class="card-text text-center"
                                                     data-sortable="true" data-sorter="numericOnly">ضریب بودجه
                                                 </th>
@@ -741,6 +766,8 @@
                                                     <td class="card-text text-center">{{ item.l2 }}</td>
                                                     <td class="card-text text-center">{{ item.l3 }}</td>
                                                     <td class="card-text text-center">{{ item.by_factor|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center">{{ item.by_today_factor|floatformat:0|intcomma:False }}</td>
+
                                                     <td class="card-text text-center">{{ item.budget_rate }}</td>
                                                     <td class="card-text text-center">{{ item.actual_ratio_by_year|floatformat:2 }}</td>
                                                     <td class="card-text text-center">{{ item.cy_budget|floatformat:0|intcomma:False }}</td>

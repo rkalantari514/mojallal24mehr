@@ -1152,7 +1152,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
             'amalkard_by_line_ratio': amalkard_by_line_ratio,
             'amalkard1': amalkard1,
             'amalkard2': amalkard2,
-            'by_today_factor': by_today_factor,
+            'by_today_factor':  data['by_today_factor'],
             'actual_ratio_by_year': actual_ratio_by_year,
         })
 
