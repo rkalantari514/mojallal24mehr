@@ -2127,6 +2127,7 @@ def update_kala_categories():
     default_category = Category.objects.filter(name='تعیین نشده', level=3).first()
     category_110 = Category.objects.filter(name='اضافه مبلغ شرايطي	', level=3).first()
     category_120 = Category.objects.filter(name='اضافه مبلغ شرايطي40', level=3).first()
+    category_1 = Category.objects.filter(name='اجناس', level=3).first()
     # Kala.objects.update(category=None)
     # گرفتن تمامی کالاها
     kalas = Kala.objects.all()
@@ -2148,8 +2149,14 @@ def update_kala_categories():
             if kala.category != category_120:
                 kala.category = category_120
                 updates.append(kala)
+        elif int(kala.code) == 1:
+            print('================ 1')
+            print(kala.code,kala.name)
+            print(category_1)
+            if kala.category != category_1:
+                kala.category = category_1
+                updates.append(kala)
         else:
-            print('================')
             print(kala.code, kala.name)
             group_infos = KalaGroupinfo.objects.order_by('-id').all()
             category_found = False  # متغیری برای پیگیری پیدا شدن دسته‌بندی
