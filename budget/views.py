@@ -2012,28 +2012,39 @@ def BudgetSaleFactorDetail(request,year, level, code, *args, **kwargs):
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page='جزئیات فاکتور های فروش', code=int(code))
 
+    master_info = MasterInfo.objects.filter(is_active=True).last()
+    acc_year = master_info.acc_year
+    is_b_year=False
+    if int(year) == acc_year-1:
+        is_b_year=True
 
     if int(level)==3:
         cat3=Category.objects.filter(id=int(code),level=3).last()
+        detail_name=cat3.name
         factors=FactorDetaile.objects.filter(kala__category=cat3,acc_year=int(year))
 
     if int(level)==2:
         cat2=Category.objects.filter(id=int(code),level=2).last()
+        detail_name=cat2.name
+
         factors=FactorDetaile.objects.filter(kala__category__parent=cat2,acc_year=int(year))
 
     if int(level)==1:
         cat1=Category.objects.filter(id=int(code),level=1).last()
+        detail_name=cat1.name
+
         factors=FactorDetaile.objects.filter(kala__category__parent__parent=cat1,acc_year=int(year))
 
-
+    today = date.today()
+    one_year_ago = today - relativedelta(years=1)
 
     context = {
         'user': user,
         'year': year,
         'factors': factors,
-
-
-
+        'detail_name': detail_name,
+        'is_b_year': is_b_year,
+        'one_year_ago': one_year_ago,
     }
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
