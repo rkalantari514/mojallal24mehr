@@ -929,9 +929,39 @@ def BudgetSaleTotal(request, *args, **kwargs):
             'amalkard2':amalkard2,
             'actual_ratio_by_year':actual_ratio_by_year,
 
-        }
+        })
 
-        )
+    no_cat_by_factor =FactorDetaile.objects.filter(kala__isnull=True, acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
+    no_cat_cy_factor = \
+    FactorDetaile.objects.filter(kala__isnull=True, acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))[
+        'forosh'] or 0
+    no_cat_by_today_factor = \
+    FactorDetaile.objects.filter(kala__isnull=True, acc_year=base_year, factor__date__lte=one_year_ago).aggregate(
+        forosh=Sum('mablagh_nahaee'))['forosh']
+
+    table3.append({
+            'l1':'کالای حذف شده_',
+            'l2':'کالای حذف شده__',
+            'l3':'کالای حذف شده___',
+
+            'cat_id':None,
+            'cat_par_id':None,
+            'cat_par_par_id':None,
+            'by_factor':no_cat_by_factor,
+            'cy_budget':0,
+            'budget_rate':0,
+            'by_today_factor':no_cat_by_today_factor,
+
+            'cy_today_budget':0,
+            'cy_today_budget_line':0,
+            'cy_factor':no_cat_cy_factor,
+            'amalkard_by_year_ratio':0,
+            'amalkard_by_line_ratio':0,
+            'amalkard1':amalkard1,
+            'amalkard2':amalkard2,
+            'actual_ratio_by_year':actual_ratio_by_year,
+
+        })
 #==============================================  table2
     # دیکشنری کمکی برای نگهداری جمع مقادیر بر اساس لایه‌های l1 و l2
     grouped_data = {}
