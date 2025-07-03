@@ -5072,7 +5072,7 @@ def DeleteDublicateData(request):
 
 
 
-def AfterTakhfifKol(request):
+def AfterTakhfifKol2(request):
     import time
     t0 = time.time()
     print('بعد از تخفیف کل فاکتور---------------------')
@@ -5116,3 +5116,70 @@ def AfterTakhfifKol(request):
     print(f"زمان کل: {total_time:.2f} ثانیه")
     return redirect('/updatedb')
 
+from decimal import Decimal, ROUND_HALF_UP
+
+def AfterTakhfifKol(request):
+    t0 = time.time()
+    print('بعد از تخفیف کل فاکتور---------------------')
+
+    # دریافت آخرین حساب سال فعال
+    acc_year_obj = MasterInfo.objects.filter(is_active=True).last()
+    acc_year = acc_year_obj.acc_year
+
+    # دریافت تمام فاکتورها برای سال جاری
+    factors = list(Factor.objects.filter(acc_year=acc_year))
+    factor_ids = [f.id for f in factors]
+
+    # دریافت جزئیات فاکتورها
+    fac_details = list(FactorDetaile.objects.filter(factor_id__in=factor_ids, acc_year=acc_year))
+
+    # ساخت نقشه برای دسترسی سریع
+    from collections import defaultdict
+    details_by_factor = defaultdict(list)
+    for fd in fac_details:
+        details_by_factor[fd.factor_id].append(fd)
+
+    fac_d_to_update = []
+
+    for factor in factors:
+        details = details_by_factor.get(factor.id, [])
+        no_takfif = 0
+        mab_naha = 0
+
+        # محاسبات اولیه برای هر فاکتور
+        for fd in details:
+            print(f"جزئیات: Count={fd.count}, Mablagh Vahed={fd.mablagh_vahed}, Mablagh Nahaee={fd.mablagh_nahaee}")
+            no_takfif += fd.count * fd.mablagh_vahed
+            mab_naha += fd.mablagh_nahaee
+
+        print(f"جمع بدون تخفیف: {no_takfif}, مبلغ نهایی: {mab_naha}")
+        end_fac_takhfif_ratio = Decimal('0')
+
+        # محاسبه نسبت تخفیف نهایی
+        print(f"تخفیف فاکتور: {factor.takhfif}, تفاوت: {no_takfif - mab_naha}")
+        if factor.takhfif > (no_takfif - mab_naha):
+            end_fac_takhfif = Decimal(str(factor.takhfif - (no_takfif - mab_naha)))
+            end_fac_takhfif_ratio = end_fac_takhfif / Decimal(str(factor.mablagh_factor))
+            print(f"تخفیف نهایی فاکتور: {end_fac_takhfif}, نسبت: {end_fac_takhfif_ratio}")
+
+        # بروزرسانی جزئیات با مقدار جدید
+        for fd in details:
+            count_decimal = Decimal(str(fd.count))
+            mablagh_nahaee_decimal = Decimal(str(fd.mablagh_nahaee))
+            mablagh_vahed_decimal = Decimal(str(fd.mablagh_vahed))
+            expected_value = mablagh_nahaee_decimal - (
+                    end_fac_takhfif_ratio * count_decimal * mablagh_vahed_decimal
+            )
+            # گرد کردن
+            expected_value = expected_value.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            if Decimal(str(fd.mablagh_after_takhfif_kol)) != expected_value:
+                fd.mablagh_after_takhfif_kol = float(expected_value)
+                fac_d_to_update.append(fd)
+    # بروزرسانی در bulk با مقادیر گرد شده
+    if fac_d_to_update:
+        FactorDetaile.objects.bulk_update(fac_d_to_update, ['mablagh_after_takhfif_kol'])
+
+    tend = time.time()
+    print(f"زمان کل: {tend - t0:.2f} ثانیه")
+
+    return redirect('/updatedb')
