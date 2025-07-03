@@ -259,6 +259,8 @@ def Updateall(request):
         'update/bedehimoshtari',
         'update/compleloan',
         'update/calculate_award',
+        'update/calculate_award',
+        'update/after_takhfif_kol',
     ]
     # نگاشت آدرس‌های استاتیک به توابع
     static_view_map = {
@@ -275,6 +277,7 @@ def Updateall(request):
         'update/bedehimoshtari': UpdateBedehiMoshtari,
         'update/compleloan': CompleLoan,
         'update/calculate_award': Calculate_and_award_points,
+        'update/after_takhfif_kol': AfterTakhfifKol,
     }
     # چاپ تزئینی برای عیب یابی
     print(f"Request path: {request.path}")
@@ -5059,6 +5062,54 @@ def DeleteDublicateData(request):
 
 
 
+
+    tend = time.time()
+    total_time = tend - t0
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    return redirect('/updatedb')
+
+
+
+
+
+def AfterTakhfifKol(request):
+    import time
+    t0 = time.time()
+    print('بعد از تخفیف کل فاکتور---------------------')
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+
+    fac=Factor.objects.filter(acc_year=acc_year)
+    fac_d_to_update=[]
+    for f in fac:
+        # if f.code==7391:
+        if True:
+            fac_d=FactorDetaile.objects.filter(factor=f,acc_year=acc_year)
+            no_takfif=0
+            mab_naha=0
+
+            for fd in fac_d:
+                print(fd.count , fd.mablagh_vahed,fd.mablagh_nahaee)
+                no_takfif += fd.count * fd.mablagh_vahed
+                mab_naha += fd.mablagh_nahaee
+            print('no_takfif,mab_naha')
+            print(no_takfif,mab_naha)
+            end_fac_takhfif_ratio=0
+            print('f.takhfif , no_takfif - mab_naha')
+            print(f.takhfif , no_takfif - mab_naha)
+            if f.takhfif > no_takfif-mab_naha:
+                end_fac_takhfif= f.takhfif - no_takfif+mab_naha
+                end_fac_takhfif_ratio=end_fac_takhfif/f.mablagh_factor
+                print('end_fac_takhfif,end_fac_takhfif_ratio')
+                print(end_fac_takhfif,end_fac_takhfif_ratio)
+            for fd in fac_d:
+                print(fd.mablagh_after_takhfif_kol , fd.mablagh_nahaee ,end_fac_takhfif_ratio,fd.count , fd.mablagh_vahed)
+                print(fd.mablagh_after_takhfif_kol , (fd.mablagh_nahaee - (end_fac_takhfif_ratio*fd.count * fd.mablagh_vahed)))
+                if fd.mablagh_after_takhfif_kol != (fd.mablagh_nahaee - (end_fac_takhfif_ratio*fd.count * fd.mablagh_vahed)):
+                    fd.mablagh_after_takhfif_kol = fd.mablagh_nahaee - (end_fac_takhfif_ratio * fd.count * fd.mablagh_vahed)
+                    fac_d_to_update.append(fd)
+
+    if fac_d_to_update:
+        FactorDetaile.objects.bulk_update(fac_d_to_update, ['mablagh_after_takhfif_kol'])
 
     tend = time.time()
     total_time = tend - t0
