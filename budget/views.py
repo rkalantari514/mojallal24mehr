@@ -187,7 +187,7 @@ def BudgetCostTotal(request, *args, **kwargs):
         amalkard1 = True
         if data['amalkard_by_year'] > 0:
             amalkard1 = False
-        amalkard2 =True
+        amalkard2 = True
         if data['amalkard_by_day'] > 0:
             amalkard2 = False
 
@@ -201,21 +201,21 @@ def BudgetCostTotal(request, *args, **kwargs):
             'total_budget_cy_today': data['total_budget_cy_today'],
             'total_sanad_cy_today': data['total_sanad_cy_today'],
             'amalkard_by_year': data['amalkard_by_year'],
-            'amalkard_by_year_ratio': data['amalkard_by_year'] / data['total_budget_cy_today'] * 100 ,
+            'amalkard_by_year_ratio': data['amalkard_by_year'] / data['total_budget_cy_today'] * 100,
             'amalkard1': amalkard1,
             'amalkard_by_day': data['amalkard_by_day'],
-            'amalkard_by_day_ratio':  (data['amalkard_by_day'] / (float(data['total_budget_cy']) * day_rate)) * 100,
+            'amalkard_by_day_ratio': (data['amalkard_by_day'] / (float(data['total_budget_cy']) * day_rate)) * 100,
             'amalkard2': amalkard2,
 
         })
 
-        acc_code_2=AccCoding.objects.filter(level=2,code=moin_code,parent__code=501).last()
-        br=data['total_budget_cy']/data['total_sanad_by']
+        acc_code_2 = AccCoding.objects.filter(level=2, code=moin_code, parent__code=501).last()
+        br = data['total_budget_cy'] / data['total_sanad_by']
         if acc_code_2.budget_rate != br:
             acc_code_2.budget_rate = br
             acc_code_2.save()
 
-#----------------------------------ساخت جدول 1 ----------------------------
+    # ----------------------------------ساخت جدول 1 ----------------------------
 
     # دیکشنری کمکی برای نگهداری جمع کل داده‌ها
     summary_data = {
@@ -290,7 +290,6 @@ def BudgetCostTotal(request, *args, **kwargs):
     return render(request, 'budget_cost_total.html', context)
 
 
-
 import time
 import datetime
 from django.db.models import Sum, Min, Max
@@ -299,7 +298,6 @@ from django.shortcuts import render
 from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta
 import jdatetime
-
 
 
 def BudgetCostDetail(request, level, code, *args, **kwargs):
@@ -319,31 +317,29 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
     tafzil = None
     moin_code = None
     tafzili_code = None
-    g1=-70
-    g2=43
+    g1 = -70
+    g2 = 43
     today_bay_by = 0
     today_actual = 0
     today_by_time = 0
     budget_rate = 0  # نرخ بودجه پیش‌فرض
-    level1=AccCoding.objects.filter(level=1,code=501)
-    kol_code=None
-    moin_code=None
-    level2=AccCoding.objects.filter(level=2,parent__code=501)
-    level3=None
-    tafzili_code=None
-
-
+    level1 = AccCoding.objects.filter(level=1, code=501)
+    kol_code = None
+    moin_code = None
+    level2 = AccCoding.objects.filter(level=2, parent__code=501)
+    level3 = None
+    tafzili_code = None
 
     if level == '3':
         tafzili_code = int(code)
         tafzil = AccCoding.objects.filter(code=tafzili_code, parent__parent__code=501).last()
-        detail_name=f'سطح تفضیل - {tafzil.name}-{tafzili_code}'
-        moin_code=int(tafzil.parent.code)
-        level3 = AccCoding.objects.filter(level=3, parent__parent__code=501 ,parent__code=moin_code, is_budget=True)
+        detail_name = f'سطح تفضیل - {tafzil.name}-{tafzili_code}'
+        moin_code = int(tafzil.parent.code)
+        level3 = AccCoding.objects.filter(level=3, parent__parent__code=501, parent__code=moin_code, is_budget=True)
 
         if tafzil:
             moin_code = tafzil.parent.code
-            budget_rate=tafzil.budget_rate
+            budget_rate = tafzil.budget_rate
             if hasattr(tafzil, 'budget_rate') and tafzil.budget_rate is not None and tafzil.budget_rate != 0:
                 budget_rate = tafzil.budget_rate
         else:
@@ -385,9 +381,10 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         start_date = sanad_base_year_qs.aggregate(min_date=Min('date'))['min_date']
         end_date = sanad_base_year_qs.aggregate(max_date=Max('date'))['max_date']
 
-
-        start_date = SanadDetail.objects.filter(is_active=True,acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
-        end_date = SanadDetail.objects.filter(is_active=True,acc_year=base_year).aggregate(max_date=Max('date'))['max_date']
+        start_date = SanadDetail.objects.filter(is_active=True, acc_year=base_year).aggregate(min_date=Min('date'))[
+            'min_date']
+        end_date = SanadDetail.objects.filter(is_active=True, acc_year=base_year).aggregate(max_date=Max('date'))[
+            'max_date']
         # ایجاد لیست روزها
         date_list = []
         current_date = start_date
@@ -406,7 +403,6 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         for d in acc_date_list:
             print(d)
 
-
         month_names = {
             1: "فروردین", 2: "اردیبهشت", 3: "خرداد", 4: "تیر",
             5: "مرداد", 6: "شهریور", 7: "مهر", 8: "آبان",
@@ -419,11 +415,11 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
                 miladi_date = datetime.strptime(date, '%Y-%m-%d')  # تبدیل میلادی به datetime
                 shamsi_date = jdatetime.date.fromgregorian(day=miladi_date.day, month=miladi_date.month,
                                                            year=miladi_date.year)
-                print(shamsi_date,shamsi_date.day)
+                print(shamsi_date, shamsi_date.day)
                 # تنظیم نمایش لیبل‌ها بر اساس شرط‌های تعیین‌شده
                 if shamsi_date.day == 1:  # نمایش نام ماه برای اولین روز ماه
                     label = month_names[shamsi_date.month]
-                    print(')))))))))))))))))))))',label)
+                    print(')))))))))))))))))))))', label)
                 elif shamsi_date.day == 15:  # نمایش تاریخ کامل برای روز ۱۵ هر ماه
                     label = shamsi_date.strftime('%Y-%m-%d')
                 else:  # سایر موارد خالی باشند
@@ -455,7 +451,7 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
             chart1_data.append(cumulative_base_year)
             chart3_data.append(cumulative_base_year * budget_rate)
             if day == today:
-                today_bay_by=cumulative_base_year * budget_rate
+                today_bay_by = cumulative_base_year * budget_rate
 
             # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
             if day in daily_totals_acc_year:
@@ -463,39 +459,39 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
             if day <= today:
                 chart2_data.append(cumulative_acc_year)
                 if day == today:
-                    today_actual=cumulative_acc_year
+                    today_actual = cumulative_acc_year
 
         last_value_chart1 = chart1_data[-1] if chart1_data else None
         count_acc_date_list = len(acc_date_list)
-        s=last_value_chart1/count_acc_date_list * budget_rate
-        ch4=0
+        s = last_value_chart1 / count_acc_date_list * budget_rate
+        ch4 = 0
         for day in acc_date_list:
             chart4_data.append(ch4)
             if day == today:
-                today_by_time=ch4
+                today_by_time = ch4
 
             ch4 += s
         last_value_chart2 = chart2_data[-1] if chart2_data else None
-        master_dat={
-            'by_sanads':last_value_chart1/10,
-            'cy_budget':last_value_chart1/10*budget_rate,
-            'budget_rate':budget_rate,
+        master_dat = {
+            'by_sanads': last_value_chart1 / 10,
+            'cy_budget': last_value_chart1 / 10 * budget_rate,
+            'budget_rate': budget_rate,
             'cy_sanads': last_value_chart2 / 10
 
         }
 
         print('today_bay_by,today_actual,today_by_time')
-        print(today_bay_by,today_actual,today_by_time)
+        print(today_bay_by, today_actual, today_by_time)
 
         g1 = ((today_actual - today_bay_by) / today_bay_by * 100) if today_bay_by != 0 else 100
         g2 = ((today_actual - today_by_time) / today_by_time * 100) if today_by_time != 0 else 100
-        print(g1,g2)
+        print(g1, g2)
 
     if level == '2':
         moin_code = int(code)
         moin = AccCoding.objects.filter(level=2, code=moin_code, parent__code=501).last()
-        detail_name=f'سطح معین - {moin.name}-{moin_code}'
-        level3 = AccCoding.objects.filter(level=3, parent__parent__code=501 ,parent__code=moin_code, is_budget=True)
+        detail_name = f'سطح معین - {moin.name}-{moin_code}'
+        level3 = AccCoding.objects.filter(level=3, parent__parent__code=501, parent__code=moin_code, is_budget=True)
 
         budget_rate = moin.budget_rate
 
@@ -531,9 +527,10 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
             for item in sanad_acc_year_qs.values('date').annotate(total=Sum('curramount')).order_by('date'):
                 daily_totals_acc_year[str(item['date'])] = -float(item['total'] or 0)
 
-
-        start_date = SanadDetail.objects.filter(is_active=True,acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
-        end_date = SanadDetail.objects.filter(is_active=True,acc_year=base_year).aggregate(max_date=Max('date'))['max_date']
+        start_date = SanadDetail.objects.filter(is_active=True, acc_year=base_year).aggregate(min_date=Min('date'))[
+            'min_date']
+        end_date = SanadDetail.objects.filter(is_active=True, acc_year=base_year).aggregate(max_date=Max('date'))[
+            'max_date']
         # ایجاد لیست روزها
         date_list = []
         current_date = start_date
@@ -552,7 +549,6 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         for d in acc_date_list:
             print(d)
 
-
         month_names = {
             1: "فروردین", 2: "اردیبهشت", 3: "خرداد", 4: "تیر",
             5: "مرداد", 6: "شهریور", 7: "مهر", 8: "آبان",
@@ -565,11 +561,11 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
                 miladi_date = datetime.strptime(date, '%Y-%m-%d')  # تبدیل میلادی به datetime
                 shamsi_date = jdatetime.date.fromgregorian(day=miladi_date.day, month=miladi_date.month,
                                                            year=miladi_date.year)
-                print(shamsi_date,shamsi_date.day)
+                print(shamsi_date, shamsi_date.day)
                 # تنظیم نمایش لیبل‌ها بر اساس شرط‌های تعیین‌شده
                 if shamsi_date.day == 1:  # نمایش نام ماه برای اولین روز ماه
                     label = month_names[shamsi_date.month]
-                    print(')))))))))))))))))))))',label)
+                    print(')))))))))))))))))))))', label)
                 elif shamsi_date.day == 15:  # نمایش تاریخ کامل برای روز ۱۵ هر ماه
                     label = shamsi_date.strftime('%Y-%m-%d')
                 else:  # سایر موارد خالی باشند
@@ -591,7 +587,7 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
 
         cumulative_base_year = 0
         cumulative_acc_year = 0
-        chart3_d= 0
+        chart3_d = 0
         today = datetime.today().strftime('%Y-%m-%d')  # تاریخ امروز به فرمت YYYY-MM-DD
         for day in acc_date_list:
             by_date = datetime.strptime(day, '%Y-%m-%d') + relativedelta(years=-1)  # تاریخ مربوط به سال پایه
@@ -602,7 +598,7 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
             chart1_data.append(cumulative_base_year)
             chart3_data.append(cumulative_base_year * budget_rate)
             if day == today:
-                today_bay_by=cumulative_base_year * budget_rate
+                today_bay_by = cumulative_base_year * budget_rate
 
             # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
             if day in daily_totals_acc_year:
@@ -610,18 +606,16 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
             if day <= today:
                 chart2_data.append(cumulative_acc_year)
                 if day == today:
-                    today_actual=cumulative_acc_year
-
-
+                    today_actual = cumulative_acc_year
 
         last_value_chart3 = chart3_data[-1] if chart3_data else None
         count_acc_date_list = len(acc_date_list)
-        s=last_value_chart3/count_acc_date_list
-        ch4=0
+        s = last_value_chart3 / count_acc_date_list
+        ch4 = 0
         for day in acc_date_list:
             chart4_data.append(ch4)
             if day == today:
-                today_by_time=ch4
+                today_by_time = ch4
             ch4 += s
 
         last_value_chart2 = chart2_data[-1] if chart2_data else None
@@ -635,17 +629,17 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         }
 
         print('today_bay_by,today_actual,today_by_time')
-        print(today_bay_by,today_actual,today_by_time)
+        print(today_bay_by, today_actual, today_by_time)
 
         g1 = ((today_actual - today_bay_by) / today_bay_by * 100) if today_bay_by != 0 else 100
         g2 = ((today_actual - today_by_time) / today_by_time * 100) if today_by_time != 0 else 100
-        print(g1,g2)
+        print(g1, g2)
 
     if level == '1':
         kol_code = int(code)
 
         kol = AccCoding.objects.filter(level=1, code=kol_code).last()
-        detail_name=f'سطح کل - {kol.name}-{kol_code}'
+        detail_name = f'سطح کل - {kol.name}-{kol_code}'
 
         budget_rate = kol.budget_rate
 
@@ -679,9 +673,10 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
             for item in sanad_acc_year_qs.values('date').annotate(total=Sum('curramount')).order_by('date'):
                 daily_totals_acc_year[str(item['date'])] = -float(item['total'] or 0)
 
-
-        start_date = SanadDetail.objects.filter(is_active=True,acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
-        end_date = SanadDetail.objects.filter(is_active=True,acc_year=base_year).aggregate(max_date=Max('date'))['max_date']
+        start_date = SanadDetail.objects.filter(is_active=True, acc_year=base_year).aggregate(min_date=Min('date'))[
+            'min_date']
+        end_date = SanadDetail.objects.filter(is_active=True, acc_year=base_year).aggregate(max_date=Max('date'))[
+            'max_date']
         # ایجاد لیست روزها
         date_list = []
         current_date = start_date
@@ -700,7 +695,6 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         for d in acc_date_list:
             print(d)
 
-
         month_names = {
             1: "فروردین", 2: "اردیبهشت", 3: "خرداد", 4: "تیر",
             5: "مرداد", 6: "شهریور", 7: "مهر", 8: "آبان",
@@ -713,11 +707,11 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
                 miladi_date = datetime.strptime(date, '%Y-%m-%d')  # تبدیل میلادی به datetime
                 shamsi_date = jdatetime.date.fromgregorian(day=miladi_date.day, month=miladi_date.month,
                                                            year=miladi_date.year)
-                print(shamsi_date,shamsi_date.day)
+                print(shamsi_date, shamsi_date.day)
                 # تنظیم نمایش لیبل‌ها بر اساس شرط‌های تعیین‌شده
                 if shamsi_date.day == 1:  # نمایش نام ماه برای اولین روز ماه
                     label = month_names[shamsi_date.month]
-                    print(')))))))))))))))))))))',label)
+                    print(')))))))))))))))))))))', label)
                 elif shamsi_date.day == 15:  # نمایش تاریخ کامل برای روز ۱۵ هر ماه
                     label = shamsi_date.strftime('%Y-%m-%d')
                 else:  # سایر موارد خالی باشند
@@ -732,16 +726,14 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
             print(c)
 
         chart_labels = chart_labels_shamsi  # برچسب‌های نمودار همان لیست تاریخ‌ها
-        chart1_data = [] #عکلکرد سال گذشته
-        chart2_data = [] # عملکرد امسال تا امروز
-        chart3_data = [] # بودجه با آهنگ پارسال
-        chart4_data = [] # بودجه با تناسب زمان
-
-
+        chart1_data = []  # عکلکرد سال گذشته
+        chart2_data = []  # عملکرد امسال تا امروز
+        chart3_data = []  # بودجه با آهنگ پارسال
+        chart4_data = []  # بودجه با تناسب زمان
 
         cumulative_base_year = 0
         cumulative_acc_year = 0
-        chart3_d= 0
+        chart3_d = 0
         today = datetime.today().strftime('%Y-%m-%d')  # تاریخ امروز به فرمت YYYY-MM-DD
         for day in acc_date_list:
             by_date = datetime.strptime(day, '%Y-%m-%d') + relativedelta(years=-1)  # تاریخ مربوط به سال پایه
@@ -752,7 +744,7 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
             chart1_data.append(cumulative_base_year)
             chart3_data.append(cumulative_base_year * budget_rate)
             if day == today:
-                today_bay_by=cumulative_base_year * budget_rate
+                today_bay_by = cumulative_base_year * budget_rate
 
             # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
             if day in daily_totals_acc_year:
@@ -760,18 +752,16 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
             if day <= today:
                 chart2_data.append(cumulative_acc_year)
                 if day == today:
-                    today_actual=cumulative_acc_year
-
-
+                    today_actual = cumulative_acc_year
 
         last_value_chart3 = chart3_data[-1] if chart3_data else None
         count_acc_date_list = len(acc_date_list)
-        s=last_value_chart3/count_acc_date_list
-        ch4=0
+        s = last_value_chart3 / count_acc_date_list
+        ch4 = 0
         for day in acc_date_list:
             chart4_data.append(ch4)
             if day == today:
-                today_by_time=ch4
+                today_by_time = ch4
             ch4 += s
         last_value_chart2 = chart2_data[-1] if chart2_data else None
         last_value_chart1 = chart1_data[-1] if chart1_data else None
@@ -784,16 +774,14 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         }
 
         print('today_bay_by,today_actual,today_by_time')
-        print(today_bay_by,today_actual,today_by_time)
-
+        print(today_bay_by, today_actual, today_by_time)
 
         g1 = ((today_actual - today_bay_by) / today_bay_by * 100) if today_bay_by != 0 else 100
         g2 = ((today_actual - today_by_time) / today_by_time * 100) if today_by_time != 0 else 100
-        print(g1,g2)
+        print(g1, g2)
 
     g1 = max(-100, min(g1, 100))
     g2 = max(-100, min(g2, 100))
-
 
     context = {
         'acc_year': acc_year,
@@ -807,7 +795,6 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         'chart3_data': chart3_data,
         'chart4_data': chart4_data,
 
-
         'level': int(level),
         'level1': level1,
         'level2': level2,
@@ -816,20 +803,16 @@ def BudgetCostDetail(request, level, code, *args, **kwargs):
         'moin_code': moin_code,
         'tafzili_code': tafzili_code,
 
-
         'master_dat': master_dat,
 
-        'g1':g1,
-        'g2':g2,
-
-
+        'g1': g1,
+        'g2': g2,
 
     }
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
     return render(request, 'budget_cost_detail.html', context)
-
 
 
 def BudgetSaleTotal(request, *args, **kwargs):
@@ -850,19 +833,24 @@ def BudgetSaleTotal(request, *args, **kwargs):
     today = date.today()
     one_year_ago = today - relativedelta(years=1)
 
-
     first_factor_day = FactorDetaile.objects.filter(acc_year=acc_year).first().factor.date
     days_from_start = (today - first_factor_day).days
     day_rate = days_from_start / 365
 
-    level3=Category.objects.filter(level=3)
+    level3 = Category.objects.filter(level=3)
     today = date.today()
     one_year_ago = today - relativedelta(years=1)
     table3 = []
     for cat in level3:
-        by_factor=FactorDetaile.objects.filter(kala__category=cat,acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
-        cy_factor=FactorDetaile.objects.filter(kala__category=cat,acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh'] or 0
-        by_today_factor=FactorDetaile.objects.filter(kala__category=cat,acc_year=base_year,factor__date__lte=one_year_ago).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
+        by_factor = \
+        FactorDetaile.objects.filter(kala__category=cat, acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))[
+            'forosh']
+        cy_factor = \
+        FactorDetaile.objects.filter(kala__category=cat, acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))[
+            'forosh'] or 0
+        by_today_factor = \
+        FactorDetaile.objects.filter(kala__category=cat, acc_year=base_year, factor__date__lte=one_year_ago).aggregate(
+            forosh=Sum('mablagh_nahaee'))['forosh']
         budget_rate = 0
         category1 = cat
         for _ in range(3):  # بررسی cat و دو سطح از والدها
@@ -874,95 +862,92 @@ def BudgetSaleTotal(request, *args, **kwargs):
             if category1 is None:
                 break
 
-
         cy_budget = (Decimal(by_factor) if by_factor is not None else Decimal(0)) * (
             Decimal(budget_rate) if budget_rate is not None else Decimal(0))
 
         cy_today_budget = (Decimal(by_today_factor) if by_today_factor is not None else Decimal(0)) * (
             Decimal(budget_rate) if budget_rate is not None else Decimal(0))
         if cy_today_budget != 0:
-            amalkard_by_year_ratio=((Decimal(cy_factor)/cy_today_budget)-Decimal(1.0))*Decimal(100.0)
+            amalkard_by_year_ratio = ((Decimal(cy_factor) / cy_today_budget) - Decimal(1.0)) * Decimal(100.0)
         else:
-            amalkard_by_year_ratio=0
-
-
+            amalkard_by_year_ratio = 0
 
         amalkard1 = False
 
         if amalkard_by_year_ratio > 0:
-            amalkard1=True
+            amalkard1 = True
 
-        cy_today_budget_line= Decimal(day_rate) * cy_budget
+        cy_today_budget_line = Decimal(day_rate) * cy_budget
         if cy_today_budget_line != 0:
-            amalkard_by_line_ratio=((Decimal(cy_factor)/cy_today_budget_line)-Decimal(1.0))*Decimal(100.0)
+            amalkard_by_line_ratio = ((Decimal(cy_factor) / cy_today_budget_line) - Decimal(1.0)) * Decimal(100.0)
         else:
-            amalkard_by_line_ratio=0
-
-
+            amalkard_by_line_ratio = 0
 
         amalkard2 = False
 
         if amalkard_by_line_ratio > 0:
-            amalkard2=True
+            amalkard2 = True
 
-        actual_ratio_by_year=Decimal(cy_factor)/Decimal(by_today_factor) if by_today_factor and by_today_factor != 0 else 0.0
-
+        actual_ratio_by_year = Decimal(cy_factor) / Decimal(
+            by_today_factor) if by_today_factor and by_today_factor != 0 else 0.0
 
         table3.append({
-            'l1':cat.parent.parent.name,
-            'l2':cat.parent.name,
-            'l3':cat.name,
-            'cat_id':cat.id,
-            'cat_par_id':cat.parent.id,
-            'cat_par_par_id':cat.parent.parent.id,
-            'by_factor':by_factor,
-            'cy_budget':cy_budget,
-            'budget_rate':budget_rate,
-            'by_today_factor':by_today_factor,
+            'l1': cat.parent.parent.name,
+            'l2': cat.parent.name,
+            'l3': cat.name,
+            'cat_id': cat.id,
+            'cat_par_id': cat.parent.id,
+            'cat_par_par_id': cat.parent.parent.id,
+            'by_factor': by_factor,
+            'cy_budget': cy_budget,
+            'budget_rate': budget_rate,
+            'by_today_factor': by_today_factor,
 
-            'cy_today_budget':cy_today_budget,
-            'cy_today_budget_line':cy_today_budget_line,
-            'cy_factor':cy_factor,
-            'amalkard_by_year_ratio':amalkard_by_year_ratio,
-            'amalkard_by_line_ratio':amalkard_by_line_ratio,
-            'amalkard1':amalkard1,
-            'amalkard2':amalkard2,
-            'actual_ratio_by_year':actual_ratio_by_year,
+            'cy_today_budget': cy_today_budget,
+            'cy_today_budget_line': cy_today_budget_line,
+            'cy_factor': cy_factor,
+            'amalkard_by_year_ratio': amalkard_by_year_ratio,
+            'amalkard_by_line_ratio': amalkard_by_line_ratio,
+            'amalkard1': amalkard1,
+            'amalkard2': amalkard2,
+            'actual_ratio_by_year': actual_ratio_by_year,
 
         })
 
-    no_cat_by_factor =FactorDetaile.objects.filter(kala__isnull=True, acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
+    no_cat_by_factor = \
+    FactorDetaile.objects.filter(kala__isnull=True, acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))[
+        'forosh']
     no_cat_cy_factor = \
-    FactorDetaile.objects.filter(kala__isnull=True, acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))[
-        'forosh'] or 0
+        FactorDetaile.objects.filter(kala__isnull=True, acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))[
+            'forosh'] or 0
     no_cat_by_today_factor = \
-    FactorDetaile.objects.filter(kala__isnull=True, acc_year=base_year, factor__date__lte=one_year_ago).aggregate(
-        forosh=Sum('mablagh_nahaee'))['forosh']
+        FactorDetaile.objects.filter(kala__isnull=True, acc_year=base_year, factor__date__lte=one_year_ago).aggregate(
+            forosh=Sum('mablagh_nahaee'))['forosh']
 
     table3.append({
-            'l1':'کالای حذف شده_',
-            'l2':'کالای حذف شده__',
-            'l3':'کالای حذف شده___',
+        'l1': 'کالای حذف شده_',
+        'l2': 'کالای حذف شده__',
+        'l3': 'کالای حذف شده___',
 
-            'cat_id':None,
-            'cat_par_id':None,
-            'cat_par_par_id':None,
-            'by_factor':no_cat_by_factor,
-            'cy_budget':0,
-            'budget_rate':0,
-            'by_today_factor':no_cat_by_today_factor,
+        'cat_id': None,
+        'cat_par_id': None,
+        'cat_par_par_id': None,
+        'by_factor': no_cat_by_factor,
+        'cy_budget': 0,
+        'budget_rate': 0,
+        'by_today_factor': no_cat_by_today_factor,
 
-            'cy_today_budget':0,
-            'cy_today_budget_line':0,
-            'cy_factor':no_cat_cy_factor,
-            'amalkard_by_year_ratio':0,
-            'amalkard_by_line_ratio':0,
-            'amalkard1':amalkard1,
-            'amalkard2':amalkard2,
-            'actual_ratio_by_year':actual_ratio_by_year,
+        'cy_today_budget': 0,
+        'cy_today_budget_line': 0,
+        'cy_factor': no_cat_cy_factor,
+        'amalkard_by_year_ratio': 0,
+        'amalkard_by_line_ratio': 0,
+        'amalkard1': amalkard1,
+        'amalkard2': amalkard2,
+        'actual_ratio_by_year': actual_ratio_by_year,
 
-        })
-#==============================================  table2
+    })
+    # ==============================================  table2
     # دیکشنری کمکی برای نگهداری جمع مقادیر بر اساس لایه‌های l1 و l2
     grouped_data = {}
 
@@ -1015,33 +1000,33 @@ def BudgetSaleTotal(request, *args, **kwargs):
         # محاسبه نسبت budget_rate
         budget_rate = data['cy_budget'] / data['by_factor'] if data['by_factor'] != 0 else 0
 
-
         if data['cy_today_budget'] != 0:
-            amalkard_by_year_ratio=((Decimal(data['cy_factor'])/Decimal(data['cy_today_budget']))-Decimal(1.0))*Decimal(100.0)
+            amalkard_by_year_ratio = ((Decimal(data['cy_factor']) / Decimal(data['cy_today_budget'])) - Decimal(
+                1.0)) * Decimal(100.0)
         else:
-            amalkard_by_year_ratio=0
-
-
+            amalkard_by_year_ratio = 0
 
         amalkard1 = False
 
         if amalkard_by_year_ratio > 0:
-            amalkard1=True
+            amalkard1 = True
 
-        cy_today_budget_line= Decimal(day_rate) * Decimal(data['cy_budget'])
+        cy_today_budget_line = Decimal(day_rate) * Decimal(data['cy_budget'])
         if cy_today_budget_line != 0:
-            amalkard_by_line_ratio=((Decimal(data['cy_factor'])/cy_today_budget_line)-Decimal(1.0))*Decimal(100.0)
+            amalkard_by_line_ratio = ((Decimal(data['cy_factor']) / cy_today_budget_line) - Decimal(1.0)) * Decimal(
+                100.0)
         else:
-            amalkard_by_line_ratio=0
-
-
+            amalkard_by_line_ratio = 0
 
         amalkard2 = False
 
         if amalkard_by_line_ratio > 0:
-            amalkard2=True
+            amalkard2 = True
 
-        actual_ratio_by_year=Decimal(data['cy_factor'])/Decimal(data['by_today_factor']) if data['by_today_factor'] and data['by_today_factor'] != 0 else 0.0
+        actual_ratio_by_year = Decimal(data['cy_factor']) / Decimal(data['by_today_factor']) if data[
+                                                                                                    'by_today_factor'] and \
+                                                                                                data[
+                                                                                                    'by_today_factor'] != 0 else 0.0
 
         table2.append({
             'l1': data['l1'],
@@ -1056,7 +1041,6 @@ def BudgetSaleTotal(request, *args, **kwargs):
             'by_today_factor': data['by_today_factor'],
             'cat_par_par_id': data['cat_par_par_id'],
 
-
             'amalkard_by_year_ratio': amalkard_by_year_ratio,
             'amalkard_by_line_ratio': amalkard_by_line_ratio,
             'amalkard1': amalkard1,
@@ -1064,9 +1048,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
             'actual_ratio_by_year': actual_ratio_by_year,
         })
 
-
-
-#=======================================table1
+    # =======================================table1
     # دیکشنری کمکی برای نگهداری جمع مقادیر بر اساس لایه‌های l1
     grouped_data = {}
 
@@ -1136,7 +1118,10 @@ def BudgetSaleTotal(request, *args, **kwargs):
         amalkard2 = False
         if amalkard_by_line_ratio > 0:
             amalkard2 = True
-        actual_ratio_by_year=Decimal(data['cy_factor'])/Decimal(data['by_today_factor']) if data['by_today_factor'] and data['by_today_factor'] != 0 else 0.0
+        actual_ratio_by_year = Decimal(data['cy_factor']) / Decimal(data['by_today_factor']) if data[
+                                                                                                    'by_today_factor'] and \
+                                                                                                data[
+                                                                                                    'by_today_factor'] != 0 else 0.0
 
         table1.append({
             'l1': data['l1'],
@@ -1152,11 +1137,11 @@ def BudgetSaleTotal(request, *args, **kwargs):
             'amalkard_by_line_ratio': amalkard_by_line_ratio,
             'amalkard1': amalkard1,
             'amalkard2': amalkard2,
-            'by_today_factor':  data['by_today_factor'],
+            'by_today_factor': data['by_today_factor'],
             'actual_ratio_by_year': actual_ratio_by_year,
         })
 
-#=========================================  table0
+    # =========================================  table0
     # دیکشنری کمکی برای نگهداری جمع مقادیر بدون هیچ گروه‌بندی خاصی
     grouped_data = {
         'by_factor': 0,
@@ -1210,9 +1195,10 @@ def BudgetSaleTotal(request, *args, **kwargs):
     amalkard2 = False
     if amalkard_by_line_ratio > 0:
         amalkard2 = True
-    actual_ratio_by_year = Decimal(grouped_data['cy_factor']) / Decimal(grouped_data['by_today_factor']) if grouped_data['by_today_factor'] and \
-                                                                                            grouped_data[
-                                                                                                'by_today_factor'] != 0 else 0.0
+    actual_ratio_by_year = Decimal(grouped_data['cy_factor']) / Decimal(grouped_data['by_today_factor']) if \
+    grouped_data['by_today_factor'] and \
+    grouped_data[
+        'by_today_factor'] != 0 else 0.0
     # افزودن رکورد نهایی بدون هیچ لایه‌ای به جدول
     table0.append({
         # حذف 'l1', 'l2'
@@ -1230,12 +1216,12 @@ def BudgetSaleTotal(request, *args, **kwargs):
         'actual_ratio_by_year': actual_ratio_by_year,
     })
 
-
-    #ساخت دوباره جدول صفر ============================
+    # ساخت دوباره جدول صفر ============================
     table0 = []
-    by_factor=FactorDetaile.objects.filter(acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
-    cy_factor=FactorDetaile.objects.filter(acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh'] or 0
-    by_today_factor=FactorDetaile.objects.filter(acc_year=base_year,factor__date__lte=one_year_ago).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
+    by_factor = FactorDetaile.objects.filter(acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
+    cy_factor = FactorDetaile.objects.filter(acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh'] or 0
+    by_today_factor = FactorDetaile.objects.filter(acc_year=base_year, factor__date__lte=one_year_ago).aggregate(
+        forosh=Sum('mablagh_nahaee'))['forosh']
 
     cy_budget = (Decimal(by_factor) if by_factor is not None else Decimal(0)) * (
         Decimal(budget_rate) if budget_rate is not None else Decimal(0))
@@ -1243,32 +1229,28 @@ def BudgetSaleTotal(request, *args, **kwargs):
     cy_today_budget = (Decimal(by_today_factor) if by_today_factor is not None else Decimal(0)) * (
         Decimal(budget_rate) if budget_rate is not None else Decimal(0))
     if cy_today_budget != 0:
-        amalkard_by_year_ratio=((Decimal(cy_factor)/cy_today_budget)-Decimal(1.0))*Decimal(100.0)
+        amalkard_by_year_ratio = ((Decimal(cy_factor) / cy_today_budget) - Decimal(1.0)) * Decimal(100.0)
     else:
-        amalkard_by_year_ratio=0
-
-
+        amalkard_by_year_ratio = 0
 
     amalkard1 = False
 
     if amalkard_by_year_ratio > 0:
-        amalkard1=True
+        amalkard1 = True
 
-    cy_today_budget_line= Decimal(day_rate) * cy_budget
+    cy_today_budget_line = Decimal(day_rate) * cy_budget
     if cy_today_budget_line != 0:
-        amalkard_by_line_ratio=((Decimal(cy_factor)/cy_today_budget_line)-Decimal(1.0))*Decimal(100.0)
+        amalkard_by_line_ratio = ((Decimal(cy_factor) / cy_today_budget_line) - Decimal(1.0)) * Decimal(100.0)
     else:
-        amalkard_by_line_ratio=0
-
-
+        amalkard_by_line_ratio = 0
 
     amalkard2 = False
 
     if amalkard_by_line_ratio > 0:
-        amalkard2=True
+        amalkard2 = True
 
-    actual_ratio_by_year=Decimal(cy_factor)/Decimal(by_today_factor) if by_today_factor and by_today_factor != 0 else 0.0
-
+    actual_ratio_by_year = Decimal(cy_factor) / Decimal(
+        by_today_factor) if by_today_factor and by_today_factor != 0 else 0.0
 
     table0.append({
         'by_factor': by_factor,
@@ -1288,12 +1270,14 @@ def BudgetSaleTotal(request, *args, **kwargs):
 
     )
 
-
     # فرض بر این است که این کد در ویو Django یا فریمورک مشابه است
-    table100 = [{'l1': item['l1'], 'cy_factor': item['cy_factor']/10000000} for item in table1 if item.get('cy_factor', 0) > 0]
-    table200 = [{'l1': item['l1'], 'l2': item['l2'], 'cy_factor': item['cy_factor']/10000000} for item in table2 if item.get('cy_factor', 0) > 0]
-    table300 = [{'l1': item['l1'], 'l2': item['l2'], 'l3': item['l3'], 'cy_factor': item['cy_factor']/10000000} for item
-                       in table3 if item.get('cy_factor', 0) > 0]
+    table100 = [{'l1': item['l1'], 'cy_factor': item['cy_factor'] / 10000000} for item in table1 if
+                item.get('cy_factor', 0) > 0]
+    table200 = [{'l1': item['l1'], 'l2': item['l2'], 'cy_factor': item['cy_factor'] / 10000000} for item in table2 if
+                item.get('cy_factor', 0) > 0]
+    table300 = [{'l1': item['l1'], 'l2': item['l2'], 'l3': item['l3'], 'cy_factor': item['cy_factor'] / 10000000} for
+                item
+                in table3 if item.get('cy_factor', 0) > 0]
 
     for item in table100:
         print(item['l1'])
@@ -1320,9 +1304,6 @@ def BudgetSaleTotal(request, *args, **kwargs):
     table20 = [apply_short_names(item.copy()) for item in table200]
     table30 = [apply_short_names(item.copy()) for item in table300]
 
-
-
-
     context = {
         'acc_year': acc_year,
         'base_year': base_year,
@@ -1339,7 +1320,6 @@ def BudgetSaleTotal(request, *args, **kwargs):
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
     return render(request, 'budget_sale_total.html', context)
-
 
 
 def BudgetSaleDetail(request, level, code, *args, **kwargs):
@@ -1360,35 +1340,41 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
     tafzil = None
     moin_code = None
     tafzili_code = None
-    g1=-70
-    g2=43
+    g1 = -70
+    g2 = 43
     today_bay_by = 0
     today_actual = 0
     today_by_time = 0
     budget_rate = 0  # نرخ بودجه پیش‌فرض
-    level1=AccCoding.objects.filter(level=1,code=501)
-    kol_code=None
-    moin_code=None
-    level2=AccCoding.objects.filter(level=2,parent__code=501)
-    level3=None
-    tafzili_code=None
-
-
+    tafzili_code = None
+    level1 = Category.objects.filter(level=1)
+    level2 = None
+    level3 = None
+    cat1 = None
+    cat2 = None
+    cat3 = None
 
     if level == '3':
-        cat_id=int(code)
-        category=Category.objects.filter(id=cat_id,level=3).last()
-        detail_name=f'دسته - {category.name}-{cat_id}'
-        parent_cat=category.parent
-        parent_parent_cat=category.parent.parent
-        level3=Category.objects.filter(level=3,parent=parent_cat)
+        cat_id = int(code)
+        category = Category.objects.filter(id=cat_id, level=3).last()
+        detail_name = f'دسته - {category.name}-{cat_id}'
+        parent_cat = category.parent
+        parent_parent_cat = category.parent.parent
+        level3 = Category.objects.filter(level=3, parent=parent_cat)
+        level2 = Category.objects.filter(level=2, parent=parent_cat.parent)
+        cat3 = category
+        cat2=cat3.parent
+        cat1=cat2.parent
+
+
+
         if category.budget_rate is not None and category.budget_rat != 0:
             budget_rate = category.budget_rate
         elif parent_cat.budget_rate is not None and parent_cat.budget_rate != 0:
-            budget_rate=parent_cat.budget_rate
+            budget_rate = parent_cat.budget_rate
         else:
-            budget_rate=parent_parent_cat.budget_rate
-        budget_rate=float(budget_rate)
+            budget_rate = parent_parent_cat.budget_rate
+        budget_rate = float(budget_rate)
 
         print(detail_name)
 
@@ -1417,8 +1403,6 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             for item in facor_acc_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
                 daily_totals_acc_year[str(item['date'])] = float(item['total'] or 0)
 
-
-
         start_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
         end_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(max_date=Max('date'))['max_date']
         print(detail_name)
@@ -1431,12 +1415,8 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             date_list.append(current_date.strftime('%Y-%m-%d'))  # قالب تاریخ به YYYY-MM-DD
             current_date += timedelta(days=1)
 
-
-
         acc_date_list = [datetime.strptime(date, '%Y-%m-%d') + relativedelta(years=1) for date in date_list]
         acc_date_list = [date.strftime('%Y-%m-%d') for date in acc_date_list]
-
-
 
         month_names = {
             1: "فروردین", 2: "اردیبهشت", 3: "خرداد", 4: "تیر",
@@ -1463,7 +1443,6 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             except ValueError as e:
                 print(f"خطای تبدیل تاریخ: {date}, {e}")  # نمایش خطا در صورت وجود مشکل
 
-
         chart_labels = chart_labels_shamsi  # برچسب‌های نمودار همان لیست تاریخ‌ها
         print('==============================================================')
 
@@ -1481,11 +1460,11 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             if str(by_date.date()) in daily_totals_base_year:
                 cumulative_base_year += daily_totals_base_year[str(by_date.date())]  # علامت منفی برای تصحیح
             chart1_data.append(cumulative_base_year)
-            for_chart3_data=((cumulative_base_year) * budget_rate)
-            for_chart3_data=float(for_chart3_data)
+            for_chart3_data = ((cumulative_base_year) * budget_rate)
+            for_chart3_data = float(for_chart3_data)
             chart3_data.append(for_chart3_data)
             if day == today:
-                today_bay_by=(cumulative_base_year) * budget_rate
+                today_bay_by = (cumulative_base_year) * budget_rate
 
             # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
             if day in daily_totals_acc_year:
@@ -1493,49 +1472,57 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             if day <= today:
                 chart2_data.append(cumulative_acc_year)
                 if day == today:
-                    today_actual=cumulative_acc_year
+                    today_actual = cumulative_acc_year
 
         last_value_chart1 = chart1_data[-1] if chart1_data else None
         count_acc_date_list = len(acc_date_list)
-        s=(last_value_chart1)/count_acc_date_list * budget_rate
-        ch4=0
+        s = (last_value_chart1) / count_acc_date_list * budget_rate
+        ch4 = 0
         for day in acc_date_list:
             chart4_data.append(ch4)
             if day == today:
-                today_by_time=ch4
+                today_by_time = ch4
 
             ch4 += s
         last_value_chart2 = chart2_data[-1] if chart2_data else None
-        master_dat={
-            'by_sanads':last_value_chart1/10,
-            'cy_budget':(last_value_chart1)/10*budget_rate,
-            'budget_rate':budget_rate,
+        master_dat = {
+            'by_sanads': last_value_chart1 / 10,
+            'cy_budget': (last_value_chart1) / 10 * budget_rate,
+            'budget_rate': budget_rate,
             'cy_sanads': last_value_chart2 / 10
 
         }
 
         print('today_bay_by,today_actual,today_by_time')
-        print(today_bay_by,today_actual,today_by_time)
-        today_actual=Decimal(today_actual)
-        today_bay_by=Decimal(today_bay_by)
-        today_by_time=Decimal(today_by_time)
+        print(today_bay_by, today_actual, today_by_time)
+        today_actual = Decimal(today_actual)
+        today_bay_by = Decimal(today_bay_by)
+        today_by_time = Decimal(today_by_time)
         g1 = ((today_actual - today_bay_by) / today_bay_by * 100) if today_bay_by != 0 else 100
         g2 = ((today_actual - today_by_time) / today_by_time * 100) if today_by_time != 0 else 100
-        print(g1,g2)
+        print(g1, g2)
 
     if level == '2':
-        cat_id=int(code)
-        category=Category.objects.filter(id=cat_id,level=2).last()
-        detail_name=f'دسته - {category.name}-{cat_id}'
-        parent_cat=category.parent
-        level3=Category.objects.filter(level=3,parent=category)
-        level2=Category.objects.filter(level=2,parent=parent_cat)
+        cat_id = int(code)
+        category = Category.objects.filter(id=cat_id, level=2).last()
+        detail_name = f'دسته - {category.name}-{cat_id}'
+        parent_cat = category.parent
+        level3 = Category.objects.filter(level=3, parent=category)
+        level2 = Category.objects.filter(level=2, parent=parent_cat)
+
+        cat2 = category
+        cat1 = cat2.parent
+
+
+
+
+
         if category.budget_rate is not None and category.budget_rat != 0:
             budget_rate = category.budget_rate
         else:
-            budget_rate=parent_cat.budget_rate
+            budget_rate = parent_cat.budget_rate
 
-        budget_rate=float(budget_rate)
+        budget_rate = float(budget_rate)
 
         print(detail_name)
 
@@ -1564,8 +1551,6 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             for item in facor_acc_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
                 daily_totals_acc_year[str(item['date'])] = float(item['total'] or 0)
 
-
-
         start_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
         end_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(max_date=Max('date'))['max_date']
         print(detail_name)
@@ -1578,12 +1563,8 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             date_list.append(current_date.strftime('%Y-%m-%d'))  # قالب تاریخ به YYYY-MM-DD
             current_date += timedelta(days=1)
 
-
-
         acc_date_list = [datetime.strptime(date, '%Y-%m-%d') + relativedelta(years=1) for date in date_list]
         acc_date_list = [date.strftime('%Y-%m-%d') for date in acc_date_list]
-
-
 
         month_names = {
             1: "فروردین", 2: "اردیبهشت", 3: "خرداد", 4: "تیر",
@@ -1610,7 +1591,6 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             except ValueError as e:
                 print(f"خطای تبدیل تاریخ: {date}, {e}")  # نمایش خطا در صورت وجود مشکل
 
-
         chart_labels = chart_labels_shamsi  # برچسب‌های نمودار همان لیست تاریخ‌ها
         print('==============================================================')
 
@@ -1628,11 +1608,11 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             if str(by_date.date()) in daily_totals_base_year:
                 cumulative_base_year += daily_totals_base_year[str(by_date.date())]  # علامت منفی برای تصحیح
             chart1_data.append(cumulative_base_year)
-            for_chart3_data=((cumulative_base_year) * budget_rate)
-            for_chart3_data=float(for_chart3_data)
+            for_chart3_data = ((cumulative_base_year) * budget_rate)
+            for_chart3_data = float(for_chart3_data)
             chart3_data.append(for_chart3_data)
             if day == today:
-                today_bay_by=(cumulative_base_year) * budget_rate
+                today_bay_by = (cumulative_base_year) * budget_rate
 
             # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
             if day in daily_totals_acc_year:
@@ -1640,45 +1620,45 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             if day <= today:
                 chart2_data.append(cumulative_acc_year)
                 if day == today:
-                    today_actual=cumulative_acc_year
+                    today_actual = cumulative_acc_year
 
         last_value_chart1 = chart1_data[-1] if chart1_data else None
         count_acc_date_list = len(acc_date_list)
-        s=(last_value_chart1)/count_acc_date_list * budget_rate
-        ch4=0
+        s = (last_value_chart1) / count_acc_date_list * budget_rate
+        ch4 = 0
         for day in acc_date_list:
             chart4_data.append(ch4)
             if day == today:
-                today_by_time=ch4
+                today_by_time = ch4
 
             ch4 += s
         last_value_chart2 = chart2_data[-1] if chart2_data else None
-        master_dat={
-            'by_sanads':last_value_chart1/10,
-            'cy_budget':(last_value_chart1)/10*budget_rate,
-            'budget_rate':budget_rate,
+        master_dat = {
+            'by_sanads': last_value_chart1 / 10,
+            'cy_budget': (last_value_chart1) / 10 * budget_rate,
+            'budget_rate': budget_rate,
             'cy_sanads': last_value_chart2 / 10
 
         }
 
         print('today_bay_by,today_actual,today_by_time')
-        print(today_bay_by,today_actual,today_by_time)
-        today_actual=Decimal(today_actual)
-        today_bay_by=Decimal(today_bay_by)
-        today_by_time=Decimal(today_by_time)
+        print(today_bay_by, today_actual, today_by_time)
+        today_actual = Decimal(today_actual)
+        today_bay_by = Decimal(today_bay_by)
+        today_by_time = Decimal(today_by_time)
         g1 = ((today_actual - today_bay_by) / today_bay_by * 100) if today_bay_by != 0 else 100
         g2 = ((today_actual - today_by_time) / today_by_time * 100) if today_by_time != 0 else 100
-        print(g1,g2)
+        print(g1, g2)
 
     if level == '1':
-        cat_id=int(code)
-        category=Category.objects.filter(id=cat_id,level=1).last()
-        detail_name=f'دسته - {category.name}-{cat_id}'
-        level2=Category.objects.filter(level=2,parent=category)
+        cat_id = int(code)
+        category = Category.objects.filter(id=cat_id, level=1).last()
+        detail_name = f'دسته - {category.name}-{cat_id}'
+        level2 = Category.objects.filter(level=2, parent=category)
+        cat1=category
+        budget_rate = category.budget_rate
 
-        budget_rate=category.budget_rate
-
-        budget_rate=float(budget_rate)
+        budget_rate = float(budget_rate)
 
         print(detail_name)
 
@@ -1707,8 +1687,6 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             for item in facor_acc_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
                 daily_totals_acc_year[str(item['date'])] = float(item['total'] or 0)
 
-
-
         start_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
         end_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(max_date=Max('date'))['max_date']
         print(detail_name)
@@ -1721,12 +1699,8 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             date_list.append(current_date.strftime('%Y-%m-%d'))  # قالب تاریخ به YYYY-MM-DD
             current_date += timedelta(days=1)
 
-
-
         acc_date_list = [datetime.strptime(date, '%Y-%m-%d') + relativedelta(years=1) for date in date_list]
         acc_date_list = [date.strftime('%Y-%m-%d') for date in acc_date_list]
-
-
 
         month_names = {
             1: "فروردین", 2: "اردیبهشت", 3: "خرداد", 4: "تیر",
@@ -1753,7 +1727,6 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             except ValueError as e:
                 print(f"خطای تبدیل تاریخ: {date}, {e}")  # نمایش خطا در صورت وجود مشکل
 
-
         chart_labels = chart_labels_shamsi  # برچسب‌های نمودار همان لیست تاریخ‌ها
         print('==============================================================')
 
@@ -1771,11 +1744,11 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             if str(by_date.date()) in daily_totals_base_year:
                 cumulative_base_year += daily_totals_base_year[str(by_date.date())]  # علامت منفی برای تصحیح
             chart1_data.append(cumulative_base_year)
-            for_chart3_data=((cumulative_base_year) * budget_rate)
-            for_chart3_data=float(for_chart3_data)
+            for_chart3_data = ((cumulative_base_year) * budget_rate)
+            for_chart3_data = float(for_chart3_data)
             chart3_data.append(for_chart3_data)
             if day == today:
-                today_bay_by=(cumulative_base_year) * budget_rate
+                today_bay_by = (cumulative_base_year) * budget_rate
 
             # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
             if day in daily_totals_acc_year:
@@ -1783,45 +1756,41 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             if day <= today:
                 chart2_data.append(cumulative_acc_year)
                 if day == today:
-                    today_actual=cumulative_acc_year
+                    today_actual = cumulative_acc_year
 
         last_value_chart1 = chart1_data[-1] if chart1_data else None
         count_acc_date_list = len(acc_date_list)
-        s=(last_value_chart1)/count_acc_date_list * budget_rate
-        ch4=0
+        s = (last_value_chart1) / count_acc_date_list * budget_rate
+        ch4 = 0
         for day in acc_date_list:
             chart4_data.append(ch4)
             if day == today:
-                today_by_time=ch4
+                today_by_time = ch4
 
             ch4 += s
         last_value_chart2 = chart2_data[-1] if chart2_data else None
-        master_dat={
-            'by_sanads':last_value_chart1/10,
-            'cy_budget':(last_value_chart1)/10*budget_rate,
-            'budget_rate':budget_rate,
+        master_dat = {
+            'by_sanads': last_value_chart1 / 10,
+            'cy_budget': (last_value_chart1) / 10 * budget_rate,
+            'budget_rate': budget_rate,
             'cy_sanads': last_value_chart2 / 10
 
         }
 
         print('today_bay_by,today_actual,today_by_time')
-        print(today_bay_by,today_actual,today_by_time)
-        today_actual=Decimal(today_actual)
-        today_bay_by=Decimal(today_bay_by)
-        today_by_time=Decimal(today_by_time)
+        print(today_bay_by, today_actual, today_by_time)
+        today_actual = Decimal(today_actual)
+        today_bay_by = Decimal(today_bay_by)
+        today_by_time = Decimal(today_by_time)
         g1 = ((today_actual - today_bay_by) / today_bay_by * 100) if today_bay_by != 0 else 100
         g2 = ((today_actual - today_by_time) / today_by_time * 100) if today_by_time != 0 else 100
-        print(g1,g2)
+        print(g1, g2)
 
 
     if level == '0':
-        detail_name='همه کالاها'
-        level1=Category.objects.filter(level=1)
-
-        budget_rate=1.5
-
-        budget_rate=float(budget_rate)
-
+        detail_name = 'همه کالاها'
+        budget_rate = 1.5
+        budget_rate = float(budget_rate)
         print(detail_name)
 
         # --- ۱. کوئری‌های مربوط به سال پایه (Base Year) ---
@@ -1847,8 +1816,6 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             for item in facor_acc_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
                 daily_totals_acc_year[str(item['date'])] = float(item['total'] or 0)
 
-
-
         start_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
         end_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(max_date=Max('date'))['max_date']
         print(detail_name)
@@ -1861,12 +1828,8 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             date_list.append(current_date.strftime('%Y-%m-%d'))  # قالب تاریخ به YYYY-MM-DD
             current_date += timedelta(days=1)
 
-
-
         acc_date_list = [datetime.strptime(date, '%Y-%m-%d') + relativedelta(years=1) for date in date_list]
         acc_date_list = [date.strftime('%Y-%m-%d') for date in acc_date_list]
-
-
 
         month_names = {
             1: "فروردین", 2: "اردیبهشت", 3: "خرداد", 4: "تیر",
@@ -1893,7 +1856,6 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             except ValueError as e:
                 print(f"خطای تبدیل تاریخ: {date}, {e}")  # نمایش خطا در صورت وجود مشکل
 
-
         chart_labels = chart_labels_shamsi  # برچسب‌های نمودار همان لیست تاریخ‌ها
         print('==============================================================')
 
@@ -1911,11 +1873,11 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             if str(by_date.date()) in daily_totals_base_year:
                 cumulative_base_year += daily_totals_base_year[str(by_date.date())]  # علامت منفی برای تصحیح
             chart1_data.append(cumulative_base_year)
-            for_chart3_data=((cumulative_base_year) * budget_rate)
-            for_chart3_data=float(for_chart3_data)
+            for_chart3_data = ((cumulative_base_year) * budget_rate)
+            for_chart3_data = float(for_chart3_data)
             chart3_data.append(for_chart3_data)
             if day == today:
-                today_bay_by=(cumulative_base_year) * budget_rate
+                today_bay_by = (cumulative_base_year) * budget_rate
 
             # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
             if day in daily_totals_acc_year:
@@ -1923,37 +1885,35 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             if day <= today:
                 chart2_data.append(cumulative_acc_year)
                 if day == today:
-                    today_actual=cumulative_acc_year
+                    today_actual = cumulative_acc_year
 
         last_value_chart1 = chart1_data[-1] if chart1_data else None
         count_acc_date_list = len(acc_date_list)
-        s=(last_value_chart1)/count_acc_date_list * budget_rate
-        ch4=0
+        s = (last_value_chart1) / count_acc_date_list * budget_rate
+        ch4 = 0
         for day in acc_date_list:
             chart4_data.append(ch4)
             if day == today:
-                today_by_time=ch4
+                today_by_time = ch4
 
             ch4 += s
         last_value_chart2 = chart2_data[-1] if chart2_data else None
-        master_dat={
-            'by_sanads':last_value_chart1/10,
-            'cy_budget':(last_value_chart1)/10*budget_rate,
-            'budget_rate':budget_rate,
+        master_dat = {
+            'by_sanads': last_value_chart1 / 10,
+            'cy_budget': (last_value_chart1) / 10 * budget_rate,
+            'budget_rate': budget_rate,
             'cy_sanads': last_value_chart2 / 10
 
         }
 
         print('today_bay_by,today_actual,today_by_time')
-        print(today_bay_by,today_actual,today_by_time)
-        today_actual=Decimal(today_actual)
-        today_bay_by=Decimal(today_bay_by)
-        today_by_time=Decimal(today_by_time)
+        print(today_bay_by, today_actual, today_by_time)
+        today_actual = Decimal(today_actual)
+        today_bay_by = Decimal(today_bay_by)
+        today_by_time = Decimal(today_by_time)
         g1 = ((today_actual - today_bay_by) / today_bay_by * 100) if today_bay_by != 0 else 100
         g2 = ((today_actual - today_by_time) / today_by_time * 100) if today_by_time != 0 else 100
-        print(g1,g2)
-
-
+        print(g1, g2)
 
     g1 = max(-100, min(g1, 100))
     g2 = max(-100, min(g2, 100))
@@ -1972,22 +1932,19 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
         'chart3_data': chart3_data,
         'chart4_data': chart4_data,
 
-
         'level': int(level),
         'level1': level1,
         'level2': level2,
         'level3': level3,
-        'kol_code': kol_code,
-        'moin_code': moin_code,
-        'tafzili_code': tafzili_code,
+        'cat1': cat1,
+        'cat2': cat2,
+        'cat3': cat3,
 
 
         'master_dat': master_dat,
 
-        'g1':g1,
-        'g2':g2,
-
-
+        'g1': g1,
+        'g2': g2,
 
     }
 
@@ -1996,12 +1953,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
     return render(request, 'budget_sale_detail.html', context)
 
 
-
-
-
-
-
-def BudgetSaleFactorDetail(request,year, level, code, *args, **kwargs):
+def BudgetSaleFactorDetail(request, year, level, code, *args, **kwargs):
     start_time = time.time()
     name = 'جزئیات فاکتور های فروش'
     result = page_permision(request, name)
@@ -2014,40 +1966,39 @@ def BudgetSaleFactorDetail(request,year, level, code, *args, **kwargs):
 
     master_info = MasterInfo.objects.filter(is_active=True).last()
     acc_year = master_info.acc_year
-    is_b_year=False
-    if int(year) == acc_year-1:
-        is_b_year=True
-    level1=Category.objects.filter(level=1)
-    level2=None
-    level3=None
-    cat1=None
-    cat2=None
-    cat3=None
+    is_b_year = False
+    if int(year) == acc_year - 1:
+        is_b_year = True
+    level1 = Category.objects.filter(level=1)
+    level2 = None
+    level3 = None
+    cat1 = None
+    cat2 = None
+    cat3 = None
 
+    if int(level) == 3:
+        cat3 = Category.objects.filter(id=int(code), level=3).last()
+        cat2 = cat3.parent
+        cat1 = cat2.parent
+        detail_name = cat3.name
+        level3 = Category.objects.filter(level=3, parent=cat3.parent)
+        level2 = Category.objects.filter(level=2, parent=cat3.parent.parent)
+        factors = FactorDetaile.objects.filter(kala__category=cat3, acc_year=int(year))
 
-    if int(level)==3:
-        cat3=Category.objects.filter(id=int(code),level=3).last()
-        cat2=cat3.parent
-        cat1=cat2.parent
-        detail_name=cat3.name
-        level3 = Category.objects.filter(level=3,parent=cat3.parent)
-        level2 = Category.objects.filter(level=2,parent=cat3.parent.parent)
-        factors=FactorDetaile.objects.filter(kala__category=cat3,acc_year=int(year))
+    if int(level) == 2:
+        cat2 = Category.objects.filter(id=int(code), level=2).last()
+        cat1 = cat2.parent
+        detail_name = cat2.name
+        level2 = Category.objects.filter(level=2, parent=cat2.parent)
+        level3 = Category.objects.filter(level=3, parent=cat2)
 
-    if int(level)==2:
-        cat2=Category.objects.filter(id=int(code),level=2).last()
-        cat1=cat2.parent
-        detail_name=cat2.name
-        level2 = Category.objects.filter(level=2,parent=cat2.parent)
-        level3 = Category.objects.filter(level=3,parent=cat2)
+        factors = FactorDetaile.objects.filter(kala__category__parent=cat2, acc_year=int(year))
 
-        factors=FactorDetaile.objects.filter(kala__category__parent=cat2,acc_year=int(year))
-
-    if int(level)==1:
-        cat1=Category.objects.filter(id=int(code),level=1).last()
-        detail_name=cat1.name
-        level2 = Category.objects.filter(level=2,parent=cat1)
-        factors=FactorDetaile.objects.filter(kala__category__parent__parent=cat1,acc_year=int(year))
+    if int(level) == 1:
+        cat1 = Category.objects.filter(id=int(code), level=1).last()
+        detail_name = cat1.name
+        level2 = Category.objects.filter(level=2, parent=cat1)
+        factors = FactorDetaile.objects.filter(kala__category__parent__parent=cat1, acc_year=int(year))
 
     today = date.today()
     one_year_ago = today - relativedelta(years=1)
@@ -2055,12 +2006,12 @@ def BudgetSaleFactorDetail(request,year, level, code, *args, **kwargs):
     context = {
         'user': user,
         'level': int(level),
-        'level1':level1,
-        'level2':level2,
-        'level3':level3,
-        'cat1':cat1,
-        'cat2':cat2,
-        'cat3':cat3,
+        'level1': level1,
+        'level2': level2,
+        'level3': level3,
+        'cat1': cat1,
+        'cat2': cat2,
+        'cat3': cat3,
 
         'year': year,
         'factors': factors,
