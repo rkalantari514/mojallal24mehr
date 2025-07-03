@@ -42,8 +42,8 @@ class FactorAdmin(admin.ModelAdmin):
 
 
 class FactorDetaileAdmin(admin.ModelAdmin):
-    list_display = ['acc_year','date','code_factor','factor','code_kala', 'kala', 'count', 'mablagh_vahed', 'mablagh_nahaee']
-    list_filter = ['acc_year']
+    list_display = ['acc_year','date','code_factor','factor','code_kala', 'kala','kala__category', 'count', 'mablagh_vahed', 'mablagh_nahaee','mablagh_after_takhfif_kol']
+    list_filter = ['acc_year','kala__category']
 
     # list_filter = ['name','code']
     # list_editable = ['description', 'in_use']

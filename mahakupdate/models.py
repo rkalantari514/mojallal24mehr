@@ -293,6 +293,7 @@ class FactorDetaile(models.Model):
     count = models.FloatField(blank=True, null=True, default=0, verbose_name='تعداد')
     mablagh_vahed = models.FloatField(blank=True, null=True, default=0, verbose_name='مبلغ واحد')
     mablagh_nahaee = models.FloatField(blank=True, null=True, default=0, verbose_name='مبلغ نهایی')
+    mablagh_after_takhfif_kol = models.FloatField(blank=True, null=True, default=0, verbose_name='مبلغ نهایی بعد از اعمال تخفیف کل')
     date = models.DateField(blank=True, null=True, verbose_name='تاریخ میلادی')
 
     class Meta:
