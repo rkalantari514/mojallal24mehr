@@ -35,7 +35,7 @@ class FactorAdmin(admin.ModelAdmin):
 
     list_filter = ['acc_year']
     # list_editable = ['description', 'in_use']
-    # search_fields = ['name', 'code']
+    search_fields = ['code']
 
     class Meta:
         model = Factor
