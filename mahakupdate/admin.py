@@ -47,7 +47,7 @@ class FactorDetaileAdmin(admin.ModelAdmin):
 
     # list_filter = ['name','code']
     # list_editable = ['description', 'in_use']
-    # search_fields = ['name', 'code']
+    search_fields = ['code_kala', 'code_factor']
 
     class Meta:
         model = FactorDetaile
