@@ -62,76 +62,76 @@
             </div>
 
             <!-- دکمه سطوح -->
-            <div class="col-xl-12 mb-30">
-                <div class="card card-statistics h-100">
-                    <div class="card-body">
+{#            <div class="col-xl-12 mb-30">#}
+{#                <div class="card card-statistics h-100">#}
+{#                    <div class="card-body">#}
                         {#                        <h5 class="card-title">سطح کل</h5>#}
-                        <div class="text-center">
-                            {% for l in level1 %}
-                                <a href="/budget/cost/detail/1/{{ l.code }}">
-                                    <button type="button"
-                                            class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
-                                </a>
-                            {% endfor %}
-
-                        </div>
-
-                    </div>
-
-                </div>
-            </div>
-            <div class="col-xl-12 mb-30">
-                <div class="card card-statistics h-100">
-                    <div class="card-body">
+{#                        <div class="text-center">#}
+{#                            {% for l in level1 %}#}
+{#                                <a href="/budget/cost/detail/1/{{ l.code }}">#}
+{#                                    <button type="button"#}
+{#                                            class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>#}
+{#                                </a>#}
+{#                            {% endfor %}#}
+{##}
+{#                        </div>#}
+{##}
+{#                    </div>#}
+{##}
+{#                </div>#}
+{#            </div>#}
+{#            <div class="col-xl-12 mb-30">#}
+{#                <div class="card card-statistics h-100">#}
+{#                    <div class="card-body">#}
                         {#                            <h5 class="card-title">سطح معین</h5>#}
-                        <div class="text-center">
-                            {% for l in level2 %}
-                                {% if l.code == moin_code %}
-                                    <a href="/budget/cost/detail/2/{{ l.code }}">
-                                        <button type="button"
-                                                class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
-                                    </a>
-                                {% else %}
-                                    <a href="/budget/cost/detail/2/{{ l.code }}">
-                                        <button type="button"
-                                                class="btn btn-secondary category-btn">{{ l.code }}-{{ l.name }}</button>
-                                    </a>
-                                {% endif %}
-                            {% endfor %}
-
-                        </div>
-
-                    </div>
-
-                </div>
-            </div>
-            {% if level > 1 %}
-                <div class="col-xl-12 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
+{#                        <div class="text-center">#}
+{#                            {% for l in level2 %}#}
+{#                                {% if l.code == moin_code %}#}
+{#                                    <a href="/budget/cost/detail/2/{{ l.code }}">#}
+{#                                        <button type="button"#}
+{#                                                class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>#}
+{#                                    </a>#}
+{#                                {% else %}#}
+{#                                    <a href="/budget/cost/detail/2/{{ l.code }}">#}
+{#                                        <button type="button"#}
+{#                                                class="btn btn-secondary category-btn">{{ l.code }}-{{ l.name }}</button>#}
+{#                                    </a>#}
+{#                                {% endif %}#}
+{#                            {% endfor %}#}
+{##}
+{#                        </div>#}
+{##}
+{#                    </div>#}
+{##}
+{#                </div>#}
+{#            </div>#}
+{#            {% if level > 1 %}#}
+{#                <div class="col-xl-12 mb-30">#}
+{#                    <div class="card card-statistics h-100">#}
+{#                        <div class="card-body">#}
                             {#                            <h5 class="card-title">سطح تفضیلی</h5>#}
-                            <div class="text-center">
-                                {% for l in level3 %}
-                                    {% if l.code == tafzili_code %}
-                                        <a href="/budget/cost/detail/3/{{ l.code }}">
-                                            <button type="button"
-                                                    class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>
-                                        </a>
-                                    {% else %}
-                                        <a href="/budget/cost/detail/3/{{ l.code }}">
-                                            <button type="button"
-                                                    class="btn btn-secondary category-btn">{{ l.code }}-{{ l.name }}</button>
-                                        </a>
-                                    {% endif %}
-                                {% endfor %}
-
-                            </div>
-
-                        </div>
-
-                    </div>
-                </div>
-            {% endif %}
+{#                            <div class="text-center">#}
+{#                                {% for l in level3 %}#}
+{#                                    {% if l.code == tafzili_code %}#}
+{#                                        <a href="/budget/cost/detail/3/{{ l.code }}">#}
+{#                                            <button type="button"#}
+{#                                                    class="btn btn-success category-btn">{{ l.code }}-{{ l.name }}</button>#}
+{#                                        </a>#}
+{#                                    {% else %}#}
+{#                                        <a href="/budget/cost/detail/3/{{ l.code }}">#}
+{#                                            <button type="button"#}
+{#                                                    class="btn btn-secondary category-btn">{{ l.code }}-{{ l.name }}</button>#}
+{#                                        </a>#}
+{#                                    {% endif %}#}
+{#                                {% endfor %}#}
+{##}
+{#                            </div>#}
+{##}
+{#                        </div>#}
+{##}
+{#                    </div>#}
+{#                </div>#}
+{#            {% endif %}#}
 
             <!-- ردیف خلاصه -->
             <div class="row">
