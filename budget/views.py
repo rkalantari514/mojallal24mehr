@@ -1477,12 +1477,12 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
             if day in daily_totals_acc_year:
                 cumulative_acc_year += daily_totals_acc_year[day]  # علامت منفی برای تصحیح
-            if day <= today:
+            if day < today or day == today:
                 chart2_data.append(cumulative_acc_year)
                 chart5_data.append('')
                 if day == today:
                     today_actual = cumulative_acc_year
-                    actual_rate = 1.7
+                    actual_rate = 1
                     if cumulative_base_year > 0:
                         actual_rate = today_actual / cumulative_base_year
             else:
