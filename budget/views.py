@@ -867,9 +867,13 @@ def BudgetSaleTotal(request, *args, **kwargs):
     print('cy_hazineh')
     print(cy_hazineh)
 
-    by_factor =FactorDetaile.objects.filter(acc_year=base_year).aggregate(
+    by_factor =FactorDetaile.objects.filter(acc_year=base_year).exclude(
+        kala__category__name__contains='اضافه مبلغ شرايطي'
+    ).aggregate(
             forosh=Sum('mablagh_after_takhfif_kol'))['forosh']
-    cy_factor =FactorDetaile.objects.filter(acc_year=acc_year).aggregate(
+    cy_factor =FactorDetaile.objects.filter(acc_year=acc_year).exclude(
+        kala__category__name__contains='اضافه مبلغ شرايطي'
+    ).aggregate(
             forosh=Sum('mablagh_after_takhfif_kol'))[
             'forosh'] or 0
 
