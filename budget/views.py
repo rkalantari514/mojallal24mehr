@@ -1482,6 +1482,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
                 chart5_data.append('-')
                 if day == today:
                     today_actual = cumulative_acc_year
+                    by_today_actual = cumulative_base_year
                     actual_rate = 1
                     if cumulative_base_year > 0:
                         actual_rate = today_actual / cumulative_base_year
@@ -1510,11 +1511,19 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
 
 
         last_value_chart2 = chart2_data[-1] if chart2_data else None
+        last_value_chart5 = chart5_data[-1] if chart5_data else None
+        last_value_chart6 = chart6_data[-1] if chart6_data else None
         master_dat = {
             'by_sanads': last_value_chart1 / 10,
             'cy_budget': (last_value_chart1) / 10 * budget_rate,
             'budget_rate': budget_rate,
-            'cy_sanads': last_value_chart2 / 10
+            'cy_sanads': last_value_chart2 / 10,'cy_sanads': last_value_chart2 / 10,
+
+            'actual_rate':actual_rate,
+            'by_today_actual':by_today_actual/10,
+            'pishbini':last_value_chart5 / 10,
+            'pishbini_line':last_value_chart6 / 10,
+
 
         }
 
@@ -1645,6 +1654,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
                 chart5_data.append('-')
                 if day == today:
                     today_actual = cumulative_acc_year
+                    by_today_actual = cumulative_base_year
                     actual_rate = 1
                     if cumulative_base_year > 0:
                         actual_rate = today_actual / cumulative_base_year
@@ -1671,11 +1681,18 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             ch4 += s
             ch6 += s6
         last_value_chart2 = chart2_data[-1] if chart2_data else None
+        last_value_chart5 = chart5_data[-1] if chart5_data else None
+        last_value_chart6 = chart6_data[-1] if chart6_data else None
         master_dat = {
             'by_sanads': last_value_chart1 / 10,
             'cy_budget': (last_value_chart1) / 10 * budget_rate,
             'budget_rate': budget_rate,
-            'cy_sanads': last_value_chart2 / 10
+            'cy_sanads': last_value_chart2 / 10,
+
+            'actual_rate': actual_rate,
+            'by_today_actual': by_today_actual / 10,
+            'pishbini': last_value_chart5 / 10,
+            'pishbini_line': last_value_chart6 / 10,
 
         }
 
@@ -1798,6 +1815,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
                 chart5_data.append('-')
                 if day == today:
                     today_actual = cumulative_acc_year
+                    by_today_actual = cumulative_base_year
                     actual_rate = 1
                     if cumulative_base_year > 0:
                         actual_rate = today_actual / cumulative_base_year
@@ -1824,11 +1842,18 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             ch4 += s
             ch6 += s6
         last_value_chart2 = chart2_data[-1] if chart2_data else None
+        last_value_chart5 = chart5_data[-1] if chart5_data else None
+        last_value_chart6 = chart6_data[-1] if chart6_data else None
         master_dat = {
             'by_sanads': last_value_chart1 / 10,
             'cy_budget': (last_value_chart1) / 10 * budget_rate,
             'budget_rate': budget_rate,
-            'cy_sanads': last_value_chart2 / 10
+            'cy_sanads': last_value_chart2 / 10,
+
+            'actual_rate': actual_rate,
+            'by_today_actual': by_today_actual / 10,
+            'pishbini': last_value_chart5 / 10,
+            'pishbini_line': last_value_chart6 / 10,
 
         }
 
@@ -1943,6 +1968,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
                 chart5_data.append('-')
                 if day == today:
                     today_actual = cumulative_acc_year
+                    by_today_actual = cumulative_base_year
                     actual_rate = 1
                     if cumulative_base_year > 0:
                         actual_rate = today_actual / cumulative_base_year
@@ -1969,11 +1995,18 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             ch4 += s
             ch6 += s6
         last_value_chart2 = chart2_data[-1] if chart2_data else None
+        last_value_chart5 = chart5_data[-1] if chart5_data else None
+        last_value_chart6 = chart6_data[-1] if chart6_data else None
         master_dat = {
             'by_sanads': last_value_chart1 / 10,
             'cy_budget': (last_value_chart1) / 10 * budget_rate,
             'budget_rate': budget_rate,
-            'cy_sanads': last_value_chart2 / 10
+            'cy_sanads': last_value_chart2 / 10,
+
+            'actual_rate': actual_rate,
+            'by_today_actual': by_today_actual / 10,
+            'pishbini': last_value_chart5 / 10,
+            'pishbini_line': last_value_chart6 / 10,
 
         }
 
