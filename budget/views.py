@@ -843,14 +843,14 @@ def BudgetSaleTotal(request, *args, **kwargs):
     table3 = []
     for cat in level3:
         by_factor = \
-        FactorDetaile.objects.filter(kala__category=cat, acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))[
+        FactorDetaile.objects.filter(kala__category=cat, acc_year=base_year).aggregate(forosh=Sum('mablagh_after_takhfif_kol'))[
             'forosh']
         cy_factor = \
-        FactorDetaile.objects.filter(kala__category=cat, acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))[
+        FactorDetaile.objects.filter(kala__category=cat, acc_year=acc_year).aggregate(forosh=Sum('mablagh_after_takhfif_kol'))[
             'forosh'] or 0
         by_today_factor = \
         FactorDetaile.objects.filter(kala__category=cat, acc_year=base_year, factor__date__lte=one_year_ago).aggregate(
-            forosh=Sum('mablagh_nahaee'))['forosh']
+            forosh=Sum('mablagh_after_takhfif_kol'))['forosh']
         budget_rate = 0
         category1 = cat
         for _ in range(3):  # بررسی cat و دو سطح از والدها
@@ -915,14 +915,14 @@ def BudgetSaleTotal(request, *args, **kwargs):
         })
 
     no_cat_by_factor = \
-    FactorDetaile.objects.filter(kala__isnull=True, acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))[
+    FactorDetaile.objects.filter(kala__isnull=True, acc_year=base_year).aggregate(forosh=Sum('mablagh_after_takhfif_kol'))[
         'forosh']
     no_cat_cy_factor = \
-        FactorDetaile.objects.filter(kala__isnull=True, acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))[
+        FactorDetaile.objects.filter(kala__isnull=True, acc_year=acc_year).aggregate(forosh=Sum('mablagh_after_takhfif_kol'))[
             'forosh'] or 0
     no_cat_by_today_factor = \
         FactorDetaile.objects.filter(kala__isnull=True, acc_year=base_year, factor__date__lte=one_year_ago).aggregate(
-            forosh=Sum('mablagh_nahaee'))['forosh']
+            forosh=Sum('mablagh_after_takhfif_kol'))['forosh']
 
     table3.append({
         'l1': 'کالای حذف شده_',
@@ -1218,10 +1218,10 @@ def BudgetSaleTotal(request, *args, **kwargs):
 
     # ساخت دوباره جدول صفر ============================
     table0 = []
-    by_factor = FactorDetaile.objects.filter(acc_year=base_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh']
-    cy_factor = FactorDetaile.objects.filter(acc_year=acc_year).aggregate(forosh=Sum('mablagh_nahaee'))['forosh'] or 0
+    by_factor = FactorDetaile.objects.filter(acc_year=base_year).aggregate(forosh=Sum('mablagh_after_takhfif_kol'))['forosh']
+    cy_factor = FactorDetaile.objects.filter(acc_year=acc_year).aggregate(forosh=Sum('mablagh_after_takhfif_kol'))['forosh'] or 0
     by_today_factor = FactorDetaile.objects.filter(acc_year=base_year, factor__date__lte=one_year_ago).aggregate(
-        forosh=Sum('mablagh_nahaee'))['forosh']
+        forosh=Sum('mablagh_after_takhfif_kol'))['forosh']
 
     cy_budget = (Decimal(by_factor) if by_factor is not None else Decimal(0)) * (
         Decimal(budget_rate) if budget_rate is not None else Decimal(0))
@@ -1388,7 +1388,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
 
         daily_totals_base_year = {}
         if factor_base_year_qs.exists():
-            for item in factor_base_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
+            for item in factor_base_year_qs.values('date').annotate(total=Sum('mablagh_after_takhfif_kol')).order_by('date'):
                 daily_totals_base_year[str(item['date'])] = float(item['total'] or 0)
 
         print(len(daily_totals_base_year))
@@ -1400,7 +1400,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
 
         daily_totals_acc_year = {}
         if facor_acc_year_qs.exists():
-            for item in facor_acc_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
+            for item in facor_acc_year_qs.values('date').annotate(total=Sum('mablagh_after_takhfif_kol')).order_by('date'):
                 daily_totals_acc_year[str(item['date'])] = float(item['total'] or 0)
 
         start_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
@@ -1536,7 +1536,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
 
         daily_totals_base_year = {}
         if factor_base_year_qs.exists():
-            for item in factor_base_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
+            for item in factor_base_year_qs.values('date').annotate(total=Sum('mablagh_after_takhfif_kol')).order_by('date'):
                 daily_totals_base_year[str(item['date'])] = float(item['total'] or 0)
 
         print(len(daily_totals_base_year))
@@ -1548,7 +1548,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
 
         daily_totals_acc_year = {}
         if facor_acc_year_qs.exists():
-            for item in facor_acc_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
+            for item in facor_acc_year_qs.values('date').annotate(total=Sum('mablagh_after_takhfif_kol')).order_by('date'):
                 daily_totals_acc_year[str(item['date'])] = float(item['total'] or 0)
 
         start_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
@@ -1672,7 +1672,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
 
         daily_totals_base_year = {}
         if factor_base_year_qs.exists():
-            for item in factor_base_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
+            for item in factor_base_year_qs.values('date').annotate(total=Sum('mablagh_after_takhfif_kol')).order_by('date'):
                 daily_totals_base_year[str(item['date'])] = float(item['total'] or 0)
 
         print(len(daily_totals_base_year))
@@ -1684,7 +1684,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
 
         daily_totals_acc_year = {}
         if facor_acc_year_qs.exists():
-            for item in facor_acc_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
+            for item in facor_acc_year_qs.values('date').annotate(total=Sum('mablagh_after_takhfif_kol')).order_by('date'):
                 daily_totals_acc_year[str(item['date'])] = float(item['total'] or 0)
 
         start_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
@@ -1802,7 +1802,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
 
         daily_totals_base_year = {}
         if factor_base_year_qs.exists():
-            for item in factor_base_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
+            for item in factor_base_year_qs.values('date').annotate(total=Sum('mablagh_after_takhfif_kol')).order_by('date'):
                 daily_totals_base_year[str(item['date'])] = float(item['total'] or 0)
 
         print(len(daily_totals_base_year))
@@ -1813,7 +1813,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
 
         daily_totals_acc_year = {}
         if facor_acc_year_qs.exists():
-            for item in facor_acc_year_qs.values('date').annotate(total=Sum('mablagh_nahaee')).order_by('date'):
+            for item in facor_acc_year_qs.values('date').annotate(total=Sum('mablagh_after_takhfif_kol')).order_by('date'):
                 daily_totals_acc_year[str(item['date'])] = float(item['total'] or 0)
 
         start_date = FactorDetaile.objects.filter(acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
