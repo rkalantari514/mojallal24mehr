@@ -1485,6 +1485,8 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
                     actual_rate = 1
                     if cumulative_base_year > 0:
                         actual_rate = today_actual / cumulative_base_year
+                    print('actual_rate,today_actual,cumulative_base_year')
+                    print(actual_rate,today_actual,cumulative_base_year)
             else:
                 # chart2_data.append(0)
                 chart5_data.append(cumulative_base_year * actual_rate)
