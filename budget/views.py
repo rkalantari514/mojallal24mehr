@@ -1361,6 +1361,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
     cat2 = None
     cat3 = None
     chart5_data = []
+    chart6_data = []
     if level == '3':
         cat_id = int(code)
         category = Category.objects.filter(id=cat_id, level=3).last()
@@ -1457,7 +1458,6 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
         chart2_data = []
         chart3_data = []
         chart4_data = []
-        chart5_data = []
 
         cumulative_base_year = 0
         cumulative_acc_year = 0
@@ -1493,12 +1493,22 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
         count_acc_date_list = len(acc_date_list)
         s = (last_value_chart1) / count_acc_date_list * budget_rate
         ch4 = 0
+        ch6 = 0
+        s6=0
         for day in acc_date_list:
             chart4_data.append(ch4)
             if day == today:
                 today_by_time = ch4
-
+                ch6=today_actual
+                s6=today_actual/95
+            if day <= today:
+                chart6_data.append('-')
+            else:
+                chart6_data.append(ch6)
             ch4 += s
+            ch6 += s6
+
+
         last_value_chart2 = chart2_data[-1] if chart2_data else None
         master_dat = {
             'by_sanads': last_value_chart1 / 10,
@@ -1948,6 +1958,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
         'chart3_data': chart3_data,
         'chart4_data': chart4_data,
         'chart5_data': chart5_data,
+        'chart6_data': chart6_data,
 
         'level': int(level),
         'level1': level1,

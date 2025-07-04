@@ -300,6 +300,7 @@
         var chart3Data = {{ chart3_data|safe }};
         var chart4Data = {{ chart4_data|safe }};
         var chart5Data = {{ chart5_data|safe }};
+        var chart6Data = {{ chart6_data|safe }};
 
         var ctx = document.getElementById('budgetChart').getContext('2d');
 
@@ -340,7 +341,16 @@ new Chart(ctx, {
                 label: "پیش بینی",
                 data: chart5Data,
                 borderColor: "olive",
-                fill: true,
+                fill: false,
+                pointRadius: 0,
+                borderDash: [5, 5]
+
+            },
+{
+                label: "پیش بینی خطی",
+                data: chart6Data,
+                borderColor: "yellow",
+                fill: false,
                 pointRadius: 0,
                 borderDash: [5, 5]
 
