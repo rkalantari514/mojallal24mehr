@@ -1479,14 +1479,12 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
                 cumulative_acc_year += daily_totals_acc_year[day]  # علامت منفی برای تصحیح
             if day < today or day == today:
                 chart2_data.append(cumulative_acc_year)
-                chart5_data.append('')
+                chart5_data.append('-')
                 if day == today:
                     today_actual = cumulative_acc_year
                     actual_rate = 1
                     if cumulative_base_year > 0:
                         actual_rate = today_actual / cumulative_base_year
-                    print('actual_rate,today_actual,cumulative_base_year')
-                    print(actual_rate,today_actual,cumulative_base_year)
             else:
                 # chart2_data.append(0)
                 chart5_data.append(cumulative_base_year * actual_rate)
