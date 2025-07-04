@@ -5072,7 +5072,7 @@ def DeleteDublicateData(request):
 
 
 
-def AfterTakhfifKol2(request):
+def AfterTakhfifKol(request):
     import time
     t0 = time.time()
     print('بعد از تخفیف کل فاکتور---------------------')
@@ -5088,6 +5088,8 @@ def AfterTakhfifKol2(request):
             mab_naha=0
 
             for fd in fac_d:
+                if fd.mablagh_nahaee == 0:
+                    continue
                 print(fd.count , fd.mablagh_vahed,fd.mablagh_nahaee)
                 no_takfif += fd.count * fd.mablagh_vahed
                 mab_naha += fd.mablagh_nahaee
@@ -5096,7 +5098,7 @@ def AfterTakhfifKol2(request):
             end_fac_takhfif_ratio=0
             print('f.takhfif , no_takfif - mab_naha')
             print(f.takhfif , no_takfif - mab_naha)
-            if f.takhfif > no_takfif-mab_naha:
+            if f.takhfif > no_takfif-mab_naha :
                 end_fac_takhfif= f.takhfif - no_takfif+mab_naha
                 end_fac_takhfif_ratio=end_fac_takhfif/f.mablagh_factor
                 print('end_fac_takhfif,end_fac_takhfif_ratio')
@@ -5104,7 +5106,12 @@ def AfterTakhfifKol2(request):
             for fd in fac_d:
                 print(fd.mablagh_after_takhfif_kol , fd.mablagh_nahaee ,end_fac_takhfif_ratio,fd.count , fd.mablagh_vahed)
                 print(fd.mablagh_after_takhfif_kol , (fd.mablagh_nahaee - (end_fac_takhfif_ratio*fd.count * fd.mablagh_vahed)))
-                if fd.mablagh_after_takhfif_kol != (fd.mablagh_nahaee - (end_fac_takhfif_ratio*fd.count * fd.mablagh_vahed)):
+                if fd.mablagh_nahaee == 0:
+                    if fd.mablagh_after_takhfif_kol != 0:
+                        fd.mablagh_after_takhfif_kol = 0
+                        fac_d_to_update.append(fd)
+
+                elif fd.mablagh_after_takhfif_kol != (fd.mablagh_nahaee - (end_fac_takhfif_ratio*fd.count * fd.mablagh_vahed)):
                     fd.mablagh_after_takhfif_kol = fd.mablagh_nahaee - (end_fac_takhfif_ratio * fd.count * fd.mablagh_vahed)
                     fac_d_to_update.append(fd)
 
@@ -5118,7 +5125,7 @@ def AfterTakhfifKol2(request):
 
 from decimal import Decimal, ROUND_HALF_UP
 
-def AfterTakhfifKol(request):
+def AfterTakhfifKolsider(request):
     t0 = time.time()
     print('بعد از تخفیف کل فاکتور---------------------')
 
