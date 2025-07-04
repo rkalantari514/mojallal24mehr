@@ -1340,8 +1340,8 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
     tafzil = None
     moin_code = None
     tafzili_code = None
-    g1 = -70
-    g2 = 43
+    g1 = 0
+    g2 = 0
     today_bay_by = 0
     today_actual = 0
     today_by_time = 0
@@ -1353,7 +1353,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
     cat1 = None
     cat2 = None
     cat3 = None
-
+    chart5_data=[]
     if level == '3':
         cat_id = int(code)
         category = Category.objects.filter(id=cat_id, level=3).last()
@@ -1450,6 +1450,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
         chart2_data = []
         chart3_data = []
         chart4_data = []
+        chart5_data = []
 
         cumulative_base_year = 0
         cumulative_acc_year = 0
@@ -1471,8 +1472,15 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
                 cumulative_acc_year += daily_totals_acc_year[day]  # علامت منفی برای تصحیح
             if day <= today:
                 chart2_data.append(cumulative_acc_year)
+                chart5_data.append('')
                 if day == today:
                     today_actual = cumulative_acc_year
+                    actual_rate = 1
+                    if cumulative_base_year >0:
+                        actual_rate=today_actual/cumulative_base_year
+            else:
+                # chart2_data.append(0)
+                chart5_data.append(cumulative_base_year*actual_rate)
 
         last_value_chart1 = chart1_data[-1] if chart1_data else None
         count_acc_date_list = len(acc_date_list)
@@ -1931,6 +1939,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
         'chart2_data': chart2_data,
         'chart3_data': chart3_data,
         'chart4_data': chart4_data,
+        'chart5_data': chart5_data,
 
         'level': int(level),
         'level1': level1,

@@ -192,6 +192,26 @@
                         </div>
                     </div>
                 </div>
+{#                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">#}
+{#                    <div class="card card-statistics h-100">#}
+{#                        <div class="card-body">#}
+{#                            <div class="clearfix">#}
+{#                                <div class="float-left icon-box bg-success rounded-circle">#}
+{#    <span class="text-white">#}
+{#    <i class="fa fa- fa-spinner fa-spin highlight-icon" aria-hidden="true"></i>#}
+{#    </span>#}
+{#                                </div>#}
+{#                                <div class="float-right text-right">#}
+{#                                   <a href="/budget/sale/detail/3/408" target="_blank">#}
+{#                                                            <button type="button" class="btn btn-sm btn-success btn-fixed-width">#}
+{#                                                                <i class="ti-bar-chart pr-1"></i> نمودار عملکرد#}
+{#                                                            </button>#}
+{#                                                        </a>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
                 <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="card-body">
@@ -279,6 +299,7 @@
         var chart2Data = {{ chart2_data|safe }};
         var chart3Data = {{ chart3_data|safe }};
         var chart4Data = {{ chart4_data|safe }};
+        var chart5Data = {{ chart5_data|safe }};
 
         var ctx = document.getElementById('budgetChart').getContext('2d');
 
@@ -312,6 +333,13 @@ new Chart(ctx, {
                 label: "بودجه بر اساس زمان",
                 data: chart4Data,
                 borderColor: "teal",
+                fill: false,
+                pointRadius: 0
+            },
+            {
+                label: "پیش بینی",
+                data: chart5Data,
+                borderColor: "hsla",
                 fill: false,
                 pointRadius: 0
             }
