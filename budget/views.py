@@ -886,6 +886,30 @@ def BudgetSaleTotal(request, *args, **kwargs):
     cy_sayer_hazine_ratio=cy_hazineh/Decimal(cy_factor) if cy_factor>0 else 0
     print(by_sayer_hazine_ratio)
     print(cy_sayer_hazine_ratio)
+    print('-------------------------------------')
+
+    by_daramad = SanadDetail.objects.filter(
+        acc_year=base_year,
+        is_active=True,
+        kol=401
+    ).aggregate(daramad=Sum('curramount'))['daramad']
+
+    print('by_daramad')
+    print(by_daramad)
+
+    cy_daramad = SanadDetail.objects.filter(
+        acc_year=acc_year,
+        is_active=True,
+        kol=401
+    ).aggregate(daramad=Sum('curramount'))['daramad']
+
+    print('cy_daramad')
+    print(cy_daramad)
+
+    by_sayer_daramad_ratio=by_daramad/Decimal(by_factor) if by_factor>0 else 0
+    cy_sayer_daramad_ratio=cy_daramad/Decimal(cy_factor) if cy_factor>0 else 0
+    print(by_sayer_daramad_ratio)
+    print(cy_sayer_daramad_ratio)
 
 
     table3 = []
