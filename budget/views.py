@@ -895,7 +895,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
     ).aggregate(daramad=Sum('curramount'))['daramad']
 
     by_daramad += Decimal(FactorDetaile.objects.filter(acc_year=base_year , kala__category__name__contains='اضافه مبلغ شرايطي').aggregate(
-            forosh=Sum('mablagh_after_takhfif_kol'))['forosh'])
+            forosh=Sum('mablagh_after_takhfif_kol'))['forosh']  or 0 )
     print('by_daramad')
     print(by_daramad)
 
@@ -905,7 +905,7 @@ def BudgetSaleTotal(request, *args, **kwargs):
         kol=401
     ).aggregate(daramad=Sum('curramount'))['daramad']
     cy_daramad += Decimal(FactorDetaile.objects.filter(acc_year=acc_year , kala__category__name__contains='اضافه مبلغ شرايطي').aggregate(
-            forosh=Sum('mablagh_after_takhfif_kol'))['forosh'])
+            forosh=Sum('mablagh_after_takhfif_kol'))['forosh']  or 0)
 
     print('cy_daramad')
     print(cy_daramad)
@@ -1307,6 +1307,8 @@ def BudgetSaleTotal(request, *args, **kwargs):
 
         'by_sayer_hazine_ratio': by_sayer_hazine_ratio,
         'cy_sayer_hazine_ratio': cy_sayer_hazine_ratio,
+        'by_sayer_daramad_ratio': by_sayer_daramad_ratio,
+        'cy_sayer_daramad_ratio': cy_sayer_daramad_ratio,
 
 
     })
