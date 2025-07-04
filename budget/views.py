@@ -1642,19 +1642,34 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
                 cumulative_acc_year += daily_totals_acc_year[day]  # علامت منفی برای تصحیح
             if day <= today:
                 chart2_data.append(cumulative_acc_year)
+                chart5_data.append('-')
                 if day == today:
                     today_actual = cumulative_acc_year
+                    actual_rate = 1
+                    if cumulative_base_year > 0:
+                        actual_rate = today_actual / cumulative_base_year
+            else:
+                # chart2_data.append(0)
+                chart5_data.append(cumulative_base_year * actual_rate)
 
         last_value_chart1 = chart1_data[-1] if chart1_data else None
         count_acc_date_list = len(acc_date_list)
         s = (last_value_chart1) / count_acc_date_list * budget_rate
         ch4 = 0
+        ch6 = 0
+        s6 = 0
         for day in acc_date_list:
             chart4_data.append(ch4)
             if day == today:
                 today_by_time = ch4
-
+                ch6 = today_actual
+                s6 = today_actual / 95
+            if day <= today:
+                chart6_data.append('-')
+            else:
+                chart6_data.append(ch6)
             ch4 += s
+            ch6 += s6
         last_value_chart2 = chart2_data[-1] if chart2_data else None
         master_dat = {
             'by_sanads': last_value_chart1 / 10,
@@ -1780,19 +1795,34 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
                 cumulative_acc_year += daily_totals_acc_year[day]  # علامت منفی برای تصحیح
             if day <= today:
                 chart2_data.append(cumulative_acc_year)
+                chart5_data.append('-')
                 if day == today:
                     today_actual = cumulative_acc_year
+                    actual_rate = 1
+                    if cumulative_base_year > 0:
+                        actual_rate = today_actual / cumulative_base_year
+            else:
+                # chart2_data.append(0)
+                chart5_data.append(cumulative_base_year * actual_rate)
 
         last_value_chart1 = chart1_data[-1] if chart1_data else None
         count_acc_date_list = len(acc_date_list)
         s = (last_value_chart1) / count_acc_date_list * budget_rate
         ch4 = 0
+        ch6 = 0
+        s6 = 0
         for day in acc_date_list:
             chart4_data.append(ch4)
             if day == today:
                 today_by_time = ch4
-
+                ch6 = today_actual
+                s6 = today_actual / 95
+            if day <= today:
+                chart6_data.append('-')
+            else:
+                chart6_data.append(ch6)
             ch4 += s
+            ch6 += s6
         last_value_chart2 = chart2_data[-1] if chart2_data else None
         master_dat = {
             'by_sanads': last_value_chart1 / 10,
@@ -1910,19 +1940,34 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
                 cumulative_acc_year += daily_totals_acc_year[day]  # علامت منفی برای تصحیح
             if day <= today:
                 chart2_data.append(cumulative_acc_year)
+                chart5_data.append('-')
                 if day == today:
                     today_actual = cumulative_acc_year
+                    actual_rate = 1
+                    if cumulative_base_year > 0:
+                        actual_rate = today_actual / cumulative_base_year
+            else:
+                # chart2_data.append(0)
+                chart5_data.append(cumulative_base_year * actual_rate)
 
         last_value_chart1 = chart1_data[-1] if chart1_data else None
         count_acc_date_list = len(acc_date_list)
         s = (last_value_chart1) / count_acc_date_list * budget_rate
         ch4 = 0
+        ch6 = 0
+        s6 = 0
         for day in acc_date_list:
             chart4_data.append(ch4)
             if day == today:
                 today_by_time = ch4
-
+                ch6 = today_actual
+                s6 = today_actual / 95
+            if day <= today:
+                chart6_data.append('-')
+            else:
+                chart6_data.append(ch6)
             ch4 += s
+            ch6 += s6
         last_value_chart2 = chart2_data[-1] if chart2_data else None
         master_dat = {
             'by_sanads': last_value_chart1 / 10,
