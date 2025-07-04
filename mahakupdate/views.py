@@ -5080,48 +5080,53 @@ def AfterTakhfifKol(request):
 
     fac=Factor.objects.filter(acc_year=acc_year)
     fac_d_to_update=[]
+    fac_to_update=[]
     for f in fac:
         # if f.code==7391:
-        if True:
-            fac_d=FactorDetaile.objects.filter(factor=f,acc_year=acc_year)
-            no_takfif=0
-            mab_naha=0
+        fac_d=FactorDetaile.objects.filter(factor=f,acc_year=acc_year)
+        no_takfif=0
+        mab_naha=0
 
-            for fd in fac_d:
-                if fd.mablagh_nahaee == 0:
-                    continue
-                print(fd.count , fd.mablagh_vahed,fd.mablagh_nahaee)
-                no_takfif += fd.count * fd.mablagh_vahed
-                mab_naha += fd.mablagh_nahaee
-            print('no_takfif,mab_naha')
-            print(no_takfif,mab_naha)
-            end_fac_takhfif_ratio=0
-            print('f.takhfif , no_takfif - mab_naha')
-            print(f.takhfif , no_takfif - mab_naha)
-            if f.takhfif > no_takfif-mab_naha :
-                end_fac_takhfif= f.takhfif - no_takfif+mab_naha
-                end_fac_takhfif_ratio=end_fac_takhfif/f.mablagh_factor
-                print('end_fac_takhfif,end_fac_takhfif_ratio')
-                print(end_fac_takhfif,end_fac_takhfif_ratio)
-            for fd in fac_d:
-                print(fd.mablagh_after_takhfif_kol , fd.mablagh_nahaee ,end_fac_takhfif_ratio,fd.count , fd.mablagh_vahed)
-                print(fd.mablagh_after_takhfif_kol , (fd.mablagh_nahaee - (end_fac_takhfif_ratio*fd.count * fd.mablagh_vahed)))
-                if fd.mablagh_nahaee == 0:
-                    if fd.mablagh_after_takhfif_kol != 0:
-                        fd.mablagh_after_takhfif_kol = 0
-                        fac_d_to_update.append(fd)
-
-                elif no_takfif > f.mablagh_factor:
-                    fd.mablagh_after_takhfif_kol = fd.mablagh_nahaee
+        for fd in fac_d:
+            if fd.mablagh_nahaee == 0:
+                continue
+            print(fd.count , fd.mablagh_vahed,fd.mablagh_nahaee)
+            no_takfif += fd.count * fd.mablagh_vahed
+            mab_naha += fd.mablagh_nahaee
+        print('no_takfif,mab_naha')
+        print(no_takfif,mab_naha)
+        end_fac_takhfif_ratio=0
+        print('f.takhfif , no_takfif - mab_naha')
+        print(f.takhfif , no_takfif - mab_naha)
+        if f.takhfif > no_takfif - mab_naha :
+            end_fac_takhfif= f.takhfif - no_takfif+mab_naha
+            end_fac_takhfif_ratio=end_fac_takhfif/f.mablagh_factor
+            if f.darsad_takhfif_end_factor != end_fac_takhfif_ratio:
+                f.darsad_takhfif_end_factor = end_fac_takhfif_ratio
+                fac_to_update.append(f)
+            print('end_fac_takhfif,end_fac_takhfif_ratio')
+            print(end_fac_takhfif,end_fac_takhfif_ratio)
+        for fd in fac_d:
+            print(fd.mablagh_after_takhfif_kol , fd.mablagh_nahaee ,end_fac_takhfif_ratio,fd.count , fd.mablagh_vahed)
+            print(fd.mablagh_after_takhfif_kol , (fd.mablagh_nahaee - (end_fac_takhfif_ratio*fd.count * fd.mablagh_vahed)))
+            if fd.mablagh_nahaee == 0:
+                if fd.mablagh_after_takhfif_kol != 0:
+                    fd.mablagh_after_takhfif_kol = 0
                     fac_d_to_update.append(fd)
 
+            elif no_takfif > f.mablagh_factor:
+                fd.mablagh_after_takhfif_kol = fd.mablagh_nahaee
+                fac_d_to_update.append(fd)
 
-                elif fd.mablagh_after_takhfif_kol != (fd.mablagh_nahaee - (end_fac_takhfif_ratio*fd.count * fd.mablagh_vahed)):
-                    fd.mablagh_after_takhfif_kol = fd.mablagh_nahaee - (end_fac_takhfif_ratio * fd.count * fd.mablagh_vahed)
-                    fac_d_to_update.append(fd)
+
+            elif fd.mablagh_after_takhfif_kol != (fd.mablagh_nahaee - (end_fac_takhfif_ratio*fd.count * fd.mablagh_vahed)):
+                fd.mablagh_after_takhfif_kol = fd.mablagh_nahaee - (end_fac_takhfif_ratio * fd.count * fd.mablagh_vahed)
+                fac_d_to_update.append(fd)
 
     if fac_d_to_update:
         FactorDetaile.objects.bulk_update(fac_d_to_update, ['mablagh_after_takhfif_kol'])
+    if fac_to_update:
+        Factor.objects.bulk_update(fac_to_update, ['darsad_takhfif_end_factor'])
 
     tend = time.time()
     total_time = tend - t0

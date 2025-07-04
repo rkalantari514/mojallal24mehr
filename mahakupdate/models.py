@@ -271,6 +271,7 @@ class Factor(models.Model):
     takhfif = models.FloatField(blank=True, null=True, default=0, verbose_name='تخفیف')
     create_time = models.CharField(blank=True, null=True, max_length=150, verbose_name='ساعت ایجاد')
     darsad_takhfif = models.FloatField(blank=True, null=True, default=0, verbose_name='درصد تخفیف')
+    darsad_takhfif_end_factor = models.FloatField(blank=True, null=True, default=0, verbose_name='درصد تخفیف پای فاکتور')
     date = models.DateField(blank=True, null=True, verbose_name='تاریخ میلادی')
     per_code = models.IntegerField(blank=True, null=True, verbose_name='کد شخص')
     person = models.ForeignKey('Person', on_delete=models.SET_NULL, blank=True, null=True)
