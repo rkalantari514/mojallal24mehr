@@ -298,6 +298,7 @@ from django.shortcuts import render
 from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta
 import jdatetime
+from django.db.models import Sum, Subquery # مطمئن شوید Subquery را ایمپورت کرده‌اید
 
 
 def BudgetCostDetail(request, level, code, *args, **kwargs):
@@ -840,6 +841,49 @@ def BudgetSaleTotal(request, *args, **kwargs):
     level3 = Category.objects.filter(level=3)
     today = date.today()
     one_year_ago = today - relativedelta(years=1)
+
+    # =======   محاسبات هزینه مشترک==================
+
+    budget_tafzili_codes_subquery = AccCoding.objects.filter(
+        level=3,
+        is_budget=True
+    ).values('code')
+
+    by_hazineh = - SanadDetail.objects.filter(
+        acc_year=base_year,
+        is_active=True,
+        tafzili__in=Subquery(budget_tafzili_codes_subquery)
+    ).aggregate(hazineh=Sum('curramount'))['hazineh']
+
+    print('by_hazineh')
+    print(by_hazineh)
+
+    cy_hazineh = - SanadDetail.objects.filter(
+            acc_year=acc_year,
+            is_active=True,
+            tafzili__in=Subquery(budget_tafzili_codes_subquery)
+        ).aggregate(hazineh=Sum('curramount'))['hazineh']
+
+    print('cy_hazineh')
+    print(cy_hazineh)
+
+    by_factor =FactorDetaile.objects.filter(acc_year=base_year).aggregate(
+            forosh=Sum('mablagh_after_takhfif_kol'))['forosh']
+    cy_factor =FactorDetaile.objects.filter(acc_year=acc_year).aggregate(
+            forosh=Sum('mablagh_after_takhfif_kol'))[
+            'forosh'] or 0
+
+    print('by_factor')
+    print(by_factor)
+    print('cy_factor')
+    print(cy_factor)
+
+    by_sayer_hazine_ratio=by_hazineh/Decimal(by_factor) if by_factor>0 else 0
+    cy_sayer_hazine_ratio=cy_hazineh/Decimal(cy_factor) if cy_factor>0 else 0
+    print(by_sayer_hazine_ratio)
+    print(cy_sayer_hazine_ratio)
+
+
     table3 = []
     for cat in level3:
         by_factor = \
@@ -893,6 +937,13 @@ def BudgetSaleTotal(request, *args, **kwargs):
 
         actual_ratio_by_year = Decimal(cy_factor) / Decimal(
             by_today_factor) if by_today_factor and by_today_factor != 0 else 0.0
+
+
+
+
+
+
+
 
         table3.append({
             'l1': cat.parent.parent.name,
@@ -1219,6 +1270,13 @@ def BudgetSaleTotal(request, *args, **kwargs):
         'amalkard2': amalkard2,
         'by_today_factor': by_today_factor,
         'actual_ratio_by_year': actual_ratio_by_year,
+
+
+
+        'by_sayer_hazine_ratio': by_sayer_hazine_ratio,
+        'cy_sayer_hazine_ratio': cy_sayer_hazine_ratio,
+
+
     })
 
     # ساخت دوباره جدول صفر ============================
