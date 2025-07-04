@@ -5121,7 +5121,7 @@ def AfterTakhfifKol(request):
 
             elif fd.mablagh_after_takhfif_kol != (fd.mablagh_nahaee - (end_fac_takhfif_ratio*fd.count * fd.mablagh_vahed)):
                 fd.mablagh_after_takhfif_kol = fd.mablagh_nahaee - (end_fac_takhfif_ratio * fd.count * fd.mablagh_vahed)
-                if fd.mablagh_after_takhfif_kol < 0:
+                if fd.mablagh_nahaee - (end_fac_takhfif_ratio * fd.count * fd.mablagh_vahed) < 0:
                     fd.mablagh_after_takhfif_kol = fd.mablagh_nahaee
 
                 fac_d_to_update.append(fd)
