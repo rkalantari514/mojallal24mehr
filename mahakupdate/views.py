@@ -5091,8 +5091,6 @@ def AfterTakhfifKol(request):
             if fd.mablagh_nahaee == 0:
                 continue
             print(fd.count , fd.mablagh_vahed,fd.mablagh_nahaee)
-            if fd.mablagh_nahaee > fd.count * fd.mablagh_vahed:
-                fd.count = fd.mablagh_nahaee / fd.mablagh_vahed
             no_takfif += fd.count * fd.mablagh_vahed
             mab_naha += fd.mablagh_nahaee
         print('no_takfif,mab_naha')
@@ -5109,8 +5107,6 @@ def AfterTakhfifKol(request):
             print('end_fac_takhfif,end_fac_takhfif_ratio')
             print(end_fac_takhfif,end_fac_takhfif_ratio)
         for fd in fac_d:
-            if fd.mablagh_nahaee > fd.count * fd.mablagh_vahed:
-                fd.count = fd.mablagh_nahaee / fd.mablagh_vahed
             print(fd.mablagh_after_takhfif_kol , fd.mablagh_nahaee ,end_fac_takhfif_ratio,fd.count , fd.mablagh_vahed)
             print(fd.mablagh_after_takhfif_kol , (fd.mablagh_nahaee - (end_fac_takhfif_ratio*fd.count * fd.mablagh_vahed)))
             if fd.mablagh_nahaee == 0:
@@ -5125,6 +5121,9 @@ def AfterTakhfifKol(request):
 
             elif fd.mablagh_after_takhfif_kol != (fd.mablagh_nahaee - (end_fac_takhfif_ratio*fd.count * fd.mablagh_vahed)):
                 fd.mablagh_after_takhfif_kol = fd.mablagh_nahaee - (end_fac_takhfif_ratio * fd.count * fd.mablagh_vahed)
+                if fd.mablagh_after_takhfif_kol < 0:
+                    fd.mablagh_after_takhfif_kol = fd.mablagh_nahaee
+
                 fac_d_to_update.append(fd)
 
     if fac_d_to_update:
