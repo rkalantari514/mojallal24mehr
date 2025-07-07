@@ -1040,7 +1040,7 @@ def CreateTotalReport(request):
         repo.sayer_hazine_total = - sayer_hazine_total
         repo.navizheh_ratio = (forosh_total + barrghasht_forosh_total - baha_tamam_total) / (
                     forosh_total + barrghasht_forosh_total)
-        repo.vizheh_ratio =(forosh_total + barrghasht_forosh_total - baha_tamam_total + sayer_daramad_total - sayer_hazine_total) / (
+        repo.vizheh_ratio =(forosh_total + barrghasht_forosh_total - baha_tamam_total + sayer_daramad_total + sayer_hazine_total) / (
                     forosh_total + barrghasht_forosh_total)
 
         repo.save()
