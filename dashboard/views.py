@@ -977,7 +977,7 @@ def CreateTotalReport(request):
             [Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 403]) / Decimal(
             10000000)
 
-        baha_tamam_total = - sum([Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 403]) / Decimal(
+        baha_tamam_total = - sum([Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 500]) / Decimal(
             10000000)
 
         sayer_hazine_total = sum([Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 501]) / Decimal(
@@ -1051,74 +1051,6 @@ def CreateTotalReport(request):
     return redirect('/updatedb')
 
 
-def trst():
-    by_hazineh = - SanadDetail.objects.filter(
-        acc_year=base_year,
-        is_active=True,
-        tafzili__in=Subquery(budget_tafzili_codes_subquery)
-    ).aggregate(hazineh=Sum('curramount'))['hazineh']
-
-    print('by_hazineh')
-    print(by_hazineh)
-
-    cy_hazineh = - SanadDetail.objects.filter(
-        acc_year=acc_year,
-        is_active=True,
-        tafzili__in=Subquery(budget_tafzili_codes_subquery)
-    ).aggregate(hazineh=Sum('curramount'))['hazineh']
-
-    print('cy_hazineh')
-    print(cy_hazineh)
-
-    by_factor = FactorDetaile.objects.filter(acc_year=base_year).exclude(
-        kala__category__name__contains='اضافه مبلغ شرايطي'
-    ).aggregate(
-        forosh=Sum('mablagh_after_takhfif_kol'))['forosh']
-    cy_factor = FactorDetaile.objects.filter(acc_year=acc_year).exclude(
-        kala__category__name__contains='اضافه مبلغ شرايطي'
-    ).aggregate(
-        forosh=Sum('mablagh_after_takhfif_kol'))[
-                    'forosh'] or 0
-
-    print('by_factor')
-    print(by_factor)
-    print('cy_factor')
-    print(cy_factor)
-
-    by_sayer_hazine_ratio = by_hazineh / Decimal(by_factor) if by_factor > 0 else 0
-    cy_sayer_hazine_ratio = cy_hazineh / Decimal(cy_factor) if cy_factor > 0 else 0
-    print(by_sayer_hazine_ratio)
-    print(cy_sayer_hazine_ratio)
-    print('-------------------------------------')
-
-    by_daramad = SanadDetail.objects.filter(
-        acc_year=base_year,
-        is_active=True,
-        kol=401
-    ).aggregate(daramad=Sum('curramount'))['daramad']
-
-    by_daramad += Decimal(
-        FactorDetaile.objects.filter(acc_year=base_year, kala__category__name__contains='اضافه مبلغ شرايطي').aggregate(
-            forosh=Sum('mablagh_after_takhfif_kol'))['forosh'] or 0)
-    print('by_daramad')
-    print(by_daramad)
-
-    cy_daramad = SanadDetail.objects.filter(
-        acc_year=acc_year,
-        is_active=True,
-        kol=401
-    ).aggregate(daramad=Sum('curramount'))['daramad']
-    cy_daramad += Decimal(
-        FactorDetaile.objects.filter(acc_year=acc_year, kala__category__name__contains='اضافه مبلغ شرايطي').aggregate(
-            forosh=Sum('mablagh_after_takhfif_kol'))['forosh'] or 0)
-
-    print('cy_daramad')
-    print(cy_daramad)
-
-    by_sayer_daramad_ratio = by_daramad / Decimal(by_factor) if by_factor > 0 else 0
-    cy_sayer_daramad_ratio = cy_daramad / Decimal(cy_factor) if cy_factor > 0 else 0
-    print(by_sayer_daramad_ratio)
-    print(cy_sayer_daramad_ratio)
 
 
 def CreateTotalReport9(request):
