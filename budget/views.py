@@ -849,71 +849,8 @@ def BudgetSaleTotal(request, *args, **kwargs):
         is_budget=True
     ).values('code')
 
-    by_hazineh = - SanadDetail.objects.filter(
-        acc_year=base_year,
-        is_active=True,
-        tafzili__in=Subquery(budget_tafzili_codes_subquery)
-    ).aggregate(hazineh=Sum('curramount'))['hazineh']
 
-    print('by_hazineh')
-    print(by_hazineh)
 
-    cy_hazineh = - SanadDetail.objects.filter(
-            acc_year=acc_year,
-            is_active=True,
-            tafzili__in=Subquery(budget_tafzili_codes_subquery)
-        ).aggregate(hazineh=Sum('curramount'))['hazineh']
-
-    print('cy_hazineh')
-    print(cy_hazineh)
-
-    by_factor =FactorDetaile.objects.filter(acc_year=base_year).exclude(
-        kala__category__name__contains='اضافه مبلغ شرايطي'
-    ).aggregate(
-            forosh=Sum('mablagh_after_takhfif_kol'))['forosh']
-    cy_factor =FactorDetaile.objects.filter(acc_year=acc_year).exclude(
-        kala__category__name__contains='اضافه مبلغ شرايطي'
-    ).aggregate(
-            forosh=Sum('mablagh_after_takhfif_kol'))[
-            'forosh'] or 0
-
-    print('by_factor')
-    print(by_factor)
-    print('cy_factor')
-    print(cy_factor)
-
-    by_sayer_hazine_ratio=by_hazineh/Decimal(by_factor) if by_factor>0 else 0
-    cy_sayer_hazine_ratio=cy_hazineh/Decimal(cy_factor) if cy_factor>0 else 0
-    print(by_sayer_hazine_ratio)
-    print(cy_sayer_hazine_ratio)
-    print('-------------------------------------')
-
-    by_daramad = SanadDetail.objects.filter(
-        acc_year=base_year,
-        is_active=True,
-        kol=401
-    ).aggregate(daramad=Sum('curramount'))['daramad']
-
-    by_daramad += Decimal(FactorDetaile.objects.filter(acc_year=base_year , kala__category__name__contains='اضافه مبلغ شرايطي').aggregate(
-            forosh=Sum('mablagh_after_takhfif_kol'))['forosh']  or 0 )
-    print('by_daramad')
-    print(by_daramad)
-
-    cy_daramad = SanadDetail.objects.filter(
-        acc_year=acc_year,
-        is_active=True,
-        kol=401
-    ).aggregate(daramad=Sum('curramount'))['daramad']
-    cy_daramad += Decimal(FactorDetaile.objects.filter(acc_year=acc_year , kala__category__name__contains='اضافه مبلغ شرايطي').aggregate(
-            forosh=Sum('mablagh_after_takhfif_kol'))['forosh']  or 0)
-
-    print('cy_daramad')
-    print(cy_daramad)
-
-    by_sayer_daramad_ratio=by_daramad/Decimal(by_factor) if by_factor>0 else 0
-    cy_sayer_daramad_ratio=cy_daramad/Decimal(cy_factor) if cy_factor>0 else 0
-    print(by_sayer_daramad_ratio)
-    print(cy_sayer_daramad_ratio)
 
 
     table3 = []
@@ -969,7 +906,6 @@ def BudgetSaleTotal(request, *args, **kwargs):
 
         actual_ratio_by_year = Decimal(cy_factor) / Decimal(
             by_today_factor) if by_today_factor and by_today_factor != 0 else 0.0
-
 
 
 

@@ -108,7 +108,7 @@ import requests
 
 
 
-ip_panel_token=MasterInfo.objects.filter(is_active=True).last().ip_panel_token
+# ip_panel_token=MasterInfo.objects.filter(is_active=True).last().ip_panel_token
 
 import requests
 

@@ -30,6 +30,13 @@ class MasterInfo(models.Model):
 
     active_day=models.IntegerField(default=0,blank=True, null=True,verbose_name='روز فعال')
 
+    khales_daramad_forosh = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='خالص درآمد فروش')
+    tamam_shode = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='هزینه تمام شده کالای فروش رفته')
+    sayer_daramad_total = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='سایر در آمد ها')
+    sayer_hazine_total = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='سایر هزینه ها')
+    navizheh_ratio = models.DecimalField(max_digits=8, decimal_places=6, default=0, verbose_name='ضریب سود ناویژه')
+    vizheh_ratio = models.DecimalField(max_digits=8, decimal_places=6, default=0, verbose_name='ضریب سود ویژه')
+
 
     sayer_hazine_ave = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='متوسط سایر هزینه ها')
     sayer_daramad_ave = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='متوسط  سایر درآمد ها')

@@ -3,7 +3,7 @@ import jdatetime
 from datetime import datetime, timedelta, date
 from collections import defaultdict
 from django.utils import timezone
-from django.db.models import  Q
+from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from accounting.models import BedehiMoshtari
@@ -13,6 +13,7 @@ from .models import MasterInfo, MasterReport, MonthlyReport
 from khayyam import JalaliDate
 from django.db.models import OuterRef, Subquery
 from django.db.models import Sum, Case, When, Value
+
 logger = logging.getLogger(__name__)
 from django.http import JsonResponse
 
@@ -20,9 +21,6 @@ from mahakupdate.models import (
     Factor, FactorDetaile, SanadDetail, Mtables,
     ChequesRecieve, ChequesPay, LoanDetil, AccCoding
 )
-
-
-
 
 month_names_persian = {
     1: 'فروردین',
@@ -38,6 +36,7 @@ month_names_persian = {
     11: 'بهمن',
     12: 'اسفند'
 }
+
 
 def TarazCalFromReport(day):
     repo = MasterReport.objects.filter(day=day).last()
@@ -66,6 +65,7 @@ def TarazCalFromReport(day):
         'asnad_pardakhtani': repo.asnad_pardakhtani,  # جمع مقادیر asnad_pardakhtani
     }
     return to_return
+
 
 def TarazCal(fday, lday, data):
     # ایجاد لیستی از تمام روزهای بین fday و lday
@@ -181,7 +181,7 @@ def TarazCal1day(day, data, acc_year2):
     return to_return
 
 
-def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_data,loan_detail_data):
+def generate_calendar_data_cheque(month, year, cheque_recive_data, cheque_pay_data, loan_detail_data):
     # مشخص کردن اولین روز ماه
     start_time2 = time.time()  # زمان شروع تابع
 
@@ -207,16 +207,16 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
     for i in range((last_day_of_month - first_day_of_month).days + 1):
         print(f"64: {time.time() - start_time2:.2f} ثانیه")
         current_day = first_day_of_month + jdatetime.timedelta(days=i)
-        recive = sum (item.total_mandeh for item in cheque_recive_data if item.cheque_date == current_day) /10000000
-        pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date == current_day )/10000000
+        recive = sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date == current_day) / 10000000
+        pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date == current_day) / 10000000
         max_cheque = max(max_cheque, abs(recive), abs(pay))
-        print(current_day,pay)
+        print(current_day, pay)
         # تبدیل تاریخ شمسی به میلادی
         current_day_gregorian = current_day.togregorian().isoformat()
         today_recive_cheque = cheque_recive_data.filter(cheque_date=current_day_gregorian).order_by('-cost')
         today_pay_cheque = cheque_pay_data.filter(cheque_date=current_day_gregorian).order_by('-cost')
 
-        #وام ها
+        # وام ها
         loans = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
                     item.date == current_day) / Decimal(10000000)
 
@@ -226,13 +226,13 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
             'jyear': current_day.year,
             'jmonth': current_day.month,
             'jday': current_day.day,
-            'recive': -1* recive,
+            'recive': -1 * recive,
             'pay': pay,
             'today_recive_cheque': today_recive_cheque,
             'today_pay_cheque': today_pay_cheque,
             'today_loans': today_loans,
 
-            'loans':loans,
+            'loans': loans,
         }
         week.append(day_info)
         if len(week) == 7 or current_day == last_day_of_month:
@@ -244,35 +244,41 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
         days_in_month.append(week + [None] * (7 - len(week)))
     print(f"65: {time.time() - start_time2:.2f} ثانیه")
 
-    past_recive = sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date < first_day_of_month) / 10000000
-    post_recive= sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date > last_day_of_month) / 10000000
-    this_month_recive = sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date >= first_day_of_month and item.cheque_date <= last_day_of_month) / 10000000
+    past_recive = sum(
+        item.total_mandeh for item in cheque_recive_data if item.cheque_date < first_day_of_month) / 10000000
+    post_recive = sum(
+        item.total_mandeh for item in cheque_recive_data if item.cheque_date > last_day_of_month) / 10000000
+    this_month_recive = sum(item.total_mandeh for item in cheque_recive_data if
+                            item.cheque_date >= first_day_of_month and item.cheque_date <= last_day_of_month) / 10000000
 
     past_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date < first_day_of_month) / 10000000
-    post_pay= sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date > last_day_of_month) / 10000000
-    this_month_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date >= first_day_of_month and item.cheque_date <= last_day_of_month) / 10000000
+    post_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date > last_day_of_month) / 10000000
+    this_month_pay = sum(item.total_mandeh for item in cheque_pay_data if
+                         item.cheque_date >= first_day_of_month and item.cheque_date <= last_day_of_month) / 10000000
     print(f"66: {time.time() - start_time2:.2f} ثانیه")
 
-
-    month_cheque_data={
-        'past_recive': past_recive*-1,
-        'post_recive': post_recive*-1,
-        'this_month_recive': this_month_recive*-1,
+    month_cheque_data = {
+        'past_recive': past_recive * -1,
+        'post_recive': post_recive * -1,
+        'this_month_recive': this_month_recive * -1,
         'past_pay': past_pay,
         'post_pay': post_pay,
         'this_month_pay': this_month_pay,
     }
 
-
     print(f"67: {time.time() - start_time2:.2f} ثانیه")
 
-    total_bedehkar=BedehiMoshtari.objects.filter(total_mandeh__lt=0).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
-    not_loan=BedehiMoshtari.objects.filter(total_mandeh__lt=0,loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
-    loan_gap=BedehiMoshtari.objects.filter(total_mandeh__lt=0,loans_total__gt=0,total_with_loans__lt=0).aggregate(total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0
+    total_bedehkar = BedehiMoshtari.objects.filter(total_mandeh__lt=0).aggregate(total_mandeh=Sum('total_mandeh'))[
+                         'total_mandeh'] or 0
+    not_loan = \
+    BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))[
+        'total_mandeh'] or 0
+    loan_gap = BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0, total_with_loans__lt=0).aggregate(
+        total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0
     this_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
-                item.date >= first_day_of_month and item.date <= last_day_of_month) / Decimal(10000000)
+                          item.date >= first_day_of_month and item.date <= last_day_of_month) / Decimal(10000000)
     past_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
-                    item.date < first_day_of_month) / Decimal(10000000)
+                          item.date < first_day_of_month) / Decimal(10000000)
     post_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
                           item.date > last_day_of_month) / Decimal(10000000)
     print(f"68: {time.time() - start_time2:.2f} ثانیه")
@@ -283,18 +289,19 @@ def generate_calendar_data_cheque(month, year, cheque_recive_data,cheque_pay_dat
     total_bedehkar = float(total_bedehkar)
     print(f"69: {time.time() - start_time2:.2f} ثانیه")
 
-    month_loan_data={
-        'not_loan': -1.0/10000000.0 * not_loan,
-        'loan_gap':-1.0/10000000.0 * loan_gap,
-        'this_month_loan':this_month_loan,
-        'past_month_loan':past_month_loan,
-        'post_month_loan':post_month_loan,
-        'total_bedehkar':-1/10000000 * total_bedehkar,
+    month_loan_data = {
+        'not_loan': -1.0 / 10000000.0 * not_loan,
+        'loan_gap': -1.0 / 10000000.0 * loan_gap,
+        'this_month_loan': this_month_loan,
+        'past_month_loan': past_month_loan,
+        'post_month_loan': post_month_loan,
+        'total_bedehkar': -1 / 10000000 * total_bedehkar,
 
     }
 
+    return days_in_month, max_cheque, month_cheque_data, month_loan_data
 
-    return days_in_month,max_cheque,month_cheque_data,month_loan_data
+
 def generate_calendar_data_cheque44444(month, year, cheque_recive_data, cheque_pay_data, loan_detail_data):
     start_time2 = time.time()  # زمان شروع تابع
 
@@ -360,13 +367,17 @@ def generate_calendar_data_cheque44444(month, year, cheque_recive_data, cheque_p
     print(f"65: {time.time() - start_time2:.2f} ثانیه")
 
     # محاسبات چک‌های ماه گذشته و آینده
-    past_recive = sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date < first_day_of_month) / 10000000
-    post_recive = sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date > last_day_of_month) / 10000000
-    this_month_recive = sum(item.total_mandeh for item in cheque_recive_data if first_day_of_month <= item.cheque_date <= last_day_of_month) / 10000000
+    past_recive = sum(
+        item.total_mandeh for item in cheque_recive_data if item.cheque_date < first_day_of_month) / 10000000
+    post_recive = sum(
+        item.total_mandeh for item in cheque_recive_data if item.cheque_date > last_day_of_month) / 10000000
+    this_month_recive = sum(item.total_mandeh for item in cheque_recive_data if
+                            first_day_of_month <= item.cheque_date <= last_day_of_month) / 10000000
 
     past_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date < first_day_of_month) / 10000000
     post_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date > last_day_of_month) / 10000000
-    this_month_pay = sum(item.total_mandeh for item in cheque_pay_data if first_day_of_month <= item.cheque_date <= last_day_of_month) / 10000000
+    this_month_pay = sum(item.total_mandeh for item in cheque_pay_data if
+                         first_day_of_month <= item.cheque_date <= last_day_of_month) / 10000000
     print(f"66: {time.time() - start_time2:.2f} ثانیه")
 
     month_cheque_data = {
@@ -380,12 +391,19 @@ def generate_calendar_data_cheque44444(month, year, cheque_recive_data, cheque_p
     print(f"67: {time.time() - start_time2:.2f} ثانیه")
 
     # محاسبات وام‌ها
-    total_bedehkar = BedehiMoshtari.objects.filter(total_mandeh__lt=0).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
-    not_loan = BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0
-    loan_gap = BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0, total_with_loans__lt=0).aggregate(total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0
-    this_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if first_day_of_month <= item.date <= last_day_of_month) / Decimal(10000000)
-    past_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if item.date < first_day_of_month) / Decimal(10000000)
-    post_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if item.date > last_day_of_month) / Decimal(10000000)
+    total_bedehkar = BedehiMoshtari.objects.filter(total_mandeh__lt=0).aggregate(total_mandeh=Sum('total_mandeh'))[
+                         'total_mandeh'] or 0
+    not_loan = \
+    BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))[
+        'total_mandeh'] or 0
+    loan_gap = BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0, total_with_loans__lt=0).aggregate(
+        total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0
+    this_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
+                          first_day_of_month <= item.date <= last_day_of_month) / Decimal(10000000)
+    past_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
+                          item.date < first_day_of_month) / Decimal(10000000)
+    post_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
+                          item.date > last_day_of_month) / Decimal(10000000)
     print(f"68: {time.time() - start_time2:.2f} ثانیه")
 
     not_loan = float(not_loan)
@@ -433,7 +451,8 @@ def generate_calendar_data_chequesider1(month, year, cheque_recive_data, cheque_
     today_pay_cheques = {}
     today_loans = {}
 
-    for current_day in (first_day_of_month + jdatetime.timedelta(days=i) for i in range((last_day_of_month - first_day_of_month).days + 1)):
+    for current_day in (first_day_of_month + jdatetime.timedelta(days=i) for i in
+                        range((last_day_of_month - first_day_of_month).days + 1)):
         current_day_gregorian = current_day.togregorian().isoformat()
 
         # محاسبات مربوط به چک‌های دریافتی و پرداختی
@@ -442,9 +461,13 @@ def generate_calendar_data_chequesider1(month, year, cheque_recive_data, cheque_
         max_cheque = max(max_cheque, abs(recive), abs(pay))
 
         # دریافت جزئیات چک‌ها و وام‌ها
-        today_recive_cheque = today_recive_cheques.setdefault(current_day_gregorian, cheque_recive_data.filter(cheque_date=current_day_gregorian).order_by('-cost'))
-        today_pay_cheque = today_pay_cheques.setdefault(current_day_gregorian, cheque_pay_data.filter(cheque_date=current_day_gregorian).order_by('-cost'))
-        loans = today_loans.setdefault(current_day_gregorian, sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if item.date == current_day) / Decimal(10000000))
+        today_recive_cheque = today_recive_cheques.setdefault(current_day_gregorian, cheque_recive_data.filter(
+            cheque_date=current_day_gregorian).order_by('-cost'))
+        today_pay_cheque = today_pay_cheques.setdefault(current_day_gregorian, cheque_pay_data.filter(
+            cheque_date=current_day_gregorian).order_by('-cost'))
+        loans = today_loans.setdefault(current_day_gregorian, sum(
+            (Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
+            item.date == current_day) / Decimal(10000000))
 
         day_info = {
             'jyear': current_day.year,
@@ -467,13 +490,17 @@ def generate_calendar_data_chequesider1(month, year, cheque_recive_data, cheque_
         days_in_month.append(week + [None] * (7 - len(week)))
 
     # محاسبات چک‌های ماه گذشته و آینده
-    past_recive = sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date < first_day_of_month) / 10000000
-    post_recive = sum(item.total_mandeh for item in cheque_recive_data if item.cheque_date > last_day_of_month) / 10000000
-    this_month_recive = sum(item.total_mandeh for item in cheque_recive_data if first_day_of_month <= item.cheque_date <= last_day_of_month) / 10000000
+    past_recive = sum(
+        item.total_mandeh for item in cheque_recive_data if item.cheque_date < first_day_of_month) / 10000000
+    post_recive = sum(
+        item.total_mandeh for item in cheque_recive_data if item.cheque_date > last_day_of_month) / 10000000
+    this_month_recive = sum(item.total_mandeh for item in cheque_recive_data if
+                            first_day_of_month <= item.cheque_date <= last_day_of_month) / 10000000
 
     past_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date < first_day_of_month) / 10000000
     post_pay = sum(item.total_mandeh for item in cheque_pay_data if item.cheque_date > last_day_of_month) / 10000000
-    this_month_pay = sum(item.total_mandeh for item in cheque_pay_data if first_day_of_month <= item.cheque_date <= last_day_of_month) / 10000000
+    this_month_pay = sum(item.total_mandeh for item in cheque_pay_data if
+                         first_day_of_month <= item.cheque_date <= last_day_of_month) / 10000000
 
     month_cheque_data = {
         'past_recive': past_recive * -1,
@@ -485,12 +512,21 @@ def generate_calendar_data_chequesider1(month, year, cheque_recive_data, cheque_
     }
 
     # محاسبات وام‌ها
-    total_bedehkar = float(BedehiMoshtari.objects.filter(total_mandeh__lt=0).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0)
-    not_loan = float(BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))['total_mandeh'] or 0)
-    loan_gap = float(BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0, total_with_loans__lt=0).aggregate(total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0)
-    this_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if first_day_of_month <= item.date <= last_day_of_month) / Decimal(10000000)
-    past_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if item.date < first_day_of_month) / Decimal(10000000)
-    post_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if item.date > last_day_of_month) / Decimal(10000000)
+    total_bedehkar = float(
+        BedehiMoshtari.objects.filter(total_mandeh__lt=0).aggregate(total_mandeh=Sum('total_mandeh'))[
+            'total_mandeh'] or 0)
+    not_loan = float(
+        BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))[
+            'total_mandeh'] or 0)
+    loan_gap = float(
+        BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0, total_with_loans__lt=0).aggregate(
+            total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0)
+    this_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
+                          first_day_of_month <= item.date <= last_day_of_month) / Decimal(10000000)
+    past_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
+                          item.date < first_day_of_month) / Decimal(10000000)
+    post_month_loan = sum((Decimal(1) - Decimal(item.complete_percent)) * item.cost for item in loan_detail_data if
+                          item.date > last_day_of_month) / Decimal(10000000)
 
     month_loan_data = {
         'not_loan': -1.0 / 10000000.0 * not_loan,
@@ -598,8 +634,8 @@ def generate_calendar_data_chequesider2(month, year, cheque_recive_data, cheque_
     total_bedehkar = BedehiMoshtari.objects.filter(total_mandeh__lt=0).aggregate(total_mandeh=Sum('total_mandeh'))[
                          'total_mandeh'] or 0
     not_loan = \
-    BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))[
-        'total_mandeh'] or 0
+        BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total=0).aggregate(total_mandeh=Sum('total_mandeh'))[
+            'total_mandeh'] or 0
     loan_gap = BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0, total_with_loans__lt=0).aggregate(
         total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0
 
@@ -621,13 +657,15 @@ def generate_calendar_data_chequesider2(month, year, cheque_recive_data, cheque_
 
     print(f"Total execution time: {time.time() - start_time:.2f} seconds")
     return days_in_month, max_cheque, month_cheque_data, month_loan_data
+
+
 @login_required(login_url='/login')
 def Home1(request, *args, **kwargs):
-    name='داشبورد 1'
+    name = 'داشبورد 1'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
         return result
-    minfo=MasterInfo.objects.filter(is_active=True).last()
+    minfo = MasterInfo.objects.filter(is_active=True).last()
     user = request.user
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page='داشبورد 1')
@@ -667,9 +705,9 @@ def Home1(request, *args, **kwargs):
     pastchequesr = ChequesPay.objects.filter(cheque_date__lte=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
 
     p_chequ_data = {
-        'tmandeh': (chequesr['total_mandeh_sum'] / 10000000) ,
-        'pastmandeh': (pastchequesr['total_mandeh_sum'] / 10000000) ,
-        'postmandeh': (postchequesr['total_mandeh_sum'] / 10000000) ,
+        'tmandeh': (chequesr['total_mandeh_sum'] / 10000000),
+        'pastmandeh': (pastchequesr['total_mandeh_sum'] / 10000000),
+        'postmandeh': (postchequesr['total_mandeh_sum'] / 10000000),
     }
     print(f"5: {time.time() - start_time:.2f} ثانیه")
 
@@ -710,8 +748,8 @@ def Home1(request, *args, **kwargs):
 
     chart4_data = {
         'labels': [day_names_persian[report.day.weekday()] for report in dayly_reports],  # تبدیل شماره روز به نام روز
-        'total_daramad': [report.khales_forosh+report.sayer_daramad for report in dayly_reports],
-        'total_hazineh': [report.baha_tamam_forosh+report.sayer_hazine for report in dayly_reports],
+        'total_daramad': [report.khales_forosh + report.sayer_daramad for report in dayly_reports],
+        'total_hazineh': [report.baha_tamam_forosh + report.sayer_hazine for report in dayly_reports],
         'sood_vizhe': [report.sood_vizhe for report in dayly_reports],
     }
     print(f"10: {time.time() - start_time:.2f} ثانیه")
@@ -725,8 +763,6 @@ def Home1(request, *args, **kwargs):
     }
     print(f"11: {time.time() - start_time:.2f} ثانیه")
 
-
-
     context = {
         'title': 'داشبورد مدیریتی',
         'user': user,
@@ -738,10 +774,6 @@ def Home1(request, *args, **kwargs):
         'r_chequ_data': r_chequ_data,
         'p_chequ_data': p_chequ_data,
 
-
-
-
-
         'chart1_data': chart1_data,
         'chart2_data': chart2_data,
         'chart4_data': chart4_data,
@@ -752,6 +784,7 @@ def Home1(request, *args, **kwargs):
     total_time = time.time() - start_time  # محاسبه زمان اجرا
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
     return render(request, 'home1.html', context)
+
 
 @login_required(login_url='/login')
 def CalendarTotal(request, *args, **kwargs):
@@ -786,27 +819,28 @@ def CalendarTotal(request, *args, **kwargs):
 
         loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
 
-        days_in_month, max_cheque, month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year,
-                                                                                     cheque_recive_data,
-                                                                                     cheque_pay_data, loan_detail_data)
+        days_in_month, max_cheque, month_cheque_data, month_loan_data = generate_calendar_data_cheque(current_month,
+                                                                                                      current_year,
+                                                                                                      cheque_recive_data,
+                                                                                                      cheque_pay_data,
+                                                                                                      loan_detail_data)
         context = {
-                # for calendar
-                'month_name': month_name,
-                'year': current_year,
-                'month': current_month,
-                'days_in_month': days_in_month,
-                'max_cheque': max_cheque,
-                'month_cheque_data': month_cheque_data,
-                'month_loan_data': month_loan_data,
+            # for calendar
+            'month_name': month_name,
+            'year': current_year,
+            'month': current_month,
+            'days_in_month': days_in_month,
+            'max_cheque': max_cheque,
+            'month_cheque_data': month_cheque_data,
+            'month_loan_data': month_loan_data,
 
-            }
+        }
 
         total_time = time.time() - start_time  # محاسبه زمان اجرا
         print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
         return render(request, 'partial_calendar.html', context)
 
-
-    #تکمیل تقویم
+    # تکمیل تقویم
     month = request.GET.get('month', None)
     year = request.GET.get('year', None)
     print("Query params - Year:", year, "Month:", month)
@@ -823,12 +857,16 @@ def CalendarTotal(request, *args, **kwargs):
     month_name = months[current_month - 1]
     print("**Current Year:", current_year, "Current Month:", current_month)
 
-    cheque_recive_data=ChequesRecieve.objects.exclude(total_mandeh=0)
-    cheque_pay_data=ChequesPay.objects.exclude(total_mandeh=0)
+    cheque_recive_data = ChequesRecieve.objects.exclude(total_mandeh=0)
+    cheque_pay_data = ChequesPay.objects.exclude(total_mandeh=0)
 
     loan_detail_data = LoanDetil.objects.filter(complete_percent__lt=1)
 
-    days_in_month,max_cheque,month_cheque_data,month_loan_data = generate_calendar_data_cheque(current_month, current_year, cheque_recive_data,cheque_pay_data,loan_detail_data)
+    days_in_month, max_cheque, month_cheque_data, month_loan_data = generate_calendar_data_cheque(current_month,
+                                                                                                  current_year,
+                                                                                                  cheque_recive_data,
+                                                                                                  cheque_pay_data,
+                                                                                                  loan_detail_data)
 
     print(f"13: {time.time() - start_time:.2f} ثانیه")
 
@@ -836,7 +874,7 @@ def CalendarTotal(request, *args, **kwargs):
         'title': 'تقویم',
         'user': user,
 
-        #for calendar
+        # for calendar
         'month_name': month_name,
         'year': current_year,
         'month': current_month,
@@ -900,7 +938,6 @@ def Home5(request):
     return render(request, 'homepage.html', context)
 
 
-
 from django.db.models import Sum, Min, Max, Avg, F, ExpressionWrapper, FloatField
 
 from django.db.models import Sum
@@ -908,6 +945,7 @@ from django.db.models import Sum
 import time
 from decimal import Decimal
 from django.shortcuts import redirect
+
 
 def CreateTotalReport(request):
     start_time = time.time()  # زمان شروع ویو
@@ -922,7 +960,7 @@ def CreateTotalReport(request):
         unique_dates400 = set(dates400)
         active_day = len(unique_dates400)
 
-        repo.active_day=active_day
+        repo.active_day = active_day
 
         print('active_day=', active_day)
 
@@ -931,16 +969,27 @@ def CreateTotalReport(request):
         unique_dates = set(dates)
         date_rang = sorted(unique_dates)
 
-        print('date_rang:',date_rang)
+        print('date_rang:', date_rang)
+
+        forosh_total = sum([Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 400]) / Decimal(
+            10000000)
+        barrghasht_forosh_total = sum(
+            [Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 403]) / Decimal(
+            10000000)
+
+        baha_tamam_total = - sum([Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 403]) / Decimal(
+            10000000)
 
         sayer_hazine_total = sum([Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 501]) / Decimal(
             10000000)
         sayer_daramad_total = sum([Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 401]) / Decimal(
             10000000)
-        repo.asnad_daryaftani = -sum([Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 101]) / Decimal(
+        repo.asnad_daryaftani = -sum(
+            [Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 101]) / Decimal(
             10000000)
-        repo.asnad_pardakhtani = sum([Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 200]) / Decimal(
-                    10000000)
+        repo.asnad_pardakhtani = sum(
+            [Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 200]) / Decimal(
+            10000000)
 
         repo.sayer_hazine_ave = sayer_hazine_total / active_day * -1 if active_day else 0
         repo.sayer_daramad_ave = sayer_daramad_total / active_day if active_day else 0
@@ -950,12 +999,12 @@ def CreateTotalReport(request):
         sood_vizhe_list = []
 
         for day in date_rang:
-            print('day:',day)
+            print('day:', day)
             sanads = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, date=day)
-            print('len(sanads):',len(sanads))
+            print('len(sanads):', len(sanads))
             daramad_forosh = Decimal(sum([sanad.curramount for sanad in sanads if sanad.kol == 400])) / Decimal(
                 10000000)
-            print('daramad_forosh',daramad_forosh)
+            print('daramad_forosh', daramad_forosh)
             baha_tamam_forosh = Decimal(sum([sanad.curramount for sanad in sanads if sanad.kol == 500])) / Decimal(
                 10000000)
             barghasht_az_forosh = Decimal(sum([sanad.curramount for sanad in sanads if sanad.kol == 403])) / Decimal(
@@ -969,7 +1018,7 @@ def CreateTotalReport(request):
 
         sood_navizhe_list_positive = [value for value in sood_navizhe_list if value > 1]
 
-        print('sood_navizhe_list:',sood_navizhe_list)
+        print('sood_navizhe_list:', sood_navizhe_list)
 
         # محاسبه حداقل، حداکثر، میانگین و مجموع سود ناویژه
         repo.sood_navizhe_min = min(sood_navizhe_list_positive) if sood_navizhe_list_positive else 0
@@ -985,6 +1034,15 @@ def CreateTotalReport(request):
         repo.sood_vizhe_ave = sum(sood_vizhe_list) / active_day if active_day else 0
         repo.sood_vizhe_total = sum(sood_vizhe_list)
 
+        repo.khales_daramad_forosh = forosh_total + barrghasht_forosh_total
+        repo.tamam_shode = baha_tamam_total
+        repo.sayer_daramad_total = sayer_daramad_total
+        repo.sayer_hazine_total = - sayer_hazine_total
+        repo.navizheh_ratio = (forosh_total + barrghasht_forosh_total - baha_tamam_total) / (
+                    forosh_total + barrghasht_forosh_total)
+        repo.vizheh_ratio =(forosh_total + barrghasht_forosh_total - baha_tamam_total + sayer_daramad_total - sayer_hazine_total) / (
+                    forosh_total + barrghasht_forosh_total)
+
         repo.save()
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
@@ -993,36 +1051,110 @@ def CreateTotalReport(request):
     return redirect('/updatedb')
 
 
+def trst():
+    by_hazineh = - SanadDetail.objects.filter(
+        acc_year=base_year,
+        is_active=True,
+        tafzili__in=Subquery(budget_tafzili_codes_subquery)
+    ).aggregate(hazineh=Sum('curramount'))['hazineh']
+
+    print('by_hazineh')
+    print(by_hazineh)
+
+    cy_hazineh = - SanadDetail.objects.filter(
+        acc_year=acc_year,
+        is_active=True,
+        tafzili__in=Subquery(budget_tafzili_codes_subquery)
+    ).aggregate(hazineh=Sum('curramount'))['hazineh']
+
+    print('cy_hazineh')
+    print(cy_hazineh)
+
+    by_factor = FactorDetaile.objects.filter(acc_year=base_year).exclude(
+        kala__category__name__contains='اضافه مبلغ شرايطي'
+    ).aggregate(
+        forosh=Sum('mablagh_after_takhfif_kol'))['forosh']
+    cy_factor = FactorDetaile.objects.filter(acc_year=acc_year).exclude(
+        kala__category__name__contains='اضافه مبلغ شرايطي'
+    ).aggregate(
+        forosh=Sum('mablagh_after_takhfif_kol'))[
+                    'forosh'] or 0
+
+    print('by_factor')
+    print(by_factor)
+    print('cy_factor')
+    print(cy_factor)
+
+    by_sayer_hazine_ratio = by_hazineh / Decimal(by_factor) if by_factor > 0 else 0
+    cy_sayer_hazine_ratio = cy_hazineh / Decimal(cy_factor) if cy_factor > 0 else 0
+    print(by_sayer_hazine_ratio)
+    print(cy_sayer_hazine_ratio)
+    print('-------------------------------------')
+
+    by_daramad = SanadDetail.objects.filter(
+        acc_year=base_year,
+        is_active=True,
+        kol=401
+    ).aggregate(daramad=Sum('curramount'))['daramad']
+
+    by_daramad += Decimal(
+        FactorDetaile.objects.filter(acc_year=base_year, kala__category__name__contains='اضافه مبلغ شرايطي').aggregate(
+            forosh=Sum('mablagh_after_takhfif_kol'))['forosh'] or 0)
+    print('by_daramad')
+    print(by_daramad)
+
+    cy_daramad = SanadDetail.objects.filter(
+        acc_year=acc_year,
+        is_active=True,
+        kol=401
+    ).aggregate(daramad=Sum('curramount'))['daramad']
+    cy_daramad += Decimal(
+        FactorDetaile.objects.filter(acc_year=acc_year, kala__category__name__contains='اضافه مبلغ شرايطي').aggregate(
+            forosh=Sum('mablagh_after_takhfif_kol'))['forosh'] or 0)
+
+    print('cy_daramad')
+    print(cy_daramad)
+
+    by_sayer_daramad_ratio = by_daramad / Decimal(by_factor) if by_factor > 0 else 0
+    cy_sayer_daramad_ratio = cy_daramad / Decimal(cy_factor) if cy_factor > 0 else 0
+    print(by_sayer_daramad_ratio)
+    print(cy_sayer_daramad_ratio)
+
+
 def CreateTotalReport9(request):
     start_time = time.time()  # زمان شروع ویو
-    report=MasterInfo.objects.all()
+    report = MasterInfo.objects.all()
 
     for repo in report:
-        acc_year=repo.acc_year
-        active_day=SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=400,curramount__gt=0).count()
+        acc_year = repo.acc_year
+        active_day = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=400, curramount__gt=0).count()
 
-        daramad_forosh = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=400).aggregate(total_curramount=Sum('curramount') or 0)['total_curramount']
-        baha_tamam_forosh = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=500).aggregate(total_curramount=Sum('curramount') or 0)['total_curramount']
-        sayer_hazine = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=501).aggregate(total_curramount=Sum('curramount') or 0)['total_curramount']
-        sayer_daramad = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=401).aggregate(total_curramount=Sum('curramount') or 0)['total_curramount']
-        barghasht_az_forosh = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=403).aggregate(total_curramount=Sum('curramount') or 0)['total_curramount']
+        daramad_forosh = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=400).aggregate(
+            total_curramount=Sum('curramount') or 0)['total_curramount']
+        baha_tamam_forosh = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=500).aggregate(
+            total_curramount=Sum('curramount') or 0)['total_curramount']
+        sayer_hazine = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=501).aggregate(
+            total_curramount=Sum('curramount') or 0)['total_curramount']
+        sayer_daramad = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=401).aggregate(
+            total_curramount=Sum('curramount') or 0)['total_curramount']
+        barghasht_az_forosh = SanadDetail.objects.filter(acc_year=acc_year, is_active=True, kol=403).aggregate(
+            total_curramount=Sum('curramount') or 0)['total_curramount']
 
-        repo.sayer_hazine_ave = sayer_hazine/active_day
-        repo.sayer_daramad_ave =sayer_daramad/active_day
-        repo.sood_navizhe_min =0
-        repo.sood_navizhe_max =0
-        repo.sood_navizhe_ave =0
-        repo.sood_navizhe_total =daramad_forosh + barghasht_az_forosh + baha_tamam_forosh
-        repo.sood_vizhe_min =0
-        repo.sood_vizhe_max =0
-        repo.sood_vizhe_ave =0
+        repo.sayer_hazine_ave = sayer_hazine / active_day
+        repo.sayer_daramad_ave = sayer_daramad / active_day
+        repo.sood_navizhe_min = 0
+        repo.sood_navizhe_max = 0
+        repo.sood_navizhe_ave = 0
+        repo.sood_navizhe_total = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh
+        repo.sood_vizhe_min = 0
+        repo.sood_vizhe_max = 0
+        repo.sood_vizhe_ave = 0
         repo.sood_vizhe_total = daramad_forosh + barghasht_az_forosh + baha_tamam_forosh + sayer_daramad + sayer_hazine
 
         repo.save()
 
         total_time = time.time() - start_time  # محاسبه زمان اجرا
         print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
-
 
     return redirect('/updatedb')
 
@@ -1103,7 +1235,7 @@ def CreateReport(request):
         print(report.day)
         if not SanadDetail.objects.filter(date=current_date):
             continue
-        acc_year2=SanadDetail.objects.filter(date= current_date).last().acc_year
+        acc_year2 = SanadDetail.objects.filter(date=current_date).last().acc_year
         # data = SanadDetail.objects.filter(
         #     is_active=True,
         #     date=current_date
@@ -1138,7 +1270,7 @@ def CreateReport(request):
 
         # محاسبه داده‌ها برای روزهای مختلف
         # today_data = TarazCal(current_date, current_date, data)
-        today_data = TarazCal1day(current_date, data,acc_year2)
+        today_data = TarazCal1day(current_date, data, acc_year2)
 
         report.khales_forosh = today_data['khales_forosh']
         report.baha_tamam_forosh = today_data['baha_tamam_forosh']
@@ -1178,9 +1310,6 @@ def CreateReport(request):
     print(f"end_date: {end_date_gregorian}")
 
     return redirect('/updatedb')
-
-
-
 
 
 def get_last_day_of_jalali_month(year, month):
@@ -1284,7 +1413,7 @@ def CreateMonthlyReport(request):
             is_active=True,
             date__range=(current_date_start, current_date_end)
         ).filter(
-            Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101) | Q(kol=401) | Q(kol=501)| Q(kol=200)
+            Q(kol=500) | Q(kol=400) | Q(kol=403) | Q(kol=101) | Q(kol=401) | Q(kol=501) | Q(kol=200)
         ).values('date', 'kol').annotate(total_amount=Sum('curramount'))
 
         # محاسبه داده‌ها برای ماه‌های مختلف
@@ -1331,7 +1460,6 @@ def CreateMonthlyReport(request):
     return redirect('/updatedb')
 
 
-
 @login_required(login_url='/login')
 def ReportsDailySummary(request):
     name = 'گزارش های روزانه کلی'
@@ -1342,18 +1470,10 @@ def ReportsDailySummary(request):
     if user.mobile_number != '09151006447':
         UserLog.objects.create(user=user, page='خلاصه گزارش های روزانه')
     start_time = time.time()  # زمان شروع تابع
-    dailyr= MasterReport.objects.all().order_by('-day')
-
-
-
-
-
-
-
+    dailyr = MasterReport.objects.all().order_by('-day')
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
-
 
     context = {
         'title': 'خلاصه گزارش های روزانه',
@@ -1362,9 +1482,6 @@ def ReportsDailySummary(request):
     }
 
     return render(request, 'reports_daily_summary.html', context)
-
-
-
 
 
 @login_required(login_url='/login')
@@ -1385,7 +1502,7 @@ def ReportsDailyDetile(request, *args, **kwargs):
         print(day_date)
     except ValueError:
         print('Invalid date format:', day)
-    kol=(500, 400, 403, 401, 501)
+    kol = (500, 400, 403, 401, 501)
     sanads = SanadDetail.objects.filter(date=day_date, kol__in=kol).annotate(
         acc_name=Subquery(
             AccCoding.objects.filter(code=OuterRef('kol')).values('name')[:1]
@@ -1394,12 +1511,11 @@ def ReportsDailyDetile(request, *args, **kwargs):
 
     print(len(sanads))
 
-
     total_time = time.time() - start_time  # محاسبه زمان اجرا
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
 
     day_report = MasterReport.objects.filter(day=day_date).last()
-    minfo=MasterInfo.objects.filter(is_active=True).last()
+    minfo = MasterInfo.objects.filter(is_active=True).last()
 
     context = {
         'title': 'گزارش روز',
@@ -1416,12 +1532,10 @@ def ReportsDailyDetile(request, *args, **kwargs):
 from jdatetime import date as jdate
 
 
-
-
 @login_required(login_url='/login')
 def YealyChart(request):
     name = 'نمودار های سالانه'
-    result = page_permision(request, name) # فرض می‌شود این تابع از جایی دیگر تعریف شده است
+    result = page_permision(request, name)  # فرض می‌شود این تابع از جایی دیگر تعریف شده است
     if result:
         return result
     user = request.user
@@ -1432,7 +1546,8 @@ def YealyChart(request):
 
     # -------------------------------------------------------------------------------------------------
 
-    jalali_month_names = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"]
+    jalali_month_names = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن",
+                          "اسفند"]
 
     all_report_years = MonthlyReport.objects.values_list('year', flat=True).distinct().order_by('year')
 
@@ -1441,7 +1556,6 @@ def YealyChart(request):
     yearly_monthly_baha_tamam_forosh_data = {year: [0] * 12 for year in all_report_years}
     yearly_monthly_sood_navizhe_data = {year: [0] * 12 for year in all_report_years}
     yearly_monthly_sood_vizhe_data = {year: [0] * 12 for year in all_report_years}
-
 
     all_monthly_reports = MonthlyReport.objects.filter(year__in=all_report_years).order_by('year', 'month')
 
@@ -1452,7 +1566,8 @@ def YealyChart(request):
 
             if 0 <= month_index < 12:
                 # اطمینان از اینکه مقادیر DecimalField به float تبدیل شوند
-                yearly_monthly_khales_forosh_data[year_val][month_index] = float(report.khales_forosh / 1_000) # تقسیم بر 1 میلیون برای نمایش "میلیارد تومان"
+                yearly_monthly_khales_forosh_data[year_val][month_index] = float(
+                    report.khales_forosh / 1_000)  # تقسیم بر 1 میلیون برای نمایش "میلیارد تومان"
                 yearly_monthly_baha_tamam_forosh_data[year_val][month_index] = float(report.baha_tamam_forosh / 1_000)
                 yearly_monthly_sood_navizhe_data[year_val][month_index] = float(report.sood_navizhe / 1_000)
                 yearly_monthly_sood_vizhe_data[year_val][month_index] = float(report.sood_vizhe / 1_000)
@@ -1463,15 +1578,15 @@ def YealyChart(request):
     # پالت رنگی برای نمودارها (می‌توانید رنگ‌های بیشتری اضافه کنید)
     colors_for_yearly_chart = [
         'rgba(30, 144, 255, 0.7)',  # Dodger Blue
-        'rgba(255, 69, 0, 0.7)',    # Orange Red
-        'rgba(50, 205, 50, 0.7)',   # Lime Green
-        'rgba(147, 112, 219, 0.7)', # MediumPurple
-        'rgba(255, 165, 0, 0.7)',   # Orange
-        'rgba(0, 191, 255, 0.7)',   # Deep Sky Blue
-        'rgba(255, 0, 128, 0.7)',   # Pink
-        'rgba(128, 128, 0, 0.7)',   # Olive
-        'rgba(0, 200, 200, 0.7)',   # Teal
-        'rgba(200, 0, 200, 0.7)',   # Fuchsia
+        'rgba(255, 69, 0, 0.7)',  # Orange Red
+        'rgba(50, 205, 50, 0.7)',  # Lime Green
+        'rgba(147, 112, 219, 0.7)',  # MediumPurple
+        'rgba(255, 165, 0, 0.7)',  # Orange
+        'rgba(0, 191, 255, 0.7)',  # Deep Sky Blue
+        'rgba(255, 0, 128, 0.7)',  # Pink
+        'rgba(128, 128, 0, 0.7)',  # Olive
+        'rgba(0, 200, 200, 0.7)',  # Teal
+        'rgba(200, 0, 200, 0.7)',  # Fuchsia
     ]
     border_colors_for_yearly_chart = [c.replace('0.7', '1') for c in colors_for_yearly_chart]
 
@@ -1540,7 +1655,7 @@ def YealyChart(request):
         'title': title,
         'user': user,
 
-        'chart_labels_khales_forosh_by_year': jalali_month_names, # لیبل‌های ماه برای همه نمودارها یکسان است
+        'chart_labels_khales_forosh_by_year': jalali_month_names,  # لیبل‌های ماه برای همه نمودارها یکسان است
 
         'chart_datasets_khales_forosh_by_year': chart_datasets_khales_forosh_by_year,
         'chart_datasets_baha_tamam_forosh_by_year': chart_datasets_baha_tamam_forosh_by_year,
@@ -1552,5 +1667,3 @@ def YealyChart(request):
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
     return render(request, 'yearly_report_chrat.html', context)
-
-
