@@ -346,9 +346,9 @@ def FestivalPinSms(request,festival_id):
 
             message_id = None
             # خط زیر برای ارسال واقعی به شماره مشتری است (در آینده فعال کنید)
-            # message_id = send_sms(phone_number, message)
+            message_id = send_sms(phone_number, message)
             # خط زیر فقط برای تست به شماره ثابت ارسال می‌کند
-            message_id = send_sms('09151006447', message)
+            # message_id = send_sms('09151006447', message)
             # message_id = send_sms(user.mobile_number, message)
             print('message_id:',message_id)
 
