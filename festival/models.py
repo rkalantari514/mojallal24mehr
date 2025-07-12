@@ -73,7 +73,13 @@ STATUS_DETAILS = {
           "icon": "fa-phone-slash"}
 
 }
+import random
+import string
 
+def generate_pin_code():
+    letters = ''.join(random.choices(string.ascii_lowercase, k=2))
+    digits = ''.join(random.choices(string.digits, k=4))
+    return letters + digits
 
 
 
@@ -86,6 +92,13 @@ class CustomerPoints(models.Model):
     message_id = models.CharField(blank=True, null=True, max_length=50, verbose_name="شناسه پیامک")
     phone_number = models.CharField(blank=True, null=True, max_length=150, verbose_name="شماره تلفن")
     status_code = models.IntegerField(blank=True, null=True, verbose_name="کد وضعیت پیامک")
+    pin_code=models.CharField(max_length=6,default=0,verbose_name='رمز خرید')
+    is_win=models.BooleanField(default=False, verbose_name='برنده')
+    is_send_pin=models.BooleanField(default=False, verbose_name='آیا پین ارسال شده است')
+    message_id_pin = models.CharField(blank=True, null=True, max_length=50, verbose_name="شناسه پیامک پین")
+    status_code_pin = models.IntegerField(blank=True, null=True, verbose_name="کد وضعیت پیامک پین")
+
+
 
     class Meta:
         verbose_name = 'امتیاز مشتری'

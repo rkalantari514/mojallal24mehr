@@ -1241,10 +1241,10 @@ def BudgetSaleTotal(request, *args, **kwargs):
 
 
 
-        'by_sayer_hazine_ratio': by_sayer_hazine_ratio,
-        'cy_sayer_hazine_ratio': cy_sayer_hazine_ratio,
-        'by_sayer_daramad_ratio': by_sayer_daramad_ratio,
-        'cy_sayer_daramad_ratio': cy_sayer_daramad_ratio,
+        # 'by_sayer_hazine_ratio': by_sayer_hazine_ratio,
+        # 'cy_sayer_hazine_ratio': cy_sayer_hazine_ratio,
+        # 'by_sayer_daramad_ratio': by_sayer_daramad_ratio,
+        # 'cy_sayer_daramad_ratio': cy_sayer_daramad_ratio,
 
 
     })

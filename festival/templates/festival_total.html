@@ -55,6 +55,7 @@
                                         <th>رسیده به گوشی</th>
                                         <th>ناموفق</th>
                                         <th>رد شده</th>
+                                        <th>ارسال پیامک رمز خرید</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -80,6 +81,7 @@
                                                 <td>{{ sms_counts.delivered }}</td>
                                                 <td>{{ sms_counts.failed }}</td>
                                                 <td>{{ sms_counts.discarded }}</td>
+                                                <td><a href="/festival/pinsms/{{ f.id }}"><i class="fa fa-paper-plane-o"></i></a></td>
                                             </tr>
                                         {% endwith %}
                                     {% endfor %}
@@ -191,6 +193,21 @@
                                                     data-field="condiition" data-filter-control="select"
                                                 >وضعیت پیامک
                                                 </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="pin_code" data-filter-control="select"
+                                                >رمز خرید
+                                                </th>
+
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="is_win" data-filter-control="select"
+                                                >برنده
+                                                </th>
+
+
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="is_send_pin" data-filter-control="select"
+                                                >ارسال پیامک رمز
+                                                </th>
 
 
                                             </tr>
@@ -229,12 +246,30 @@
                         <i class="fa {{ p.get_status_details.icon }}"></i>
                         {{ p.get_status_details.persian }}
                     </span>
-
-
                                                     </td>
 
 
+                                                    <td class="card-text text-center">{{ p.pin_code }}</td>
+                                                    <td class="card-text text-center">
+                                                        {% if p.is_win %}
+                                                            <i class="fa fa-check text-success"></i>
+
+                                                        {% else %}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="card-text text-center">
+
+                                                        {% if p.is_send_pin %}
+                                                            </td>
+                                                        {% else %}
+                                                            <i class="fa fa-times  text-danger"></i>
+
+                                                        {% endif %}
                                                 </tr>
+
+
+
+
                                             {% endfor %}
                                             </tbody>
                                         </table>

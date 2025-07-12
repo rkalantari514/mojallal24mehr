@@ -13,9 +13,10 @@ class FestivalAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerPoints)
 class CustomerPointsAdmin(admin.ModelAdmin):
-    list_display = ('festival', 'customer', 'factor','factor__code', 'points_awarded', 'award_date')
+    list_display = ('festival', 'customer', 'phone_number','factor','factor__code', 'points_awarded', 'award_date','pin_code','is_win','is_send_pin','message_id_pin')
     list_filter = ('festival', 'award_date')
     search_fields = ('customer__name', 'customer__lname', 'factor__code', 'festival__name')
     ordering = ('-award_date',)
+    list_editable = ['is_win']
     # می‌توانید فارنکی‌ها را به صورت raw_id_fields نمایش دهید اگر تعداد زیادی رکورد دارید
     # raw_id_fields = ('festival', 'customer', 'factor')

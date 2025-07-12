@@ -108,7 +108,7 @@ import requests
 
 
 
-# ip_panel_token=MasterInfo.objects.filter(is_active=True).last().ip_panel_token
+ip_panel_token=MasterInfo.objects.filter(is_active=True).last().ip_panel_token
 
 import requests
 
@@ -187,7 +187,7 @@ def send_sms(phone_number, message):
         # timeout = (connect_timeout, read_timeout)
         # 10 ثانیه برای برقراری اتصال و 30 ثانیه برای خواندن پاسخ
         response = requests.post(url, json=data, headers=headers, timeout=(10, 30))
-
+        print(response)
         if response.status_code == 200:
             response_data = response.json()
             # برای دیباگینگ، می‌توانید کل پاسخ را چاپ کنید
