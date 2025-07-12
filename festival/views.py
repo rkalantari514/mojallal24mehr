@@ -357,7 +357,7 @@ def FestivalPinSms(request,festival_id):
                 customer_point.status_code_pin = 1
                 customer_point.message_id_pin = message_id
                 customer_point.save()
-                CustomerPoints.objects.filter(festival__id=festival_id, phone_number=phone_number).update(CustomerPoints=pin1)
+                CustomerPoints.objects.filter(festival__id=festival_id, phone_number=phone_number).update(pin_code=pin1)
 
 
                 sent_count += 1
