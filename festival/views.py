@@ -330,8 +330,8 @@ def FestivalPinSms(request,festival_id):
             CustomerPoints.objects.filter(festival__id=festival_id,phone_number=phone_number).update(is_send_pin=True)
             continue
         if phone_number:
-            customer_point.pin_code=generate_pin_code()
-            customer_point.save()
+            pin1=generate_pin_code()
+
 
 
             message = f"""{customer_point.customer.clname} عزیز 
@@ -340,7 +340,7 @@ def FestivalPinSms(request,festival_id):
 فقط کافیه خریدتونو تا ۱۰ روز آینده نهایی کنین و این هدیه‌ی ویژه رو از دست ندین 💛💙
 
 📅 مهلت استفاده: فقط تا (۳۱تیرماه)
-رمز اختصاصی شما: {customer_point.pin_code}
+رمز اختصاصی شما: {pin1}
 🛍️ سرای یاس مجلل
 05136005"""
 
@@ -357,6 +357,9 @@ def FestivalPinSms(request,festival_id):
                 customer_point.status_code_pin = 1
                 customer_point.message_id_pin = message_id
                 customer_point.save()
+                CustomerPoints.objects.filter(festival__id=festival_id, phone_number=phone_number).update(CustomerPoints=pin1)
+
+
                 sent_count += 1
             else:
                 customer_point.status_code_pin = None
@@ -375,4 +378,4 @@ def FestivalPinSms(request,festival_id):
     messages.warning(request, f"تعداد شماره‌های نامعتبر: {invalid_count}")
     messages.info(request, f"تعداد رکوردهای بررسی شده: {counter - 1}")
 
-    return redirect('/')
+    return redirect('/festival_total')
