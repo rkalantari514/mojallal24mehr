@@ -316,7 +316,7 @@ def FestivalPinSms(request,festival_id):
     counter = 0
 
     for customer_point in customer_points:
-        if counter > 1:
+        if counter > 100:
             break
         print('counter=',counter)
         phone_number = customer_point.phone_number
