@@ -349,15 +349,15 @@ def FestivalPinSms(request,festival_id):
             # message_id = send_sms(phone_number, message)
             # خط زیر فقط برای تست به شماره ثابت ارسال می‌کند
             message_id = send_sms('09151006447', message)
-            print('message_id:',message_id)
             # message_id = send_sms(user.mobile_number, message)
+            print('message_id:',message_id)
 
             if message_id:
-                customer_point.is_send_pin = True
-                customer_point.status_code_pin = 1
-                customer_point.message_id_pin = message_id
-                customer_point.save()
-                CustomerPoints.objects.filter(festival__id=festival_id, phone_number=phone_number).update(pin_code=pin1)
+                CustomerPoints.objects.filter(festival__id=festival_id, phone_number=phone_number).update(pin_code=pin1,
+                                                                                                          message_id_pin = message_id,
+                                                                                                          status_code_pin = 1,
+                                                                                                          is_send_pin=True
+                                                                                                          )
 
 
                 sent_count += 1
