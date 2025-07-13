@@ -5049,8 +5049,8 @@ def DeleteDublicateData(request):
 
         # افزودن این رکوردها به لیست حذف
         objects_to_delete.extend(queryset)
-    print('objects_to_delete.count()')
-    print(objects_to_delete.count())
+    print('len(objects_to_delete)')
+    print(len(objects_to_delete))
     # حذف دسته جمعی این رکوردها
     if objects_to_delete:
         ids_to_delete = [obj.id for obj in objects_to_delete]
