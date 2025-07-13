@@ -5026,7 +5026,8 @@ def DeleteDublicateData(request):
 
     print('حذف جشنواره  تکراری---------------------')
     # یافتن گروه‌های تکراری بر اساس سه فیلد و نگهداری آخرین ID هر گروه
-    duplicates = CustomerPoints.objects.values('festival', 'customer', 'factor').annotate(
+    # duplicates = CustomerPoints.objects.values('festival', 'customer', 'factor').annotate(
+    duplicates = CustomerPoints.objects.values('festival',  'factor').annotate(
         count=Count('id'),
         last_id=Max('id')
     ).filter(count__gt=1)
@@ -5035,20 +5036,21 @@ def DeleteDublicateData(request):
 
     for duplicate in duplicates:
         festival_id = duplicate['festival']
-        customer_id = duplicate['customer']
+        # customer_id = duplicate['customer']
         factor_id = duplicate['factor']
         last_id = duplicate['last_id']
 
         # پیدا کردن رکوردهای تکراری به جز آخرین
         queryset = CustomerPoints.objects.filter(
             festival_id=festival_id,
-            customer_id=customer_id,
+            # customer_id=customer_id,
             factor_id=factor_id
         ).exclude(id=last_id)
 
         # افزودن این رکوردها به لیست حذف
         objects_to_delete.extend(queryset)
-
+    print('objects_to_delete.count()')
+    print(objects_to_delete.count())
     # حذف دسته جمعی این رکوردها
     if objects_to_delete:
         ids_to_delete = [obj.id for obj in objects_to_delete]
