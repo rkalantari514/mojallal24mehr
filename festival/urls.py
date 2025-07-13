@@ -1,6 +1,7 @@
 from django.urls import path
 
-from festival.views import Calculate_and_award_points, FestivalTotal, send_bulk_promotional_sms, FestivalPinSms
+from festival.views import Calculate_and_award_points, FestivalTotal, send_bulk_promotional_sms, FestivalPinSms, \
+    FestivalSmsStatusUpdate
 
 urlpatterns = [
 
@@ -10,6 +11,7 @@ urlpatterns = [
     path('festival_total', FestivalTotal, name="festival-total"),
 
     path('festival/pinsms/<festival_id>', FestivalPinSms, name="festival-pin-sms"),
+    path('festival/update/sms_status/<festival_id>', FestivalSmsStatusUpdate, name="festival_sms_status_update"),
 
 ]
 

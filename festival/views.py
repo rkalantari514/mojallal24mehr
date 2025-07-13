@@ -143,24 +143,24 @@ def FestivalTotal(request):
         'festivals': festivals,
     }
 
-    for t in points:
-        try:
-            if t.message_id and t.status_code != 2 and t.status_code != 3 and t.status_code != 4:
-                status_code = check_sms_status(t.message_id)
-                if status_code is not None:  # فقط اگر مقدار معتبر باشد، ذخیره شود
-                    t.status_code = status_code
-                    t.save()
-        except:
-            pass
-
-        try:
-            if t.message_id_pin and t.status_code_pin != 2 and t.status_code_pin != 3 and t.status_code_pin != 4:
-                status_code_pin = check_sms_status(t.message_id_pin)
-                if status_code_pin is not None:  # فقط اگر مقدار معتبر باشد، ذخیره شود
-                    t.status_code_pin = status_code_pin
-                    t.save()
-        except:
-            pass
+    # for t in points:
+    #     try:
+    #         if t.message_id and t.status_code != 2 and t.status_code != 3 and t.status_code != 4:
+    #             status_code = check_sms_status(t.message_id)
+    #             if status_code is not None:  # فقط اگر مقدار معتبر باشد، ذخیره شود
+    #                 t.status_code = status_code
+    #                 t.save()
+    #     except:
+    #         pass
+    #
+    #     try:
+    #         if t.message_id_pin and t.status_code_pin != 2 and t.status_code_pin != 3 and t.status_code_pin != 4:
+    #             status_code_pin = check_sms_status(t.message_id_pin)
+    #             if status_code_pin is not None:  # فقط اگر مقدار معتبر باشد، ذخیره شود
+    #                 t.status_code_pin = status_code_pin
+    #                 t.save()
+    #     except:
+    #         pass
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
@@ -388,3 +388,39 @@ def FestivalPinSms(request,festival_id):
     messages.info(request, f"تعداد رکوردهای بررسی شده: {counter - 1}")
 
     return redirect('/festival_total')
+
+
+
+
+
+def FestivalSmsStatusUpdate(request,festival_id):
+    start_time = time.time()  # زمان شروع تابع
+
+    points = CustomerPoints.objects.filter(festival__id=festival_id)
+
+    for t in points:
+        try:
+            if t.message_id and t.status_code != 2 and t.status_code != 3 and t.status_code != 4:
+                status_code = check_sms_status(t.message_id)
+                if status_code is not None:  # فقط اگر مقدار معتبر باشد، ذخیره شود
+                    t.status_code = status_code
+                    t.save()
+        except:
+            pass
+
+        try:
+            if t.message_id_pin and t.status_code_pin != 2 and t.status_code_pin != 3 and t.status_code_pin != 4:
+                status_code_pin = check_sms_status(t.message_id_pin)
+                if status_code_pin is not None:  # فقط اگر مقدار معتبر باشد، ذخیره شود
+                    t.status_code_pin = status_code_pin
+                    t.save()
+        except:
+            pass
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+
+    return redirect('/festival_total')
+
+
+
+
