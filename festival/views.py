@@ -153,6 +153,15 @@ def FestivalTotal(request):
         except:
             pass
 
+        try:
+            if t.message_id_pin and t.status_code_pin != 2 and t.status_code_pin != 3 and t.status_code_pin != 4:
+                status_code_pin = check_sms_status(t.message_id_pin)
+                if status_code_pin is not None:  # فقط اگر مقدار معتبر باشد، ذخیره شود
+                    t.status_code_pin = status_code_pin
+                    t.save()
+        except:
+            pass
+
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
     return render(request, 'festival_total.html', context)

@@ -113,6 +113,12 @@ class CustomerPoints(models.Model):
                                   {"status": "Unknown", "persian": "نامشخص", "color": "text-secondary",
                                    "icon": "fa-question"})
 
+
+    def get_status_details_pin(self):
+        return STATUS_DETAILS.get(self.status_code_pin,
+                                  {"status": "Unknown", "persian": "نامشخص", "color": "text-secondary",
+                                   "icon": "fa-question"})
+
     def total_point_global(self):
         result = CustomerPoints.objects.filter(customer=self.customer).aggregate(total_points=Sum('points_awarded'))
         return result['total_points'] if result['total_points'] else 0

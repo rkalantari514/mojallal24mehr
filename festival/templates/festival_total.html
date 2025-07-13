@@ -209,6 +209,10 @@
                                                     data-field="is_send_pin" data-filter-control="select"
                                                 >ارسال پیامک رمز
                                                 </th>
+                                                <th class="card-text text-center" data-sortable="true"
+                                                    data-field="condiition" data-filter-control="select"
+                                                >وضعیت پیامک رمز
+                                                </th>
 
 
                                             </tr>
@@ -267,6 +271,12 @@
                                                             <i class="fa fa-times  text-danger"></i>
 
                                                         {% endif %}
+                                                    </td>
+                                                <td class="card-text text-center">
+                                                     <span class="{{ p.get_status_details_pin.color }}">
+                        <i class="fa {{ p.get_status_details_pin.icon }}"></i>
+                        {{ p.get_status_details_pin.persian }}
+                    </span>
                                                     </td>
                                                 </tr>
 
