@@ -45,37 +45,37 @@
                                             <tr>
                                                 <td>خالص درآمد فروش</td>
                                                 {% for row in master_table %}
-                                                    <td>{{ row.khales_daramad_forosh }}</td>
+                                                    <td>{{ row.khales_daramad_forosh|floatformat:0|intcomma:False }}</td>
                                                 {% endfor %}
                                             </tr>
                                             <tr>
                                                 <td>بهای تمام‌شده</td>
                                                 {% for row in master_table %}
-                                                    <td>{{ row.tamam_shode }}</td>
+                                                    <td>{{ row.tamam_shode|floatformat:0|intcomma:False }}</td>
                                                 {% endfor %}
                                             </tr>
                                             <tr>
                                                 <td>سایر درآمدها</td>
                                                 {% for row in master_table %}
-                                                    <td>{{ row.sayer_daramad_total }}</td>
+                                                    <td>{{ row.sayer_daramad_total|floatformat:0|intcomma:False }}</td>
                                                 {% endfor %}
                                             </tr>
                                             <tr>
                                                 <td>سایر هزینه‌ها</td>
                                                 {% for row in master_table %}
-                                                    <td>{{ row.sayer_hazine_total }}</td>
+                                                    <td>{{ row.sayer_hazine_total|floatformat:0|intcomma:False }}</td>
                                                 {% endfor %}
                                             </tr>
                                             <tr>
                                                 <td>نسبت ناویژه</td>
                                                 {% for row in master_table %}
-                                                    <td>{{ row.navizheh_ratio }}</td>
+                                                    <td>{{ row.navizheh_ratio|floatformat:2}} %</td>
                                                 {% endfor %}
                                             </tr>
                                             <tr>
                                                 <td>نسبت ویژه</td>
                                                 {% for row in master_table %}
-                                                    <td>{{ row.vizheh_ratio }}</td>
+                                                    <td>{{ row.vizheh_ratio|floatformat:2}} %</td>
                                                 {% endfor %}
                                             </tr>
                                             </tbody>
