@@ -360,6 +360,9 @@ def FestivalPinSms(request,festival_id):
             # message_id = send_sms('09151006447', message)
             # message_id = send_sms(user.mobile_number, message)
             print('message_id:',message_id)
+            if CustomerPoints.objects.filter(festival__id=festival_id, phone_number=phone_number, is_win=True).exists():
+                CustomerPoints.objects.filter(festival__id=festival_id, phone_number=phone_number).update(is_win=True)
+                continue
 
             if message_id:
                 CustomerPoints.objects.filter(festival__id=festival_id, phone_number=phone_number).update(pin_code=pin1,
@@ -369,6 +372,71 @@ def FestivalPinSms(request,festival_id):
                                                                                                           )
 
 
+                sent_count += 1
+            else:
+                customer_point.status_code_pin = None
+                customer_point.save()
+                failed_count += 1
+        else:
+            customer_point.status_code = 404  # No Verified Number
+            customer_point.save()
+            invalid_count += 1
+
+        counter += 1
+
+
+    messages.info(request, f"تعداد پیامک‌های ارسالی (تلاش): {sent_count}")
+    messages.error(request, f"تعداد ارسال‌های ناموفق (در زمان تلاش): {failed_count}")
+    messages.warning(request, f"تعداد شماره‌های نامعتبر: {invalid_count}")
+    messages.info(request, f"تعداد رکوردهای بررسی شده: {counter - 1}")
+
+    return redirect('/festival_total')
+
+@transaction.atomic
+def FestivalPinSmsAgain(request,festival_id):
+    customer_points = CustomerPoints.objects.filter(
+        festival__id=festival_id,
+        status_code_pin=1
+    )
+
+    sent_count = 0
+    failed_count = 0
+    invalid_count = 0
+    skipped_count = 0
+    counter = 0
+
+    for customer_point in customer_points:
+        if counter > 50:
+            break
+        print('counter=',counter)
+        phone_number = customer_point.phone_number
+        print(customer_point.phone_number)
+        if phone_number:
+            pin1=customer_point.pin_code
+
+            message = f"""{customer_point.customer.clname} عزیز 
+سپاس از  شرکت در جشنواره {customer_point.festival.name}
+شما برنده‌ی ۲۰٪ تخفیف اختصاصی شدین!
+فقط کافیه خریدتونو تا ۱۰ روز آینده نهایی کنین و این هدیه‌ی ویژه رو از دست ندین 💛💙
+
+📅 مهلت استفاده: فقط تا (۳۱تیرماه)
+رمز اختصاصی شما: {pin1}
+🛍️ سرای یاس مجلل
+05136005"""
+
+            message_id = None
+            # خط زیر برای ارسال واقعی به شماره مشتری است (در آینده فعال کنید)
+            message_id = send_sms(phone_number, message)
+            # خط زیر فقط برای تست به شماره ثابت ارسال می‌کند
+            # message_id = send_sms('09151006447', message)
+            # message_id = send_sms(user.mobile_number, message)
+            print('message_id:',message_id)
+
+            if message_id:
+                CustomerPoints.objects.filter(festival__id=festival_id, phone_number=phone_number).update(message_id_pin = message_id,
+                                                                                                          status_code_pin = 1,
+                                                                                                          is_send_pin=True
+                                                                                                          )
                 sent_count += 1
             else:
                 customer_point.status_code_pin = None
