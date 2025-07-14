@@ -316,8 +316,8 @@ def BudgetTotal(request, *args, **kwargs):
             'tamam_shode':m.tamam_shode,
             'sayer_daramad_total':m.sayer_daramad_total,
             'sayer_hazine_total':m.sayer_hazine_total,
-            'navizheh_ratio':m.navizheh_ratio,
-            'vizheh_ratio':m.vizheh_ratio,
+            'navizheh_ratio':m.navizheh_ratio*100,
+            'vizheh_ratio':m.vizheh_ratio*100,
         }
         )
 
