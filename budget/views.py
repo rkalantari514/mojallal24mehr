@@ -290,6 +290,53 @@ def BudgetCostTotal(request, *args, **kwargs):
     return render(request, 'budget_cost_total.html', context)
 
 
+
+def BudgetTotal(request, *args, **kwargs):
+    start_time = time.time()
+    name = 'برنامه و بودجه سالانه'
+    result = page_permision(request, name)
+    if result:
+        return result
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='برنامه و بودجه سالانه', code=0)
+    master_info = MasterInfo.objects.filter(is_active=True).last()
+    acc_year = master_info.acc_year
+    base_year = acc_year - 1
+    today = date.today()
+    one_year_ago = today - relativedelta(years=1)
+
+    masters=MasterInfo.objects.order_by('acc_year')
+    years=[]
+    master_table=[]
+    for m in masters:
+        years.append(m.acc_year)
+        master_table.append({
+            'khales_daramad_forosh':m.khales_daramad_forosh,
+            'tamam_shode':m.tamam_shode,
+            'sayer_daramad_total':m.sayer_daramad_total,
+            'sayer_hazine_total':m.sayer_hazine_total,
+            'navizheh_ratio':m.navizheh_ratio,
+            'vizheh_ratio':m.vizheh_ratio,
+        }
+        )
+
+
+
+
+    context = {
+        'acc_year': acc_year,
+        'base_year': base_year,
+        'user': user,
+        'years': years,
+        'master_table': master_table,
+
+    }
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+    return render(request, 'budget_total.html', context)
+
+
 import time
 import datetime
 from django.db.models import Sum, Min, Max

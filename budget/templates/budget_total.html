@@ -1,0 +1,151 @@
+{% extends 'shared/_MainLayout.html' %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+
+    <div class="content-wrapper">
+        <div class="page-title">
+
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="d-block">
+                        <h4 class="card-title text-facebook pb-0 border-0">کلیات برنامه و بودجه</h4>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
+                        <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
+                        <li class="breadcrumb-item active">کلیات برنامه و بودجه</li>
+                    </ol>
+                </div>
+            </div>
+
+
+            <!-- ردیف خلاصه برنامه و بودجه -->
+            <div class="row">
+                <div class="col-md-12 mb-30">
+                    <div class="col-xl-12 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="card-body">
+                                <h5 class="card-title pb-0 border-0">خلاصه عملکرد سالانه </h5>
+                                <div class="table-responsive scrollbar max-h-500" tabindex="3"
+                                     style="overflow-y: hidden; outline: none; touch-action: none;">
+                                    <div class="table-responsive">
+                                        <table class="table center-aligned-table mb-0">
+                                            <thead>
+                                            <tr class="text-dark">
+                                                <th>شرح</th>
+                                                {% for y in years %}
+                                                    <th>{{ y }}</th>
+                                                {% endfor %}
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr>
+                                                <td>خالص درآمد فروش</td>
+                                                {% for row in master_table %}
+                                                    <td>{{ row.khales_daramad_forosh }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                            <tr>
+                                                <td>بهای تمام‌شده</td>
+                                                {% for row in master_table %}
+                                                    <td>{{ row.tamam_shode }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                            <tr>
+                                                <td>سایر درآمدها</td>
+                                                {% for row in master_table %}
+                                                    <td>{{ row.sayer_daramad_total }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                            <tr>
+                                                <td>سایر هزینه‌ها</td>
+                                                {% for row in master_table %}
+                                                    <td>{{ row.sayer_hazine_total }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                            <tr>
+                                                <td>نسبت ناویژه</td>
+                                                {% for row in master_table %}
+                                                    <td>{{ row.navizheh_ratio }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                            <tr>
+                                                <td>نسبت ویژه</td>
+                                                {% for row in master_table %}
+                                                    <td>{{ row.vizheh_ratio }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                            </tbody>
+                                        </table>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+{% endblock %}
+
+
+
+
+{% block date %}
+    <script src="{% static 'js/table1/tableExport.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-locale-all.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-export.min.js' %}"></script>
+    <script src="{% static 'js/table1/natural-sorting.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-filter-control.min.js' %}"></script>
+    <script src="{% static 'js/table1/bootstrap-table-print.min.js' %}"></script>
+    <script src="{% static 'js/table1/jspdf.min.js' %}"></script>
+    <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
+
+    <script>
+        var $table = $('#table');
+        var totalMandah = 0; // متغیر برای ذخیره مجموع مانده
+
+        $(function () {
+            $table.bootstrapTable();
+            updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده هنگام بارگذاری جدول
+        });
+
+        function priceFormatter(data) {
+            var field = this.field;
+            console.log("Data received for priceFormatter:", data);
+            var result = data.map(function (row) {
+                var valueString = row[field].replace(/,/g, ''); // حذف کاماها
+                var value = parseFloat(valueString);
+                console.log("Processing row:", row);
+                console.log("Parsed value:", value);
+                return isNaN(value) ? 0 : value;
+            }).reduce(function (sum, i) {
+                console.log("Current sum:", sum);
+                return sum + i;
+            }, 0);
+            console.log("Final result for priceFormatter:", result);
+            totalMandah = result; // ذخیره مجموع مانده
+            updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده
+            return result.toLocaleString('fa-IR'); // نمایش با کاما به صورت 3 تا 3 تا
+        }
+
+        function updateTotalMandah() {
+            $('#total-mandah').text(totalMandah.toLocaleString('fa-IR'));
+        }
+    </script>
+
+
+
+
+{% endblock %}
+
+
+
