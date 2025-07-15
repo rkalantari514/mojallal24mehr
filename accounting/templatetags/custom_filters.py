@@ -67,3 +67,14 @@ def abs_days_diff(value, arg=None):
     if days is not None:
         return abs(days)
     return None
+
+
+
+
+
+@register.filter
+def index(List, i):
+    try:
+        return List[i]
+    except:
+        return ''

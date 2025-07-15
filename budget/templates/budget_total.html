@@ -2,6 +2,7 @@
 {% load static %}
 {% load humanize %}
 {% block content %}
+    {% load custom_filters %}
     <style>
 
         .bold-bottom {
@@ -10,9 +11,9 @@
         }
 
         .bold-bottom-b {
-                    border-bottom: 3px solid #007bff;
-                    font-weight: bold;
-                }
+            border-bottom: 3px solid #007bff;
+            font-weight: bold;
+        }
 
 
     </style>
@@ -35,13 +36,13 @@
             </div>
 
 
-            <!-- ردیف خلاصه برنامه و بودجه -->
+            <!-- ردیف سود ناویژه -->
             <div class="row">
                 <div class="col-md-12 mb-30">
                     <div class="col-xl-12 mb-30">
                         <div class="card card-statistics h-100">
                             <div class="card-body">
-                                <h5 class="card-title pb-0 border-0">خلاصه عملکرد سالانه </h5>
+                                <h5 class="card-title pb-0 border-0">سود ناویژه </h5>
                                 <div class="table-responsive scrollbar max-h-1500" tabindex="3"
                                      style="overflow-y: hidden; outline: none; touch-action: none;">
                                     <div class="table-responsive">
@@ -58,19 +59,27 @@
                                             <tr>
                                                 <td> 400-درآمد فروش</td>
                                                 {% for row in master_table %}
-                                                    <td>{{ row.daramad_400|floatformat:2|intcomma:False }}</td>
+                                                    <td>
+                                                        <a href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/400/" target="_blank">
+                                                            {{ row.daramad_400|floatformat:2|intcomma:False }}
+                                                        </a>
+                                                    </td>
                                                 {% endfor %}
                                             </tr>
                                             <tr>
                                                 <td>403-برگشت از فروش و تخفیفات</td>
                                                 {% for row in master_table %}
+                                                    <a href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/403/" target="_blank">
                                                     <td style="direction: ltr">{{ row.bargasht_takfifif_403|floatformat:2|intcomma:False }}</td>
+                                                    </a>
                                                 {% endfor %}
                                             </tr>
                                             <tr>
                                                 <td>400001-1-501- تخفیف</td>
                                                 {% for row in master_table %}
+                                                    <a href="/sanad_total/{{ years|index:forloop.counter0 }}/501/1/400001" target="_blank">
                                                     <td style="direction: ltr">{{ row.takhfif_forosh_501_1_400001|floatformat:2|intcomma:False }}</td>
+                                                    </a>
                                                 {% endfor %}
                                             </tr>
                                             <tr class="text-success bold-bottom">
@@ -101,7 +110,9 @@
                                             <tr class="text-primary bold-bottom-b">
                                                 <td>501-بهای تمام شده کالای فروش رفته</td>
                                                 {% for row in master_table %}
+                                                    <a href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/501/" target="_blank">
                                                     <td style="direction: ltr">{{ row.tamam_shode_500|floatformat:2|intcomma:False }}</td>
+                                                    </a>
                                                 {% endfor %}
                                             </tr>
 
@@ -112,7 +123,7 @@
                                                 {% endfor %}
                                             </tr>
 
-<tr class="text-dark">
+                                            <tr class="text-dark">
                                                 <td>درصد سود ناویژه</td>
                                                 {% for row in master_table %}
                                                     <td style="direction: ltr">{{ row.sood_navizhe_ratio|floatformat:0 }}%</td>
