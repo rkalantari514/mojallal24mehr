@@ -321,7 +321,7 @@ def BudgetTotal(request, *args, **kwargs):
         khales_factor=fac_kol- back_fac_kol
 
         tamam_shode_500 = (SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=500).aggregate(total=Sum('curramount'))['total'] or 0 ) /10000000000
-        takhfif_forosh_500_1_400001 = (SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=500,moin=1,tafzili=400001).aggregate(total=Sum('curramount'))['total'] or 0 ) /10000000000
+        takhfif_forosh_501_1_400001 = (SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=501,moin=1,tafzili=400001).aggregate(total=Sum('curramount'))['total'] or 0 ) /10000000000
 
 
 
@@ -335,7 +335,7 @@ def BudgetTotal(request, *args, **kwargs):
 
 
             'tamam_shode_500': tamam_shode_500,
-            'takhfif_forosh_500_1_400001': takhfif_forosh_500_1_400001,
+            'takhfif_forosh_501_1_400001': takhfif_forosh_501_1_400001,
 
 
 
