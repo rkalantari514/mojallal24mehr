@@ -311,13 +311,13 @@ def BudgetTotal(request, *args, **kwargs):
     master_table=[]
     for m in masters:
         years.append(m.acc_year)
-        daramad_400 = SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=400).aggregate(total=Sum('curramount'))['total']/10000000000 or 0
-        bargasht_takfifif_403 = SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=403).aggregate(total=Sum('curramount'))['total']/10000000000 or 0
+        daramad_400 = SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=400).aggregate(total=Sum('curramount'))['total'] or 0  /10000000000
+        bargasht_takfifif_403 = SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=403).aggregate(total=Sum('curramount'))['total'] or 0 /10000000000
         khales_forosh=daramad_400+bargasht_takfifif_403
 
 
-        fac_kol=FactorDetaile.objects.filter(acc_year=m.acc_year).aggregate(total=Sum('mablagh_after_takhfif_kol'))['total']/10000000000 or 0
-        back_fac_kol=BackFactorDetail.objects.filter(acc_year=m.acc_year).aggregate(total=Sum('naghdi'))['total']/10000000000 or 0
+        fac_kol=FactorDetaile.objects.filter(acc_year=m.acc_year).aggregate(total=Sum('mablagh_after_takhfif_kol'))['total'] or 0 /10000000000
+        back_fac_kol=BackFactorDetail.objects.filter(acc_year=m.acc_year).aggregate(total=Sum('naghdi'))['total'] or 0 /10000000000
 
 
 
