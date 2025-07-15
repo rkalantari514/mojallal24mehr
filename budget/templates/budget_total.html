@@ -2,7 +2,15 @@
 {% load static %}
 {% load humanize %}
 {% block content %}
+    <style>
 
+        .bold-bottom {
+            border-bottom: 3px solid #28a745;
+            font-weight: bold;
+        }
+
+
+    </style>
     <div class="content-wrapper">
         <div class="page-title">
 
@@ -45,19 +53,25 @@
                                             <tr>
                                                 <td> 400-درآمد فروش</td>
                                                 {% for row in master_table %}
-                                                    <td>{{ row.daramad_400|floatformat:0|intcomma:False }}</td>
+                                                    <td>{{ row.daramad_400|floatformat:2|intcomma:False }}</td>
                                                 {% endfor %}
                                             </tr>
                                             <tr>
                                                 <td>403-برگشت از فروش و تخفیفات</td>
                                                 {% for row in master_table %}
-                                                    <td>{{ row.bargasht_takfifif_403|floatformat:0|intcomma:False }}</td>
+                                                    <td>{{ row.bargasht_takfifif_403|floatformat:2|intcomma:False }}</td>
                                                 {% endfor %}
                                             </tr>
-                                            <tr class="text-success">
+                                            <tr class="text-success bold-bottom">
                                                 <td>خالص فروش</td>
                                                 {% for row in master_table %}
-                                                    <td>{{ row.khales_forosh|floatformat:0|intcomma:False }}</td>
+                                                    <td>{{ row.khales_forosh|floatformat:2|intcomma:False }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                            <tr>
+                                                <td>خالص فاکتور های فروش</td>
+                                                {% for row in master_table %}
+                                                    <td>{{ row.fac_kol|floatformat:2|intcomma:False }}</td>
                                                 {% endfor %}
                                             </tr>
 
@@ -88,13 +102,13 @@
                                             <tr>
                                                 <td>نسبت ناویژه</td>
                                                 {% for row in master_table %}
-                                                    <td>{{ row.navizheh_ratio|floatformat:2}} %</td>
+                                                    <td>{{ row.navizheh_ratio|floatformat:2 }} %</td>
                                                 {% endfor %}
                                             </tr>
                                             <tr>
                                                 <td>نسبت ویژه</td>
                                                 {% for row in master_table %}
-                                                    <td>{{ row.vizheh_ratio|floatformat:2}} %</td>
+                                                    <td>{{ row.vizheh_ratio|floatformat:2 }} %</td>
                                                 {% endfor %}
                                             </tr>
                                             </tbody>

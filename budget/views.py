@@ -316,6 +316,9 @@ def BudgetTotal(request, *args, **kwargs):
         khales_forosh=daramad_400+bargasht_takfifif_403
 
 
+        fac_kol=FactorDetaile.objects.filter(acc_year=m.acc_year).aggregate(forosh=Sum('mablagh_after_takhfif_kol'))['forosh']/10000000000 or 0
+
+
 
         daramad_403 = SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=403).aggregate(total=Sum('curramount'))['total']
 
@@ -325,6 +328,7 @@ def BudgetTotal(request, *args, **kwargs):
             'daramad_400':daramad_400,
             'bargasht_takfifif_403':bargasht_takfifif_403,
             'khales_forosh':khales_forosh,
+            'fac_kol':fac_kol,
 
 
 
