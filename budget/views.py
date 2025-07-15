@@ -311,6 +311,14 @@ def BudgetTotal(request, *args, **kwargs):
     master_table=[]
     for m in masters:
         years.append(m.acc_year)
+        # Sanad_Detail
+        daramad_400 = SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=400).aggregate(total=Sum('curramount'))['total']
+        daramad_401 = SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=401).aggregate(total=Sum('curramount'))['total']
+
+        daramad_403 = SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=403).aggregate(total=Sum('curramount'))['total']
+
+
+
         master_table.append({
             'khales_daramad_forosh':m.khales_daramad_forosh,
             'tamam_shode':m.tamam_shode,
@@ -320,9 +328,6 @@ def BudgetTotal(request, *args, **kwargs):
             'vizheh_ratio':m.vizheh_ratio*100,
         }
         )
-
-
-
 
     context = {
         'acc_year': acc_year,
