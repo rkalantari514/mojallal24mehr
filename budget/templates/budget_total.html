@@ -69,17 +69,17 @@
                                             <tr>
                                                 <td>403-برگشت از فروش و تخفیفات</td>
                                                 {% for row in master_table %}
-                                                    <a href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/403/" target="_blank">
-                                                    <td style="direction: ltr">{{ row.bargasht_takfifif_403|floatformat:2|intcomma:False }}</td>
-                                                    </a>
+                                                    <td style="direction: ltr"><a href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/403/" target="_blank">
+                                                    {{ row.bargasht_takfifif_403|floatformat:2|intcomma:False }}
+                                                    </a></td>
                                                 {% endfor %}
                                             </tr>
                                             <tr>
                                                 <td>400001-1-501- تخفیف</td>
                                                 {% for row in master_table %}
-                                                    <a href="/sanad_total/{{ years|index:forloop.counter0 }}/501/1/400001" target="_blank">
-                                                    <td style="direction: ltr">{{ row.takhfif_forosh_501_1_400001|floatformat:2|intcomma:False }}</td>
-                                                    </a>
+                                                    <td style="direction: ltr"> <a href="/sanad_total/{{ years|index:forloop.counter0 }}/501/1/400001" target="_blank">
+                                                   {{ row.takhfif_forosh_501_1_400001|floatformat:2|intcomma:False }}
+                                                    </a></td>
                                                 {% endfor %}
                                             </tr>
                                             <tr class="text-success bold-bottom">
@@ -110,9 +110,9 @@
                                             <tr class="text-primary bold-bottom-b">
                                                 <td>501-بهای تمام شده کالای فروش رفته</td>
                                                 {% for row in master_table %}
-                                                    <a href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/501/" target="_blank">
-                                                    <td style="direction: ltr">{{ row.tamam_shode_500|floatformat:2|intcomma:False }}</td>
-                                                    </a>
+                                                  <td style="direction: ltr">  <a href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/501/" target="_blank">
+                                                    {{ row.tamam_shode_500|floatformat:2|intcomma:False }}
+                                                    </a></td>
                                                 {% endfor %}
                                             </tr>
 
