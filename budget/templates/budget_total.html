@@ -81,6 +81,14 @@
                                                 {% endfor %}
                                             </tr>
 
+                                            <tr class="text-success bold-bottom">
+                                                <td>خالص فاکتورها</td>
+                                                {% for row in master_table %}
+                                                    <td>{{ row.khales_factor|floatformat:2|intcomma:False }}</td>
+                                                {% endfor %}
+                                            </tr>
+
+
                                             <tr>
                                                 <td>خالص درآمد فروش</td>
                                                 {% for row in master_table %}

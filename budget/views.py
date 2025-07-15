@@ -318,7 +318,7 @@ def BudgetTotal(request, *args, **kwargs):
 
         fac_kol=FactorDetaile.objects.filter(acc_year=m.acc_year).aggregate(total=Sum('mablagh_after_takhfif_kol'))['total'] or 0 /10000000000
         back_fac_kol=BackFactorDetail.objects.filter(acc_year=m.acc_year).aggregate(total=Sum('naghdi'))['total'] or 0 /10000000000
-
+        khales_factor=fac_kol- back_fac_kol
 
 
 
@@ -329,7 +329,8 @@ def BudgetTotal(request, *args, **kwargs):
             'bargasht_takfifif_403':bargasht_takfifif_403,
             'khales_forosh':khales_forosh,
             'fac_kol':fac_kol,
-            'back_fac_kol':back_fac_kol,
+            'back_fac_kol': - back_fac_kol,
+            'khales_factor': khales_factor,
 
 
 
