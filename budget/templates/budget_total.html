@@ -59,7 +59,7 @@
                                             <tr>
                                                 <td>403-برگشت از فروش و تخفیفات</td>
                                                 {% for row in master_table %}
-                                                    <td>{{ row.bargasht_takfifif_403|floatformat:2|intcomma:False }}</td>
+                                                    <td style="direction: ltr">{{ row.bargasht_takfifif_403|floatformat:2|intcomma:False }}</td>
                                                 {% endfor %}
                                             </tr>
                                             <tr class="text-success bold-bottom">
@@ -74,10 +74,10 @@
                                                     <td>{{ row.fac_kol|floatformat:2|intcomma:False }}</td>
                                                 {% endfor %}
                                             </tr>
-<tr>
+                                            <tr>
                                                 <td> فاکتور های برگشتی</td>
                                                 {% for row in master_table %}
-                                                    <td>{{ row.back_fac_kol|floatformat:2|intcomma:False }}</td>
+                                                    <td style="direction: ltr">{{ row.back_fac_kol|floatformat:2|intcomma:False }}</td>
                                                 {% endfor %}
                                             </tr>
 
@@ -87,7 +87,12 @@
                                                     <td>{{ row.khales_factor|floatformat:2|intcomma:False }}</td>
                                                 {% endfor %}
                                             </tr>
-
+                                            <tr>
+                                                <td>بهای تمام شده کالای فروش رفته</td>
+                                                {% for row in master_table %}
+                                                    <td style="direction: ltr">{{ row.tamam_shode_500|floatformat:2|intcomma:False }}</td>
+                                                {% endfor %}
+                                            </tr>
 
                                             <tr>
                                                 <td>خالص درآمد فروش</td>

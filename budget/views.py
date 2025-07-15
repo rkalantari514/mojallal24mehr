@@ -320,6 +320,7 @@ def BudgetTotal(request, *args, **kwargs):
         back_fac_kol=(BackFactorDetail.objects.filter(acc_year=m.acc_year).aggregate(total=Sum('naghdi'))['total'] or 0) /10000000000
         khales_factor=fac_kol- back_fac_kol
 
+        tamam_shode_500 = (SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=500).aggregate(total=Sum('curramount'))['total'] or 0 ) /10000000000
 
 
 
@@ -331,6 +332,9 @@ def BudgetTotal(request, *args, **kwargs):
             'fac_kol':fac_kol,
             'back_fac_kol': - back_fac_kol,
             'khales_factor': khales_factor,
+
+
+            'tamam_shode_500': tamam_shode_500,
 
 
 
