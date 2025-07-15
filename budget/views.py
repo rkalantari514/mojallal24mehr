@@ -324,6 +324,8 @@ def BudgetTotal(request, *args, **kwargs):
 
         khales_forosh=daramad_400+bargasht_takfifif_403+takhfif_forosh_501_1_400001
 
+        sood_navizhe=khales_forosh+tamam_shode_500
+        sood_navizhe_ratio=sood_navizhe/khales_forosh*100
 
         master_table.append({
             'daramad_400':daramad_400,
@@ -336,6 +338,9 @@ def BudgetTotal(request, *args, **kwargs):
 
             'tamam_shode_500': tamam_shode_500,
             'takhfif_forosh_501_1_400001': takhfif_forosh_501_1_400001,
+
+            'sood_navizhe': sood_navizhe,
+            'sood_navizhe_ratio': sood_navizhe_ratio,
 
 
 

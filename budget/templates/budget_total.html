@@ -9,6 +9,11 @@
             font-weight: bold;
         }
 
+        .bold-bottom-b {
+                    border-bottom: 3px solid #007bff;
+                    font-weight: bold;
+                }
+
 
     </style>
     <div class="content-wrapper">
@@ -63,7 +68,7 @@
                                                 {% endfor %}
                                             </tr>
                                             <tr>
-                                                <td>40000-1-501- تخفیف</td>
+                                                <td>400001-1-501- تخفیف</td>
                                                 {% for row in master_table %}
                                                     <td style="direction: ltr">{{ row.takhfif_forosh_501_1_400001|floatformat:2|intcomma:False }}</td>
                                                 {% endfor %}
@@ -93,49 +98,28 @@
                                                     <td>{{ row.khales_factor|floatformat:2|intcomma:False }}</td>
                                                 {% endfor %}
                                             </tr>
-                                            <tr>
+                                            <tr class="text-primary bold-bottom-b">
                                                 <td>501-بهای تمام شده کالای فروش رفته</td>
                                                 {% for row in master_table %}
                                                     <td style="direction: ltr">{{ row.tamam_shode_500|floatformat:2|intcomma:False }}</td>
                                                 {% endfor %}
                                             </tr>
 
-                                            <tr>
-                                                <td>خالص درآمد فروش</td>
+                                            <tr class="text-dark">
+                                                <td>سود ناویژه</td>
                                                 {% for row in master_table %}
-                                                    <td>{{ row.khales_daramad_forosh|floatformat:0|intcomma:False }}</td>
+                                                    <td style="direction: ltr">{{ row.sood_navizhe|floatformat:2|intcomma:False }}</td>
                                                 {% endfor %}
                                             </tr>
-                                            <tr>
-                                                <td>بهای تمام‌شده</td>
+
+<tr class="text-dark">
+                                                <td>درصد سود ناویژه</td>
                                                 {% for row in master_table %}
-                                                    <td>{{ row.tamam_shode|floatformat:0|intcomma:False }}</td>
+                                                    <td style="direction: ltr">{{ row.sood_navizhe_ratio|floatformat:0 }}%</td>
                                                 {% endfor %}
                                             </tr>
-                                            <tr>
-                                                <td>سایر درآمدها</td>
-                                                {% for row in master_table %}
-                                                    <td>{{ row.sayer_daramad_total|floatformat:0|intcomma:False }}</td>
-                                                {% endfor %}
-                                            </tr>
-                                            <tr>
-                                                <td>سایر هزینه‌ها</td>
-                                                {% for row in master_table %}
-                                                    <td>{{ row.sayer_hazine_total|floatformat:0|intcomma:False }}</td>
-                                                {% endfor %}
-                                            </tr>
-                                            <tr>
-                                                <td>نسبت ناویژه</td>
-                                                {% for row in master_table %}
-                                                    <td>{{ row.navizheh_ratio|floatformat:2 }} %</td>
-                                                {% endfor %}
-                                            </tr>
-                                            <tr>
-                                                <td>نسبت ویژه</td>
-                                                {% for row in master_table %}
-                                                    <td>{{ row.vizheh_ratio|floatformat:2 }} %</td>
-                                                {% endfor %}
-                                            </tr>
+
+
                                             </tbody>
                                         </table>
 
