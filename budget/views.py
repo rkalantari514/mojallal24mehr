@@ -311,15 +311,23 @@ def BudgetTotal(request, *args, **kwargs):
     master_table=[]
     for m in masters:
         years.append(m.acc_year)
-        # Sanad_Detail
-        daramad_400 = SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=400).aggregate(total=Sum('curramount'))['total']
-        daramad_401 = SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=401).aggregate(total=Sum('curramount'))['total']
+        daramad_400 = SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=400).aggregate(total=Sum('curramount'))['total']/10000000000 or 0
+        bargasht_takfifif_403 = SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=403).aggregate(total=Sum('curramount'))['total']/10000000000 or 0
+        khales_forosh=daramad_400+bargasht_takfifif_403
+
+
 
         daramad_403 = SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=403).aggregate(total=Sum('curramount'))['total']
 
 
 
         master_table.append({
+            'daramad_400':daramad_400,
+            'bargasht_takfifif_403':bargasht_takfifif_403,
+            'khales_forosh':khales_forosh,
+
+
+
             'khales_daramad_forosh':m.khales_daramad_forosh,
             'tamam_shode':m.tamam_shode,
             'sayer_daramad_total':m.sayer_daramad_total,

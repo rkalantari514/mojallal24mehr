@@ -43,6 +43,25 @@
                                             </thead>
                                             <tbody>
                                             <tr>
+                                                <td> 400-درآمد فروش</td>
+                                                {% for row in master_table %}
+                                                    <td>{{ row.daramad_400|floatformat:0|intcomma:False }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                            <tr>
+                                                <td>403-برگشت از فروش و تخفیفات</td>
+                                                {% for row in master_table %}
+                                                    <td>{{ row.bargasht_takfifif_403|floatformat:0|intcomma:False }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                            <tr class="text-success">
+                                                <td>خالص فروش</td>
+                                                {% for row in master_table %}
+                                                    <td>{{ row.khales_forosh|floatformat:0|intcomma:False }}</td>
+                                                {% endfor %}
+                                            </tr>
+
+                                            <tr>
                                                 <td>خالص درآمد فروش</td>
                                                 {% for row in master_table %}
                                                     <td>{{ row.khales_daramad_forosh|floatformat:0|intcomma:False }}</td>
