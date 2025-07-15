@@ -62,6 +62,12 @@
                                                     <td style="direction: ltr">{{ row.bargasht_takfifif_403|floatformat:2|intcomma:False }}</td>
                                                 {% endfor %}
                                             </tr>
+                                            <tr>
+                                                <td>40000-1-500- تخفیف</td>
+                                                {% for row in master_table %}
+                                                    <td style="direction: ltr">{{ row.takhfif_forosh_500_1_400001|floatformat:2|intcomma:False }}</td>
+                                                {% endfor %}
+                                            </tr>
                                             <tr class="text-success bold-bottom">
                                                 <td>خالص فروش</td>
                                                 {% for row in master_table %}
@@ -88,7 +94,7 @@
                                                 {% endfor %}
                                             </tr>
                                             <tr>
-                                                <td>بهای تمام شده کالای فروش رفته</td>
+                                                <td>501-بهای تمام شده کالای فروش رفته</td>
                                                 {% for row in master_table %}
                                                     <td style="direction: ltr">{{ row.tamam_shode_500|floatformat:2|intcomma:False }}</td>
                                                 {% endfor %}
