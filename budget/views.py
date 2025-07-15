@@ -3,7 +3,7 @@ from unicodedata import category
 from custom_login.models import UserLog
 from custom_login.views import page_permision
 from dashboard.models import MasterInfo
-from mahakupdate.models import SanadDetail, AccCoding, FactorDetaile, Category, Kala, Factor
+from mahakupdate.models import SanadDetail, AccCoding, FactorDetaile, Category, Kala, Factor, BackFactorDetail
 from datetime import date
 from decimal import Decimal
 
@@ -316,11 +316,11 @@ def BudgetTotal(request, *args, **kwargs):
         khales_forosh=daramad_400+bargasht_takfifif_403
 
 
-        fac_kol=FactorDetaile.objects.filter(acc_year=m.acc_year).aggregate(forosh=Sum('mablagh_after_takhfif_kol'))['forosh']/10000000000 or 0
+        fac_kol=FactorDetaile.objects.filter(acc_year=m.acc_year).aggregate(total=Sum('mablagh_after_takhfif_kol'))['total']/10000000000 or 0
+        back_fac_kol=BackFactorDetail.objects.filter(acc_year=m.acc_year).aggregate(total=Sum('naghdi'))['total']/10000000000 or 0
 
 
 
-        daramad_403 = SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=403).aggregate(total=Sum('curramount'))['total']
 
 
 
@@ -329,6 +329,7 @@ def BudgetTotal(request, *args, **kwargs):
             'bargasht_takfifif_403':bargasht_takfifif_403,
             'khales_forosh':khales_forosh,
             'fac_kol':fac_kol,
+            'back_fac_kol':back_fac_kol,
 
 
 
