@@ -364,12 +364,7 @@ def BudgetTotal(request, *args, **kwargs):
             'khales_tamamshode': khales_tamamshode,
             'sood_navizhe': sood_navizhe,
             'sood_navizhe_ratio': sood_navizhe_ratio,
-            'khales_daramad_forosh': getattr(m, 'khales_daramad_forosh', 0),
-            'tamam_shode': getattr(m, 'tamam_shode', 0),
-            'sayer_daramad_total': getattr(m, 'sayer_daramad_total', 0),
-            'sayer_hazine_total': getattr(m, 'sayer_hazine_total', 0),
-            'navizheh_ratio': getattr(m, 'navizheh_ratio', 0) * 100,
-            'vizheh_ratio': getattr(m, 'vizheh_ratio', 0) * 100,
+
         })
 
     context = {
