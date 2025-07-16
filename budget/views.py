@@ -299,9 +299,97 @@ from django.db.models import Sum
 from django.shortcuts import render
 from datetime import date
 from dateutil.relativedelta import relativedelta
-
-
 def BudgetTotal(request, *args, **kwargs):
+    start_time = time.time()
+    name = 'برنامه و بودجه سالانه'
+    result = page_permision(request, name)
+    if result:
+        return result
+
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='برنامه و بودجه سالانه', code=0)
+
+    master_info = MasterInfo.objects.filter(is_active=True).last()
+    acc_year = master_info.acc_year
+    base_year = acc_year - 1
+    today = date.today()
+    one_year_ago = today - relativedelta(years=1)
+
+    # گرفتن همه مسترها در یک لیست
+    masters = MasterInfo.objects.order_by('acc_year')
+    years = [m.acc_year for m in masters]
+    master_table = []
+
+    # پیش‌بارگذاری داده‌های مرتبط برای همه سال‌ها
+    sanad_details = SanadDetail.objects.filter(is_active=True, acc_year__in=years)
+    factor_details = FactorDetaile.objects.filter(acc_year__in=years)
+    back_factor_details = BackFactorDetail.objects.filter(acc_year__in=years)
+    DIVISION_FACTOR = Decimal('10000000000')
+    for m in masters:
+        acc_year_value = m.acc_year
+        # فیلتر کردن داده‌ها برای هر سال
+        sanad_qs = sanad_details.filter(acc_year=acc_year_value)
+        factor_qs = factor_details.filter(acc_year=acc_year_value)
+        back_factor_qs = back_factor_details.filter(acc_year=acc_year_value)
+
+        # محاسبات کلی
+        daramad_400 = (sanad_qs.filter(kol=400).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
+        bargasht_takfifif_403 = (sanad_qs.filter(kol=403).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
+        tamp_shode_500 = (sanad_qs.filter(kol=500).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
+        takhfif_kharid_401_1_300001 = (sanad_qs.filter(kol=401, moin=1, tafzili=300001).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
+        takhfif_forosh_501_1_400001 = (sanad_qs.filter(kol=501, moin=1, tafzili=400001).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
+
+        fac_kol = (factor_qs.aggregate(total=Sum('mablagh_after_takhfif_kol'))['total'] or 0) / 1e10
+        back_fac_kol = (back_factor_qs.aggregate(total=Sum('naghdi'))['total'] or 0) / 1e10
+
+        khales_factor = fac_kol - back_fac_kol
+        khales_forosh = daramad_400 + bargasht_takfifif_403 + takhfif_forosh_501_1_400001
+        khales_tamamshode = tamp_shode_500 + takhfif_kharid_401_1_300001
+
+        sood_navizhe = khales_forosh + khales_tamamshode
+        sood_navizhe_ratio = (sood_navizhe / khales_forosh * 100) if khales_forosh != 0 else 0
+
+        # افزودن نتایج به لیست
+        master_table.append({
+            'daramad_400': daramad_400,
+            'bargasht_takfifif_403': bargasht_takfifif_403,
+            'takhfif_forosh_501_1_400001': takhfif_forosh_501_1_400001,
+            'khales_forosh': khales_forosh,
+            'fac_kol': fac_kol,
+            'back_fac_kol': -back_fac_kol,
+            'khales_factor': khales_factor,
+            'tamam_shode_500': tamp_shode_500,
+            'takhfif_kharid_401_1_300001': takhfif_kharid_401_1_300001,
+            'khales_tamamshode': khales_tamamshode,
+            'sood_navizhe': sood_navizhe,
+            'sood_navizhe_ratio': sood_navizhe_ratio,
+            'khales_daramad_forosh': getattr(m, 'khales_daramad_forosh', 0),
+            'tamam_shode': getattr(m, 'tamam_shode', 0),
+            'sayer_daramad_total': getattr(m, 'sayer_daramad_total', 0),
+            'sayer_hazine_total': getattr(m, 'sayer_hazine_total', 0),
+            'navizheh_ratio': getattr(m, 'navizheh_ratio', 0) * 100,
+            'vizheh_ratio': getattr(m, 'vizheh_ratio', 0) * 100,
+        })
+
+    context = {
+        'acc_year': acc_year,
+        'base_year': base_year,
+        'user': user,
+        'years': years,
+        'master_table': master_table,
+
+    }
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+    return render(request, 'budget_total.html', context)
+
+
+
+
+
+
+def BudgetTotal2(request, *args, **kwargs):
     start_time = time.time()
     name = 'برنامه و بودجه سالانه'
     result = page_permision(request, name)
@@ -360,6 +448,14 @@ def BudgetTotal(request, *args, **kwargs):
             'sood_navizhe': sood_navizhe,
             'sood_navizhe_ratio': sood_navizhe_ratio,
 
+
+
+            'khales_daramad_forosh':m.khales_daramad_forosh,
+            'tamam_shode':m.tamam_shode,
+            'sayer_daramad_total':m.sayer_daramad_total,
+            'sayer_hazine_total':m.sayer_hazine_total,
+            'navizheh_ratio':m.navizheh_ratio*100,
+            'vizheh_ratio':m.vizheh_ratio*100,
         }
         )
 
