@@ -335,8 +335,11 @@ def BudgetTotal(request, *args, **kwargs):
 
         # محاسبات کلی
         daramad_400 = (sanad_qs.filter(kol=400).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
+        sayer_daramad_401 = (sanad_qs.filter(kol=401).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
         bargasht_takfifif_403 = (sanad_qs.filter(kol=403).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
+        takfifif_factor_404 = (sanad_qs.filter(kol=404).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
         tamp_shode_500 = (sanad_qs.filter(kol=500).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
+        sayer_hazineh_501 = (sanad_qs.filter(kol=501).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
         takhfif_kharid_401_1_300001 = (sanad_qs.filter(kol=401, moin=1, tafzili=300001).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
         takhfif_forosh_501_1_400001 = (sanad_qs.filter(kol=501, moin=1, tafzili=400001).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
 
@@ -350,10 +353,20 @@ def BudgetTotal(request, *args, **kwargs):
         sood_navizhe = khales_forosh + khales_tamamshode
         sood_navizhe_ratio = (sood_navizhe / khales_forosh * 100) if khales_forosh != 0 else 0
 
+        seri_400=daramad_400+sayer_daramad_401+bargasht_takfifif_403+takfifif_factor_404
+        seri_500=tamp_shode_500+sayer_hazineh_501
+
+        sood_vizhe=seri_400+seri_500
+        sood_vizhe_ratio = (sood_vizhe / khales_forosh * 100) if khales_forosh != 0 else 0
+
+
         # افزودن نتایج به لیست
         master_table.append({
             'daramad_400': daramad_400,
+            'sayer_daramad_401': sayer_daramad_401,
             'bargasht_takfifif_403': bargasht_takfifif_403,
+            'takfifif_factor_404': takfifif_factor_404,
+
             'takhfif_forosh_501_1_400001': takhfif_forosh_501_1_400001,
             'khales_forosh': khales_forosh,
             'fac_kol': fac_kol,
@@ -364,6 +377,12 @@ def BudgetTotal(request, *args, **kwargs):
             'khales_tamamshode': khales_tamamshode,
             'sood_navizhe': sood_navizhe,
             'sood_navizhe_ratio': sood_navizhe_ratio,
+
+
+            'seri_400': seri_400,
+            'seri_500': seri_500,
+
+            'sayer_hazineh_501': sayer_hazineh_501,
 
         })
 

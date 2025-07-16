@@ -113,10 +113,10 @@
                                                 {% endfor %}
                                             </tr>
                                             <tr>
-                                                <td>501-بهای تمام شده کالای فروش رفته</td>
+                                                <td>500-بهای تمام شده کالای فروش رفته</td>
                                                 {% for row in master_table %}
                                                     <td style="direction: ltr"><a
-                                                            href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/501/"
+                                                            href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/500/"
                                                             target="_blank">
                                                         {{ row.tamam_shode_500|floatformat:2|intcomma:False }}
                                                     </a></td>
@@ -153,6 +153,138 @@
                                                 <td>درصد سود ناویژه</td>
                                                 {% for row in master_table %}
                                                     <td style="direction: ltr">{{ row.sood_navizhe_ratio|floatformat:0 }}%</td>
+                                                {% endfor %}
+                                            </tr>
+
+
+                                            </tbody>
+                                        </table>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- ردیف سود ویژه -->
+            <div class="row">
+                <div class="col-md-12 mb-30">
+                    <div class="col-xl-12 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="card-body">
+                                <h5 class="card-title pb-0 border-0">سود ویژه </h5>
+                                <div class="table-responsive scrollbar max-h-1500" tabindex="3"
+                                     style="overflow-y: hidden; outline: none; touch-action: none;">
+                                    <div class="table-responsive">
+                                        <table class="table center-aligned-table mb-0">
+                                            <thead>
+                                            <tr class="text-dark">
+                                                <th>شرح</th>
+                                                {% for y in years %}
+                                                    <th>{{ y }}</th>
+                                                {% endfor %}
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr>
+                                                <td> 400-درآمد فروش</td>
+                                                {% for row in master_table %}
+                                                    <td>
+                                                        <a href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/400/"
+                                                           target="_blank">
+                                                            {{ row.daramad_400|floatformat:2|intcomma:False }}
+                                                        </a>
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
+                                            <tr>
+                                                <td> 401-سایر درآمدها</td>
+                                                {% for row in master_table %}
+                                                    <td style="direction: ltr">
+                                                        <a href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/401/"
+                                                           target="_blank">
+                                                            {{ row.sayer_daramad_401|floatformat:2|intcomma:False }}
+                                                        </a>
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
+                                            <tr>
+                                                <td>403-برگشت از فروش و تخفیفات</td>
+                                                {% for row in master_table %}
+                                                    <td style="direction: ltr"><a
+                                                            href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/403/"
+                                                            target="_blank">
+                                                        {{ row.bargasht_takfifif_403|floatformat:2|intcomma:False }}
+                                                    </a></td>
+                                                {% endfor %}
+                                            </tr>
+                                            <tr>
+                                                <td>404-تخفیفات فاکتور فروش</td>
+                                                {% for row in master_table %}
+                                                    <td style="direction: ltr"><a
+                                                            href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/404/"
+                                                            target="_blank">
+                                                        {{ row.takfifif_factor_404|floatformat:2|intcomma:False }}
+                                                    </a></td>
+                                                {% endfor %}
+                                            </tr>
+
+                                            <tr class="text-success bold-bottom">
+                                                <td>مجموع کل سری 400</td>
+                                                {% for row in master_table %}
+                                                    <td>{{ row.seri_400|floatformat:2|intcomma:False }}</td>
+                                                {% endfor %}
+                                            </tr>
+
+
+
+                                            <tr>
+                                                <td>500-بهای تمام شده کالای فروش رفته</td>
+                                                {% for row in master_table %}
+                                                    <td style="direction: ltr"><a
+                                                            href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/500/"
+                                                            target="_blank">
+                                                        {{ row.tamam_shode_500|floatformat:2|intcomma:False }}
+                                                    </a></td>
+                                                {% endfor %}
+                                            </tr>
+                                            <tr>
+                                                <td>501-سایر هزینه ها</td>
+                                                {% for row in master_table %}
+                                                    <td style="direction: ltr"><a
+                                                            href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/501/"
+                                                            target="_blank">
+                                                        {{ row.sayer_hazineh_501|floatformat:2|intcomma:False }}
+                                                    </a></td>
+                                                {% endfor %}
+                                            </tr>
+
+
+                                            <tr class="text-primary bold-bottom-b">
+                                                <td>مجموع کل سری 500</td>
+                                                {% for row in master_table %}
+                                                    <td style="direction: ltr">
+                                                        {{ row.seri_500|floatformat:2|intcomma:False }}
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
+
+                                            <tr class="text-dark">
+                                                <td>سود ویژه</td>
+                                                {% for row in master_table %}
+                                                    <td style="direction: ltr">{{ row.sood_vizhe|floatformat:2|intcomma:False }}</td>
+                                                {% endfor %}
+                                            </tr>
+
+                                            <tr class="text-dark">
+                                                <td>درصد سود ویژه</td>
+                                                {% for row in master_table %}
+                                                    <td style="direction: ltr">{{ row.sood_vizhe_ratio|floatformat:0 }}%</td>
                                                 {% endfor %}
                                             </tr>
 
