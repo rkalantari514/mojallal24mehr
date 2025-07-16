@@ -319,25 +319,36 @@ def BudgetTotal(request, *args, **kwargs):
         back_fac_kol=(BackFactorDetail.objects.filter(acc_year=m.acc_year).aggregate(total=Sum('naghdi'))['total'] or 0) /10000000000
         khales_factor=fac_kol- back_fac_kol
 
-        tamam_shode_500 = (SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=500).aggregate(total=Sum('curramount'))['total'] or 0 ) /10000000000
         takhfif_forosh_501_1_400001 = (SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=501,moin=1,tafzili=400001).aggregate(total=Sum('curramount'))['total'] or 0 ) /10000000000
 
         khales_forosh=daramad_400+bargasht_takfifif_403+takhfif_forosh_501_1_400001
 
-        sood_navizhe=khales_forosh+tamam_shode_500
+        tamam_shode_500 = (SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=500).aggregate(total=Sum('curramount'))['total'] or 0 ) /10000000000
+        takhfif_kharid_401_1_300001 = (SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=401,moin=1,tafzili=300001).aggregate(total=Sum('curramount'))['total'] or 0 ) /10000000000
+
+        khales_tamamshode=tamam_shode_500+takhfif_kharid_401_1_300001
+
+
+        sood_navizhe=khales_forosh+khales_tamamshode
         sood_navizhe_ratio=sood_navizhe/khales_forosh*100
 
         master_table.append({
             'daramad_400':daramad_400,
             'bargasht_takfifif_403':bargasht_takfifif_403,
+            'takhfif_forosh_501_1_400001': takhfif_forosh_501_1_400001,
             'khales_forosh':khales_forosh,
+
             'fac_kol':fac_kol,
             'back_fac_kol': - back_fac_kol,
             'khales_factor': khales_factor,
 
 
+
+
             'tamam_shode_500': tamam_shode_500,
-            'takhfif_forosh_501_1_400001': takhfif_forosh_501_1_400001,
+            'takhfif_kharid_401_1_300001': takhfif_kharid_401_1_300001,
+            'khales_tamamshode': khales_tamamshode,
+
 
             'sood_navizhe': sood_navizhe,
             'sood_navizhe_ratio': sood_navizhe_ratio,

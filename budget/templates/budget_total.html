@@ -60,7 +60,8 @@
                                                 <td> 400-درآمد فروش</td>
                                                 {% for row in master_table %}
                                                     <td>
-                                                        <a href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/400/" target="_blank">
+                                                        <a href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/400/"
+                                                           target="_blank">
                                                             {{ row.daramad_400|floatformat:2|intcomma:False }}
                                                         </a>
                                                     </td>
@@ -69,16 +70,20 @@
                                             <tr>
                                                 <td>403-برگشت از فروش و تخفیفات</td>
                                                 {% for row in master_table %}
-                                                    <td style="direction: ltr"><a href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/403/" target="_blank">
-                                                    {{ row.bargasht_takfifif_403|floatformat:2|intcomma:False }}
+                                                    <td style="direction: ltr"><a
+                                                            href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/403/"
+                                                            target="_blank">
+                                                        {{ row.bargasht_takfifif_403|floatformat:2|intcomma:False }}
                                                     </a></td>
                                                 {% endfor %}
                                             </tr>
                                             <tr>
-                                                <td>400001-1-501- تخفیف</td>
+                                                <td>400001-1-501- تخفیف فاکتور فروش</td>
                                                 {% for row in master_table %}
-                                                    <td style="direction: ltr"> <a href="/sanad_total/{{ years|index:forloop.counter0 }}/501/1/400001" target="_blank">
-                                                   {{ row.takhfif_forosh_501_1_400001|floatformat:2|intcomma:False }}
+                                                    <td style="direction: ltr"><a
+                                                            href="/sanad_total/{{ years|index:forloop.counter0 }}/501/1/400001"
+                                                            target="_blank">
+                                                        {{ row.takhfif_forosh_501_1_400001|floatformat:2|intcomma:False }}
                                                     </a></td>
                                                 {% endfor %}
                                             </tr>
@@ -107,12 +112,33 @@
                                                     <td>{{ row.khales_factor|floatformat:2|intcomma:False }}</td>
                                                 {% endfor %}
                                             </tr>
-                                            <tr class="text-primary bold-bottom-b">
+                                            <tr>
                                                 <td>501-بهای تمام شده کالای فروش رفته</td>
                                                 {% for row in master_table %}
-                                                  <td style="direction: ltr">  <a href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/501/" target="_blank">
-                                                    {{ row.tamam_shode_500|floatformat:2|intcomma:False }}
+                                                    <td style="direction: ltr"><a
+                                                            href="/balance-sheet-moin/{{ years|index:forloop.counter0 }}/501/"
+                                                            target="_blank">
+                                                        {{ row.tamam_shode_500|floatformat:2|intcomma:False }}
                                                     </a></td>
+                                                {% endfor %}
+                                            </tr>
+<tr>
+                                                <td>300001-1-401- تخفیف فاکتور خرید</td>
+                                                {% for row in master_table %}
+                                                    <td style="direction: ltr"><a
+                                                            href="/sanad_total/{{ years|index:forloop.counter0 }}/401/1/300001"
+                                                            target="_blank">
+                                                        {{ row.takhfif_kharid_401_1_300001|floatformat:2|intcomma:False }}
+                                                    </a></td>
+                                                {% endfor %}
+                                            </tr>
+
+                                            <tr class="text-primary bold-bottom-b">
+                                                <td>خالص بهای تمام شده کالای فروش رفته</td>
+                                                {% for row in master_table %}
+                                                    <td style="direction: ltr">
+                                                        {{ row.khales_tamamshode|floatformat:2|intcomma:False }}
+                                                    </td>
                                                 {% endfor %}
                                             </tr>
 
