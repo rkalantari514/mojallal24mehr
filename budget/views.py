@@ -378,6 +378,9 @@ def BudgetTotal(request, *args, **kwargs):
             'sood_navizhe': sood_navizhe,
             'sood_navizhe_ratio': sood_navizhe_ratio,
 
+            'sood_vizhe': sood_vizhe,
+            'sood_vizhe_ratio': sood_vizhe_ratio,
+
 
             'seri_400': seri_400,
             'seri_500': seri_500,
