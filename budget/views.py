@@ -289,6 +289,16 @@ def BudgetCostTotal(request, *args, **kwargs):
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
     return render(request, 'budget_cost_total.html', context)
 
+import time
+from django.db.models import Sum
+from django.shortcuts import render
+from datetime import date
+from dateutil.relativedelta import relativedelta
+import time
+from django.db.models import Sum
+from django.shortcuts import render
+from datetime import date
+from dateutil.relativedelta import relativedelta
 
 
 def BudgetTotal(request, *args, **kwargs):
@@ -313,12 +323,9 @@ def BudgetTotal(request, *args, **kwargs):
         years.append(m.acc_year)
         daramad_400 = (SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=400).aggregate(total=Sum('curramount'))['total'] or 0 ) /10000000000
         bargasht_takfifif_403 = (SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=403).aggregate(total=Sum('curramount'))['total'] or 0) /10000000000
-
-
         fac_kol=(FactorDetaile.objects.filter(acc_year=m.acc_year).aggregate(total=Sum('mablagh_after_takhfif_kol'))['total'] or 0 )/10000000000
         back_fac_kol=(BackFactorDetail.objects.filter(acc_year=m.acc_year).aggregate(total=Sum('naghdi'))['total'] or 0) /10000000000
         khales_factor=fac_kol- back_fac_kol
-
         takhfif_forosh_501_1_400001 = (SanadDetail.objects.filter(is_active=True, acc_year=m.acc_year,kol=501,moin=1,tafzili=400001).aggregate(total=Sum('curramount'))['total'] or 0 ) /10000000000
 
         khales_forosh=daramad_400+bargasht_takfifif_403+takhfif_forosh_501_1_400001
@@ -353,14 +360,6 @@ def BudgetTotal(request, *args, **kwargs):
             'sood_navizhe': sood_navizhe,
             'sood_navizhe_ratio': sood_navizhe_ratio,
 
-
-
-            'khales_daramad_forosh':m.khales_daramad_forosh,
-            'tamam_shode':m.tamam_shode,
-            'sayer_daramad_total':m.sayer_daramad_total,
-            'sayer_hazine_total':m.sayer_hazine_total,
-            'navizheh_ratio':m.navizheh_ratio*100,
-            'vizheh_ratio':m.vizheh_ratio*100,
         }
         )
 
