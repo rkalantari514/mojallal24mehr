@@ -170,7 +170,6 @@
             </div>
 
 
-
             <!-- ردیف سود ویژه -->
             <div class="row">
                 <div class="col-md-12 mb-30">
@@ -242,7 +241,6 @@
                                             </tr>
 
 
-
                                             <tr>
                                                 <td>500-بهای تمام شده کالای فروش رفته</td>
                                                 {% for row in master_table %}
@@ -288,6 +286,70 @@
                                                 {% endfor %}
                                             </tr>
 
+
+                                            </tbody>
+                                        </table>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ردیف موارد با اهمیت -->
+            <div class="row">
+                <div class="col-md-12 mb-30">
+                    <div class="col-xl-12 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="card-body">
+                                <h5 class="card-title pb-0 border-0">با اهمیت </h5>
+                                <div class="table-responsive scrollbar max-h-1500" tabindex="3"
+                                     style="overflow-y: hidden; outline: none; touch-action: none;">
+                                    <div class="table-responsive">
+                                        <table class="table center-aligned-table mb-0">
+                                            <thead>
+                                            <tr class="text-dark">
+                                                <th>شرح</th>
+                                                {% for y in years %}
+                                                    <th>{{ y }}</th>
+                                                {% endfor %}
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr>
+                                                <td>400100-1-501- کسری انبار گردانی</td>
+                                                {% for row in master_table %}
+                                                    <td style="direction: ltr"><a
+                                                            href="/sanad_total/{{ years|index:forloop.counter0 }}/501/1/400100"
+                                                            target="_blank">
+                                                        {{ row.kasri_anbar_501_1_400100|floatformat:2|intcomma:False }}
+                                                    </a></td>
+                                                {% endfor %}
+                                            </tr>
+
+<tr>
+                                                <td>300009-1-401- برگشت کسری انبار گردانی</td>
+                                                {% for row in master_table %}
+                                                    <td style="direction: ltr"><a
+                                                            href="/sanad_total/{{ years|index:forloop.counter0 }}/401/1/300009"
+                                                            target="_blank">
+                                                        {{ row.mazad_anbar_401_1_300009|floatformat:2|intcomma:False }}
+                                                    </a></td>
+                                                {% endfor %}
+                                            </tr>
+
+                                            <tr class="text-primary bold-bottom-b">
+                                                <td>برآیند انبار گردانی</td>
+                                                {% for row in master_table %}
+                                                    <td style="direction: ltr">
+                                                        {{ row.barayand_anbargardani|floatformat:2|intcomma:False }}
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
 
                                             </tbody>
                                         </table>

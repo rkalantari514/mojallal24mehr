@@ -342,6 +342,8 @@ def BudgetTotal(request, *args, **kwargs):
         sayer_hazineh_501 = (sanad_qs.filter(kol=501).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
         takhfif_kharid_401_1_300001 = (sanad_qs.filter(kol=401, moin=1, tafzili=300001).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
         takhfif_forosh_501_1_400001 = (sanad_qs.filter(kol=501, moin=1, tafzili=400001).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
+        kasri_anbar_501_1_400100 = (sanad_qs.filter(kol=501, moin=1, tafzili=400100).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
+        mazad_anbar_401_1_300009 = (sanad_qs.filter(kol=401, moin=1, tafzili=300009).aggregate(total=Sum('curramount'))['total'] or 0) / DIVISION_FACTOR
 
         fac_kol = (factor_qs.aggregate(total=Sum('mablagh_after_takhfif_kol'))['total'] or 0) / 1e10
         back_fac_kol = (back_factor_qs.aggregate(total=Sum('naghdi'))['total'] or 0) / 1e10
@@ -386,6 +388,15 @@ def BudgetTotal(request, *args, **kwargs):
             'seri_500': seri_500,
 
             'sayer_hazineh_501': sayer_hazineh_501,
+
+
+
+
+            'kasri_anbar_501_1_400100': kasri_anbar_501_1_400100,
+            'mazad_anbar_401_1_300009': mazad_anbar_401_1_300009,
+            'barayand_anbargardani': kasri_anbar_501_1_400100 + mazad_anbar_401_1_300009,
+
+
 
         })
 
