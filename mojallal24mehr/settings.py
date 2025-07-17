@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'payment',
     'festival',
     'budget',
+    'events',
 
 ]
 

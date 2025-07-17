@@ -1,0 +1,82 @@
+{#{% extends 'base.html' %} {# فرض می کنیم یک base.html در ریشه templates پروژه دارید #}
+{% extends 'shared/_MainLayout.html' %}
+
+{% load static %} {# برای لود کردن فایل های استاتیک #}
+
+{% block title %}مدیریت رویدادها{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'events:event_list' %}">رویدادها</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'events:category_list' %}">دسته بندی ها</a></li>
+            {# این Breadcrumb را می توان داینامیک تر کرد #}
+        </ol>
+    </nav>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% block events_content %}
+    {# محتوای خاص هر صفحه در اینجا قرار می گیرد #}
+    {% endblock %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{# اینجا می توانید فایل های جاوااسکریپت اضافی را لود کنید #}
+{# برای مثال، برای datepicker یا select2 #}
+<script>
+    // اگر از type="date" در input استفاده می کنید، مرورگر خودش تقویم را نشان می دهد.
+    // اگر می خواهید یک datepicker سفارشی (مثل شمسی) داشته باشید، باید اینجا JS آن را اضافه کنید.
+    // مثال برای datepicker میلادی (نیاز به jQuery UI)
+    // $(function() {
+    //     $(".datepicker").datepicker({
+    //         dateFormat: 'yy-mm-dd',
+    //         changeMonth: true,
+    //         changeYear: true
+    //     });
+    // });
+
+    // برای Formsetها (مدیریت افزودن/حذف دینامیک فرم ها)
+    function updateElementIndex(el, prefix, ndx) {
+        var id_regex = new RegExp('(' + prefix + '-\\d+-)|(' + prefix + '__prefix__)');
+        var replacement = prefix + '-' + ndx + '-';
+        if ($(el).attr("for")) $(el).attr("for", $(el).attr("for").replace(id_regex, replacement));
+        if (el.id) el.id = el.id.replace(id_regex, replacement);
+        if (el.name) el.name = el.name.replace(id_regex, replacement);
+    }
+
+    function deleteForm(prefix, btn) {
+        var form_count = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());
+        if (form_count > 1) {
+            $(btn).closest('.formset-row').remove();
+            var forms = $('.formset-row'); // update the index for all remaining form elements
+            $('#id_' + prefix + '-TOTAL_FORMS').val(forms.length);
+            for (var i=0; i<forms.length; i++) {
+                $(forms.get(i)).find(':input').each(function() {
+                    updateElementIndex(this, prefix, i);
+                });
+            }
+        } else {
+            alert("حداقل یک آیتم باید وجود داشته باشد.");
+        }
+        return false;
+    }
+
+    function addForm(prefix, template) {
+        var form_count = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());
+        var new_form = template.replace(/__prefix__/g, form_count);
+        $('#' + prefix + '-formset-container').append(new_form);
+        $('#id_' + prefix + '-TOTAL_FORMS').val(form_count + 1);
+        return false;
+    }
+</script>
+{% endblock %}

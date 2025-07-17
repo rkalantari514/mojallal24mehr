@@ -1,0 +1,74 @@
+{% extends 'events/base_events.html' %}
+
+{% block events_content %}
+<h2 class="mb-4">جزئیات برگزاری رویداد: {{ event_detail.event.name }} در {{ event_detail.occurrence_date }}</h2>
+
+<div class="card mb-4">
+    <div class="card-header">اطلاعات جزئیات برگزاری</div>
+    <div class="card-body">
+        <p><strong>رویداد اصلی:</strong> <a href="{% url 'events:event_detail' event_detail.event.pk %}">{{ event_detail.event.name }}</a></p>
+        <p><strong>تاریخ برگزاری:</strong> {{ event_detail.occurrence_date }}</p>
+        <p><strong>وضعیت برگزاری:</strong> {{ event_detail.get_status_relative_to_schedule_display }}</p>
+        <p><strong>گزارش:</strong></p>
+        <div class="alert alert-light">{{ event_detail.report|linebreaksbr }}</div>
+    </div>
+    <div class="card-footer">
+        <a href="{% url 'events:event_detail_edit' event_detail.pk %}" class="btn btn-warning btn-sm">ویرایش جزئیات</a>
+        <a href="{% url 'events:event_detail_delete' event_detail.pk %}" class="btn btn-danger btn-sm">حذف جزئیات</a>
+        <a href="{% url 'events:event_detail' event_detail.event.pk %}" class="btn btn-secondary btn-sm">بازگشت به رویداد</a>
+    </div>
+</div>
+
+<h3 class="mb-3">مصوبات</h3>
+{% if event_detail.resolutions.all %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>متن مصوبه</th>
+                <th>مسئول اجرا</th>
+                <th>وضعیت</th>
+                <th>مهلت انجام</th>
+                <th>تاریخ انجام</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for resolution in event_detail.resolutions.all %}
+            <tr>
+                <td>{{ resolution.text }}</td>
+                <td>{{ resolution.responsible_person.get_full_name|default:resolution.responsible_person.username|default:"-" }}</td>
+                <td>{{ resolution.get_status_display }}</td>
+                <td>{{ resolution.due_date|default:"-" }}</td>
+                <td>{{ resolution.completed_date|default:"-" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info" role="alert">
+    هیچ مصوبه ای برای این جزئیات برگزاری ثبت نشده است.
+</div>
+{% endif %}
+
+<h3 class="mb-3 mt-4">تصاویر</h3>
+{% if event_detail.images.all %}
+<div class="row">
+    {% for image in event_detail.images.all %}
+    <div class="col-md-4 mb-3">
+        <div class="card">
+            <img src="{{ image.image.url }}" class="card-img-top" alt="{{ image.caption }}" style="height: 200px; object-fit: cover;">
+            <div class="card-body">
+                <p class="card-text">{{ image.caption|default:"بدون توضیح" }}</p>
+                <small class="text-muted">آپلود شده در: {{ image.uploaded_at|date:"Y/m/d H:i" }}</small>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info" role="alert">
+    هیچ تصویری برای این جزئیات برگزاری ثبت نشده است.
+</div>
+{% endif %}
+{% endblock %}

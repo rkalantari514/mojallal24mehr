@@ -1,0 +1,59 @@
+{% extends 'events/base_events.html' %}
+
+{% block events_content %}
+<h2 class="mb-4">جزئیات رویداد: {{ event.name }}</h2>
+
+<div class="card mb-4">
+    <div class="card-header">اطلاعات اصلی</div>
+    <div class="card-body">
+        <p><strong>نام رویداد:</strong> {{ event.name }}</p>
+        <p><strong>دسته بندی:</strong> {{ event.category.name|default:"-" }}</p>
+        <p><strong>بازه تکرار:</strong> {{ event.get_repeat_interval_display }}</p>
+        <p><strong>اولین رویداد:</strong> {{ event.first_occurrence }}</p>
+        <p><strong>آخرین رویداد:</strong> {{ event.last_occurrence|default:"-" }}</p>
+        <p><strong>فاصله یادآور:</strong> {{ event.get_reminder_interval_display }}</p>
+        <p><strong>فعال:</strong> {% if event.is_active %}<span class="badge bg-success">بله</span>{% else %}<span class="badge bg-danger">خیر</span>{% endif %}</p>
+    </div>
+    <div class="card-footer">
+        <a href="{% url 'events:event_edit' event.pk %}" class="btn btn-warning btn-sm">ویرایش رویداد</a>
+        <a href="{% url 'events:event_delete' event.pk %}" class="btn btn-danger btn-sm">حذف رویداد</a>
+        <a href="{% url 'events:event_list' %}" class="btn btn-secondary btn-sm">بازگشت به لیست</a>
+    </div>
+</div>
+
+<h3 class="mb-3">جزئیات برگزاری</h3>
+<a href="{% url 'events:event_detail_add' event_pk=event.pk %}" class="btn btn-success mb-3">افزودن جزئیات برگزاری جدید</a>
+
+{% if event.details.all %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>تاریخ برگزاری</th>
+                <th>وضعیت</th>
+                <th>گزارش</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detail in event.details.all %}
+            <tr>
+                <td><a href="{% url 'events:event_detail_detail' detail.pk %}">{{ detail.occurrence_date }}</a></td>
+                <td>{{ detail.get_status_relative_to_schedule_display }}</td>
+                <td>{{ detail.report|truncatechars:100 }}</td>
+                <td>
+                    <a href="{% url 'events:event_detail_detail' detail.pk %}" class="btn btn-sm btn-info">جزئیات</a>
+                    <a href="{% url 'events:event_detail_edit' detail.pk %}" class="btn btn-sm btn-warning">ویرایش</a>
+                    <a href="{% url 'events:event_detail_delete' detail.pk %}" class="btn btn-sm btn-danger">حذف</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info" role="alert">
+    هیچ جزئیات برگزاری برای این رویداد ثبت نشده است.
+</div>
+{% endif %}
+{% endblock %}

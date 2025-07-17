@@ -1,0 +1,14 @@
+{% extends 'events/base_events.html' %}
+
+{% block events_content %}
+<h2 class="mb-4">حذف دسته بندی</h2>
+<div class="alert alert-warning" role="alert">
+    آیا مطمئن هستید که می خواهید دسته بندی "<strong>{{ object.name }}</strong>" را حذف کنید؟
+    این عملیات غیر قابل بازگشت است.
+</div>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">بله، حذف کن</button>
+    <a href="{% url 'events:category_list' %}" class="btn btn-secondary">خیر، بازگشت</a>
+</form>
+{% endblock %}

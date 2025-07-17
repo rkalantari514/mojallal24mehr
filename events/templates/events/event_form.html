@@ -1,0 +1,30 @@
+{% extends 'events/base_events.html' %}
+
+{% block events_content %}
+<h2 class="mb-4">{% if form.instance.pk %}ویرایش رویداد{% else %}افزودن رویداد جدید{% endif %}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+        <div class="mb-3">
+            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+                <div class="form-text">{{ field.help_text }}</div>
+            {% endif %}
+            {% for error in field.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <button type="submit" class="btn btn-success">ذخیره</button>
+    <a href="{% url 'events:event_list' %}" class="btn btn-secondary">بازگشت</a>
+</form>
+{% endblock %}

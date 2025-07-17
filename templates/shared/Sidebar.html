@@ -111,7 +111,7 @@
             <!-- منو حسابداری-->
             <li>
                 <a href="javascript:void(0);" data-toggle="collapse" data-target="#calendar-menu">
-                    <div class="pull-left"><i class="ti-calendar"></i><span class="right-nav-text">حسابداری</span></div>
+                    <div class="pull-left"><i class="ti-layout-accordion-list"></i><span class="right-nav-text">حسابداری</span></div>
                     <div class="pull-right"><i class="ti-plus"></i></div>
                     <div class="clearfix"></div>
                 </a>
@@ -184,6 +184,18 @@
                         <li><a href="{% url 'budget_sale_total' %}">کلیات بودجه فروش </a></li>
 {#                    {% endif %}#}
 
+                </ul>
+            </li>
+                    <!-- منوی رویدادها-->
+            <li>
+                <a href="javascript:void(0);" data-toggle="collapse" data-target="#events">
+                    <div class="pull-left"><i class="ti-calendar"></i><span class="right-nav-text">رویدادها</span>
+                    </div>
+                    <div class="pull-right"><i class="ti-plus"></i></div>
+                    <div class="clearfix"></div>
+                </a>
+                <ul id="events" class="collapse" data-parent="#sidebarnav">
+                    <li><a href="/events/">رویداد</a></li>
                 </ul>
             </li>
             <br>

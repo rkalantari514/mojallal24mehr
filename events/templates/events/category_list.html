@@ -1,0 +1,36 @@
+{% extends 'events/base_events.html' %}
+
+{% block events_content %}
+<h2 class="mb-4">لیست دسته بندی رویدادها</h2>
+<a href="{% url 'events:category_add' %}" class="btn btn-primary mb-3">افزودن دسته بندی جدید</a>
+
+{% if categories %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>نام</th>
+                <th>توضیحات</th>
+                <th>عملیات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr>
+                <td>{{ category.name }}</td>
+                <td>{{ category.description|default:"-" }}</td>
+                <td>
+                    <a href="{% url 'events:category_edit' category.pk %}" class="btn btn-sm btn-info">ویرایش</a>
+                    <a href="{% url 'events:category_delete' category.pk %}" class="btn btn-sm btn-danger">حذف</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info" role="alert">
+    هیچ دسته بندی رویدادی یافت نشد.
+</div>
+{% endif %}
+{% endblock %}

@@ -56,7 +56,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = []
 
     def __str__(self):
-        return self.mobile_number
+        return f'{self.first_name} {self.last_name}'
 
     def has_perm(self, perm, obj=None):
         return True

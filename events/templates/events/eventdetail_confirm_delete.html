@@ -1,0 +1,14 @@
+{% extends 'events/base_events.html' %}
+
+{% block events_content %}
+<h2 class="mb-4">حذف جزئیات برگزاری</h2>
+<div class="alert alert-warning" role="alert">
+    آیا مطمئن هستید که می خواهید جزئیات برگزاری رویداد "<strong>{{ object.event.name }}</strong>" در تاریخ <strong>{{ object.occurrence_date }}</strong> را حذف کنید؟
+    این عملیات تمام مصوبات و تصاویر مرتبط با آن را نیز حذف خواهد کرد و غیر قابل بازگشت است.
+</div>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">بله، حذف کن</button>
+    <a href="{% url 'events:event_detail' object.event.pk %}" class="btn btn-secondary">خیر، بازگشت</a>
+</form>
+{% endblock %}

@@ -35,6 +35,7 @@ urlpatterns = [
     path('', include('payment.urls')),
     path('', include('festival.urls')),
     path('', include('budget.urls')),
+    path('events/', include('events.urls')),  
 
     path('update-dark-mode/', update_dark_mode, name='update_dark_mode'),
 
