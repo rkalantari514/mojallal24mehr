@@ -623,7 +623,7 @@ def balance_sheet_tafsili(request,year, kol_code, moin_code):
 
         level3.append(
             {
-                'code': tafzili_code,
+                'code': tafsili_code,
                 'name': tafsili_name,
 
             }
