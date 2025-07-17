@@ -583,7 +583,124 @@ def balance_sheet_moin(request,year, kol_code):
     return render(request, 'balance_sheet.html', context)
 
 
-def balance_sheet_tafsili(request,year, kol_code, moin_code):
+
+def balance_sheet_tafsili(request, year, kol_code, moin_code):
+    # بررسی مجوز
+    name = 'تراز آزمایشی | تفصیلی'
+    result = page_permision(request, name)
+    if result:
+        return result
+
+    # تعیین سال حساب
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    if year:
+        acc_year = year
+
+    # جمع‌آوری کدهای tafsili بدون تکرار
+    tafsili_codes = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).values_list('tafzili', flat=True).distinct()
+
+    total_bed = total_bes = total_curramount = 0
+    balance_data = []
+    level3 = []
+
+    # برای هر کد tafsili، نام و مقدارهای مربوطه را جمع‌آوری می‌کنیم
+    for tafsili_code in tafsili_codes:
+        # تعیین نام بر اساس نوع کد
+        try:
+            if int(kol_code) == 103:
+                person = Person.objects.filter(code=int(tafsili_code)).last()
+                tafsili_name = f'{person.name} {person.lname}' if person else ''
+            elif int(kol_code) == 102 or int(kol_code) == 500:
+                kala = Kala.objects.filter(kala_taf=int(tafsili_code)).last()
+                tafsili_name = kala.name if kala else ''
+            else:
+                acc = AccCoding.objects.filter(
+                    level=3,
+                    parent__code=int(moin_code),
+                    parent__parent__code=int(kol_code),
+                    code=int(tafsili_code)
+                ).last()
+                tafsili_name = acc.name if acc else ''
+        except:
+            tafsili_name = ''
+
+        # افزودن به لیست سطح ۳
+        level3.append({'code': tafsili_code, 'name': tafsili_name})
+
+        # جمع مقادیر با یک Query برای هر tafsili
+        aggregates = SanadDetail.objects.filter(
+            is_active=True,
+            kol=kol_code,
+            moin=moin_code,
+            tafzili=tafsili_code,
+            acc_year=acc_year
+        ).aggregate(
+            bed_sum=Sum('bed'),
+            bes_sum=Sum('bes'),
+            curramount_sum=Sum('curramount')
+        )
+
+        bed_sum = aggregates['bed_sum'] or 0
+        bes_sum = aggregates['bes_sum'] or 0
+        curramount_sum = aggregates['curramount_sum'] or 0
+
+        # جمع کل
+        total_bed += bed_sum
+        total_bes += bes_sum
+        total_curramount += curramount_sum
+
+        # افزودن به لیست نهایی
+        balance_data.append({
+            'tafzili_code': tafsili_code,
+            'tafsili_name': tafsili_name,
+            'bed_sum': bed_sum,
+            'bes_sum': bes_sum,
+            'curramount_sum': curramount_sum,
+        })
+
+    # نام کل کلید
+    kol_item = AccCoding.objects.filter(level=1, code=kol_code).last()
+    kol_name = kol_item.name if kol_item else ''
+
+    # ساخت لیست‌های سطح ۱ و ۲
+    level1 = [
+        {'code': item.code, 'name': item.name}
+        for item in AccCoding.objects.filter(level=1).order_by('code')
+    ]
+    level2 = [
+        {'code': item.code, 'name': item.name}
+        for item in AccCoding.objects.filter(level=2, parent__code=kol_code).order_by('code')
+    ]
+
+    # جمع‌آوری tafziliها برای ساخت لیست کامل
+    sanads = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, acc_year=acc_year)
+    tafzili_set = sorted(set(sanads.values_list('tafzili', flat=True)))
+
+    # ساخت context نهایی
+    context = {
+        'year': year,
+        'balance_data': balance_data,
+        'level': 3,
+        'moin_code': moin_code,
+        'kol_code': kol_code,
+        'level_name': 'تفضیلی',
+        'parent_code': moin_code,
+        'parent_name': AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code).first().name,
+
+        'level1': level1,
+        'level2': level2,
+        'level3': level3,
+        'total_bed': total_bed,
+        'total_bes': total_bes,
+        'total_curramount': total_curramount,
+    }
+    return render(request, 'balance_sheet.html', context)
+
+
+
+
+
+def balance_sheet_tafsili2(request,year, kol_code, moin_code):
     name = 'تراز آزمایشی | تفصیلی'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
