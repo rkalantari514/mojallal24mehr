@@ -169,6 +169,7 @@
                     <th data-field="vaziat" data-sortable="true" data-filter-control="select">وضعیت</th>
                     <th data-field="tarikh" data-sortable="true" data-sorter="numericOnly">تاریخ</th>
                     <th data-field="code" data-sortable="true" data-sorter="numericOnly">کد</th>
+                    <th data-field="name" data-sortable="true" data-sorter="numericOnly">نام </th>
                     <th data-field="radif" data-sortable="true" data-sorter="numericOnly">ردیف</th>
                     <th data-field="sharh" data-sortable="true" data-sorter="numericOnly">شرح</th>
                     <th data-field="bed" data-sortable="true" data-sorter="numericOnly">بدهکار</th>
@@ -183,6 +184,7 @@
                             <td><h4 >غیر فعال</h4></td>
                             <td><h4>{{ item.tarikh }}</h4></td>
                             <td><h4>{{ item.code }}</h4></td>
+                            <td><h4>{{ item.kala_name }}</h4></td>
                             <td><h4>{{ item.radif }}</h4></td>
                             <td><h4 class="text-danger">{{ item.syscomment }}</h4></td>
                             <td><h4><s>{{ item.bed|floatformat:0|intcomma:False }}</s></h4></td>
