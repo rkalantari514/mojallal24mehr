@@ -7,10 +7,12 @@
             width: 300px; /* عرض دکمه‌ها را تنظیم می‌کند */
             margin-bottom: 10px; /* فاصله بین خطوط را تنظیم می‌کند */
         }
+
+        .custom-font-size {
+            font-size: 1rem; /* یا هر اندازه‌ای که دوست داری */
+            font-weight: bold; /* اختیاری */
+        }
     </style>
-
-
-
 
 
 
@@ -18,7 +20,7 @@
 
         <!-- دکمه سطوح -->
         <div class="card-body">
-    <div class="text-center">
+            <div class="text-center">
                 {% if level == 1 %}
                     <button type="button" class="btn btn-primary category-btn">تراز کل</button>
                 {% else %}
@@ -102,81 +104,96 @@
             </div>
         {% endif %}
 
-
+        <!-- جدول خلاصه -->
         <div class="card-body">
-             <h5 class="mb-15 pb-0 border-0 card-title">خلاصه </h5>
-             <!-- action group -->
-              <div class="table-responsive">
-              <table class="table center-aligned-table mb-10 text-center">
-                <thead>
-                  <tr class="text-dark">
-                    <th>بدهکار</th>
-                    <th>بستانکار</th>
-                    <th>مانده</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><h4>{{ total_bed|floatformat:0|intcomma:False }}</h4></td>
-                    <td><h4>{{ total_bes|floatformat:0|intcomma:False }}</h4></td>
-                    <td style="direction: ltr"><h4>{{ total_curramount|floatformat:0|intcomma:False }}</h4></td>
+            <h5 class="mb-15 pb-0 border-0 card-title">خلاصه </h5>
+            <!-- action group -->
+            <div class="table-responsive">
+                <table class="table center-aligned-table mb-10 text-center">
+                    <thead>
+                    <tr class="text-dark">
+                        <th>بدهکار</th>
+                        <th>بستانکار</th>
+                        <th>مانده</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><h4>{{ total_bed|floatformat:0|intcomma:False }}</h4></td>
+                        <td><h4>{{ total_bes|floatformat:0|intcomma:False }}</h4></td>
+                        <td style="direction: ltr"><h4>{{ total_curramount|floatformat:0|intcomma:False }}</h4></td>
 
-                  </tr>
+                    </tr>
 
-                </tbody>
-              </table>
+                    </tbody>
+                </table>
             </div>
-           </div>
+        </div>
 
 
         <div class="container">
 
 
             <div class="table-responsive">
-                <table
-                        id="table"
-                        class="table-striped"
-                        data-toggle="table"
-                        data-locale="fa-IR"
-                        data-search="true"
-                        data-show-columns="true"
-                        data-show-export="true"
-                        data-show-refresh="true"
-                        data-show-columns-toggle-all="true"
-                        data-show-pagination-switch="true"
-                        data-show-toggle="true"
-                        data-show-fullscreen="true"
-                        data-buttons="buttons"
-                        data-search-align="left"
-                        data-buttons-class="primary"
-                        data-pagination="true"
-                        data-show-columns-search="true"
-                        data-show-footer="true"
-                        data-page-size="100"
-                        data-remember-order="true"
-                        data-sortable="true"
-                        data-show-search-clear-button="true"
-                        data-sort-name="count"
-                        data-sort-order="desc"
-                        data-filter-control="true"
-                        data-show-print="true"
-                        data-export-data-type="all"
-                        data-export-types=['excel']
-                >
+                <table id="table"
+                       class="table-striped"
+                       data-toggle="table"
+                       data-locale="fa-IR"
+                       data-search="true"
+                       data-show-columns="true"
+                       data-show-export="true"
+                       data-show-refresh="true"
+                       data-show-columns-toggle-all="true"
+                       data-show-pagination-switch="true"
+                       data-show-toggle="true"
+                       data-show-fullscreen="true"
+                       data-buttons="buttons"
+                       data-search-align="left"
+                       data-buttons-class="primary"
+                       data-pagination="true"
+                       data-show-columns-search="true"
+                       data-show-footer="true"
+                       data-page-size="100"
+                       data-remember-order="true"
+                       data-sortable="true"
+                       data-show-search-clear-button="true"
+                       data-sort-name="total_sanad_cy_today"
+                        {#                                               data-sort-order="asc"#}
+                       data-sort-order="desc"
+                       data-filter-control="true"
+                       data-show-print="true"
+                       data-export-data-type="all"
+                       data-export-types='["excel"]'>
                     <thead>
                     <tr>
                         {% if level == 1 %}
-                            <th data-field="kol_code" data-sortable="true" data-sorter="numericOnly" data-filter-control="select">کد کل</th>
+                            <th data-field="kol_code" data-sortable="true" data-sorter="numericOnly"
+                                data-filter-control="select">کد کل
+                            </th>
                             <th data-field="kol_name" data-sortable="true" data-filter-control="select">نام سطح کل</th>
                         {% elif level == 2 %}
-                            <th data-field="moin_code" data-sortable="true" data-sorter="numericOnly" data-filter-control="select">کد معین</th>
-                            <th data-field="moin_name" data-sortable="true" data-filter-control="select">نام سطح معین</th>
+                            <th data-field="moin_code" data-sortable="true" data-sorter="numericOnly"
+                                data-filter-control="select">کد معین
+                            </th>
+                            <th data-field="moin_name" data-sortable="true" data-filter-control="select">نام سطح معین
+                            </th>
                         {% else %}
-                            <th data-field="tafzili_code" data-sortable="true" data-sorter="numericOnly" >کد تفضیل</th>
+                            <th data-field="tafzili_code" data-sortable="true" data-sorter="numericOnly">کد تفضیل</th>
+                            <th data-field="tafzili_name" data-sortable="true" data-filter-control="select">نام سطح تفصیل
+                            </th>
                         {% endif %}
-                        <th data-field="bed_sum" data-sortable="true" data-sorter="numericOnly">بدهکار</th>
-                        <th data-field="bes_sum" data-sortable="true" data-sorter="numericOnly">بستانکار</th>
-                        <th data-field="curramount_sum" data-sortable="true" data-sorter="numericOnly">مانده</th>
+                        <th data-field="bed_sum" class="card-text text-center"
+                            data-sortable="true" data-sorter="numericOnly"
+                            data-footer-formatter="priceFormatter">بدهکار
+                        </th>
+                        <th data-field="bes_sum" class="card-text text-center"
+                            data-sortable="true" data-sorter="numericOnly"
+                            data-footer-formatter="priceFormatter">بستانکار
+                        </th>
+                        <th data-field="curramount_sum" class="card-text text-center"
+                            data-sortable="true" data-sorter="numericOnly"
+                            data-footer-formatter="priceFormatter">مانده
+                        </th>
                     </tr>
                     </thead>
                     <tbody>
@@ -184,7 +201,8 @@
                         <tr>
                             <td>
                                 {% if level == 1 %}
-                                    <a href="{% url 'balance_sheet_moin' year item.kol_code %}"><h4>{{ item.kol_code }}</h4>
+                                    <a href="{% url 'balance_sheet_moin' year item.kol_code %}">
+                                        <h4>{{ item.kol_code }}</h4>
                                     </a>
                                 {% elif level == 2 %}
                                     <a href="{% url 'balance_sheet_tafsili' year parent_code item.moin_code %}">
@@ -198,11 +216,13 @@
                                 <td><h4>{{ item.kol_name }}</h4></td>
                             {% elif level == 2 %}
                                 <td><h4>{{ item.moin_name }}</h4></td>
+                            {% elif level == 3 %}
+                                <td><h4>{{ item.tafsili_name }}</h4></td>
                             {% endif %}
-                            <td><h4>{{ item.bed_sum|intcomma:False }}</h4></td>
-                            <td><h4>{{ item.bes_sum|intcomma:False }}</h4></td>
-                            <td><h4 style="direction: ltr">{{ item.curramount_sum|floatformat:0|intcomma:False }}</h4>
-                            </td>
+                            <td class="card-text text-center custom-font-size">{{ item.bed_sum|floatformat:0|intcomma:False }}</td>
+                            <td class="card-text text-center custom-font-size">{{ item.bes_sum|floatformat:0|intcomma:False }}</td>
+                            <td class="card-text text-center custom-font-size"
+                                style="direction: ltr">{{ item.curramount_sum|floatformat:0|intcomma:False }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -229,33 +249,41 @@
     <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
 
     <script>
-        var $table = $('#table')
+        var $table = $('#table');
+        var totalMandah = 0; // متغیر برای ذخیره مجموع مانده
 
         $(function () {
-            $table.bootstrapTable()
-        })
-
-        function idFormatter() {
-            return 'Total'
-        }
-
-        function nameFormatter(data) {
-            return data.length
-        }
+            $table.bootstrapTable();
+            updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده هنگام بارگذاری جدول
+        });
 
         function priceFormatter(data) {
-            var field = this.field
-            return data.map(function (row) {
-                return +row[field].substring(0)
+            var field = this.field;
+            console.log("Data received for priceFormatter:", data);
+            var result = data.map(function (row) {
+                var valueString = row[field].replace(/,/g, ''); // حذف کاماها
+                var value = parseFloat(valueString);
+                console.log("Processing row:", row);
+                console.log("Parsed value:", value);
+                return isNaN(value) ? 0 : value;
             }).reduce(function (sum, i) {
-                return sum + i
-            }, 0)
+                console.log("Current sum:", sum);
+                return sum + i;
+            }, 0);
+            console.log("Final result for priceFormatter:", result);
+            totalMandah = result; // ذخیره مجموع مانده
+            updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده
+            return result.toLocaleString('fa-IR'); // نمایش با کاما به صورت 3 تا 3 تا
         }
 
-        function formatMoney(number) {
-            return number.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
+        function updateTotalMandah() {
+            $('#total-mandah').text(totalMandah.toLocaleString('fa-IR'));
         }
     </script>
+
+
+
+
 {% endblock %}
 
 

@@ -18,7 +18,7 @@ from dashboard.models import MasterInfo, MasterReport, MonthlyReport
 from dashboard.views import generate_calendar_data_cheque
 from loantracker.forms import SMSTrackingForm, CallTrackingForm
 from loantracker.models import TrackKinde, Tracking
-from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan, LoanDetil
+from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan, LoanDetil, Kala
 from jdatetime import date as jdate
 from datetime import timedelta, date
 from khayyam import JalaliDate, JalaliDatetime
@@ -595,8 +595,42 @@ def balance_sheet_tafsili(request,year, kol_code, moin_code):
     total_bed = 0
     total_bes = 0
     total_curramount = 0
+    level3=[]
     for tafsili in tafsili_codes:
         tafsili_code = tafsili['tafzili']
+        tafsili_name = ''
+
+        if int(kol_code) == 103:
+            try:
+                tafsili_name=f'{Person.objects.filter(code=int(tafsili_code)).last().name} {Person.objects.filter(code=int(tafsili_code)).last().lname}'
+                print('tafsili_name b', tafsili_name)
+            except:
+                pass
+        elif int(kol_code) == 102:
+            try:
+                tafsili_name=Kala.objects.filter(kala_taf=int(tafsili_code)).last().name
+                print('tafsili_name c', tafsili_name)
+            except:
+                pass
+
+        else:
+            try:
+                tafsili_name =AccCoding.objects.filter(level=3,parent__code=int(moin_code),parent__parent__code=int(kol_code),code=int(tafsili_code)).last().name
+                print('tafsili_name a',tafsili_name)
+            except:
+                pass
+
+
+        level3.append(
+            {
+                'code': tafzili_code,
+                'name': tafsili_name,
+
+            }
+        )
+
+
+
 
         bed_sum = \
             SanadDetail.objects.filter(is_active=True, kol=kol_code, moin=moin_code, tafzili=tafsili_code,
@@ -616,16 +650,15 @@ def balance_sheet_tafsili(request,year, kol_code, moin_code):
         total_curramount += curramount_sum
         balance_data.append({
             'tafzili_code': tafsili_code,
+            'tafsili_name': tafsili_name,
             'bed_sum': bed_sum,
             'bes_sum': bes_sum,
             'curramount_sum': curramount_sum,
         })
 
     kol_name = AccCoding.objects.filter(level=1, code=kol_code).last().name
-    # kol_code=AccCoding.objects.filter(level=1,code=kol_code).last().code
     level1 = []
     level2 = []
-    level3 = []
     for l in AccCoding.objects.filter(level=1).order_by('code'):
         level1.append(
             {
@@ -652,20 +685,25 @@ def balance_sheet_tafsili(request,year, kol_code, moin_code):
     # استفاده از مجموعه برای حذف تکراری‌ها و سپس تبدیل به لیست مرتب‌شده
     tafzili_set = sorted({s.tafzili for s in sanads})
 
-    # ایجاد لیست level3
-    for tafzili_code in tafzili_set:
-        print(tafzili_code)
-        try:
-            taf_name=AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code,code=tafzili_code).last().name
-        except:
-            taf_name=' '
-        level3.append(
-            {
-                'code': tafzili_code,
-                'name': taf_name,
-
-            }
-        )
+    # # ایجاد لیست level3
+    # for tafzili_code in tafzili_set:
+    #     print(tafzili_code)
+    #     try:
+    #         taf_name=AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code,code=tafzili_code).last().name
+    #     except:
+    #         taf_name=' '
+    #
+    #
+    #
+    #
+    #
+    #     level3.append(
+    #         {
+    #             'code': tafzili_code,
+    #             'name': taf_name,
+    #
+    #         }
+    #     )
 
 
     context = {
@@ -677,8 +715,7 @@ def balance_sheet_tafsili(request,year, kol_code, moin_code):
         'level_name': 'تفضیلی',
         'parent_code': moin_code,
         'parent_name': AccCoding.objects.filter(code=moin_code, level=2, parent__code=kol_code).first().name,
-        'kol_code': kol_code,
-        'moin_code': moin_code,
+
 
         'level1': level1,
         'level2': level2,
