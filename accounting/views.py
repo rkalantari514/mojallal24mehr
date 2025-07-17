@@ -877,38 +877,36 @@ def SanadTotal(request,year, *args, **kwargs):
             }
         )
 
-    # فعلا خالی است
-    for l in AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code).order_by('code'):
-        print(l.code, l.name)
-        level3.append(
-            {
-                'code': l.code,
-                'name': l.name,
 
-            }
-        )
+    # جمع‌آوری کدهای tafsili بدون تکرار
+    tafsili_codes = SanadDetail.objects.filter(kol=kol_code, moin=moin_code).values_list('tafzili', flat=True).distinct()
+
     level3 = []
 
-    # فیلتر کردن داده‌ها
-    sanads2 = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, acc_year=acc_year)
-
-    # استفاده از مجموعه برای حذف تکراری‌ها و سپس تبدیل به لیست مرتب‌شده
-    tafzili_set = sorted({s.tafzili for s in sanads2})
-
-    # ایجاد لیست level3
-    for tafzili_code1 in tafzili_set:
-        print(tafzili_code)
+    # برای هر کد tafsili، نام و مقدارهای مربوطه را جمع‌آوری می‌کنیم
+    for tafsili_code in tafsili_codes:
+        # تعیین نام بر اساس نوع کد
         try:
-            taf_name=AccCoding.objects.filter(level=3, parent__code=moin_code, parent__parent__code=kol_code,code=tafzili_code1).last().name
+            if int(kol_code) == 103:
+                person = Person.objects.filter(code=int(tafsili_code)).last()
+                tafsili_name = f'{person.name} {person.lname}' if person else ''
+            elif int(kol_code) == 102 or int(kol_code) == 500:
+                kala = Kala.objects.filter(kala_taf=int(tafsili_code)).last()
+                tafsili_name = kala.name if kala else ''
+            else:
+                acc = AccCoding.objects.filter(
+                    level=3,
+                    parent__code=int(moin_code),
+                    parent__parent__code=int(kol_code),
+                    code=int(tafsili_code)
+                ).last()
+                tafsili_name = acc.name if acc else ''
         except:
-            taf_name=' '
-        level3.append(
-            {
-                'code': tafzili_code1,
-                'name': taf_name,
+            tafsili_name = ''
 
-            }
-        )
+        # افزودن به لیست سطح ۳
+        level3.append({'code': tafsili_code, 'name': tafsili_name})
+
 
     level = 4
 
