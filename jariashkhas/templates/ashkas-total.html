@@ -327,13 +327,13 @@
 
                                             <th data-field="total_positive_balance" class="card-text text-center"
                                                 data-sortable="true" data-sorter="numericOnly"
-                                                data-footer-formatter="priceFormatter">مجموع بستانکاران
+                                                data-footer-formatter="priceFormatter">مجموع بستانکاری
                                             </th>
                                             <th data-field="total_negative_balance" class="card-text text-center"
                                                 data-sortable="true" data-sorter="numericOnly"
-                                                data-footer-formatter="priceFormatter">مجموع بدهکاران
+                                                data-footer-formatter="priceFormatter">مجموع بدهکاری
                                             </th>
-
+{% if is_kol %}
                                             <th data-field="num_debtors" class="card-text text-center"
                                                 data-sortable="true" data-sorter="numericOnly"
                                                 data-footer-formatter="priceFormatter">تعداد بستانکاران
@@ -351,7 +351,7 @@
                                             >بیشترین بدهی یک بدهکار
                                             </th>
 
-
+{% endif %}
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -400,13 +400,15 @@
                                                     style="direction: ltr">{{ item.total_positive_balance|floatformat:0|intcomma:False }}</td>
                                                 <td class="card-text text-center"
                                                     style="direction: ltr">{{ item.total_negative_balance|floatformat:0|intcomma:False }}</td>
+                                                {% if is_kol %}
+
                                                 <td class="card-text text-center">{{ item.num_debtors }}</td>
                                                 <td class="card-text text-center">{{ item.num_creditors }}</td>
                                                 <td class="card-text text-center"
                                                     style="direction: ltr">{{ item.max_overall_debt|floatformat:0|intcomma:False }}</td>
                                                 <td class="card-text text-center"
                                                     style="direction: ltr">{{ item.min_overall_credit|floatformat:0|intcomma:False }}</td>
-
+{% endif %}
 
                                             </tr>
                                         {% endfor %}
