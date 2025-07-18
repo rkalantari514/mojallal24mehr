@@ -7,7 +7,18 @@
             width: 300px; /* عرض دکمه‌ها را تنظیم می‌کند */
             margin-bottom: 10px; /* فاصله بین خطوط را تنظیم می‌کند */
         }
+
+        .custom-font-size {
+            font-size: 1rem; /* یا هر اندازه‌ای که دوست داری */
+            font-weight: bold; /* اختیاری */
+        }
+
+        .s-line {
+            text-decoration: line-through; /* مشابه <s> */
+        }
+
     </style>
+
 
 
 
@@ -169,40 +180,50 @@
                     <th data-field="vaziat" data-sortable="true" data-filter-control="select">وضعیت</th>
                     <th data-field="tarikh" data-sortable="true" data-sorter="numericOnly">تاریخ</th>
                     <th data-field="code" data-sortable="true" data-sorter="numericOnly">کد</th>
-                    <th data-field="name" data-sortable="true" data-sorter="numericOnly">نام </th>
                     <th data-field="radif" data-sortable="true" data-sorter="numericOnly">ردیف</th>
                     <th data-field="sharh" data-sortable="true" data-sorter="numericOnly">شرح</th>
-                    <th data-field="bed" data-sortable="true" data-sorter="numericOnly">بدهکار</th>
-                    <th data-field="bes" data-sortable="true" data-sorter="numericOnly">بستانکار</th>
-                    <th data-field="curramount" data-sortable="true" data-sorter="numericOnly">مانده</th>
+                    <th data-field="bed" class="card-text text-center"
+                        data-sortable="true" data-sorter="numericOnly"
+                        data-footer-formatter="priceFormatter">بدهکار
+                    </th>
+                    <th data-field="bes" class="card-text text-center"
+                        data-sortable="true" data-sorter="numericOnly"
+                        data-footer-formatter="priceFormatter">بستانکار
+                    </th>
+                    <th data-field="curramount" class="card-text text-center"
+                        data-sortable="true" data-sorter="numericOnly"
+                        data-footer-formatter="priceFormatter">مانده
+                    </th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for item in sanads %}
                     {% if not item.is_active %}
                         <tr>
-                            <td><h4 >غیر فعال</h4></td>
+                            <td><h4>غیر فعال</h4></td>
                             <td><h4>{{ item.tarikh }}</h4></td>
                             <td><h4>{{ item.code }}</h4></td>
-                            <td><h4>{{ item.kala_name }}</h4></td>
                             <td><h4>{{ item.radif }}</h4></td>
                             <td><h4 class="text-danger">{{ item.syscomment }}</h4></td>
-                            <td><h4><s>{{ item.bed|floatformat:0|intcomma:False }}</s></h4></td>
-                            <td><h4><s>{{ item.bes|floatformat:0|intcomma:False }}</s></h4></td>
-                            <td><h4 style="direction: ltr"><s>{{ item.curramount|floatformat:0|intcomma:False }}</s></h4></td>
+                            <td class="card-text text-center custom-font-size s-line text-danger">{{ item.bed|floatformat:0|intcomma:False }}</td>
+                            <td class="card-text text-center custom-font-size s-line text-danger">{{ item.bes|floatformat:0|intcomma:False }}</td>
+                            <td class="card-text text-center custom-font-size s-line text-danger"
+                                style="direction: ltr">{{ item.curramount|floatformat:0|intcomma:False }}</td>
                         </tr>
 
                     {% else %}
                         <tr>
-                                                    <td><h4> فعال</h4></td>
-
+                            <td><h4> فعال</h4></td>
                             <td><h4>{{ item.tarikh }}</h4></td>
                             <td><h4>{{ item.code }}</h4></td>
                             <td><h4>{{ item.radif }}</h4></td>
                             <td><h4>{{ item.syscomment }}</h4></td>
-                            <td><h4>{{ item.bed|floatformat:0|intcomma:False }}</h4></td>
-                            <td><h4>{{ item.bes|floatformat:0|intcomma:False }}</h4></td>
-                            <td><h4 style="direction: ltr">{{ item.curramount|floatformat:0|intcomma:False }}</h4></td>
+                            <td class="card-text text-center custom-font-size">{{ item.bed|floatformat:0|intcomma:False }}</td>
+                            <td class="card-text text-center custom-font-size">{{ item.bes|floatformat:0|intcomma:False }}</td>
+                            <td class="card-text text-center custom-font-size"
+                                style="direction: ltr">{{ item.curramount|floatformat:0|intcomma:False }}</td>
+
+
                         </tr>
                     {% endif %}
 
@@ -230,33 +251,41 @@
     <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
 
     <script>
-        var $table = $('#table')
+        var $table = $('#table');
+        var totalMandah = 0; // متغیر برای ذخیره مجموع مانده
 
         $(function () {
-            $table.bootstrapTable()
-        })
-
-        function idFormatter() {
-            return 'Total'
-        }
-
-        function nameFormatter(data) {
-            return data.length
-        }
+            $table.bootstrapTable();
+            updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده هنگام بارگذاری جدول
+        });
 
         function priceFormatter(data) {
-            var field = this.field
-            return data.map(function (row) {
-                return +row[field].substring(0)
+            var field = this.field;
+            console.log("Data received for priceFormatter:", data);
+            var result = data.map(function (row) {
+                var valueString = row[field].replace(/,/g, ''); // حذف کاماها
+                var value = parseFloat(valueString);
+                console.log("Processing row:", row);
+                console.log("Parsed value:", value);
+                return isNaN(value) ? 0 : value;
             }).reduce(function (sum, i) {
-                return sum + i
-            }, 0)
+                console.log("Current sum:", sum);
+                return sum + i;
+            }, 0);
+            console.log("Final result for priceFormatter:", result);
+            totalMandah = result; // ذخیره مجموع مانده
+            updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده
+            return result.toLocaleString('fa-IR'); // نمایش با کاما به صورت 3 تا 3 تا
         }
 
-        function formatMoney(number) {
-            return number.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
+        function updateTotalMandah() {
+            $('#total-mandah').text(totalMandah.toLocaleString('fa-IR'));
         }
     </script>
+
+
+
+
 {% endblock %}
 
 
