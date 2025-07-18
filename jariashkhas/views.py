@@ -7,7 +7,7 @@ from openpyxl.styles.builtins import title
 from custom_login.models import UserLog
 from custom_login.views import page_permision
 from dashboard.models import MasterInfo
-from mahakupdate.models import SanadDetail, AccCoding
+from mahakupdate.models import SanadDetail, AccCoding, Person
 
 # Create your views here.
 
@@ -129,8 +129,8 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
                 if tafzili_data:
                     table1.append(tafzili_data)
 
-                tafzili_name_obj = AccCoding.objects.filter(parent__parent__code=103,parent__code=103, code=moein_code, level=3).first()
-                tafzili_name = tafzili_name_obj.name if tafzili_name_obj else f"نامعلوم ({tafzili_code})"
+                tafzili_name_obj = Person.objects.filter(per_taf=tafzili_code).last()
+                tafzili_name = f'{tafzili_name_obj.name} {tafzili_name_obj.lname}'  if tafzili_name_obj else f"کد فرد ({tafzili_code})"
                 current_tafzili_code = tafzili_code
 
                 tafzili_data = {
