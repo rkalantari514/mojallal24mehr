@@ -5,6 +5,6 @@ from jariashkhas.views import JariAshkasList
 
 urlpatterns = [
 
-    path('', JariAshkasList, name='jari-ashkas-list'),  # لیست اصلی رویدادها
+    path('<km>/<int:moin>', JariAshkasList, name='jari-ashkas-list'),  # لیست اصلی رویدادها
 
 ]

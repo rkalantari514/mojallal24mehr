@@ -67,141 +67,381 @@
     </style>
 
 
+
+
+
     <div class="content-wrapper">
-
-            <!-- ردیف خلاصه طلب بدهی بر اساس معین -->
+        <div class="page-title">
             <div class="row">
-                <div class="col-md-12 mb-30">
-                    <div class="col-xl-12 mb-30">
-                        <div class="card card-statistics h-100">
-                            <div class="card-body">
-                                <div class="table-responsive mt-15 ">
-                                    <h5 class="card-title pb-0 border-0">بر اساس معین</h5>
-                                    <h6 class="card-title pb-0 border-0">عملکرد هزینه سال </h6>
-                                    <div class="table-responsive">
-                                        <table id="table"
-                                               class="table-striped"
-                                               data-toggle="table"
-                                               data-locale="fa-IR"
-                                               data-search="true"
-                                               data-show-columns="true"
-                                               data-show-export="true"
-                                               data-show-refresh="true"
-                                               data-show-columns-toggle-all="true"
-                                               data-show-pagination-switch="true"
-                                               data-show-toggle="true"
-                                               data-show-fullscreen="true"
-                                               data-buttons="buttons"
-                                               data-search-align="left"
-                                               data-buttons-class="primary"
-                                               data-pagination="true"
-                                               data-show-columns-search="true"
-                                               data-show-footer="true"
-                                               data-page-size="100"
-                                               data-remember-order="true"
-                                               data-sortable="true"
-                                               data-show-search-clear-button="true"
-                                               data-sort-name="moin_code"
-                                               data-sort-order="asc"
-                                                {#                                           data-sort-order="desc"#}
-                                               data-filter-control="true"
-                                               data-show-print="true"
-                                               data-export-data-type="all"
-                                               data-export-types='["excel"]'>
-                                            <thead>
-                                            <tr class="tr-class-1">
-                                                <th></th>
-                                                <th data-field="moin_code" class="card-text text-center"
-                                                    data-sortable="true">کد معین
-                                                </th>
-                                                <th data-field="moin_name" class="card-text text-center"
-                                                    data-sortable="true">نام معین
-                                                </th>
+                <div class="col-sm-6">
+                    <div class="d-block">
+                        <h4 class="card-title text-facebook pb-0 border-0">{{ title }} </h4>
+                    </div>
 
-                                                <th data-field="total_positive_balance" class="card-text text-center"
-                                                    data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">مجموع بستانکاران</th>
-                                                <th data-field="total_negative_balance" class="card-text text-center"
-                                                    data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">مجموع بدهکاران</th>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
+                        <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
+                        <li class="breadcrumb-item active">{{ title }}</li>
 
-                                                <th data-field="num_debtors" class="card-text text-center" data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">تعداد بستانکاران</th>
-                                                <th data-field="num_creditors" class="card-text text-center"
-                                                    data-sortable="true" data-sorter="numericOnly"
-                                                    data-footer-formatter="priceFormatter">تعداد بدهکاران</th>
-                                                <th data-field="max_overall_debt" class="card-text text-center"
-                                                    data-sortable="true" data-sorter="numericOnly">بیشترین طلب یک بستانکار</th>
-                                                <th data-field="min_overall_credit" class="card-text text-center"
-                                                    data-sortable="true" data-sorter="numericOnly"
-                                                   >بیشترین بدهی یک بدهکار
-                                                </th>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <!-- ردیف اول خلاصه ها -->
+        <div class="row">
+            <!-- خط بدهی ها -->
+            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="clearfix">
+                            <div class="float-left icon-box bg-primary rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-download highlight-icon" aria-hidden="true"></i>
+    </span>
+                            </div>
+                            <div class="float-right text-right">
+                                <p class="card-text text-dark">مجموع بدهکارها</p>
+                                <h4>
+                                        {{ master_data.total_negative_balance|intword }} تومان
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="clearfix">
+                            <div class="float-left icon-box bg-warning rounded-circle">
+    <span class="text-white">
+    <i class="fa fa fa-address-book-o highlight-icon" aria-hidden="true"></i>
+    </span>
+                            </div>
+                            <div class="float-right text-right">
+                                <p class="card-text text-dark"> تعداد بدهکار ها </p>
+                                <h4>
 
-
-
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {% for item in table1 %}
-                                                <tr>
-                                                    <td>
-                                                        <a href="/budget/cost/detail/2/{{ item.moin_code }}"
-                                                           target="_blank">
-                                                            <button type="button"
-                                                                    class="btn btn-sm btn-success btn-fixed-width">
-                                                                <i class="ti-bar-chart pr-1"></i> نمودار عملکرد
-                                                            </button>
-                                                        </a>
-                                                        <a href="/balance-sheet-tafsili/{{ acc_year }}/501/{{ item.moin_code }}/"
-                                                           target="_blank">
-                                                            <button type="button"
-                                                                    class="btn btn-sm btn-danger btn-fixed-width">
-                                                                <i class="ti-wallet pr-1"></i> تراز {{ acc_year }}
-                                                            </button>
-                                                        </a>
-                                                        <a href="/balance-sheet-tafsili/{{ base_year }}/501/{{ item.moin_code }}/"
-                                                           target="_blank">
-                                                            <button type="button"
-                                                                    class="btn btn-sm btn-primary btn-fixed-width">
-                                                                <i class="ti-wallet pr-1"></i> تراز {{ base_year }}
-                                                            </button>
-                                                        </a>
-                                                    </td>
-                                                    <td class="card-text text-center">{{ item.moein_code }}</td>
-                                                    <td class="card-text text-center">{{ item.moein_name }}</td>
-                                                    <td class="card-text text-center"
-                                                        style="direction: ltr">{{ item.total_positive_balance|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center" style="direction: ltr">{{ item.total_negative_balance|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center">{{ item.num_debtors }}</td>
-                                                    <td class="card-text text-center">{{ item.num_creditors }}</td>
-                                                    <td class="card-text text-center"
-                                                        style="direction: ltr">{{ item.max_overall_debt|floatformat:0|intcomma:False }}</td>
-                                                    <td class="card-text text-center"
-                                                        style="direction: ltr">{{ item.min_overall_credit|floatformat:0|intcomma:False }}</td>
-
-
-
-
-                                                </tr>
-                                            {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                </div>
-
-
+                                        {{ master_data.num_creditors|intcomma:False }} مورد
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="clearfix">
+                            <div class="float-left icon-box bg-danger rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-search-minus highlight-icon" aria-hidden="true"></i>
+    </span>
+                            </div>
+                            <div class="float-right text-right">
+                                <p class="card-text text-dark"> بیشترین بدهی</p>
+                                <h4>
+                                    <a href="/acc/jariashkhas/moshtarian/detaile/7" target="_blank">
+                                        {{ master_data.min_overall_credit|intword }} تومان
+                                    </a>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="clearfix">
+                            <div class="float-left icon-box bg-danger rounded-circle">
+    <span class="text-white">
+    <i class="fa  fa fa-hourglass-end highlight-icon" aria-hidden="true"></i>
+    </span>
+                            </div>
+                            <div class="float-right text-right">
+                                <p class="card-text text-dark"> خواب بدهی از 1403</p>
+                                <h4>
+                                        {{ table1.9|floatformat:0|intcomma:False }} میلیون تومان
+                                </h4>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- خط طلب ها -->
+            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="clearfix">
+                            <div class="float-left icon-box bg-success rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-upload highlight-icon" aria-hidden="true"></i>
+    </span>
+                            </div>
+                            <div class="float-right text-right">
+                                <p class="card-text text-dark">مجموع بستانکارها</p>
+                                <h4>
+                                        {{ master_data.total_negative_balance|intword }} تومان
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="clearfix">
+                            <div class="float-left icon-box bg-secondary rounded-circle">
+    <span class="text-white">
+    <i class="fa fa fa-id-badge highlight-icon" aria-hidden="true"></i>
+    </span>
+                            </div>
+                            <div class="float-right text-right">
+                                <p class="card-text text-dark"> تعداد بستانکارها </p>
+                                <h4>
+
+                                        {{ master_data.num_debtors|intcomma:False }} مورد
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="clearfix">
+                            <div class="float-left icon-box bg-warning rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-search-plus highlight-icon" aria-hidden="true"></i>
+    </span>
+                            </div>
+                            <div class="float-right text-right">
+                                <p class="card-text text-dark"> بیشترین طلب</p>
+                                <h4>
+                                        {{ master_data.max_overall_debt|intword }} تومان
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="clearfix">
+                            <div class="float-left icon-box bg-info rounded-circle">
+    <span class="text-white">
+    <i class="fa  fa fa-hourglass-end highlight-icon" aria-hidden="true"></i>
+    </span>
+                            </div>
+                            <div class="float-right text-right">
+                                <p class="card-text text-dark"> خواب طلب از 1403</p>
+                                <h4>
+                                    <a href="/acc/loan_total" target="_blank">
+                                        {{ table1.9|floatformat:0|intcomma:False }} میلیون تومان
+                                    </a>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- خط کلی -->
+
+            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="clearfix">
+                            <div class="float-left icon-box bg-info rounded-circle">
+    <span class="text-white">
+    <i class=" fa fa-balance-scale highlight-icon" aria-hidden="true"></i>
+    </span>
+                            </div>
+                            <div class="float-right text-right">
+                                <p class="card-text text-dark">بالانس کلی</p>
+                                <h4 style="direction: ltr">
+                                    <a href="/acc/loan_total" target="_blank">
+                                        {{ master_data.total_balance|intword }} تومان
+                                    </a>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ردیف جدول طلب و بدهی -->
+        <div class="row">
+            <div class="col-md-12 mb-30">
+                <div class="col-xl-12 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="table-responsive mt-15 ">
+                                <h5 class="card-title pb-0 border-0">{{ title }}</h5>
+                                <div class="table-responsive">
+                                    <table id="table"
+                                           class="table-striped"
+                                           data-toggle="table"
+                                           data-locale="fa-IR"
+                                           data-search="true"
+                                           data-show-columns="true"
+                                           data-show-export="true"
+                                           data-show-refresh="true"
+                                           data-show-columns-toggle-all="true"
+                                           data-show-pagination-switch="true"
+                                           data-show-toggle="true"
+                                           data-show-fullscreen="true"
+                                           data-buttons="buttons"
+                                           data-search-align="left"
+                                           data-buttons-class="primary"
+                                           data-pagination="true"
+                                           data-show-columns-search="true"
+                                           data-show-footer="true"
+                                           data-page-size="100"
+                                           data-remember-order="true"
+                                           data-sortable="true"
+                                           data-show-search-clear-button="true"
+                                           data-sort-name="moin_code"
+                                           data-sort-order="asc"
+                                            {#                                           data-sort-order="desc"#}
+                                           data-filter-control="true"
+                                           data-show-print="true"
+                                           data-export-data-type="all"
+                                           data-export-types='["excel"]'>
+                                        <thead>
+                                        <tr class="tr-class-1">
+                                            <th></th>
+                                            <th data-field="moin_code" class="card-text text-center"
+                                                data-sortable="true">کد
+                                            </th>
+                                            <th data-field="moin_name" class="card-text text-center"
+                                                data-sortable="true">نام
+                                            </th>
+
+                                            <th data-field="total_positive_balance" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter">مجموع بستانکاران
+                                            </th>
+                                            <th data-field="total_negative_balance" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter">مجموع بدهکاران
+                                            </th>
+
+                                            <th data-field="num_debtors" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter">تعداد بستانکاران
+                                            </th>
+                                            <th data-field="num_creditors" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter">تعداد بدهکاران
+                                            </th>
+                                            <th data-field="max_overall_debt" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly">بیشترین طلب یک
+                                                بستانکار
+                                            </th>
+                                            <th data-field="min_overall_credit" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                            >بیشترین بدهی یک بدهکار
+                                            </th>
 
 
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for item in table1 %}
+                                            <tr>
+                                                <td>
+                                                    {% if is_kol %}
+                                                    <a href="/jariashkhas/m/{{ item.code }}"
+                                                       target="_blank">
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-success btn-fixed-width">
+                                                            <i class="ti-list pr-1"></i> جزئیات
+                                                        </button>
+                                                    </a>
+                                                    <a href="/balance-sheet-tafsili/{{ acc_year }}/103/{{ item.code }}/"
+                                                       target="_blank">
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-primary btn-fixed-width">
+                                                            <i class="ti-wallet pr-1"></i> تراز {{ acc_year }}
+                                                        </button>
+                                                    </a>
+                                                    {% else %}
+                                                      <a href="/acc/jariashkhas/moshtari/{{ item.code }}"
+                                                       target="_blank">
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-success btn-fixed-width">
+                                                            <i class="ti-user pr-1"></i>حساب شخص
+                                                        </button>
+                                                    </a>
+
+                                                    <a href="/sanad_total/{{ acc_year }}/103/{{ m_code }}/{{ item.code }}/"
+                                                       target="_blank">
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-primary btn-fixed-width">
+                                                            <i class="ti-wallet pr-1"></i> اسناد {{ acc_year }}
+                                                        </button>
+                                                    </a>
+
+
+                                                    {% endif %}
+
+                                                </td>
+                                                <td class="card-text text-center">{{ item.code }}</td>
+                                                <td class="card-text text-center">{{ item.name }}</td>
+                                                <td class="card-text text-center"
+                                                    style="direction: ltr">{{ item.total_positive_balance|floatformat:0|intcomma:False }}</td>
+                                                <td class="card-text text-center"
+                                                    style="direction: ltr">{{ item.total_negative_balance|floatformat:0|intcomma:False }}</td>
+                                                <td class="card-text text-center">{{ item.num_debtors }}</td>
+                                                <td class="card-text text-center">{{ item.num_creditors }}</td>
+                                                <td class="card-text text-center"
+                                                    style="direction: ltr">{{ item.max_overall_debt|floatformat:0|intcomma:False }}</td>
+                                                <td class="card-text text-center"
+                                                    style="direction: ltr">{{ item.min_overall_credit|floatformat:0|intcomma:False }}</td>
+
+
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
     </div>
+    {#    </div>#}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
