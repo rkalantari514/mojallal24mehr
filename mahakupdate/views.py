@@ -5233,3 +5233,119 @@ def AfterTakhfifKolsider(request):
     print(f"زمان کل: {tend - t0:.2f} ثانیه")
 
     return redirect('/updatedb')
+
+
+
+from django.db.models import Min, Sum
+from django.utils import timezone
+from datetime import timedelta
+
+from datetime import timedelta
+from django.db import transaction
+
+def UpdateSleepInvestment1(request):
+    for person in Person.objects.all():
+        # دریافت تمام سندهای مربوط به فرد، مرتب بر اساس تاریخ
+        sanads = SanadDetail.objects.filter(person=person).order_by('date')
+
+        max_days_same_curramount = 0
+        current_streak_days = 0
+        last_curramount = None
+        last_date = None
+
+        max_streak_curramount = None  # نگهداری مقدار `curramount` در بلندترین رشته
+
+        for sanad in sanads:
+            if sanad.curramount is None:
+                # اگر مقدار ندارد، تکرار ادامه ندارد
+                continue
+
+            if last_curramount is not None and sanad.curramount == last_curramount:
+                # اگر مقدار مشابه است و تاریخ روز قبل است، ادامه رشته
+                if last_date and (sanad.date - last_date).days == 1:
+                    current_streak_days += 1
+                else:
+                    # شکست رشته، اگر طول رشته بیشتر است ثبت می‌شود
+                    if current_streak_days > max_days_same_curramount:
+                        max_days_same_curramount = current_streak_days
+                        max_streak_curramount = last_curramount
+                    current_streak_days = 1
+            else:
+                # مقدار تغییر کرد یا اولین سند است
+                if current_streak_days > max_days_same_curramount:
+                    max_days_same_curramount = current_streak_days
+                    max_streak_curramount = last_curramount
+                current_streak_days = 1
+
+            last_curramount = sanad.curramount
+            last_date = sanad.date
+
+        # در پایان حلقه، اگر رشته جاری طولانی‌تر است، ثبت می‌کنیم
+        if current_streak_days > max_days_same_curramount:
+            max_days_same_curramount = current_streak_days
+            max_streak_curramount = last_curramount
+
+        # محاسبه خواب سرمایه بر اساس بلندترین رشته تکرار و مقدار `curramount`
+        sleep_value = 0
+        if max_streak_curramount and max_days_same_curramount:
+            sleep_value = max_streak_curramount * max_days_same_curramount
+
+        # بروزرسانی در مدل BedehiMoshtari
+        # فرض بر این است که در مدل `BedehiMoshtari` فیلد `sleep_investment` وجود دارد
+        # و هر فرد، یک رکورد دارد
+        try:
+            bedehi_obj = BedehiMoshtari.objects.get(person=person)
+            bedehi_obj.sleep_investment = sleep_value
+            bedehi_obj.save(update_fields=['sleep_investment'])
+        except BedehiMoshtari.DoesNotExist:
+            # اگر هنوز رکورد نیست، می‌توانید ایجاد کنید یا خطا بگیرید
+            pass
+
+        print(f"فرد: {person.id}، خواب سرمایه: {sleep_value}")
+
+    return redirect('/updatedb')
+
+
+from django.db.models import Sum
+from django.utils import timezone
+from django.shortcuts import redirect
+
+def UpdateSleepInvestment(request):
+    bedehi_to_update = []
+
+    today = timezone.now().date()
+
+    for bedehi_obj in BedehiMoshtari.objects.all():
+        person = bedehi_obj.person
+        if not person:
+            continue
+        print(person)
+
+        sanads = SanadDetail.objects.filter(person=person).order_by('date')
+        if not sanads.exists():
+            continue
+
+        first_day = sanads.first().date
+        sleep = 0
+
+        # ابتدا مقدار پیش‌فرض را بر اساس مقدار قبلی قرار می‌دهیم
+        # فرض بر این است که مقدار نهایی در این حلقه، مجموع است
+        for d in (first_day, today):
+            day_sanad_qs = sanads.filter(date=d)
+            total_agree = 0
+            if day_sanad_qs.exists():
+                total_agree = day_sanad_qs.aggregate(total=Sum('curramount'))['total'] or 0
+            # اگر سند نبود، مقدار قبلی هم در این روز در نظر گرفته می‌شود
+            sleep += total_agree
+
+        # اگر مقدار جدید با مقدار قبلی متفاوت است، بروزرسانی می‌کنیم
+        if sleep != bedehi_obj.sleep_investment:
+            bedehi_obj.sleep_investment = sleep
+            bedehi_to_update.append(bedehi_obj)
+            print(f"Updated: {bedehi_obj} with sleep: {sleep}")
+
+    # اجرای بروزرسانی جمعی
+    if bedehi_to_update:
+        BedehiMoshtari.objects.bulk_update(bedehi_to_update, ['sleep_investment'])
+
+    return redirect('/updatedb')

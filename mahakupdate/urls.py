@@ -4,7 +4,7 @@ from mahakupdate.views import Update_from_mahak, Kala_group, Updatedb, \
     CreateKalaGroup, UpdateKalaGroup, UpdateStorage, UpdateMojodi, Update_Sales_Mojodi_Ratio, UpdateSanad, \
     UpdateSanadDetail, UpdateAccCoding, Cheques_Recieve, UpdateSanadConditions, Cheque_Pay, UpdateBank, UpdateLoan, \
     UpdateLoanDetail, UpdateBedehiMoshtari, CompleLoan, UpdateMyCondition, UpdateBackFactor, UpdateBackFactorDetail, \
-    DeleteDublicateData, AfterTakhfifKol
+    DeleteDublicateData, AfterTakhfifKol, UpdateSleepInvestment
 
 urlpatterns = [
     path('1', Update_from_mahak, name="update"),
@@ -35,6 +35,7 @@ urlpatterns = [
     path('update/loan', UpdateLoan, name="updateloan"),
     path('update/loandetail', UpdateLoanDetail, name="updateloan-detail"),
     path('update/bedehimoshtari', UpdateBedehiMoshtari, name="update-bedehi-moshtari"),
+    path('update/sleepinvestment', UpdateSleepInvestment, name="update-sleep-investment"),
     path('update/compleloan', CompleLoan, name="completloan"),
     path('update/delete_dublicate_data', DeleteDublicateData, name="delete-dublicate-data"),
     path('update/after_takhfif_kol', AfterTakhfifKol, name="after-takhfif-kol"),
