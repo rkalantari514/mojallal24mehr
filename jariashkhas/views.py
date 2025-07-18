@@ -201,9 +201,9 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
         'min_overall_credit': min_overall_credit/10*-1 if min_overall_credit else 0,
     }
     context['master_data'] = master_data
-
-
-
+    balance = master_data['total_balance']
+    context['abs_balance'] = abs(balance)
+    context['is_negative'] = balance < 0
 
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
