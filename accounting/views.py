@@ -855,15 +855,15 @@ def SanadTotal(request,year, *args, **kwargs):
     tafzili_code = kwargs['tafzili_code']
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
     acc_year = year
-    # sanads = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafzili_code, acc_year=acc_year)
+    sanads = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafzili_code, acc_year=acc_year)
 
-    # فرض می‌کنیم، مدل Kala و SanadDetail دارید و می‌خواهید نام کالا را
-    kala_subquery = Kala.objects.filter(kala_taf=OuterRef('tafzili')).values('name')[:1]
-
-    # حالا در query خوانده شده، آن را با annotate() اضافه می‌کنید
-    sanads = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafzili_code, acc_year=acc_year).annotate(
-        kala_name=Subquery(kala_subquery)
-    )
+    # # فرض می‌کنیم، مدل Kala و SanadDetail دارید و می‌خواهید نام کالا را
+    # kala_subquery = Kala.objects.filter(kala_taf=OuterRef('tafzili')).values('name')[:1]
+    #
+    # # حالا در query خوانده شده، آن را با annotate() اضافه می‌کنید
+    # sanads = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafzili_code, acc_year=acc_year).annotate(
+    #     kala_name=Subquery(kala_subquery)
+    # )
     level1 = []
     level2 = []
     level3 = []
