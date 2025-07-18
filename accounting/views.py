@@ -608,7 +608,7 @@ def balance_sheet_tafsili(request, year, kol_code, moin_code):
         # تعیین نام بر اساس نوع کد
         try:
             if int(kol_code) == 103:
-                person = Person.objects.filter(code=int(tafsili_code)).last()
+                person = Person.objects.filter(per_taf=int(tafsili_code)).last()
                 tafsili_name = f'{person.name} {person.lname}' if person else ''
             elif int(kol_code) == 102 or int(kol_code) == 500:
                 kala = Kala.objects.filter(kala_taf=int(tafsili_code)).last()
@@ -896,7 +896,7 @@ def SanadTotal(request,year, *args, **kwargs):
         # تعیین نام بر اساس نوع کد
         try:
             if int(kol_code) == 103:
-                person = Person.objects.filter(code=int(tafsili_code)).last()
+                person = Person.objects.filter(per_taf=int(tafsili_code)).last()
                 tafsili_name = f'{person.name} {person.lname}' if person else ''
                 print('person:',tafsili_name)
             elif int(kol_code) == 102 or int(kol_code) == 500:
