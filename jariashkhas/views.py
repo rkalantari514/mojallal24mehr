@@ -192,13 +192,13 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
                 min_overall_credit = moin['min_overall_credit']
 
     master_data = {
-        'total_positive_balance': total_positive_balance/10,
-        'total_negative_balance': total_negative_balance /10*-1,
-        'total_balance': (total_positive_balance + total_negative_balance)/10,
+        'total_positive_balance': total_positive_balance/10 if total_positive_balance else 0,
+        'total_negative_balance': total_negative_balance /10*-1 if total_negative_balance else 0,
+        'total_balance': (total_positive_balance + total_negative_balance)/10 if (total_positive_balance + total_negative_balance) else 0,
         'num_debtors': num_debtors,
         'num_creditors': num_creditors,
-        'max_overall_debt': max_overall_debt/10,
-        'min_overall_credit': min_overall_credit/10*-1,
+        'max_overall_debt': max_overall_debt/10 if max_overall_debt else 0 ,
+        'min_overall_credit': min_overall_credit/10*-1 if min_overall_credit else 0,
     }
     context['master_data'] = master_data
 
