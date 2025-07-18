@@ -140,6 +140,24 @@
                     {% endif %}
                 </ul>
             </li>
+            <!-- منو جاری اشخاص-->
+            <li>
+                <a href="javascript:void(0);" data-toggle="collapse" data-target="#jariashkhas-menu">
+                    <div class="pull-left"><i class="ti-user"></i><span class="right-nav-text">جاری اشخاص</span></div>
+                    <div class="pull-right"><i class="ti-plus"></i></div>
+                    <div class="clearfix"></div>
+                </a>
+                <ul id="jariashkhas-menu" class="collapse" data-parent="#sidebarnav">
+
+{#                    {% if "balance_sheet_kol" in allowed_view %}#}
+                        <li><a href="{% url 'jari-ashkas-list' %}">لیست کلی جاری اشخاص</a></li>
+{#                    {% endif %}#}
+
+                </ul>
+            </li>
+
+
+
             <!-- منوی احراز هویت-->
             <li>
                 <a href="javascript:void(0);" data-toggle="collapse" data-target="#authentication">
