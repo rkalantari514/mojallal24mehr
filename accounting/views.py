@@ -858,7 +858,7 @@ def SanadTotal(request,year, *args, **kwargs):
     # sanads = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafzili_code, acc_year=acc_year)
 
     # فرض می‌کنیم، مدل Kala و SanadDetail دارید و می‌خواهید نام کالا را
-    kala_subquery = Kala.objects.filter(code=OuterRef('tafzili')).values('name')[:1]
+    kala_subquery = Kala.objects.filter(kala_taf=OuterRef('tafzili')).values('name')[:1]
 
     # حالا در query خوانده شده، آن را با annotate() اضافه می‌کنید
     sanads = SanadDetail.objects.filter(kol=kol_code, moin=moin_code, tafzili=tafzili_code, acc_year=acc_year).annotate(
@@ -898,9 +898,11 @@ def SanadTotal(request,year, *args, **kwargs):
             if int(kol_code) == 103:
                 person = Person.objects.filter(code=int(tafsili_code)).last()
                 tafsili_name = f'{person.name} {person.lname}' if person else ''
+                print('person:',tafsili_name)
             elif int(kol_code) == 102 or int(kol_code) == 500:
                 kala = Kala.objects.filter(kala_taf=int(tafsili_code)).last()
                 tafsili_name = kala.name if kala else ''
+                print('kala:',tafsili_name)
             else:
                 acc = AccCoding.objects.filter(
                     level=3,
