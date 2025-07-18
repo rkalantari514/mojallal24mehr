@@ -4600,7 +4600,8 @@ def UpdateBedehiMoshtari(request):
             mm=[1,16]
             # دریافت مجموع بدهی‌ها و اطلاعات مرتبط
             tafzili_sums = SanadDetail.objects.filter(
-                moin__in=mm, kol=103, is_active=True, acc_year=acc_year
+                # moin__in=mm, kol=103, is_active=True, acc_year=acc_year
+                kol=103, is_active=True, acc_year=acc_year
             ).values('tafzili', 'moin').annotate(total_curramount=Sum('curramount'))
 
             existing_entries = {
