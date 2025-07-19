@@ -71,6 +71,27 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box {% if khab %} bg-danger {% else %} bg-facebook {% endif %}   rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-bed highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    {% if khab %}
+                                    <p class="card-text text-dark"> خواب بدهی </p>
+                                    {% else %}
+                                    <p class="card-text text-dark"> خواب طلب </p>
+                                    {% endif %}
+                                    <h4> {{ hesabmoshtari.sleep_investment|intword }} روز </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
             </div>
 

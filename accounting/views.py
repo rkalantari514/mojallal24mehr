@@ -1412,6 +1412,11 @@ def HesabMoshtariDetail(request, tafsili):
         except:
             pass
 
+    khab=True
+    if hesabmoshtari.sleep_investment >= 0:
+        khab=False
+
+
     context = {
         'title': 'حساب مشتری',
         'hesabmoshtari': hesabmoshtari,
@@ -1422,6 +1427,7 @@ def HesabMoshtariDetail(request, tafsili):
         'sms_form': sms_form,  # ارسال فرم به قالب
         'call_form': call_form,  # ارسال فرم به قالب
         'tracking': tracking,
+        'khab': khab,
     }
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
     # return render(request, 'moshrari_detail.html', context)
