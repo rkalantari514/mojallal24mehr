@@ -5391,14 +5391,14 @@ def UpdateSleepInvestment(request):
             curr_date = entry['date']
             delta_days = (curr_date - prev_date).days
             sleep += delta_days * total
-            print(f"{prev_date} → {curr_date}: {delta_days} days × {prev_total} = {delta_days * prev_total}")
+            print(f"{prev_date} → {curr_date}: {delta_days} days × {total} = {delta_days * total}")
             prev_date = curr_date
             prev_total = entry['total'] or 0
             total += prev_total
         # اضافه کردن فاصله از آخرین سند تا امروز
         delta_days = (today - prev_date).days
         sleep += delta_days * total
-        print(f"{prev_date} → {curr_date}: {delta_days} days × {total} = {delta_days * total}")
+        print(f"{prev_date} → {today}: {delta_days} days × {total} = {delta_days * total}")
 
         if sleep != bedehi_obj.sleep_investment:
             bedehi_obj.sleep_investment = sleep
