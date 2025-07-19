@@ -5319,23 +5319,26 @@ def UpdateSleepInvestment(request):
         person = bedehi_obj.person
         if not person:
             continue
-        print(person)
+        print(person,'-------------------------------------------')
 
-        sanads = SanadDetail.objects.filter(person=person).order_by('date')
+        sanads = SanadDetail.objects.filter(kol=103,person=person).order_by('date')
         if not sanads.exists():
             continue
 
         first_day = sanads.first().date
+        print(first_day,today)
         sleep = 0
         date_range = [first_day + timedelta(days=i) for i in range((today - first_day).days + 1)]
 
+        total_agree = 0
         for d in date_range:
+            print(d)
             day_sanad_qs = sanads.filter(date=d)
-            total_agree = 0
             if day_sanad_qs.exists():
                 total_agree = day_sanad_qs.aggregate(total=Sum('curramount'))['total'] or 0
             # اگر سند نبود، مقدار قبلی هم در این روز در نظر گرفته می‌شود
             sleep += total_agree
+            print(sleep)
 
         # اگر مقدار جدید با مقدار قبلی متفاوت است، بروزرسانی می‌کنیم
         if sleep != bedehi_obj.sleep_investment:
@@ -5348,3 +5351,8 @@ def UpdateSleepInvestment(request):
         BedehiMoshtari.objects.bulk_update(bedehi_to_update, ['sleep_investment'])
 
     return redirect('/updatedb')
+
+
+
+
+
