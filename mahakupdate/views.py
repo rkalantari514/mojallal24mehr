@@ -261,6 +261,7 @@ def Updateall(request):
         'update/calculate_award',
         'update/calculate_award',
         'update/after_takhfif_kol',
+        'update/sleepinvestment',
     ]
     # نگاشت آدرس‌های استاتیک به توابع
     static_view_map = {
@@ -278,6 +279,7 @@ def Updateall(request):
         'update/compleloan': CompleLoan,
         'update/calculate_award': Calculate_and_award_points,
         'update/after_takhfif_kol': AfterTakhfifKol,
+        'update/sleepinvestment': UpdateSleepInvestment,
     }
     # چاپ تزئینی برای عیب یابی
     print(f"Request path: {request.path}")
