@@ -5310,7 +5310,9 @@ from django.db.models import Sum
 from django.utils import timezone
 from django.shortcuts import redirect
 
-def UpdateSleepInvestment(request):
+def UpdateSleepInvestment1(request):
+    t0 = time.time()
+
     bedehi_to_update = []
 
     today = timezone.now().date()
@@ -5350,9 +5352,62 @@ def UpdateSleepInvestment(request):
     if bedehi_to_update:
         BedehiMoshtari.objects.bulk_update(bedehi_to_update, ['sleep_investment'])
 
+    tend = time.time()
+    total_time = tend - t0
+    print(f"زمان کل: {total_time:.2f} ثانیه")
     return redirect('/updatedb')
 
 
 
 
+from datetime import timedelta
+
+def UpdateSleepInvestment(request):
+    bedehi_to_update = []
+    today = timezone.now().date()
+
+    for bedehi_obj in BedehiMoshtari.objects.select_related('person').all():
+        person = bedehi_obj.person
+        if not person:
+            continue
+        print(person, '-------------------------------------------')
+
+        sanads = (
+            SanadDetail.objects
+            .filter(kol=103, person=person)
+            .order_by('date')
+            .values('date')
+            .annotate(total=Sum('curramount'))
+        )
+
+        if not sanads:
+            continue
+
+        sleep = 0
+        prev_date = sanads[0]['date']
+        prev_total = sanads[0]['total'] or 0
+
+        for entry in sanads[1:]:
+            curr_date = entry['date']
+            delta_days = (curr_date - prev_date).days
+            sleep += delta_days * prev_total
+            print(f"{prev_date} → {curr_date}: {delta_days} days × {prev_total} = {delta_days * prev_total}")
+            prev_date = curr_date
+            prev_total = entry['total'] or 0
+
+        # اضافه کردن فاصله از آخرین سند تا امروز
+        delta_days = (today - prev_date).days
+        sleep += delta_days * prev_total
+        print(f"{prev_date} → {today}: {delta_days} days × {prev_total} = {delta_days * prev_total}")
+
+        if sleep != bedehi_obj.sleep_investment:
+            bedehi_obj.sleep_investment = sleep
+            bedehi_to_update.append(bedehi_obj)
+            print(f"Updated: {bedehi_obj} with sleep: {sleep}")
+
+    if bedehi_to_update:
+        BedehiMoshtari.objects.bulk_update(bedehi_to_update, ['sleep_investment'])
+
+    print("بروزرسانی انجام شد ✅")
+    return redirect('/updatedb')
 
