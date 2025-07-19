@@ -1413,7 +1413,7 @@ def HesabMoshtariDetail(request, tafsili):
             pass
 
     khab=True
-    if hesabmoshtari.sleep_investment >= 0:
+    if hesabmoshtari.sleep_investment and hesabmoshtari.sleep_investment >= 0:
         khab=False
 
 
