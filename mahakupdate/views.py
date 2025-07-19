@@ -5327,10 +5327,9 @@ def UpdateSleepInvestment(request):
 
         first_day = sanads.first().date
         sleep = 0
+        date_range = [first_day + timedelta(days=i) for i in range((today - first_day).days + 1)]
 
-        # ابتدا مقدار پیش‌فرض را بر اساس مقدار قبلی قرار می‌دهیم
-        # فرض بر این است که مقدار نهایی در این حلقه، مجموع است
-        for d in (first_day, today):
+        for d in date_range:
             day_sanad_qs = sanads.filter(date=d)
             total_agree = 0
             if day_sanad_qs.exists():
