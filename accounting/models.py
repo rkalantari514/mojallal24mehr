@@ -15,7 +15,7 @@ class BedehiMoshtari(models.Model):
     loans_total=models.DecimalField(max_digits=30, decimal_places=10, null=True, verbose_name='مجموع  وام ها')
     total_with_loans=models.DecimalField(max_digits=30, decimal_places=10, null=True, verbose_name='برآیند بدهی با وام')
     from_last_daryaft=models.IntegerField(default=None,blank=True, null=True, verbose_name='از آخری دریافت')
-    sleep_investment = models.DecimalField(max_digits=30, decimal_places=10, null=True, verbose_name='خواب سرمایه')
+    sleep_investment = models.DecimalField(max_digits=30, decimal_places=0, null=True, verbose_name='خواب سرمایه')
 
     class Meta:
         verbose_name = 'بدهی مشتری'
