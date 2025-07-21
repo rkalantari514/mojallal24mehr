@@ -5092,6 +5092,39 @@ def DeleteDublicateData(request):
 
 
 
+    print('حذف جزئیات اسناد تکراری---------------------')
+    # گروه‌بندی بر اساس سه فیلد و یافتن آخرین ID هر گروه
+    duplicates = SanadDetail.objects.values('acc_year', 'code', 'radif').annotate(
+        count=Count('id'),
+        last_id=Max('id')
+    ).filter(count__gt=1)
+
+    objects_to_delete = []
+    for duplicate in duplicates:
+        acc_year = duplicate['acc_year']
+        code = duplicate['code']
+        radif = duplicate['radif']
+        last_id = duplicate['last_id']
+
+        # حذف رکوردهای تکراری به جز آخرین
+        deleted_qs = SanadDetail.objects.filter(
+            acc_year=acc_year,
+            code=code,
+            radif=radif
+        ).exclude(id=last_id)
+
+        # افزودن به لیست حذف برای اجرای bulk_delete
+        objects_to_delete.extend(deleted_qs)
+
+    # حذف دسته جمعی با bulk_delete
+    if objects_to_delete:
+        count_deleted, _ = SanadDetail.objects.filter(
+            id__in=[obj.id for obj in objects_to_delete]
+        ).delete()
+        print(f"تعداد رکوردهای تکراری حذف شده: {count_deleted}")
+    else:
+        print('رکورد تکراری یافت نشد.')
+
 
 
 
