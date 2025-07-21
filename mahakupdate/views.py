@@ -5101,11 +5101,12 @@ def DeleteDublicateData(request):
     print('تعداد تکراری', len(duplicates))
     objects_to_delete = []
     for duplicate in duplicates:
+        print()
         acc_year = duplicate['acc_year']
         code = duplicate['code']
         radif = duplicate['radif']
         last_id = duplicate['last_id']
-
+        print(acc_year,code,radif,'add to objects_to_delete')
         # حذف رکوردهای تکراری به جز آخرین
         deleted_qs = SanadDetail.objects.filter(
             acc_year=acc_year,
