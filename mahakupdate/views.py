@@ -2805,9 +2805,11 @@ def UpdateSanadDetail(request):
 
     # لیست نهایی برای شناسه رکوردهایی که باید حذف شوند
     sanad_ids = []
-
+    c=1
     # مرحله 4: پردازش در batchهای کوچک
     for i in range(0, len(keys_list), BATCH_SIZE):
+        print(c)
+        c=c+1
         batch = keys_list[i:i + BATCH_SIZE]
         query = Q()
         for code, radif in batch:
