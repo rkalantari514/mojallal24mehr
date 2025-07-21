@@ -2788,11 +2788,18 @@ def UpdateSanadDetail(request):
     sanads_to_delete = []
     current_sanad_keys = {(sd.code, sd.radif) for sd in SanadDetail.objects.filter(acc_year=acc_year)}
 
-    for key in current_sanad_keys:
-        if key not in existing_in_mahak:
-            sanads = SanadDetail.objects.filter(code=key[0], radif=key[1])
-            if sanads.exists():
-                sanads_to_delete.extend(sanad.id for sanad in sanads)
+    keys_to_delete = current_sanad_keys - existing_in_mahak
+
+    sanads_to_delete = []
+    for code, radif in keys_to_delete:
+        sanads = SanadDetail.objects.filter(code=code, radif=radif)
+        sanads_to_delete.extend(sanad.id for sanad in sanads)
+
+    # for key in current_sanad_keys:
+    #     if key not in existing_in_mahak:
+    #         sanads = SanadDetail.objects.filter(code=key[0], radif=key[1])
+    #         if sanads.exists():
+    #             sanads_to_delete.extend(sanad.id for sanad in sanads)
 
     # حذف به صورت دسته‌ای
     if sanads_to_delete:
