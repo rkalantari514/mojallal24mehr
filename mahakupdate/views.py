@@ -2793,7 +2793,7 @@ def UpdateSanadDetail(request):
     sanads_to_delete = []
     for code, radif in keys_to_delete:
         print(code, radif,'add to sanads_to_delete')
-        sanads = SanadDetail.objects.filter(code=code, radif=radif)
+        sanads = SanadDetail.objects.filter(code=code, radif=radif,acc_year=acc_year)
         sanads_to_delete.extend(sanad.id for sanad in sanads)
 
     # for key in current_sanad_keys:
