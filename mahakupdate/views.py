@@ -5066,7 +5066,7 @@ def DeleteDublicateData(request):
     ).filter(count__gt=1)
 
     objects_to_delete = []
-
+    print('تعداد تکراری',len(duplicates))
     for duplicate in duplicates:
         festival_id = duplicate['festival']
         customer_id = duplicate['customer']
@@ -5098,7 +5098,7 @@ def DeleteDublicateData(request):
         count=Count('id'),
         last_id=Max('id')
     ).filter(count__gt=1)
-
+    print('تعداد تکراری', len(duplicates))
     objects_to_delete = []
     for duplicate in duplicates:
         acc_year = duplicate['acc_year']
