@@ -2821,7 +2821,12 @@ def UpdateSanadDetail(request):
     # مرحله 5: حذف دسته جمعی رکوردها
     if sanad_ids:
         print(f"حذف {len(sanad_ids)} رکورد")
-        SanadDetail.objects.filter(id__in=sanad_ids).delete()
+        batch_size = 1000
+        for i in range(0, len(sanad_ids), batch_size):
+            batch_ids = sanad_ids[i:i + batch_size]
+            SanadDetail.objects.filter(id__in=batch_ids).delete()
+
+
     else:
         print("هیچ رکوردی برای حذف وجود ندارد.")
 
