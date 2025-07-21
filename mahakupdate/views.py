@@ -2785,34 +2785,46 @@ def UpdateSanadDetail(request):
     #
 
     # حذف رکوردهای اضافی
-    sanads_to_delete = []
-    current_sanad_keys = {(sd.code, sd.radif) for sd in SanadDetail.objects.filter(acc_year=acc_year)}
 
-    keys_to_delete = current_sanad_keys - existing_in_mahak
-    print('keys_to_delete',len(keys_to_delete))
+
 
     from django.db.models import Q
 
-    # ساخت لیست تمام کلیدهای مورد نیاز
+    # مرحله 1: دریافت کلیدهای موجود در دیتابیس
+    current_sanad_keys = {(sd.code, sd.radif) for sd in SanadDetail.objects.filter(acc_year=acc_year)}
+
+    # مرحله 2: محاسبه کلیدهای مورد نیاز برای حذف
+    keys_to_delete = current_sanad_keys - existing_in_mahak
+    print('keys_to_delete', len(keys_to_delete))
+
+    # مرحله 3: ساخت لیست کلیدها برای batching
     keys_list = list(keys_to_delete)
 
-    # ساخت کوئری با OR برای ترکیب کلیدهای مورد نظر
-    query = Q()
-    for code, radif in keys_list:
-        query |= Q(code=code, radif=radif)
+    # مقدار batch مناسب
+    BATCH_SIZE = 500
 
-    # گرفتن تمام رکوردهای SanadDetail مربوطه در یک کوئری
-    sanads_queryset = SanadDetail.objects.filter(query, acc_year=acc_year)
+    # لیست نهایی برای شناسه رکوردهایی که باید حذف شوند
+    sanad_ids = []
 
-    # جمع‌آوری IDهای این رکوردها
-    sanad_ids = list(sanads_queryset.values_list('id', flat=True))
+    # مرحله 4: پردازش در batchهای کوچک
+    for i in range(0, len(keys_list), BATCH_SIZE):
+        batch = keys_list[i:i + BATCH_SIZE]
+        query = Q()
+        for code, radif in batch:
+            query |= Q(code=code, radif=radif)
+        # گرفتن رکوردهای مربوطه در این batch و افزودن به لیست شناسه‌ها
+        sanads = SanadDetail.objects.filter(query, acc_year=acc_year)
+        sanad_ids.extend(sanads.values_list('id', flat=True))
 
-    # اگر رکوردی برای حذف وجود دارد
+    # مرحله 5: حذف دسته جمعی رکوردها
     if sanad_ids:
         print(f"حذف {len(sanad_ids)} رکورد")
         SanadDetail.objects.filter(id__in=sanad_ids).delete()
     else:
         print("هیچ رکوردی برای حذف وجود ندارد.")
+
+
+
     import re
 
     # بررسی اسناد دریافتنی
