@@ -2790,28 +2790,29 @@ def UpdateSanadDetail(request):
 
     keys_to_delete = current_sanad_keys - existing_in_mahak
     print('keys_to_delete',len(keys_to_delete))
-    sanads_to_delete = []
-    for code, radif in keys_to_delete:
-        print(code, radif,'add to sanads_to_delete')
-        sanads = SanadDetail.objects.filter(code=code, radif=radif,acc_year=acc_year)
-        sanads_to_delete.extend(sanad.id for sanad in sanads)
 
-    # for key in current_sanad_keys:
-    #     if key not in existing_in_mahak:
-    #         sanads = SanadDetail.objects.filter(code=key[0], radif=key[1])
-    #         if sanads.exists():
-    #             sanads_to_delete.extend(sanad.id for sanad in sanads)
+    from django.db.models import Q
 
-    # حذف به صورت دسته‌ای
-    if sanads_to_delete:
-        print('شروع به حذف')
-        for i in range(0, len(sanads_to_delete), BATCH_SIZE):
-            batch = sanads_to_delete[i:i + BATCH_SIZE]
-            print(f"حذف شناسه‌ها: {batch}")  # برای بررسی، شناسه‌های حذف را چاپ کنید
-            SanadDetail.objects.filter(id__in=batch).delete()
+    # ساخت لیست تمام کلیدهای مورد نیاز
+    keys_list = list(keys_to_delete)
+
+    # ساخت کوئری با OR برای ترکیب کلیدهای مورد نظر
+    query = Q()
+    for code, radif in keys_list:
+        query |= Q(code=code, radif=radif)
+
+    # گرفتن تمام رکوردهای SanadDetail مربوطه در یک کوئری
+    sanads_queryset = SanadDetail.objects.filter(query, acc_year=acc_year)
+
+    # جمع‌آوری IDهای این رکوردها
+    sanad_ids = list(sanads_queryset.values_list('id', flat=True))
+
+    # اگر رکوردی برای حذف وجود دارد
+    if sanad_ids:
+        print(f"حذف {len(sanad_ids)} رکورد")
+        SanadDetail.objects.filter(id__in=sanad_ids).delete()
     else:
         print("هیچ رکوردی برای حذف وجود ندارد.")
-
     import re
 
     # بررسی اسناد دریافتنی
