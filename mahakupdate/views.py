@@ -2789,7 +2789,7 @@ def UpdateSanadDetail(request):
     current_sanad_keys = {(sd.code, sd.radif) for sd in SanadDetail.objects.filter(acc_year=acc_year)}
 
     keys_to_delete = current_sanad_keys - existing_in_mahak
-    print('keys_to_delete',lrn(keys_to_delete))
+    print('keys_to_delete',len(keys_to_delete))
     sanads_to_delete = []
     for code, radif in keys_to_delete:
         print(code, radif,'add to sanads_to_delete')
