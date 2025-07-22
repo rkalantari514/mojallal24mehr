@@ -491,7 +491,7 @@
                                                     data-field="bes" data-footer-formatter="priceFormatter">بستانکار
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-field="mand1" data-footer-formatter="priceFormatter">مانده سند
+                                                    data-field="mandeh" >مانده کل
                                                 </th>
                                                 {#                                                <th class="card-text text-center" data-sortable="true"#}
                                                 {#                                                    data-field="mandkol"#}
@@ -504,7 +504,8 @@
                                             {% for s in asnad %}
                                                 <tr>
                                                     <td class="card-text text-center">{{ s.code }}</td>
-                                                    <td class="card-text text-center">{{ s.radif }}</td>
+{#                                                    <td class="card-text text-center">{{ s.radif }}</td>#}
+                                                    <td class="card-text text-center">{{ s.acc_year }}</td>
                                                     <td class="card-text text-center">{{ s.tarikh }}</td>
                                                     {#                                                    <td class="card-text text-center ">{{ s.kind.0 }}</td>#}
                                                     <td class="card-text text-center text-{{ s.kind.2 }}">{{ s.kind.1 }}</td>
@@ -520,7 +521,7 @@
                                                     <td class="card-text text-center">{{ s.bed|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center">{{ s.bes|floatformat:0|intcomma:False }}</td>
                                                     <td class="card-text text-center"
-                                                        style="direction: ltr">{{ s.curramount|floatformat:0|intcomma:False }}</td>
+                                                        style="direction: ltr">{{ s.mandeh|floatformat:0|intcomma:False }}</td>
                                                     {#                                                    <td class="card-text text-center"></td>#}
                                                 </tr>
                                             {% endfor %}

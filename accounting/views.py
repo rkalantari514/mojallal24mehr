@@ -1,9 +1,18 @@
 # جدید
 # جدیدتر
 import re
+
+import time
+import datetime
+from django.db.models import Sum, Min, Max
+from django.db.models import Q
+from django.shortcuts import render
+from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta
+import jdatetime
+from django.db.models import Sum, Subquery # مطمئن شوید Subquery را ایمپورت کرده‌اید
 from django.contrib.auth.decorators import login_required
 import time
-from datetime import date
 from django.utils import timezone
 from django.db.models import Sum, F, FloatField
 from django.db.models.functions import Cast
@@ -20,7 +29,6 @@ from loantracker.forms import SMSTrackingForm, CallTrackingForm
 from loantracker.models import TrackKinde, Tracking
 from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan, LoanDetil, Kala
 from jdatetime import date as jdate
-from datetime import timedelta, date
 from khayyam import JalaliDate, JalaliDatetime
 from django.db.models import F
 
@@ -1236,14 +1244,11 @@ def JariAshkhasMoshtarianDetail(request, filter_id):
     return render(request, 'jari_ashkhas_moshtarian_detail.html', context)
 
 
-import datetime
 from django.utils import timezone
-import datetime
 from collections import defaultdict
 from django.utils import timezone
 from django.utils import timezone
 from collections import defaultdict
-import datetime
 
 
 @login_required(login_url='/login')
@@ -1282,14 +1287,12 @@ def HesabMoshtariDetail1(request, tafsili):
     return render(request, 'moshrari_detail.html', context)
 
 
-from datetime import timedelta
-
-from datetime import timedelta
 import re
 
-from datetime import timedelta
 
 from django.shortcuts import render, redirect
+from django.db.models import Sum, Min, Max
+import jdatetime
 
 
 @login_required(login_url='/login')
@@ -1307,6 +1310,90 @@ def HesabMoshtariDetail(request, tafsili):
     today = timezone.now().date()
     # asnad = SanadDetail.objects.filter(kol=103, moin=1, tafzili=tafsili).order_by('date')
     asnad = SanadDetail.objects.filter(kol=103, tafzili=tafsili).order_by('date')
+    mandeh=0
+    for s in asnad:
+        s.mandeh=mandeh+s.curramount
+        mandeh+=s.curramount
+
+
+    # =========================================ایجاد نمودار گردش حساب مشتری
+    master_info = MasterInfo.objects.filter(is_active=True).last()
+    year_list=[]
+    for m in MasterInfo.objects.order_by('acc_year').all():
+        year_list.append(m.acc_year)
+
+    acc_year = master_info.acc_year
+    base_year = acc_year - 1
+
+    start_date = SanadDetail.objects.filter(acc_year=base_year).aggregate(min_date=Min('date'))['min_date']
+    end_date = SanadDetail.objects.filter(acc_year=base_year).aggregate(max_date=Max('date'))['max_date']
+
+    # ایجاد لیست روزها
+    date_list = []
+    current_date = start_date
+    while current_date <= end_date:
+        date_list.append(current_date.strftime('%Y-%m-%d'))  # قالب تاریخ به YYYY-MM-DD
+        current_date += timedelta(days=1)
+    acc_date_list = [datetime.strptime(date, '%Y-%m-%d') + relativedelta(years=1) for date in date_list]
+    acc_date_list = [date.strftime('%Y-%m-%d') for date in acc_date_list]
+
+
+    chart_labels_shamsi = []
+    for date in acc_date_list:
+        try:
+            miladi_date = datetime.strptime(date, '%Y-%m-%d')  # تبدیل میلادی به datetime
+            shamsi_date = jdatetime.date.fromgregorian(day=miladi_date.day, month=miladi_date.month,
+                                                       year=miladi_date.year)
+
+            chart_labels_shamsi.append(shamsi_date.strftime('%Y-%m-%d'))
+
+        except ValueError as e:
+            print(f"خطای تبدیل تاریخ: {date}, {e}")  # نمایش خطا در صورت وجود مشکل
+
+    chart_labels = chart_labels_shamsi  # برچسب‌های نمودار همان لیست تاریخ‌ها
+
+    today = datetime.today().strftime('%Y-%m-%d')
+
+    chart_date=[]
+    for y in year_list:
+        print(y)
+        delta_yar=y-acc_year
+        print('delta_yar',delta_yar)
+        daily_totals_year = {}
+        sanad_year_qs = asnad.filter(acc_year=y)
+        print('sanad_year_qs.count()',sanad_year_qs.count())
+
+        results = asnad.filter(acc_year=y).values('date').annotate(total=Sum('curramount')).order_by('date')
+        print('نتایج برای سال:', y)
+        print('تعداد نتایج:', len(results))
+        for r in results:
+            print(r)
+
+        if sanad_year_qs.exists():
+            for item in sanad_year_qs.values('date').annotate(total=Sum('curramount')).order_by('date'):
+                print("item[total]",item['total'])
+                daily_totals_year[str(item['date'])] = float(item['total'] or 0)
+
+        chart_y=[]
+        cumulative_year = 0
+        for day in acc_date_list:
+            by_date = datetime.strptime(day, '%Y-%m-%d') + relativedelta(years=delta_yar)  # تاریخ مربوط به سال پایه
+            # مقدار روز جاری از سال پایه را دریافت و تجمعی محاسبه کن
+            if str(by_date.date()) in daily_totals_year:
+                cumulative_year += daily_totals_year[str(by_date.date())]  # علامت منفی برای تصحیح
+            chart_y.append(cumulative_year)
+            # if day == today:
+            #     today_bay_by = (cumulative_base_year) * budget_rate
+
+            # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
+
+        chart_date.append(chart_y)
+
+    for t in chart_date:
+        print('==================')
+        for tt in t:
+            print(tt)
+
 
     hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
     m_name = None
