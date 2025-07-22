@@ -94,6 +94,30 @@
                 </div>
 
             </div>
+            <!-- ردیف نمودار -->
+
+            <div class="row">
+                <div class="col-md-12 mb-30">
+                    <div class="col-xl-12 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="card-body">
+                                <div class="table-responsive mt-15 ">
+                                    <h5 class="card-title pb-0 border-0">نمودار گردش حساب</h5>
+                                </div>
+
+                                <div class="chart-container ">
+                                    <canvas id="Chart1"></canvas>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
 
             <!-- ردیف خلاصه و جزئیات وام ها -->
             <div class="row">
@@ -592,6 +616,75 @@
             document.getElementById("id_call_description").value = "";
         });
     </script>
+
+<div class="chart-container">
+    <canvas id="Chart1"></canvas>
+</div>
+
+<script>
+    // داده‌های پاس داده شده از Django
+    const chartLabels = {{ chart_labels|safe }}; // لیست تاریخ‌ها
+    const chartDataSets = {{ chart_date|safe }}; // آرایه‌ای از آرایه‌های داده‌ها برای هر سال
+
+    // رنگ‌های پیشنهادی برای هر سال - قابل تغییر است
+    const colors = [
+        'blue', 'green', 'red', 'teal', 'orange', 'purple', 'brown', 'cyan', 'magenta', 'lime'
+    ];
+
+    // ساخت Dataset ها برای هر سال
+    const datasets = chartDataSets.map((data, index) => ({
+        label: `سال ${index + 1}`,
+        data: data,
+        borderColor: colors[index % colors.length], // تکرار رنگ‌ها در صورت نیاز
+        fill: false,
+        pointRadius: 0,
+        borderDash: (index >= chartDataSets.length - 2) ? [5, 5] : [], // برای پیش‌بینی و پیش‌بینی خطی خط‌خطی
+    }));
+
+    // رسم نمودار
+    const ctx = document.getElementById('Chart1').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartLabels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { title: { display: true, text: "تاریخ" } },
+                y: { title: { display: true, text: "مقدار تجمعی" } }
+            },
+            plugins: {
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function (context) {
+                            var value = context.parsed.y / 10000000;
+                            return context.dataset.label + ': ' + value.toFixed(1) + ' میلیون تومان';
+                        },
+                        title: function (tooltipItems) {
+                            return 'تاریخ: ' + tooltipItems[0].label;
+                        }
+                    }
+                },
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+</script>
+
 
 
 

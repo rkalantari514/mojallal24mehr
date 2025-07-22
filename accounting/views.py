@@ -1515,6 +1515,13 @@ def HesabMoshtariDetail(request, tafsili):
         'call_form': call_form,  # ارسال فرم به قالب
         'tracking': tracking,
         'khab': khab,
+
+
+        'chart_labels': chart_labels,
+        'chart_date': chart_date,
+
+
+
     }
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
     # return render(request, 'moshrari_detail.html', context)
