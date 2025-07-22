@@ -138,7 +138,7 @@ def ChequesRecieveTotal(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
 
     # گام اول: استخراج تاریخ و ماه
-    today = date.today()
+    today = timezone.now().date()
     month = request.GET.get('month', None)
     year = request.GET.get('year', None)
 
@@ -298,7 +298,7 @@ def ChequesPayTotal(request, *args, **kwargs):
     start_time = time.time()  # زمان شروع تابع
 
     # گام اول: استخراج تاریخ و ماه
-    today = date.today()
+    today = timezone.now().date()
     month = request.GET.get('month', None)
     year = request.GET.get('year', None)
 
@@ -1090,8 +1090,7 @@ def JariAshkhasMoshtarian(request):
     table1.append(-(
             BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0, total_with_loans__lt=0).aggregate(
                 total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0) / 10000000)
-    today = datetime.date.today()
-
+    today = timezone.now().date()
     # 9 قسط عقب افتاده
     total_cost = LoanDetil.objects.filter(
         complete_percent__lt=1,  # فرض کنیم درصد کامل باید کمتر از 100 باشد
