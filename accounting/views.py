@@ -1090,7 +1090,7 @@ def JariAshkhasMoshtarian(request):
     table1.append(-(
             BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0, total_with_loans__lt=0).aggregate(
                 total_with_loans=Sum('total_with_loans'))['total_with_loans'] or 0) / 10000000)
-    today = date.today()
+    today = datetime.date.today()
 
     # 9 قسط عقب افتاده
     total_cost = LoanDetil.objects.filter(
@@ -1368,7 +1368,8 @@ def HesabMoshtariDetail(request, tafsili):
         print('تعداد نتایج:', len(results))
         for r in results:
             print(r)
-
+        for s in sanad_year_qs:
+            print('==>',s.date, s.curramount)
         if sanad_year_qs.exists():
             for item in sanad_year_qs.values('date').annotate(total=Sum('curramount')).order_by('date'):
                 print("item[total]",item['total'])
