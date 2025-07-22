@@ -106,7 +106,7 @@
                                 </div>
 
                                 <div class="chart-container ">
-                                    <canvas id="Chart1"></canvas>
+<canvas id="Chart1" style="height: 400px; width: 100%;"></canvas>
                                 </div>
 
                             </div>
@@ -617,28 +617,28 @@
         });
     </script>
 
-<div class="chart-container">
-    <canvas id="Chart1"></canvas>
-</div>
+
 
 <script>
-    // داده‌های پاس داده شده از Django
-    const chartLabels = {{ chart_labels|safe }}; // لیست تاریخ‌ها
-    const chartDataSets = {{ chart_date|safe }}; // آرایه‌ای از آرایه‌های داده‌ها برای هر سال
+    // داده‌های پاس‌داده شده از Django
+    const chartLabels = {{ chart_labels|safe }}; // لیست برچسب‌های تاریخ
+    const chartDataSets = {{ chart_date|safe }}; // داده‌های هر سال، لیست لیست‌ها
+    const yearList = {{ year_list|safe }}; // لیست سال‌ها
 
-    // رنگ‌های پیشنهادی برای هر سال - قابل تغییر است
+    // رنگ‌های پیشنهادی برای هر سال - اگر تعداد سال‌ها بیشتر شد، باید رنگ‌های بیشتری انتخاب کنید
     const colors = [
         'blue', 'green', 'red', 'teal', 'orange', 'purple', 'brown', 'cyan', 'magenta', 'lime'
     ];
 
-    // ساخت Dataset ها برای هر سال
+    // ساخت Dataset برای هر سال
     const datasets = chartDataSets.map((data, index) => ({
-        label: `سال ${index + 1}`,
+        label: `سال ${yearList[index]}`,
         data: data,
-        borderColor: colors[index % colors.length], // تکرار رنگ‌ها در صورت نیاز
+        borderColor: colors[index % colors.length],
         fill: false,
         pointRadius: 0,
-        borderDash: (index >= chartDataSets.length - 2) ? [5, 5] : [], // برای پیش‌بینی و پیش‌بینی خطی خط‌خطی
+        // حذف خطوط خط‌خطی برای سادگی
+        // borderDash: [5, 5], // اگر خواستید خط‌های خط‌چین باشد، فعال کنید
     }));
 
     // رسم نمودار
@@ -654,8 +654,12 @@
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                x: { title: { display: true, text: "تاریخ" } },
-                y: { title: { display: true, text: "مقدار تجمعی" } }
+                x: {
+                    title: { display: true, text: "تاریخ" }
+                },
+                y: {
+                    title: { display: true, text: "مقدار تجمعی" }
+                }
             },
             plugins: {
                 tooltip: {
@@ -663,6 +667,7 @@
                     intersect: false,
                     callbacks: {
                         label: function (context) {
+                            // تقسیم بر 10 میلیون، با یک رقم اعشار
                             var value = context.parsed.y / 10000000;
                             return context.dataset.label + ': ' + value.toFixed(1) + ' میلیون تومان';
                         },
@@ -684,7 +689,6 @@
         }
     });
 </script>
-
 
 
 

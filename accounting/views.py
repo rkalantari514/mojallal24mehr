@@ -1519,6 +1519,7 @@ def HesabMoshtariDetail(request, tafsili):
 
         'chart_labels': chart_labels,
         'chart_date': chart_date,
+        'year_list': year_list,
 
 
 
