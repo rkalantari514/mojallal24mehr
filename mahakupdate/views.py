@@ -14,6 +14,7 @@ from .models import Kala, Storagek
 from .models import Factor
 from .sendtogap import send_to_admin
 import logging
+
 logger = logging.getLogger(__name__)
 from .models import Kardex, Mojodi
 from datetime import timedelta
@@ -33,13 +34,14 @@ from django.http import JsonResponse
 # sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
 from django.db.models import Sum, Count, F, Q
 
+
 def connect_to_mahak():
     sn = os.getenv('COMPUTERNAME')
     print('sn')
     print(sn)
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
 
-    if acc_year==1403:
+    if acc_year == 1403:
         connections = {
             'DESKTOP-ITU3EHV': ('DESKTOP-ITU3EHV\\MAHAK14', 'mahak'),
             'TECH_MANAGER': ('TECH_MANAGER\\RKALANTARI', 'mahak'),
@@ -48,7 +50,7 @@ def connect_to_mahak():
             'RP-MAHAK': ('Ac\\MAHAK', 'mahak_FY_1403')
         }
 
-    if acc_year==1404:
+    if acc_year == 1404:
         print('acc_year=1404')
         connections = {
             'DESKTOP-ITU3EHV': ('DESKTOP-ITU3EHV\\MAHAK14', 'mahak'),
@@ -73,6 +75,7 @@ def connect_to_mahak():
     else:
         raise EnvironmentError("The computer name does not match.")
 
+
 def jalali_to_gregorian(jalali_date):
     # تابع تبدیل تاریخ شمسی به میلادی (نیاز به پیاده سازی دارد)
     # مثال: '1403/10/02' -> datetime.date(2025, 1, 22)
@@ -82,6 +85,8 @@ def jalali_to_gregorian(jalali_date):
     import jdatetime
     gregorian_date = jdatetime.date(year, month, day).togregorian()
     return gregorian_date
+
+
 def get_databases(request):
     try:
         conn = connect_to_mahak()
@@ -103,11 +108,10 @@ def get_databases(request):
     # صفحه عملیات آپدیت
 
 
-
-
 import os
 import pyodbc
 from django.http import JsonResponse
+
 
 def BackupFromMahak(request, dbname):
     try:
@@ -137,13 +141,6 @@ def BackupFromMahak(request, dbname):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
-
-
-
-
-
-
-
 
 
 @login_required(login_url='/login')
@@ -198,7 +195,7 @@ def Updateall(request):
     if now.hour in work_time:
         print(f' ساعت کاری: {now.hour}')
         send_to_admin(f' ساعت کاری: {now.hour}')
-    # send_to_admin(f' لغو: {now.hour}')
+        # send_to_admin(f' لغو: {now.hour}')
         return redirect('/updatedb')
 
     else:
@@ -262,6 +259,7 @@ def Updateall(request):
         'update/calculate_award',
         'update/after_takhfif_kol',
         'update/sleepinvestment',
+        'update/loan_bedehi_moshtari',
     ]
     # نگاشت آدرس‌های استاتیک به توابع
     static_view_map = {
@@ -280,6 +278,7 @@ def Updateall(request):
         'update/calculate_award': Calculate_and_award_points,
         'update/after_takhfif_kol': AfterTakhfifKol,
         'update/sleepinvestment': UpdateSleepInvestment,
+        'update/loan_bedehi_moshtari': LoanBedehiMoshtari,
     }
     # چاپ تزئینی برای عیب یابی
     print(f"Request path: {request.path}")
@@ -398,10 +397,12 @@ def UpdateFactor2(request):
 
     return redirect('/updatedb')
 
+
 import pyodbc
 
 from django.shortcuts import redirect
 import pyodbc
+
 
 def TsesFactorDuplicatte(request):
     conn = connect_to_mahak()
@@ -409,11 +410,11 @@ def TsesFactorDuplicatte(request):
 
     # یافتن کدهای تکراری
     cursor.execute("""
-        SELECT [Code], COUNT([Code]) AS count
-        FROM [Fact_Fo]
-        GROUP BY [Code]
-        HAVING COUNT([Code]) > 1
-    """)
+                   SELECT [Code], COUNT([Code]) AS count
+                   FROM [Fact_Fo]
+                   GROUP BY [Code]
+                   HAVING COUNT([Code]) > 1
+                   """)
     duplicate_codes = cursor.fetchall()
 
     if not duplicate_codes:
@@ -449,11 +450,6 @@ def TsesFactorDuplicatte(request):
     return redirect('/updatedb')
 
 
-
-
-
-
-
 def UpdateFactor(request):
     t0 = time.time()
     print('شروع آپدیت فاکتور--------------------------------------')
@@ -461,7 +457,8 @@ def UpdateFactor(request):
     cursor = conn.cursor()
     t1 = time.time()
 
-    cursor.execute("SELECT [Code], [tarikh], [mablagh_factor], [takhfif], [CreatedTime], [Takhfif_Percent], [Shakhs_Code] FROM Fact_Fo")
+    cursor.execute(
+        "SELECT [Code], [tarikh], [mablagh_factor], [takhfif], [CreatedTime], [Takhfif_Percent], [Shakhs_Code] FROM Fact_Fo")
     mahakt_data = cursor.fetchall()
     existing_in_mahak_codes = {row[0] for row in mahakt_data}
 
@@ -554,7 +551,8 @@ def UpdateFactor(request):
         if factors_to_update:
             Factor.objects.bulk_update(
                 factors_to_update,
-                ['pdate', 'mablagh_factor', 'takhfif', 'create_time', 'darsad_takhfif', 'acc_year', 'date', 'per_code', 'person']
+                ['pdate', 'mablagh_factor', 'takhfif', 'create_time', 'darsad_takhfif', 'acc_year', 'date', 'per_code',
+                 'person']
             )
 
         # حذف فاکتورهایی که در Mahak نیستند
@@ -586,7 +584,6 @@ def UpdateFactor(request):
         conn.close()
     print('پایان آپدیت فاکتور--------------------------------------')
     return redirect('/updatedb')
-
 
 
 def UpdateBackFactor(request):
@@ -626,7 +623,6 @@ def UpdateBackFactor(request):
         pdate_jalali = row[3]
         sharh = row[4] or ""
         takhfif = Decimal(row[5]) if row[5] is not None else Decimal(0)
-
 
         defaults = {
             'pdate': pdate_jalali,
@@ -721,9 +717,6 @@ def UpdateBackFactor(request):
     return redirect('/updatedb')
 
 
-
-
-
 from django.db.models import Count
 
 
@@ -731,7 +724,6 @@ from django.db.models import Count
 def UpdateKardex(request):
     t0 = time.time()
     print('شروع آپدیت کاردکس----------------------------------------')
-
 
     # گروه‌بندی بر اساس کلید مورد نظر و شمارش تعداد
     duplicates = Kardex.objects.values('pdate', 'code_kala', 'stock', 'radif') \
@@ -757,7 +749,6 @@ def UpdateKardex(request):
         # بروزرسانی sync_mojodi ردیف نگهداری‌شده
         to_keep.sync_mojodi = False
         to_keep.save()
-
 
     conn = connect_to_mahak()
     cursor = conn.cursor()
@@ -855,9 +846,9 @@ def UpdateKardex(request):
             print(f"{len(batch_keys)} رکورد اضافی حذف شد.")
             send_to_admin(f"{len(batch_keys)} کاردکس حذف")
 
-    kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala', 'storage').filter(acc_year=acc_year))  # فقط رکوردهای سال مالی جاری
+    kardex_instances = list(Kardex.objects.prefetch_related('factor', 'kala', 'storage').filter(
+        acc_year=acc_year))  # فقط رکوردهای سال مالی جاری
     updates = []
-
 
     # تقسیم کدها به دسته‌های کوچک‌تر
     factor_codes = [k.code_factor for k in kardex_instances]
@@ -868,7 +859,8 @@ def UpdateKardex(request):
         factors.update({factor.code: factor for factor in Factor.objects.filter(code__in=batch_factor_codes)})
 
     kalas = {kala.code: kala for kala in Kala.objects.filter(code__in=[k.code_kala for k in kardex_instances])}
-    storages = {storage.code: storage for storage in Storagek.objects.filter(code__in=[k.warehousecode for k in kardex_instances])}
+    storages = {storage.code: storage for storage in
+                Storagek.objects.filter(code__in=[k.warehousecode for k in kardex_instances])}
 
     for kardex in kardex_instances:
         factor = factors.get(kardex.code_factor)
@@ -941,11 +933,6 @@ def UpdateKardex(request):
         kardex_falt.save()
 
     return redirect('/updatedb')
-
-
-
-
-
 
 
 def UpdateFactorDetail2(request):
@@ -1052,11 +1039,8 @@ from decimal import Decimal
 import time
 import pyodbc
 
+
 # فرضا مدل های شما (برای جلوگیری از خطا در صورت اجرا)
-
-
-
-
 
 
 def UpdateFactorDetail(request):
@@ -1103,7 +1087,7 @@ def UpdateFactorDetail(request):
     updated_count = 0
 
     for row in mahakt_data:
-        print( row[0],row[1])
+        print(row[0], row[1])
         code_factor_mahak = row[0]
         radif_mahak = row[1]
         kala_code_mahak = row[2]
@@ -1115,7 +1099,6 @@ def UpdateFactorDetail(request):
 
         factor = factors.get(code_factor_mahak)
         kala = kalas.get(kala_code_mahak)
-
 
         if factor:
             defaults = {
@@ -1134,14 +1117,17 @@ def UpdateFactorDetail(request):
                 for attr, value in defaults.items():
                     current_value = getattr(detail, attr)
                     if isinstance(current_value, (int, float, Decimal)) and isinstance(value, (int, float, Decimal)):
-                        if Decimal(str(current_value)).quantize(Decimal('0.000001')) != Decimal(str(value)).quantize(Decimal('0.000001')):
-                            print(f"تفاوت (عددی) در فیلد '{attr}' برای فاکتور '{detail.code_factor}' و ردیف '{detail.radif}':")
+                        if Decimal(str(current_value)).quantize(Decimal('0.000001')) != Decimal(str(value)).quantize(
+                                Decimal('0.000001')):
+                            print(
+                                f"تفاوت (عددی) در فیلد '{attr}' برای فاکتور '{detail.code_factor}' و ردیف '{detail.radif}':")
                             print(f"  مقدار فعلی (جنگو): {current_value}")
                             print(f"  مقدار جدید (Mahak): {value}")
                             setattr(detail, attr, value)
                             updated = True
                     elif current_value != value:
-                        print(f"تفاوت (غیر عددی) در فیلد '{attr}' برای فاکتور '{detail.code_factor}' و ردیف '{detail.radif}':")
+                        print(
+                            f"تفاوت (غیر عددی) در فیلد '{attr}' برای فاکتور '{detail.code_factor}' و ردیف '{detail.radif}':")
                         print(f"  مقدار فعلی (جنگو): {current_value} ({type(current_value)})")
                         print(f"  مقدار جدید (Mahak): {value} ({type(value)})")
                         setattr(detail, attr, value)
@@ -1162,7 +1148,9 @@ def UpdateFactorDetail(request):
         if details_to_create:
             FactorDetaile.objects.bulk_create(details_to_create, ignore_conflicts=True)
         if details_to_update:
-            FactorDetaile.objects.bulk_update(details_to_update, ['code_kala', 'count', 'mablagh_vahed', 'mablagh_nahaee', 'acc_year', 'factor', 'kala', 'date'])
+            FactorDetaile.objects.bulk_update(details_to_update,
+                                              ['code_kala', 'count', 'mablagh_vahed', 'mablagh_nahaee', 'acc_year',
+                                               'factor', 'kala', 'date'])
 
         deleted_count = FactorDetaile.objects.filter(
             acc_year=acc_year
@@ -1211,7 +1199,6 @@ def UpdateFactorDetail(request):
     if conn:
         conn.close()
 
-
     objects_to_update = []
     fields_to_update = ['date']
 
@@ -1232,18 +1219,15 @@ def UpdateFactorDetail(request):
         d1 = fac.date
         print(d1, d2)
         if d2 and d1 != d2:
-            print('------',fac.code_factor)
+            print('------', fac.code_factor)
             fac.date = d2
             objects_to_update.append(fac)
 
     if objects_to_update:
         FactorDetaile.objects.bulk_update(objects_to_update, fields_to_update)
 
-
     print('پایان آپدیت جزئیات فاکتور-------------------------------------------------')
     return redirect('/updatedb')
-
-
 
 
 def UpdateBackFactorDetail(request):
@@ -1320,14 +1304,17 @@ def UpdateBackFactorDetail(request):
                 for attr, value in defaults.items():
                     current_value = getattr(detail, attr)
                     if isinstance(current_value, (int, float, Decimal)) and isinstance(value, (int, float, Decimal)):
-                        if Decimal(str(current_value)).quantize(Decimal('0.000001')) != Decimal(str(value)).quantize(Decimal('0.000001')):
-                            print(f"تفاوت (عددی) در فیلد '{attr}' برای فاکتور '{detail.code_factor}' و ردیف '{detail.radif}':")
+                        if Decimal(str(current_value)).quantize(Decimal('0.000001')) != Decimal(str(value)).quantize(
+                                Decimal('0.000001')):
+                            print(
+                                f"تفاوت (عددی) در فیلد '{attr}' برای فاکتور '{detail.code_factor}' و ردیف '{detail.radif}':")
                             print(f"  مقدار فعلی (جنگو): {current_value}")
                             print(f"  مقدار جدید (Mahak): {value}")
                             setattr(detail, attr, value)
                             updated = True
                     elif current_value != value:
-                        print(f"تفاوت (غیر عددی) در فیلد '{attr}' برای فاکتور '{detail.code_factor}' و ردیف '{detail.radif}':")
+                        print(
+                            f"تفاوت (غیر عددی) در فیلد '{attr}' برای فاکتور '{detail.code_factor}' و ردیف '{detail.radif}':")
                         print(f"  مقدار فعلی (جنگو): {current_value} ({type(current_value)})")
                         print(f"  مقدار جدید (Mahak): {value} ({type(value)})")
                         setattr(detail, attr, value)
@@ -1348,7 +1335,9 @@ def UpdateBackFactorDetail(request):
         if details_to_create:
             BackFactorDetail.objects.bulk_create(details_to_create, ignore_conflicts=True)
         if details_to_update:
-            BackFactorDetail.objects.bulk_update(details_to_update, ['code_kala', 'count', 'naghdi','type', 'acc_year', 'backfactor', 'kala'])
+            BackFactorDetail.objects.bulk_update(details_to_update,
+                                                 ['code_kala', 'count', 'naghdi', 'type', 'acc_year', 'backfactor',
+                                                  'kala'])
 
         deleted_count = BackFactorDetail.objects.filter(
             acc_year=acc_year
@@ -1428,19 +1417,20 @@ def UpdateKala(request):
         grpcode = row[2]
 
         if code in current_kalas:
-            if current_kalas[code].name != name or current_kalas[code].grpcode != grpcode or current_kalas[code].kala_taf != kala_taf :
+            if current_kalas[code].name != name or current_kalas[code].grpcode != grpcode or current_kalas[
+                code].kala_taf != kala_taf:
                 current_kalas[code].name = name
                 current_kalas[code].grpcode = grpcode
                 current_kalas[code].kala_taf = kala_taf
                 kalas_to_update.append(current_kalas[code])
         else:
-            kalas_to_create.append(Kala(code=code, name=name,grpcode=grpcode,kala_taf=kala_taf))
+            kalas_to_create.append(Kala(code=code, name=name, grpcode=grpcode, kala_taf=kala_taf))
 
     # Bulk create new kalas
     Kala.objects.bulk_create(kalas_to_create)
 
     # Bulk update existing kalas
-    Kala.objects.bulk_update(kalas_to_update, ['name' , 'grpcode', 'kala_taf'])
+    Kala.objects.bulk_update(kalas_to_update, ['name', 'grpcode', 'kala_taf'])
 
     # Delete obsolete kalas
     Kala.objects.exclude(code__in=existing_in_mahak).delete()
@@ -1470,9 +1460,6 @@ def UpdateKala(request):
     return redirect('/updatedb')
 
 
-
-
-
 def UpdatePerson(request):
     send_to_admin('شروع آپدیت افراد')
     t0 = time.time()
@@ -1495,7 +1482,7 @@ def UpdatePerson(request):
     persons_to_update = []
 
     current_persons = {person.code: person for person in Person.objects.iterator()}
-    created_codes_in_this_run = set() # برای جلوگیری از ایجاد تکراری در یک اجرا
+    created_codes_in_this_run = set()  # برای جلوگیری از ایجاد تکراری در یک اجرا
 
     for row in mahakt_data:
         code = int(row[0])  # تبدیل به عدد برای سازگاری
@@ -1519,14 +1506,14 @@ def UpdatePerson(request):
                 for attr, value in defaults.items():
                     setattr(person, attr, value)
                 persons_to_update.append(person)
-        elif code not in created_codes_in_this_run: # بررسی کنید که در همین اجرا ایجاد نشده باشد
+        elif code not in created_codes_in_this_run:  # بررسی کنید که در همین اجرا ایجاد نشده باشد
             persons_to_create.append(Person(code=code, **defaults))
             created_codes_in_this_run.add(code)
 
-
     with transaction.atomic():
         if persons_to_create:
-            Person.objects.bulk_create(persons_to_create, ignore_conflicts=True) # برای جلوگیری از خطای تکراری بودن کد در سطح دیتابیس
+            Person.objects.bulk_create(persons_to_create,
+                                       ignore_conflicts=True)  # برای جلوگیری از خطای تکراری بودن کد در سطح دیتابیس
 
         if persons_to_update:
             Person.objects.bulk_update(persons_to_update, [
@@ -1535,21 +1522,19 @@ def UpdatePerson(request):
 
         Person.objects.exclude(code__in=existing_in_mahak).delete()
 
-
-# 🗑️ حذف همه رکوردهای تکراری با نگه داشتن قدیمی ترین رکورد
+    # 🗑️ حذف همه رکوردهای تکراری با نگه داشتن قدیمی ترین رکورد
     duplicate_codes = (Person.objects.values('code')
-                      .annotate(count=Count('code'))
-                      .filter(count__gt=1)
-                      .values_list('code', flat=True))
+                       .annotate(count=Count('code'))
+                       .filter(count__gt=1)
+                       .values_list('code', flat=True))
 
     for code in duplicate_codes:
         duplicates = Person.objects.filter(code=code).order_by('id')
         first_record = duplicates.first()  # نگه داشتن قدیمی‌ترین رکورد
         duplicates.exclude(id=first_record.id).delete()  # حذف سایر رکوردها
 
-
     for p in Person.objects.filter(clname=None):
-        p.clname=p.cleaned_name()
+        p.clname = p.cleaned_name()
         p.save()
 
     tend = time.time()
@@ -1577,6 +1562,7 @@ def UpdatePerson(request):
     if conn:
         conn.close()
     return redirect('/updatedb')
+
 
 def UpdatePerson2(request):
     send_to_admin('شروع آپدیت افراد')
@@ -1918,8 +1904,6 @@ def Kala_group(request):
     return render(request, 'kala_group.html', context)
 
 
-
-
 def UpdateKalaGroupinfo_old(request):
     print('def UpdateKalaGroupinfo=========================================')
     # مسیر فایل اکسل
@@ -2042,10 +2026,6 @@ def UpdateKalaGroupinfo(request):
     return redirect('/updatedb')  # مسیر دلخواه شما
 
 
-
-
-
-
 def update_categories_from_kala_groupinfoold():
     # استخراج دسته‌بندی‌های یکتا از ستون‌های cat1, cat2, cat3
     kala_groups = KalaGroupinfo.objects.all()
@@ -2074,9 +2054,11 @@ def update_categories_from_kala_groupinfoold():
                 defaults={'level': level, 'parent': parent}
             )
 
+
 from django.db import transaction
 
 from django.db import transaction
+
 
 def update_categories_from_kala_groupinfo():
     # استخراج دسته‌بندی‌های یکتا از ستون‌های cat1، cat2، و cat3
@@ -2093,7 +2075,7 @@ def update_categories_from_kala_groupinfo():
 
     # حذف دسته‌بندی‌های تکراری، بر اساس نام و سطح
     unique_categories = list({(name, level): (name, level, parent_name, code_mahak)
-                                for name, level, parent_name, code_mahak in categories}.values())
+                              for name, level, parent_name, code_mahak in categories}.values())
 
     # ساخت مجموعه نام‌ها برای حذف رکوردهای قدیمی
     new_category_names = [name for name, _, _, _ in unique_categories]
@@ -2119,8 +2101,6 @@ def update_categories_from_kala_groupinfo():
             )
 
 
-
-
 def CreateKalaGroup(request):
     print('def CreateKalaGroup==========================')
     update_categories_from_kala_groupinfo()
@@ -2142,21 +2122,21 @@ def update_kala_categories():
     for kala in kalas:
         if int(kala.code) == 110:
             print('================ 110')
-            print(kala.code,kala.name)
+            print(kala.code, kala.name)
             print(category_110)
             if kala.category != category_110:
                 kala.category = category_110
                 updates.append(kala)
         elif int(kala.code) == 120:
             print('================ 120')
-            print(kala.code,kala.name)
+            print(kala.code, kala.name)
             print(category_120)
             if kala.category != category_120:
                 kala.category = category_120
                 updates.append(kala)
         elif int(kala.code) == 1:
             print('================ 1')
-            print(kala.code,kala.name)
+            print(kala.code, kala.name)
             print(category_1)
             if kala.category != category_1:
                 kala.category = category_1
@@ -2207,10 +2187,11 @@ def UpdateMojodi(request):
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
 
     # دریافت لیست کد کالاهایی که sync_mojodi=False هستند
-    false_kardex_list = list(Kardex.objects.filter(sync_mojodi=False,acc_year=acc_year).values_list('code_kala', flat=True))
+    false_kardex_list = list(
+        Kardex.objects.filter(sync_mojodi=False, acc_year=acc_year).values_list('code_kala', flat=True))
 
     # بارگذاری رکوردهای Kardex مورد نظر فقط یک بار
-    kardex_to_update = Kardex.objects.filter(code_kala__in=false_kardex_list,acc_year=acc_year)
+    kardex_to_update = Kardex.objects.filter(code_kala__in=false_kardex_list, acc_year=acc_year)
     # kardex_to_update = Kardex.objects.filter(code_kala=70179)
 
     # بارگذاری کادرکس‌ها که sync_mojodi آنها True است
@@ -2486,7 +2467,7 @@ def UpdateSanad(request):
     # پردازش داده‌های جدید
     for row in mahakt_data:
         code = int(row[0])
-        print('code=',code)
+        print('code=', code)
         tarikh = row[1]
         sharh = row[2] if row[2] is not None else ''
         sanadid = row[3]
@@ -2503,8 +2484,8 @@ def UpdateSanad(request):
             print('else')
             sanads_to_create.append(Sanad(code=code, tarikh=tarikh, sharh=sharh, sanadid=sanadid, acc_year=acc_year))
 
-    print('to create',len(sanads_to_create))
-    print('to update',len(sanads_to_update))
+    print('to create', len(sanads_to_create))
+    print('to update', len(sanads_to_update))
     # return redirect('/updatedb')
 
     # Bulk create new sanads
@@ -2581,7 +2562,6 @@ def UpdateSanadDetail(request):
     #     for sanad in queryset[:BATCH_SIZE]:
     #         sanad.delete()
     # return redirect('/updatedb')
-
 
     conn = connect_to_mahak()
     cursor = conn.cursor()
@@ -2700,7 +2680,7 @@ def UpdateSanadDetail(request):
             sanads_to_create.append(SanadDetail(
                 code=code, radif=radif, kol=kol, moin=moin, tafzili=tafzili,
                 sharh=sharh, bed=bed, bes=bes, sanad_code=sanad_code,
-                sanad_type=sanad_type, meghdar=meghdar,person=person, syscomment=syscomment,
+                sanad_type=sanad_type, meghdar=meghdar, person=person, syscomment=syscomment,
                 curramount=curramount, usercreated=usercreated,
                 tarikh=voucher_date,  # ذخیره تاریخ شمسی
                 is_analiz=False,  # تنظیم is_analiz به False
@@ -2712,7 +2692,6 @@ def UpdateSanadDetail(request):
         print('شروع به ساخت')
         SanadDetail.objects.bulk_create(sanads_to_create, batch_size=BATCH_SIZE)
 
-
     # Bulk update existing sanad details
     if sanads_to_update:
         print('تعداد اسناد که آپدیت می‌شوند:', len(sanads_to_update))
@@ -2720,17 +2699,14 @@ def UpdateSanadDetail(request):
     SanadDetail.objects.bulk_update(
         sanads_to_update,
         ['kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
-         'sanad_code', 'sanad_type', 'meghdar','person',
+         'sanad_code', 'sanad_type', 'meghdar', 'person',
          'syscomment', 'curramount', 'usercreated', 'tarikh', 'is_analiz'],
         batch_size=BATCH_SIZE
     )
 
-
-
-        # پس از بخش پردازش ثبت‌نام
+    # پس از بخش پردازش ثبت‌نام
     print('بررسی تاریخ')
     counter2 = 1
-
 
     # بارگذاری تمامی اسناد با تاریخ میلادی خالی
     empty_date_sanads = SanadDetail.objects.filter(date__isnull=True, acc_year=acc_year)
@@ -2786,8 +2762,6 @@ def UpdateSanadDetail(request):
 
     # حذف رکوردهای اضافی
 
-
-
     from django.db.models import Q
 
     # مرحله 1: دریافت کلیدهای موجود در دیتابیس
@@ -2805,11 +2779,11 @@ def UpdateSanadDetail(request):
 
     # لیست نهایی برای شناسه رکوردهایی که باید حذف شوند
     sanad_ids = []
-    c=1
+    c = 1
     # مرحله 4: پردازش در batchهای کوچک
     for i in range(0, len(keys_list), BATCH_SIZE):
         print(c)
-        c=c+1
+        c = c + 1
         batch = keys_list[i:i + BATCH_SIZE]
         query = Q()
         for code, radif in batch:
@@ -2832,8 +2806,6 @@ def UpdateSanadDetail(request):
 
     else:
         print("هیچ رکوردی برای حذف وجود ندارد.")
-
-
 
     import re
 
@@ -2921,13 +2893,6 @@ def UpdateSanadDetail(request):
     table.save()
 
     return redirect('/updatedb')
-
-
-
-
-
-
-
 
 
 def UpdateSanadDetail1403(request):
@@ -3318,7 +3283,6 @@ def UpdateSanadDetail1(request):
     return redirect('/updatedb')
 
 
-
 def UpdateAccCoding(request):
     t0 = time.time()
     print('شروع آپدیت کدینگ حسابداری (سطح کل) -----------------------')
@@ -3412,7 +3376,7 @@ def UpdateAccCoding(request):
             is_budget = row['is_budget']
             budget_rate = row['budget_rate']
             try:
-                parent_acc = AccCoding.objects.filter(parent__code=kol,code=moin, level=2).last()
+                parent_acc = AccCoding.objects.filter(parent__code=kol, code=moin, level=2).last()
                 acc_coding, created = AccCoding.objects.update_or_create(
                     code=tafsil_code,
                     level=3,
@@ -3432,7 +3396,6 @@ def UpdateAccCoding(request):
                 print(f"رکورد والد با کد {moin} یافت نشد.")
             except Exception as e:
                 print(f"خطا در وارد کردن کد {tafsil_code}: {e}")
-
 
     tend = time.time()
     total_time = tend - t0
@@ -3456,17 +3419,11 @@ def UpdateAccCoding(request):
     return redirect('/updatedb')
 
 
-
-
-
-
-
 def safe_int(val):
     try:
         return int(val)
     except (ValueError, TypeError):
         return 0  # یا هر مقدار پیش‌فرض دیگری که مناسب باشد.
-
 
 
 def UpdateBank(request):
@@ -3668,7 +3625,7 @@ def Cheques_Recieve(request):
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
     # بارگذاری SanadDetail ها به یک دیکشنری
     sanad_details = SanadDetail.objects.filter(cheque_id__in=[row[1] for row in mahak_data], kol=101,
-                                               is_active=True,acc_year=acc_year).order_by('date', 'code', 'radif')
+                                               is_active=True, acc_year=acc_year).order_by('date', 'code', 'radif')
     sanad_dict = {}
     for sd in sanad_details:
         if sd.cheque_id not in sanad_dict:
@@ -3806,9 +3763,6 @@ def Cheques_Recieve(request):
     return redirect('/updatedb')
 
 
-
-
-
 def Cheque_Pay(request):
     t0 = time.time()
     print('شروع آپدیت چک‌های پرداختی---------------------------------------------------')
@@ -3835,8 +3789,8 @@ def Cheque_Pay(request):
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
 
     sanad_details = SanadDetail.objects.filter(cheque_id__in=[row[1] for row in mahak_data], kol=200,
-                                               is_active=True,acc_year=acc_year).order_by('date', 'code',
-                                                                        'radif')
+                                               is_active=True, acc_year=acc_year).order_by('date', 'code',
+                                                                                           'radif')
     sanad_dict = {}
     for sd in sanad_details:
         if sd.cheque_id not in sanad_dict:
@@ -3859,7 +3813,8 @@ def Cheque_Pay(request):
 
         # تبدیل تاریخ شمسی به میلادی
         issuance_date = (
-            jdatetime.datetime.strptime(issuance_date_str, "%Y/%m/%d").togregorian().date() if issuance_date_str else None
+            jdatetime.datetime.strptime(issuance_date_str,
+                                        "%Y/%m/%d").togregorian().date() if issuance_date_str else None
         )
         cheque_date = (
             jdatetime.datetime.strptime(cheque_date_str, "%Y/%m/%d").togregorian().date() if cheque_date_str else None
@@ -3891,12 +3846,13 @@ def Cheque_Pay(request):
 
         # یافتن بانک مرتبط با استفاده از bank_code
         bank = bank_dict.get(bank_code, None)
-        person=Person.objects.filter(code=per_code).last()
+        person = Person.objects.filter(code=per_code).last()
         # بررسی وجود چک در پایگاه داده Django
         if id_mahak in current_cheques:
             cheque = current_cheques[id_mahak]
             # بررسی تغییرات
-            if (cheque.cheque_id != cheque_id_str or cheque.cheque_row != cheque_row or cheque.cheque_date != cheque_date or
+            if (
+                    cheque.cheque_id != cheque_id_str or cheque.cheque_row != cheque_row or cheque.cheque_date != cheque_date or
                     cheque.issuance_tarik != issuance_tarik or cheque.issuance_date != issuance_date or cheque.cheque_tarik != cheque_tarik or
                     cheque.cost != cost or cheque.bank_code != bank_code or cheque.person != person or
                     cheque.description != description or cheque.status != status or
@@ -3925,9 +3881,9 @@ def Cheque_Pay(request):
         else:
             # ایجاد چک جدید
             cheques_to_create.append(ChequesPay(
-                id_mahak=id_mahak, cheque_id=cheque_id_str, cheque_row=cheque_row,cheque_date = cheque_date,
+                id_mahak=id_mahak, cheque_id=cheque_id_str, cheque_row=cheque_row, cheque_date=cheque_date,
                 issuance_tarik=issuance_tarik, cheque_tarik=cheque_tarik, issuance_date=issuance_date,
-                cost=cost, bank_code=bank_code, bank=bank,person=person, description=description,
+                cost=cost, bank_code=bank_code, bank=bank, person=person, description=description,
                 status=status, firstperiod=first_period,
                 cheque_id_counter=cheque_id_counter,
                 per_code=per_code, recieve_status=recieve_status,
@@ -3944,9 +3900,9 @@ def Cheque_Pay(request):
         print('شروع به آپدیت چک‌های موجود')
         ChequesPay.objects.bulk_update(
             cheques_to_update,
-            ['cheque_id', 'cheque_row', 'issuance_tarik', 'cheque_tarik','issuance_date',
-             'cost', 'bank_code', 'bank','person', 'description', 'status', 'firstperiod',
-             'cheque_id_counter', 'per_code', 'recieve_status','cheque_date',
+            ['cheque_id', 'cheque_row', 'issuance_tarik', 'cheque_tarik', 'issuance_date',
+             'cost', 'bank_code', 'bank', 'person', 'description', 'status', 'firstperiod',
+             'cheque_id_counter', 'per_code', 'recieve_status', 'cheque_date',
              'total_mandeh', 'last_sanad_detaile'],
             batch_size=BATCH_SIZE
         )
@@ -3986,8 +3942,6 @@ def Cheque_Pay(request):
     return redirect('/updatedb')
 
 
-
-
 def UpdateLoan(request):
     t0 = time.time()
     print('شروع آپدیت وام‌ها---------------------------------------------------')
@@ -4019,7 +3973,7 @@ def UpdateLoan(request):
         tarikh_shamsi = row[2]  # تاریخ شمسی
         number = int(row[3]) if row[3] is not None else 0
         distance = int(row[4]) if row[4] is not None else 0
-        cost = Decimal(row[5] or '0.00')*number
+        cost = Decimal(row[5] or '0.00') * number
 
         # تبدیل تاریخ شمسی به میلادی
         date = (
@@ -4101,9 +4055,6 @@ def UpdateLoan(request):
     return redirect('/updatedb')
 
 
-
-
-
 def UpdateLoanDetail(request):
     # LoanDetil.objects.all().delete()
     t0 = time.time()
@@ -4149,7 +4100,6 @@ def UpdateLoanDetail(request):
             if recive_tarikh_shamsi and recive_tarikh_shamsi.strip() else None
         )
 
-
         # پیدا کردن وام متناظر با loan_code
         loan = Loan.objects.filter(code=loan_code).first()
 
@@ -4185,7 +4135,7 @@ def UpdateLoanDetail(request):
                 delay=delay, cost=cost, comment=comment, loan=loan
             ))
 
-                # Bulk create new loan details
+            # Bulk create new loan details
     if loan_detils_to_create:
         print('شروع به ساخت جزئیات وام‌های جدید')
         LoanDetil.objects.bulk_create(loan_detils_to_create, batch_size=BATCH_SIZE)
@@ -4212,7 +4162,6 @@ def UpdateLoanDetail(request):
     print('IDs in Django DB:', ids_in_django_db)
     print('IDs to delete:', ids_to_delete)
 
-
     # حذف رکوردهای شناسایی‌شده
     if ids_to_delete:
         LoanDetil.objects.filter(code__in=ids_to_delete).delete()
@@ -4231,15 +4180,13 @@ def UpdateLoanDetail(request):
     for lo in Loan.objects.all():
         print('+++++++++++++++++++++++')
         for l in LoanDetil.objects.filter(loan=lo, recive_date__isnull=True):
-            print(l.loan_code,l.tarikh,l.recive_tarikh,l.cost)
+            print(l.loan_code, l.tarikh, l.recive_tarikh, l.cost)
         print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
         for l in LoanDetil.objects.filter(loan=lo):
             print(l.loan_code, l.tarikh, l.recive_tarikh, l.cost)
 
-
-
-        loan_mandeh = LoanDetil.objects.filter(loan=lo, recive_date__isnull=True).aggregate(total_cost=Sum('cost'))['total_cost'] or 0
-
+        loan_mandeh = LoanDetil.objects.filter(loan=lo, recive_date__isnull=True).aggregate(total_cost=Sum('cost'))[
+                          'total_cost'] or 0
 
         print(loan_mandeh)
         if lo.loan_mandeh != loan_mandeh:
@@ -4278,9 +4225,7 @@ def UpdateLoanDetail(request):
     table.column_count = column_count
     table.save()
 
-
     return redirect('/updatedb')
-
 
 
 def UpdateSanadConditions(request):
@@ -4298,7 +4243,8 @@ def UpdateSanadConditions(request):
     for condition in conditions:
 
         # بررسی مقادیر
-        print(f"acc_year: {condition.acc_year},kol: {condition.kol}, moin: {condition.moin}, tafzili: {condition.tafzili}")
+        print(
+            f"acc_year: {condition.acc_year},kol: {condition.kol}, moin: {condition.moin}, tafzili: {condition.tafzili}")
 
         # فیلتر کردن اسناد بر اساس kol، moin و tafzili
         sanad_details = SanadDetail.objects.all()
@@ -4340,7 +4286,6 @@ def UpdateSanadConditions(request):
     return redirect('/updatedb')
 
 
-
 def UpdateBedehiMoshtari1(request):
     t0 = time.time()
     print('شروع آپدیت بدهی مشتری-------------------------------')
@@ -4348,7 +4293,8 @@ def UpdateBedehiMoshtari1(request):
     try:
         with transaction.atomic():
             # محاسبه مجموع curramount بر اساس tafzili و moin
-            tafzili_sums = SanadDetail.objects.filter(moin=1, kol=103,is_active=True,acc_year=acc_year).values('tafzili', 'moin').annotate(total_curramount=Sum('curramount'))
+            tafzili_sums = SanadDetail.objects.filter(moin=1, kol=103, is_active=True, acc_year=acc_year).values(
+                'tafzili', 'moin').annotate(total_curramount=Sum('curramount'))
 
             # جمع‌آوری داده‌ها برای به‌روزرسانی
             data_to_create = []
@@ -4360,14 +4306,15 @@ def UpdateBedehiMoshtari1(request):
                 moin_code = tafzili_sum['moin']
                 total_curramount = tafzili_sum['total_curramount']
                 person = Person.objects.filter(per_taf=tafzili_code).first()
-                from_last_daryaft=None
+                from_last_daryaft = None
                 print('-----------------')
                 print(f"1: {time.time() - t0:.2f} ثانیه")
-                tafzili_sums2=SanadDetail.objects.filter(moin=1, kol=103,tafzili=tafzili_code,is_active=True).order_by('-date')
+                tafzili_sums2 = SanadDetail.objects.filter(moin=1, kol=103, tafzili=tafzili_code,
+                                                           is_active=True).order_by('-date')
 
                 for i in tafzili_sums2:
-                    if 'دريافت' in i.sharh and i.curramount>0:
-                        last_daryaft= i.date
+                    if 'دريافت' in i.sharh and i.curramount > 0:
+                        last_daryaft = i.date
                         today = timezone.now().date()  # تاریخ امروز
                         from_last_daryaft = (today - last_daryaft).days
                     break
@@ -4380,7 +4327,7 @@ def UpdateBedehiMoshtari1(request):
                 if person:
                     # پیدا کردن وام‌های شخص
                     loans = Loan.objects.filter(person=person)
-                    print('len(loans)',len(loans))
+                    print('len(loans)', len(loans))
                     loans_total = loans.aggregate(total_cost=Sum('cost'))['total_cost'] or 0
                     total_with_loans = loans_total + total_curramount
                 else:
@@ -4404,7 +4351,7 @@ def UpdateBedehiMoshtari1(request):
                         total_with_loans=total_with_loans,
                         loans_total=loans_total,
                         moin=moin_code,
-                        from_last_daryaft = from_last_daryaft
+                        from_last_daryaft=from_last_daryaft
                     )
                     entry.save()
                     entry.loans.set(loans)  # تنظیم وام‌ها
@@ -4412,7 +4359,9 @@ def UpdateBedehiMoshtari1(request):
 
             # Bulk update existing entries
             if data_to_update:
-                BedehiMoshtari.objects.bulk_update(data_to_update, ['person', 'total_mandeh', 'total_with_loans', 'loans_total', 'moin','from_last_daryaft'])
+                BedehiMoshtari.objects.bulk_update(data_to_update,
+                                                   ['person', 'total_mandeh', 'total_with_loans', 'loans_total', 'moin',
+                                                    'from_last_daryaft'])
 
             # شناسایی رکوردهای حذف‌شده
             ids_in_external_db = {entry.tafzili for entry in data_to_create + data_to_update}
@@ -4428,15 +4377,13 @@ def UpdateBedehiMoshtari1(request):
     except Exception as e:
         print(f"خطا در به‌روزرسانی بدهی مشتری: {e}")
 
-
-
-
     # محاسبه زمان اجرای کل
     tend = time.time()
     total_time = tend - t0
     print(f"زمان کل: {total_time:.2f} ثانیه")
 
     return redirect('/acc/loan_total')
+
 
 def UpdateBedehiMoshtari2(request):
     t0 = time.time()
@@ -4447,7 +4394,7 @@ def UpdateBedehiMoshtari2(request):
             tafzili_sums = SanadDetail.objects.filter(
                 moin=1, kol=103, is_active=True, acc_year=acc_year
             ).values('tafzili', 'moin').annotate(total_curramount=Sum('curramount'))
-            print('tafzili_sums.count()',tafzili_sums.count())
+            print('tafzili_sums.count()', tafzili_sums.count())
             data_to_create = []
             data_to_update = []
             existing_entries = {
@@ -4618,9 +4565,12 @@ def UpdateBedehiMoshtari3(request):
 
     print(f"زمان کل: {time.time() - t0:.2f} ثانیه")
     return redirect('/acc/loan_total')
+
+
 from django.db.models import Max
 from django.utils import timezone
 import time
+
 
 def UpdateBedehiMoshtari(request):
     t0 = time.time()
@@ -4630,10 +4580,8 @@ def UpdateBedehiMoshtari(request):
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
     try:
         with transaction.atomic():
-            mm=[1,16]
             # دریافت مجموع بدهی‌ها و اطلاعات مرتبط
             tafzili_sums = SanadDetail.objects.filter(
-                # moin__in=mm, kol=103, is_active=True, acc_year=acc_year
                 kol=103, is_active=True, acc_year=acc_year
             ).values('tafzili', 'moin').annotate(total_curramount=Sum('curramount'))
 
@@ -4652,7 +4600,7 @@ def UpdateBedehiMoshtari(request):
                 person = Person.objects.filter(per_taf=tafzili_code).first()
 
                 loans_total = Loan.objects.filter(person=person).aggregate(total_cost=Sum('cost'))[
-                    'total_cost'] or 0 if person else 0
+                                  'total_cost'] or 0 if person else 0
                 total_with_loans = loans_total + total_curramount
 
                 entry = existing_entries.get(tafzili_code)
@@ -4673,7 +4621,8 @@ def UpdateBedehiMoshtari(request):
                         moin=moin_code
                     )
                     data_to_create.append(entry)
-            print(f"تعداد data_to_update: {len(data_to_update)} | تعداد data_to_create: {len(data_to_create)} | زمان: {time.time() - t0:.2f} ثانیه")
+            print(
+                f"تعداد data_to_update: {len(data_to_update)} | تعداد data_to_create: {len(data_to_create)} | زمان: {time.time() - t0:.2f} ثانیه")
 
             # به‌روزرسانی و ایجاد داده‌ها
             if data_to_update:
@@ -4733,15 +4682,13 @@ def UpdateBedehiMoshtari(request):
     return redirect('/acc/loan_total/overdue')
 
 
-
-
-
 from django.shortcuts import render, redirect
 from django.db.models import F, Sum, ExpressionWrapper, FloatField
 
 from django.db.models import Sum
 from django.shortcuts import redirect
 import time
+
 
 def CompleLoan3(request):
     t0 = time.time()
@@ -4755,7 +4702,8 @@ def CompleLoan3(request):
 
     for bedehkar in bedehkaran_vamdar:
         per = bedehkar.person
-        lo_detail = LoanDetil.objects.filter(loan__person=per, recive_date__isnull=True).order_by('date')  # مرتب‌سازی بر اساس تاریخ
+        lo_detail = LoanDetil.objects.filter(loan__person=per, recive_date__isnull=True).order_by(
+            'date')  # مرتب‌سازی بر اساس تاریخ
         sum_lo_detail = lo_detail.aggregate(total_cost=Sum('cost'))['total_cost'] or 0
         if -bedehkar.total_mandeh >= sum_lo_detail:
             lo_detail.update(complete_percent=0)
@@ -4784,17 +4732,13 @@ def CompleLoan3(request):
             # به روز رسانی همه اقساط به صورت همزمان
             LoanDetil.objects.bulk_update(updated_loans, ['complete_percent'])
 
-
-
     # محاسبه زمان اجرای کل
     tend = time.time()
     total_time = tend - t0
     print(f"زمان کل: {total_time:.2f} ثانیه")
     print('ppppppppppppppppppppppppppppppppppppp')
-    for i in LoanDetil.objects.filter(complete_percent__gt=0,complete_percent__lt=1):
-        print(i.id,i.complete_percent)
-
-
+    for i in LoanDetil.objects.filter(complete_percent__gt=0, complete_percent__lt=1):
+        print(i.id, i.complete_percent)
 
     return redirect('/updatedb')
 
@@ -4807,7 +4751,6 @@ def CompleLoan(request):
     LoanDetil.objects.filter(recive_date__isnull=False).update(complete_percent=1)
     bestankar_vamdar_list = BedehiMoshtari.objects.filter(total_mandeh__gte=0, loans_total__gt=0).values('tafzili')
     LoanDetil.objects.filter(loan__name_code__in=bestankar_vamdar_list).update(complete_percent=1)
-
 
     # دریافت مشتریانی که بدهی کل منفی و وام‌های مثبت دارند
     bedehkaran_vamdar = BedehiMoshtari.objects.filter(total_mandeh__lt=0, loans_total__gt=0)
@@ -4829,12 +4772,12 @@ def CompleLoan(request):
                 if skip_remaining:
                     lo.complete_percent = 0
                 else:
-                    if sum_completed_loan + lo.cost <= sum_lo_detail+bedehkar.total_mandeh:
+                    if sum_completed_loan + lo.cost <= sum_lo_detail + bedehkar.total_mandeh:
                         sum_completed_loan += lo.cost
                         lo.complete_percent = 1  # اقساط کامل پرداخت شده
                     else:
                         # محاسبه نسبت برای اقساط ناقص
-                        remaining = sum_lo_detail+bedehkar.total_mandeh - sum_completed_loan
+                        remaining = sum_lo_detail + bedehkar.total_mandeh - sum_completed_loan
                         if remaining > 0 and lo.cost > 0:  # اطمینان از غیرصفر بودن هزینه
                             lo.complete_percent = max(0, min(1, remaining / lo.cost))  # محدود کردن درصد در بازه ۰ تا ۱
                             print(lo.id, lo.complete_percent)  # پرینت برای بررسی
@@ -4916,7 +4859,7 @@ def CompleLoan(request):
             # به‌روزرسانی دسته‌ای وام‌ها
     Loan.objects.bulk_update(loans_to_update, ['actual_loan_mandeh', 'delayed_loan'])
 
-            # محاسبه زمان اجرای کل
+    # محاسبه زمان اجرای کل
     tend = time.time()
     total_time = tend - t0
     print(f"زمان کل: {total_time:.2f} ثانیه")
@@ -5097,7 +5040,7 @@ def DeleteDublicateData(request):
     ).filter(count__gt=1)
 
     objects_to_delete = []
-    print('تعداد تکراری',len(duplicates))
+    print('تعداد تکراری', len(duplicates))
     for duplicate in duplicates:
         festival_id = duplicate['festival']
         customer_id = duplicate['customer']
@@ -5121,8 +5064,6 @@ def DeleteDublicateData(request):
     else:
         print('رکورد تکراری یافت نشد.')
 
-
-
     print('حذف جزئیات اسناد تکراری---------------------')
     # گروه‌بندی بر اساس سه فیلد و یافتن آخرین ID هر گروه
     duplicates = SanadDetail.objects.values('acc_year', 'code', 'radif').annotate(
@@ -5137,7 +5078,7 @@ def DeleteDublicateData(request):
         code = duplicate['code']
         radif = duplicate['radif']
         last_id = duplicate['last_id']
-        print(acc_year,code,radif,'add to objects_to_delete')
+        print(acc_year, code, radif, 'add to objects_to_delete')
         # حذف رکوردهای تکراری به جز آخرین
         deleted_qs = SanadDetail.objects.filter(
             acc_year=acc_year,
@@ -5157,17 +5098,10 @@ def DeleteDublicateData(request):
     else:
         print('رکورد تکراری یافت نشد.')
 
-
-
-
-
     tend = time.time()
     total_time = tend - t0
     print(f"زمان کل: {total_time:.2f} ثانیه")
     return redirect('/updatedb')
-
-
-
 
 
 def AfterTakhfifKol(request):
@@ -5176,37 +5110,38 @@ def AfterTakhfifKol(request):
     print('بعد از تخفیف کل فاکتور---------------------')
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
 
-    fac=Factor.objects.filter(acc_year=acc_year)
-    fac_d_to_update=[]
-    fac_to_update=[]
+    fac = Factor.objects.filter(acc_year=acc_year)
+    fac_d_to_update = []
+    fac_to_update = []
     for f in fac:
         # if f.code==7391:
-        fac_d=FactorDetaile.objects.filter(factor=f,acc_year=acc_year)
-        no_takfif=0
-        mab_naha=0
+        fac_d = FactorDetaile.objects.filter(factor=f, acc_year=acc_year)
+        no_takfif = 0
+        mab_naha = 0
 
         for fd in fac_d:
             if fd.mablagh_nahaee == 0:
                 continue
-            print(fd.count , fd.mablagh_vahed,fd.mablagh_nahaee)
+            print(fd.count, fd.mablagh_vahed, fd.mablagh_nahaee)
             no_takfif += fd.count * fd.mablagh_vahed
             mab_naha += fd.mablagh_nahaee
         print('no_takfif,mab_naha')
-        print(no_takfif,mab_naha)
-        end_fac_takhfif_ratio=0
+        print(no_takfif, mab_naha)
+        end_fac_takhfif_ratio = 0
         print('f.takhfif , no_takfif - mab_naha')
-        print(f.takhfif , no_takfif - mab_naha)
-        if f.takhfif > no_takfif - mab_naha :
-            end_fac_takhfif= f.takhfif - no_takfif+mab_naha
-            end_fac_takhfif_ratio=end_fac_takhfif/f.mablagh_factor
+        print(f.takhfif, no_takfif - mab_naha)
+        if f.takhfif > no_takfif - mab_naha:
+            end_fac_takhfif = f.takhfif - no_takfif + mab_naha
+            end_fac_takhfif_ratio = end_fac_takhfif / f.mablagh_factor
             if f.darsad_takhfif_end_factor != end_fac_takhfif_ratio:
                 f.darsad_takhfif_end_factor = end_fac_takhfif_ratio
                 fac_to_update.append(f)
             print('end_fac_takhfif,end_fac_takhfif_ratio')
-            print(end_fac_takhfif,end_fac_takhfif_ratio)
+            print(end_fac_takhfif, end_fac_takhfif_ratio)
         for fd in fac_d:
-            print(fd.mablagh_after_takhfif_kol , fd.mablagh_nahaee ,end_fac_takhfif_ratio,fd.count , fd.mablagh_vahed)
-            print(fd.mablagh_after_takhfif_kol , (fd.mablagh_nahaee - (end_fac_takhfif_ratio*fd.count * fd.mablagh_vahed)))
+            print(fd.mablagh_after_takhfif_kol, fd.mablagh_nahaee, end_fac_takhfif_ratio, fd.count, fd.mablagh_vahed)
+            print(fd.mablagh_after_takhfif_kol,
+                  (fd.mablagh_nahaee - (end_fac_takhfif_ratio * fd.count * fd.mablagh_vahed)))
             if fd.mablagh_nahaee == 0:
                 if fd.mablagh_after_takhfif_kol != 0:
                     fd.mablagh_after_takhfif_kol = 0
@@ -5217,7 +5152,8 @@ def AfterTakhfifKol(request):
                 fac_d_to_update.append(fd)
 
 
-            elif fd.mablagh_after_takhfif_kol != (fd.mablagh_nahaee - (end_fac_takhfif_ratio*fd.count * fd.mablagh_vahed)):
+            elif fd.mablagh_after_takhfif_kol != (
+                    fd.mablagh_nahaee - (end_fac_takhfif_ratio * fd.count * fd.mablagh_vahed)):
                 fd.mablagh_after_takhfif_kol = fd.mablagh_nahaee - (end_fac_takhfif_ratio * fd.count * fd.mablagh_vahed)
                 if fd.mablagh_nahaee - (end_fac_takhfif_ratio * fd.count * fd.mablagh_vahed) < 0:
                     fd.mablagh_after_takhfif_kol = fd.mablagh_nahaee
@@ -5233,7 +5169,9 @@ def AfterTakhfifKol(request):
     print(f"زمان کل: {total_time:.2f} ثانیه")
     return redirect('/updatedb')
 
+
 from decimal import Decimal, ROUND_HALF_UP
+
 
 def AfterTakhfifKolsider(request):
     t0 = time.time()
@@ -5302,13 +5240,13 @@ def AfterTakhfifKolsider(request):
     return redirect('/updatedb')
 
 
-
 from django.db.models import Min, Sum
 from django.utils import timezone
 from datetime import timedelta
 
 from datetime import timedelta
 from django.db import transaction
+
 
 def UpdateSleepInvestment1(request):
     for person in Person.objects.all():
@@ -5377,6 +5315,7 @@ from django.db.models import Sum
 from django.utils import timezone
 from django.shortcuts import redirect
 
+
 def UpdateSleepInvestment1(request):
     t0 = time.time()
 
@@ -5388,14 +5327,14 @@ def UpdateSleepInvestment1(request):
         person = bedehi_obj.person
         if not person:
             continue
-        print(person,'-------------------------------------------')
+        print(person, '-------------------------------------------')
 
-        sanads = SanadDetail.objects.filter(kol=103,person=person).order_by('date')
+        sanads = SanadDetail.objects.filter(kol=103, person=person).order_by('date')
         if not sanads.exists():
             continue
 
         first_day = sanads.first().date
-        print(first_day,today)
+        print(first_day, today)
         sleep = 0
         date_range = [first_day + timedelta(days=i) for i in range((today - first_day).days + 1)]
 
@@ -5425,9 +5364,8 @@ def UpdateSleepInvestment1(request):
     return redirect('/updatedb')
 
 
-
-
 from datetime import timedelta
+
 
 def UpdateSleepInvestment(request):
     bedehi_to_update = []
@@ -5453,7 +5391,7 @@ def UpdateSleepInvestment(request):
         sleep = 0
         prev_date = sanads[0]['date']
         prev_total = sanads[0]['total'] or 0
-        total=prev_total
+        total = prev_total
         for entry in sanads[1:]:
             curr_date = entry['date']
             delta_days = (curr_date - prev_date).days
@@ -5478,3 +5416,40 @@ def UpdateSleepInvestment(request):
     print("بروزرسانی انجام شد ✅")
     return redirect('/updatedb')
 
+
+from django.db import transaction
+from django.shortcuts import redirect
+import time
+
+def LoanBedehiMoshtari(request):
+    t0 = time.time()
+    print('آپدیت وام های مشتریان---------------------')
+    bedehi_objects = BedehiMoshtari.objects.select_related('person').prefetch_related('loans').all()
+
+    person_loans_map = {}
+    for loan in Loan.objects.select_related('person').all():
+        if loan.person_id:
+            if loan.person_id not in person_loans_map:
+                person_loans_map[loan.person_id] = []
+            person_loans_map[loan.person_id].append(loan)
+
+    with transaction.atomic():
+        for item in bedehi_objects:
+            person_id = item.person_id
+
+            current_loans_set = set(item.loans.all())
+
+            target_loans_list = person_loans_map.get(person_id, [])
+            target_loans_set = set(target_loans_list)
+
+            if current_loans_set != target_loans_set:
+                item.loans.set(target_loans_list)
+                print(f"Updated loans for BedehiMoshtari ID: {item.id}, Person ID: {person_id}")
+            # else:
+            #     print(f"Loans for BedehiMoshtari ID: {item.id}, Person ID: {person_id} are up-to-date.")
+
+
+    tend = time.time()
+    total_time = tend - t0
+    print(f"زمان کل: {total_time:.2f} ثانیه")
+    return redirect('/updatedb')

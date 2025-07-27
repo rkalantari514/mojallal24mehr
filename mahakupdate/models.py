@@ -796,14 +796,14 @@ class Loan(models.Model):
     number = models.IntegerField(blank=True, null=True, verbose_name='تعداد اقساط')
     distance = models.IntegerField(blank=True, null=True, verbose_name='فاصله اقساط')
     cost = models.DecimalField(max_digits=14, decimal_places=2, verbose_name="مبلغ")
-    loan_mandeh = models.DecimalField(default=0,max_digits=14, decimal_places=2, verbose_name="مانده وام")
-    actual_loan_mandeh = models.DecimalField(default=0,max_digits=14, decimal_places=2, verbose_name="مانده وام واقعی")
-    delayed_loan = models.DecimalField(default=0,max_digits=14, decimal_places=2, verbose_name="مانده وام معوق")
+    loan_mandeh = models.DecimalField(default=0,max_digits=14, decimal_places=2, verbose_name="مانده قسط")
+    actual_loan_mandeh = models.DecimalField(default=0,max_digits=14, decimal_places=2, verbose_name="مانده قسط واقعی")
+    delayed_loan = models.DecimalField(default=0,max_digits=14, decimal_places=2, verbose_name="مانده قسط معوق")
 
 
     class Meta:
-        verbose_name = 'وام'
-        verbose_name_plural = 'وام ها'
+        verbose_name = 'قسط'
+        verbose_name_plural = 'قسط ها'
 
     def __str__(self):
         return f"{self.code}"
