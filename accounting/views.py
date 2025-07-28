@@ -1538,8 +1538,10 @@ def HesabMoshtariDetail(request, tafsili):
     khab=True
     if hesabmoshtari.sleep_investment and hesabmoshtari.sleep_investment >= 0:
         khab=False
-    bar_mali=hesabmoshtari.sleep_investment/Decimal(30) * Decimal(0.05)
-
+    try:
+        bar_mali=hesabmoshtari.sleep_investment/Decimal(30) * Decimal(0.05)
+    except:
+        bar_mali=0
     context = {
         'title': 'حساب مشتری',
         'hesabmoshtari': hesabmoshtari,
