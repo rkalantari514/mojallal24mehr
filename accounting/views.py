@@ -1365,14 +1365,18 @@ def HesabMoshtariDetail(request, tafsili):
         delta_yar=y-acc_year
         print('delta_yar',delta_yar)
         daily_totals_year = {}
-        sanad_year_qs = asnad.filter(acc_year=y)
-        print('sanad_year_qs.count()',sanad_year_qs.count())
+        sanad_year_qs = asnad.filter(acc_year=y).exclude(sharh__contains='بستن حساب هاي دارائي')
 
-        results = asnad.filter(acc_year=y).exclude(sharh__contains='بستن حساب هاي دارائي').values('date').annotate(total=Sum('curramount')).order_by('date')
+        print('sanad_year_qs.count()',sanad_year_qs.count())
+        for k in sanad_year_qs:
+            print('______________')
+            print(k.sharh)
+            print(k.syscomment)
+        results = asnad.filter(acc_year=y).values('date').annotate(total=Sum('curramount')).order_by('date')
         print('نتایج برای سال:', y)
         print('تعداد نتایج:', len(results))
         for r in results:
-            print(r.sharh)
+            print(r)
         for s in sanad_year_qs:
             print('==>',s.date, s.curramount)
         if sanad_year_qs.exists():
