@@ -1372,7 +1372,7 @@ def HesabMoshtariDetail(request, tafsili):
         print('نتایج برای سال:', y)
         print('تعداد نتایج:', len(results))
         for r in results:
-            print(r)
+            print(r.sharh)
         for s in sanad_year_qs:
             print('==>',s.date, s.curramount)
         if sanad_year_qs.exists():
