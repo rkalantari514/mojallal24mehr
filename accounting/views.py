@@ -1400,8 +1400,7 @@ def HesabMoshtariDetail(request, tafsili):
 
 
 
-            cumulative_year += daily_totals_year[str(by_date.date())]  # علامت منفی برای تصحیح
-            # chart_y.append(cumulative_year)
+                cumulative_year += daily_totals_year[str(by_date.date())]  # علامت منفی برای تصحیح
 
             if l_start:
                 chart_y.append(cumulative_year)
