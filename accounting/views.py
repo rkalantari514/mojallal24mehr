@@ -1412,6 +1412,16 @@ def HesabMoshtariDetail(request, tafsili):
 
         chart_date.append(chart_y)
 
+    ave=-4000000
+    chart_y=[]
+    for _ in year_list:
+        chart_y.append(ave)
+    chart_date.append(chart_y)
+
+
+
+
+
     hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
     m_name = None
 
