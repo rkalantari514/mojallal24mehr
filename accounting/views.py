@@ -1407,9 +1407,7 @@ def HesabMoshtariDetail(request, tafsili):
             else:
                 chart_y.append('-')
 
-
-
-
+        chart_date.append(chart_y)
 
     hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
     m_name = None
