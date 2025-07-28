@@ -1537,7 +1537,7 @@ def HesabMoshtariDetail(request, tafsili):
     khab=True
     if hesabmoshtari.sleep_investment and hesabmoshtari.sleep_investment >= 0:
         khab=False
-
+    bar_mali=hesabmoshtari.sleep_investment/30* 0.05
 
     context = {
         'title': 'حساب مشتری',
@@ -1553,6 +1553,7 @@ def HesabMoshtariDetail(request, tafsili):
         'acc_days': acc_days,
         'ave': ave,
         'khab2': acc_days*ave/10,
+        'bar_mali': bar_mali,
 
 
         'chart_labels': chart_labels,

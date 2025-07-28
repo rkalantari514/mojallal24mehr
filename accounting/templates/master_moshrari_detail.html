@@ -75,27 +75,6 @@
                     <div class="card card-statistics h-100">
                         <div class="card-body">
                             <div class="clearfix">
-                                <div class="float-left icon-box {% if khab %} bg-danger {% else %} bg-facebook {% endif %}   rounded-circle">
-    <span class="text-white">
-    <i class="fa fa-bed highlight-icon" aria-hidden="true"></i>
-    </span>
-                                </div>
-                                <div class="float-right text-right">
-                                    {% if khab %}
-                                    <p class="card-text text-dark"> خواب بدهی </p>
-                                    {% else %}
-                                    <p class="card-text text-dark"> خواب طلب </p>
-                                    {% endif %}
-                                    <h4> {{ hesabmoshtari.sleep_investment|intword }} روز </h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <div class="clearfix">
                                 <div class="float-left icon-box bg-danger rounded-circle">
     <span class="text-white">
     <i class="fa fa-hourglass-end highlight-icon" aria-hidden="true"></i>
@@ -126,6 +105,27 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box {% if khab %} bg-danger {% else %} bg-facebook {% endif %}   rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-bed highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    {% if khab %}
+                                        <p class="card-text text-dark"> خواب بدهی </p>
+                                    {% else %}
+                                        <p class="card-text text-dark"> خواب طلب </p>
+                                    {% endif %}
+                                    <h4> {{ bar_mali|intword }} ریال </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
 
             </div>
@@ -141,7 +141,7 @@
                                 </div>
 
                                 <div class="chart-container ">
-<canvas id="Chart1" style="height: 400px; width: 100%;"></canvas>
+                                    <canvas id="Chart1" style="height: 400px; width: 100%;"></canvas>
                                 </div>
 
                             </div>
@@ -149,9 +149,6 @@
                     </div>
                 </div>
             </div>
-
-
-
 
 
             <!-- ردیف خلاصه و جزئیات وام ها -->
@@ -257,7 +254,7 @@
                 <div class="col-xl-4 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="p-4 text-center bg-success">
-                            <h5 class="mb-60 text-white"> </h5>
+                            <h5 class="mb-60 text-white"></h5>
                         </div>
                         <div class="card-body text-center">
                             <div class="avatar-top">
@@ -265,18 +262,18 @@
                                      alt="">
                             </div>
                             <h5 class="card-title text-facebook pb-0 border-0">{{ hesabmoshtari.person.clname }}</h5>
-                                <div class="card-body">
-                                    <div class="clearfix">
-                                        <div class="float-left icon-box bg-success rounded-circle">
+                            <div class="card-body">
+                                <div class="clearfix">
+                                    <div class="float-left icon-box bg-success rounded-circle">
                   <span class="text-white">
                     <i class="fa fa-envelope highlight-icon" aria-hidden="true"></i>
                   </span>
-                                        </div>
-                                        <div class="float-right text-right">
-                                            <h4>پیگیری پیامکی</h4>
-                                        </div>
+                                    </div>
+                                    <div class="float-right text-right">
+                                        <h4>پیگیری پیامکی</h4>
                                     </div>
                                 </div>
+                            </div>
 
                             <div class="social-icons color-icon mt-20">
                                 <ul>
@@ -320,7 +317,7 @@
                 <div class="col-xl-4 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="p-4 text-center bg-primary">
-                            <h5 class="mb-60 text-white"> </h5>
+                            <h5 class="mb-60 text-white"></h5>
                         </div>
                         <div class="card-body text-center">
                             <div class="avatar-top">
@@ -328,18 +325,18 @@
                                      alt="">
                             </div>
                             <h5 class="card-title text-facebook pb-0 border-0">{{ hesabmoshtari.person.clname }}</h5>
-                                <div class="card-body">
-                                    <div class="clearfix">
-                                        <div class="float-left icon-box bg-primary rounded-circle">
+                            <div class="card-body">
+                                <div class="clearfix">
+                                    <div class="float-left icon-box bg-primary rounded-circle">
                   <span class="text-white">
                     <i class="fa fa-phone highlight-icon" aria-hidden="true"></i>
                   </span>
-                                        </div>
-                                        <div class="float-right text-right">
-                                            <h4>پیگیری تلفنی</h4>
-                                        </div>
+                                    </div>
+                                    <div class="float-right text-right">
+                                        <h4>پیگیری تلفنی</h4>
                                     </div>
                                 </div>
+                            </div>
                             <div class="social-icons color-icon mt-20">
                                 <ul>
                                     {% if gh in hesabmoshtari.person %}
@@ -392,84 +389,81 @@
                     <div class="card card-statistics h-100">
                         <div class="card-body">
                             <h5 class="card-title pb-0 border-0">آخرین پیگیری ها </h5>
-                            <h5 class="card-title pb-0 border-0 text-warning">پیگیری بعدی{{ tracking.first.next_reminder_date|timeuntil }} دیگر </h5>
+                            <h5 class="card-title pb-0 border-0 text-warning">پیگیری
+                                بعدی{{ tracking.first.next_reminder_date|timeuntil }} دیگر </h5>
                             <div class="table-responsive scrollbar max-h-500">
                                 <div class="table-responsive">
 
 
                                     <table class="table center-aligned-table mb-0">
-    <thead>
-        <tr class="text-dark">
-            <th>ردیف</th>
-            <th>اقدام کننده</th>
-            <th>نوع پیگیری</th>
-            <th>وضعیت</th>
-            <th>زمان</th>
-            <th>سطح پیامک</th>
-            <th>شرح</th>
-            <th>تلفن</th>
-{#            <th>پیگیری بعدی</th>#}
-        </tr>
-    </thead>
-<tbody>
-    {% for t in tracking %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>
-                {% if t.created_by %}
-                    <img class="img-fluid avatar-small" src="{{ t.created_by.avatar.url }}" alt="">
-                {% else %}
-                    -
-                {% endif %}
-            </td>
-            <td>
-                {% if t.call_status == 4 %}
-                                    <i class="fa fa-hourglass-start text-warning fa-2x"></i>
+                                        <thead>
+                                        <tr class="text-dark">
+                                            <th>ردیف</th>
+                                            <th>اقدام کننده</th>
+                                            <th>نوع پیگیری</th>
+                                            <th>وضعیت</th>
+                                            <th>زمان</th>
+                                            <th>سطح پیامک</th>
+                                            <th>شرح</th>
+                                            <th>تلفن</th>
+                                            {#            <th>پیگیری بعدی</th>#}
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for t in tracking %}
+                                            <tr>
+                                                <td>{{ forloop.counter }}</td>
+                                                <td>
+                                                    {% if t.created_by %}
+                                                        <img class="img-fluid avatar-small"
+                                                             src="{{ t.created_by.avatar.url }}" alt="">
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if t.call_status == 4 %}
+                                                        <i class="fa fa-hourglass-start text-warning fa-2x"></i>
 
-                {% else %}
-                <i class="fa {{ t.track_kind.kind_icon }} text-{{ t.track_kind.kind_color }} fa-2x"></i>
-                {% endif %}
-            </td>
+                                                    {% else %}
+                                                        <i class="fa {{ t.track_kind.kind_icon }} text-{{ t.track_kind.kind_color }} fa-2x"></i>
+                                                    {% endif %}
+                                                </td>
 
-            <!-- وضعیت پیامک یا تماس -->
-            <td>
+                                                <!-- وضعیت پیامک یا تماس -->
+                                                <td>
 
-                {% if t.track_kind.is_call_related %}
-                    <span class="{{ t.get_call_status_details.color }}">
+                                                    {% if t.track_kind.is_call_related %}
+                                                        <span class="{{ t.get_call_status_details.color }}">
                         <i class="fa {{ t.get_call_status_details.icon }}"></i>
                         {{ t.get_call_status_details.persian }}
                     </span>
-                {% else %}
-                    <span class="{{ t.get_status_details.color }}">
+                                                    {% else %}
+                                                        <span class="{{ t.get_status_details.color }}">
                         <i class="fa {{ t.get_status_details.icon }}"></i>
                         {{ t.get_status_details.persian }}
                     </span>
-                {% endif %}
-            </td>
+                                                    {% endif %}
+                                                </td>
 
-            <td>{{ t.created_at|to_jalali:"%Y/%m/%d - %H:%M" }}</td>
-            <td>{{ t.sample_sms.level|default:"-" }}</td>
+                                                <td>{{ t.created_at|to_jalali:"%Y/%m/%d - %H:%M" }}</td>
+                                                <td>{{ t.sample_sms.level|default:"-" }}</td>
 
-            <!-- نمایش شرح تماس یا پیامک -->
-            <td>
-                {% if t.track_kind.is_call_related %}
-                    {{ t.call_description|default:"-" }}
-                {% else %}
-                    {{ t.message_to_send|default:"-" }}
-                {% endif %}
-            </td>
+                                                <!-- نمایش شرح تماس یا پیامک -->
+                                                <td>
+                                                    {% if t.track_kind.is_call_related %}
+                                                        {{ t.call_description|default:"-" }}
+                                                    {% else %}
+                                                        {{ t.message_to_send|default:"-" }}
+                                                    {% endif %}
+                                                </td>
 
-            <td>{{ t.phone_number|default:"-" }}</td>
-{#            <td>{{ t.next_reminder_date|timeuntil }}</td>#}
-        </tr>
-    {% endfor %}
-</tbody>
-</table>
-
-
-
-
-
+                                                <td>{{ t.phone_number|default:"-" }}</td>
+                                                {#            <td>{{ t.next_reminder_date|timeuntil }}</td>#}
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
 
 
                                 </div>
@@ -550,7 +544,7 @@
                                                     data-field="bes" data-footer-formatter="priceFormatter">بستانکار
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-field="mandeh" >مانده کل
+                                                    data-field="mandeh">مانده کل
                                                 </th>
                                                 {#                                                <th class="card-text text-center" data-sortable="true"#}
                                                 {#                                                    data-field="mandkol"#}
@@ -563,7 +557,7 @@
                                             {% for s in asnad %}
                                                 <tr>
                                                     <td class="card-text text-center">{{ s.code }}</td>
-{#                                                    <td class="card-text text-center">{{ s.radif }}</td>#}
+                                                    {#                                                    <td class="card-text text-center">{{ s.radif }}</td>#}
                                                     <td class="card-text text-center">{{ s.acc_year }}</td>
                                                     <td class="card-text text-center">{{ s.tarikh }}</td>
                                                     {#                                                    <td class="card-text text-center ">{{ s.kind.0 }}</td>#}
@@ -654,77 +648,77 @@
 
 
 
-<script>
-    // داده‌های پاس‌داده شده از Django
-    const chartLabels = {{ chart_labels|safe }}; // لیست برچسب‌های تاریخ
-    const chartDataSets = {{ chart_date|safe }}; // داده‌های هر سال، لیست لیست‌ها
-    const yearList = {{ year_list|safe }}; // لیست سال‌ها
+    <script>
+        // داده‌های پاس‌داده شده از Django
+        const chartLabels = {{ chart_labels|safe }}; // لیست برچسب‌های تاریخ
+        const chartDataSets = {{ chart_date|safe }}; // داده‌های هر سال، لیست لیست‌ها
+        const yearList = {{ year_list|safe }}; // لیست سال‌ها
 
-    // رنگ‌های پیشنهادی برای هر سال - اگر تعداد سال‌ها بیشتر شد، باید رنگ‌های بیشتری انتخاب کنید
-    const colors = [
-        'red','blue', 'green',  'teal', 'orange', 'purple', 'brown', 'cyan', 'magenta', 'lime'
-    ];
-    const datasets = chartDataSets.map((data, index) => {
-    const isFirstLine = index === 0; // اولی
-    return {
-        label: `${yearList[index]}`, // فقط سال بدون کلمه 'سال'
-        data: data,
-        borderColor: colors[index % colors.length],
-        fill: isFirstLine ? true : false, // در صورت نیاز
-        fillColor : 'rgba(158,19,19,0.1)',
-        pointRadius: 0,
-        borderDash: isFirstLine ? [5, 5] : [], // خط چین برای اولین خط
-    };
-});
+        // رنگ‌های پیشنهادی برای هر سال - اگر تعداد سال‌ها بیشتر شد، باید رنگ‌های بیشتری انتخاب کنید
+        const colors = [
+            'red', 'blue', 'green', 'teal', 'orange', 'purple', 'brown', 'cyan', 'magenta', 'lime'
+        ];
+        const datasets = chartDataSets.map((data, index) => {
+            const isFirstLine = index === 0; // اولی
+            return {
+                label: `${yearList[index]}`, // فقط سال بدون کلمه 'سال'
+                data: data,
+                borderColor: colors[index % colors.length],
+                fill: isFirstLine ? true : false, // در صورت نیاز
+                fillColor: 'rgba(158,19,19,0.1)',
+                pointRadius: 0,
+                borderDash: isFirstLine ? [5, 5] : [], // خط چین برای اولین خط
+            };
+        });
 
-    // رسم نمودار
-    const ctx = document.getElementById('Chart1').getContext('2d');
+        // رسم نمودار
+        const ctx = document.getElementById('Chart1').getContext('2d');
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: chartLabels,
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    title: { display: true, text: "تاریخ" }
-                },
-                y: {
-                    title: { display: true, text: "مقدار تجمعی" }
-                }
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: datasets
             },
-            plugins: {
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                    callbacks: {
-                        label: function (context) {
-                            // تقسیم بر 10 میلیون، با یک رقم اعشار
-                            var value = context.parsed.y / 10000000;
-                            return context.dataset.label + ': ' + value.toFixed(1) + ' میلیون تومان';
-                        },
-                        title: function (tooltipItems) {
-                            return 'تاریخ: ' + tooltipItems[0].label;
-                        }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: {display: true, text: "تاریخ"}
+                    },
+                    y: {
+                        title: {display: true, text: "مقدار تجمعی"}
                     }
                 },
-                legend: {
-                    display: true,
-                    position: 'top'
+                plugins: {
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function (context) {
+                                // تقسیم بر 10 میلیون، با یک رقم اعشار
+                                var value = context.parsed.y / 10000000;
+                                return context.dataset.label + ': ' + value.toFixed(1) + ' میلیون تومان';
+                            },
+                            title: function (tooltipItems) {
+                                return 'تاریخ: ' + tooltipItems[0].label;
+                            }
+                        }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
                 }
-            },
-            interaction: {
-                mode: 'nearest',
-                axis: 'x',
-                intersect: false
             }
-        }
-    });
-</script>
+        });
+    </script>
 
 
 
