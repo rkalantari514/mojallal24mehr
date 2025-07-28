@@ -1065,12 +1065,12 @@ def JariAshkhasMoshtarian(request):
     start_time = time.time()  # زمان شروع تابع
 
     filters = [
-        {'filter': {'total_mandeh__gt': 0}, 'negate': False},
-        {'filter': {'total_mandeh__gt': 0, 'loans_total__gt': 0}, 'negate': False},
-        {'filter': {'total_mandeh__gt': 0, 'loans_total': 0}, 'negate': False},
-        {'filter': {'total_mandeh__lt': 0}, 'negate': True},
-        {'filter': {'total_mandeh__lt': 0, 'loans_total__gt': 0}, 'negate': True},
-        {'filter': {'total_mandeh__lt': 0, 'loans_total': 0}, 'negate': True},
+        {'filter': {'total_mandeh__gt': 0 ,'moin':1}, 'negate': False},
+        {'filter': {'total_mandeh__gt': 0,'moin':1, 'loans_total__gt': 0}, 'negate': False},
+        {'filter': {'total_mandeh__gt': 0,'moin':1, 'loans_total': 0}, 'negate': False},
+        {'filter': {'total_mandeh__lt': 0,'moin':1}, 'negate': True},
+        {'filter': {'total_mandeh__lt': 0,'moin':1, 'loans_total__gt': 0}, 'negate': True},
+        {'filter': {'total_mandeh__lt': 0,'moin':1, 'loans_total': 0}, 'negate': True},
     ]
 
     table1 = []
@@ -1209,14 +1209,14 @@ from django.db.models import F, Func
 
 def JariAshkhasMoshtarianDetail(request, filter_id):
     filters = {
-        '1': {'total_mandeh__gt': 0},
-        '2': {'total_mandeh__gt': 0, 'loans_total__gt': 0},
-        '3': {'total_mandeh__gt': 0, 'loans_total': 0},
-        '4': {'total_mandeh__lt': 0},
+        '1': {'total_mandeh__gt': 0,'moin':1},
+        '2': {'total_mandeh__gt': 0,'moin':1, 'loans_total__gt': 0},
+        '3': {'total_mandeh__gt': 0, 'loans_total': 0,'moin':1},
+        '4': {'total_mandeh__lt': 0,'moin':1},
         '5': {'total_mandeh__lt': 0 ,'moin':1, 'loans_total__gt': 0},
-        '6': {'total_mandeh__lt': 0, 'loans_total': 0},
-        '7': {'total_mandeh__lt': 0, 'loans_total__gt': 0, 'total_with_loans__lt': 0},
-        '8': {'total_mandeh': 0, 'loans_total__gt': 0},
+        '6': {'total_mandeh__lt': 0, 'loans_total': 0,'moin':1},
+        '7': {'total_mandeh__lt': 0, 'loans_total__gt': 0, 'total_with_loans__lt': 0,'moin':1},
+        '8': {'total_mandeh': 0, 'loans_total__gt': 0,'moin':1},
     }
 
     filter_labels = {
