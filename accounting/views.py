@@ -1320,7 +1320,7 @@ def HesabMoshtariDetail(request, tafsili):
 
     # =========================================ایجاد نمودار گردش حساب مشتری
     master_info = MasterInfo.objects.filter(is_active=True).last()
-    year_list=[]
+    year_list=['میانگین']
     for m in MasterInfo.objects.order_by('acc_year').all():
         year_list.append(m.acc_year)
 
@@ -1412,15 +1412,20 @@ def HesabMoshtariDetail(request, tafsili):
 
         chart_date.append(chart_y)
 
-    ave=-200000000
-    chart_y=[]
-    for _ in acc_date_list:
-        chart_y.append(ave)
-    chart_date.append(chart_y)
+    sum_line=0
+    count_line=0
+    for chart_y in chart_date:
+        numeric_values = [value for value in chart_y if value != '-']
+        sum_line += sum(numeric_values)
+        count_line += len(numeric_values)
 
+    if count_line>0:
+        ave=sum_line/count_line
+    else:
+        ave=0
 
-
-
+    average_line = [ave for _ in range(len(acc_date_list))]
+    chart_date.insert(0, average_line)
 
     hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
     m_name = None
