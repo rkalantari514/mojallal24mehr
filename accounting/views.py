@@ -1412,9 +1412,9 @@ def HesabMoshtariDetail(request, tafsili):
 
         chart_date.append(chart_y)
 
-    ave=-4000000
+    ave=-200000000
     chart_y=[]
-    for _ in year_list:
+    for _ in acc_date_list:
         chart_y.append(ave)
     chart_date.append(chart_y)
 
