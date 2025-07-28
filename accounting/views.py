@@ -1368,7 +1368,7 @@ def HesabMoshtariDetail(request, tafsili):
         sanad_year_qs = asnad.filter(acc_year=y)
         print('sanad_year_qs.count()',sanad_year_qs.count())
 
-        results = asnad.filter(acc_year=y).values('date').annotate(total=Sum('curramount')).order_by('date')
+        results = asnad.filter(acc_year=y,is_active=True).values('date').annotate(total=Sum('curramount')).order_by('date')
         print('نتایج برای سال:', y)
         print('تعداد نتایج:', len(results))
         for r in results:
