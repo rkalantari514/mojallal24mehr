@@ -1393,11 +1393,11 @@ def HesabMoshtariDetail(request, tafsili):
 
             # مقدار روز جاری از سال پایه را دریافت و تجمعی محاسبه کن
             if str(by_date.date()) in daily_totals_year:
-                if not l_finish and day > today and y==acc_year:
+                if (not l_finish) and (day > today) and (y==acc_year):
                     l_finish = True
                 a = daily_totals_year[str(by_date.date())]
                 print('a', a)
-                if not l_start and int(daily_totals_year[str(by_date.date())]) != 0:
+                if (not l_start) and (int(daily_totals_year[str(by_date.date())]) != 0):
                     print('l_start = True',int(daily_totals_year[str(by_date.date())]))
                     l_start = True
 
