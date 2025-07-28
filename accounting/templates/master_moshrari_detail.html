@@ -627,19 +627,20 @@
 
     // رنگ‌های پیشنهادی برای هر سال - اگر تعداد سال‌ها بیشتر شد، باید رنگ‌های بیشتری انتخاب کنید
     const colors = [
-        'blue', 'green', 'red', 'teal', 'orange', 'purple', 'brown', 'cyan', 'magenta', 'lime'
+        'red','blue', 'green',  'teal', 'orange', 'purple', 'brown', 'cyan', 'magenta', 'lime'
     ];
 
-    // ساخت Dataset برای هر سال
-    const datasets = chartDataSets.map((data, index) => ({
-        label: `سال ${yearList[index]}`,
+    const datasets = chartDataSets.map((data, index) => {
+    const isFirstLine = index === 0; // اولی
+    return {
+        label: `${yearList[index]}`, // فقط سال بدون کلمه 'سال'
         data: data,
         borderColor: colors[index % colors.length],
         fill: false,
         pointRadius: 0,
-        // حذف خطوط خط‌خطی برای سادگی
-        // borderDash: [5, 5], // اگر خواستید خط‌های خط‌چین باشد، فعال کنید
-    }));
+        borderDash: isFirstLine ? [5, 5] : [], // خط چین برای اولین خط
+    };
+});
 
     // رسم نمودار
     const ctx = document.getElementById('Chart1').getContext('2d');
