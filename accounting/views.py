@@ -1213,7 +1213,7 @@ def JariAshkhasMoshtarianDetail(request, filter_id):
         '2': {'total_mandeh__gt': 0, 'loans_total__gt': 0},
         '3': {'total_mandeh__gt': 0, 'loans_total': 0},
         '4': {'total_mandeh__lt': 0},
-        '5': {'total_mandeh__lt': 0, 'loans_total__gt': 0},
+        '5': {'total_mandeh__lt': 0 ,'moin':1, 'loans_total__gt': 0},
         '6': {'total_mandeh__lt': 0, 'loans_total': 0},
         '7': {'total_mandeh__lt': 0, 'loans_total__gt': 0, 'total_with_loans__lt': 0},
         '8': {'total_mandeh': 0, 'loans_total__gt': 0},
@@ -1239,6 +1239,9 @@ def JariAshkhasMoshtarianDetail(request, filter_id):
         'title': f'جزئیات حساب مشتریان - {filter_labels.get(str(filter_id), "فیلتر نامشخص")}',
         'items': items,
     }
+
+
+
 
     return render(request, 'jari_ashkhas_moshtarian_detail.html', context)
 
@@ -1308,7 +1311,7 @@ def HesabMoshtariDetail(request, tafsili):
 
     today = timezone.now().date()
     # asnad = SanadDetail.objects.filter(kol=103, moin=1, tafzili=tafsili).order_by('date')
-    asnad = SanadDetail.objects.filter(kol=103, tafzili=tafsili).order_by('date')
+    asnad = SanadDetail.objects.filter(kol=103, tafzili=tafsili,is_active=True).order_by('date')
     mandeh=0
     for s in asnad:
         s.mandeh=mandeh+s.curramount
@@ -1354,6 +1357,9 @@ def HesabMoshtariDetail(request, tafsili):
     today = datetime.today().strftime('%Y-%m-%d')
 
     chart_date=[]
+    l_start=False
+    l_finish=False
+
     for y in year_list:
         print(y)
         delta_yar=y-acc_year
@@ -1378,16 +1384,29 @@ def HesabMoshtariDetail(request, tafsili):
         cumulative_year = 0
         for day in acc_date_list:
             by_date = datetime.strptime(day, '%Y-%m-%d') + relativedelta(years=delta_yar)  # تاریخ مربوط به سال پایه
+
+
+
             # مقدار روز جاری از سال پایه را دریافت و تجمعی محاسبه کن
             if str(by_date.date()) in daily_totals_year:
+                if day > today:
+                    l_finish = True
+                a = daily_totals_year[str(by_date.date())]
+                print('a', a)
+                if int(daily_totals_year[str(by_date.date())]) != 0:
+                    l_start = True
+
+
+
+
                 cumulative_year += daily_totals_year[str(by_date.date())]  # علامت منفی برای تصحیح
             chart_y.append(cumulative_year)
-            # if day == today:
-            #     today_bay_by = (cumulative_base_year) * budget_rate
 
-            # مقدار روز جاری از سال جاری را دریافت و تجمعی محاسبه کن
+        if l_start:
+            chart_date.append(chart_y)
+        else:
+            chart_date.append('-')
 
-        chart_date.append(chart_y)
 
     for t in chart_date:
         print('==================')
