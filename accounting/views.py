@@ -1359,7 +1359,7 @@ def HesabMoshtariDetail(request, tafsili):
     chart_date=[]
     l_start=False
     l_finish=False
-
+    acc_days=0
     for y in year_list:
         print(y)
         delta_yar=y-acc_year
@@ -1407,6 +1407,7 @@ def HesabMoshtariDetail(request, tafsili):
 
             if l_start and not l_finish:
                 chart_y.append(cumulative_year)
+                acc_days+=1
             else:
                 chart_y.append('-')
 
@@ -1549,6 +1550,9 @@ def HesabMoshtariDetail(request, tafsili):
         'call_form': call_form,  # ارسال فرم به قالب
         'tracking': tracking,
         'khab': khab,
+        'acc_days': acc_days,
+        'ave': ave,
+        'khab2': acc_days*ave,
 
 
         'chart_labels': chart_labels,
