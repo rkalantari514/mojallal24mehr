@@ -629,19 +629,13 @@
     const colors = [
         'red','blue', 'green',  'teal', 'orange', 'purple', 'brown', 'cyan', 'magenta', 'lime'
     ];
-    const borderColor = colors[index % colors.length]; // رنگ پایه
-    const fillColor = 'rgba(0, 0, 0, 0.1)'; // رنگ کم‌رنگ و شفاف
     const datasets = chartDataSets.map((data, index) => {
     const isFirstLine = index === 0; // اولی
     return {
         label: `${yearList[index]}`, // فقط سال بدون کلمه 'سال'
         data: data,
         borderColor: colors[index % colors.length],
-
-        backgroundColor: fillColor,
-        {#fill: isFirstLine ? true : false, // در صورت نیاز#}
-
-
+        fill: isFirstLine ? true : false, // در صورت نیاز
         pointRadius: 0,
         borderDash: isFirstLine ? [5, 5] : [], // خط چین برای اولین خط
     };
