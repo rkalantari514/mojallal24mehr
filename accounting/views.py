@@ -19,7 +19,6 @@ from django.db.models.functions import Cast
 from openpyxl.styles.builtins import total
 from persianutils import standardize
 from django.db.models import Sum, F, DecimalField
-from unicodedata import decimal
 
 from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
@@ -1296,6 +1295,7 @@ import re
 from django.shortcuts import render, redirect
 from django.db.models import Sum, Min, Max
 import jdatetime
+from decimal import Decimal
 
 
 @login_required(login_url='/login')
