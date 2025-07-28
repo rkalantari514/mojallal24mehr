@@ -1552,7 +1552,7 @@ def HesabMoshtariDetail(request, tafsili):
         'khab': khab,
         'acc_days': acc_days,
         'ave': ave,
-        'khab2': acc_days*ave,
+        'khab2': acc_days*ave/10,
 
 
         'chart_labels': chart_labels,
