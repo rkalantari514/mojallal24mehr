@@ -1394,6 +1394,7 @@ def HesabMoshtariDetail(request, tafsili):
                 a = daily_totals_year[str(by_date.date())]
                 print('a', a)
                 if int(daily_totals_year[str(by_date.date())]) != 0:
+                    print('l_start = True',int(daily_totals_year[str(by_date.date())]))
                     l_start = True
 
 
@@ -1402,16 +1403,13 @@ def HesabMoshtariDetail(request, tafsili):
                 cumulative_year += daily_totals_year[str(by_date.date())]  # علامت منفی برای تصحیح
             chart_y.append(cumulative_year)
 
-        if l_start:
-            chart_date.append(chart_y)
-        else:
-            chart_date.append('-')
+            if l_start:
+                chart_y.append(cumulative_year)
+            else:
+                chart_y.append('-')
 
 
-    for t in chart_date:
-        print('==================')
-        for tt in t:
-            print(tt)
+
 
 
     hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
