@@ -48,6 +48,10 @@
                                                data-export-types='["excel"]'>
                                             <thead>
                                             <tr class="tr-class-1">
+                                                <th class="card-text text-center" data-sortable="true" data-field="moin"
+                                                    data-sorter="numericOnly" >کد معین
+                                                </th>
+
                                                 <th class="card-text text-center" data-sortable="true" data-field="code"
                                                     data-sorter="numericOnly" >کد فرد
                                                 </th>
@@ -71,6 +75,10 @@
                                             <tbody>
                                             {% for item in items %}
                                                 <tr>
+                                                    <td>
+                                                            {{ item.moin }}
+                                                    </td>
+
                                                     <td>
                                                         <a href="/acc/jariashkhas/moshtari/{{ item.tafzili }}"
                                                            target="_blank">
