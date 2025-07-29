@@ -1,0 +1,585 @@
+{% extends 'shared/_MainLayout.html' %}
+{% load humanize %}
+{% load static %}
+{% block content %}
+
+    <style>
+        .datetime-small {
+            font-size: 1.2em; /* کوچک‌تر کردن فونت تاریخ و ساعت */
+            margin-right: 10px; /* فاصله بین عنوان و تاریخ/ساعت */
+            vertical-align: middle; /* تنظیم تراز عمودی */
+        }
+
+        .text-facebook {
+            display: inline; /* نمایش عنوان در یک خط */
+        }
+
+    </style>
+    <style>
+        .calendar-table .fc-day-top {
+            position: relative; /* برای قرار دادن فرزندان */
+            padding: 5px; /* کمی فاصله برای زیبایی */
+        }
+
+        .calendar-table .fc-day-number {
+            font-weight: bold;
+            display: block;
+            margin: 0;
+            padding: 0; /* لغو حاشیه */
+            text-align: left; /* تراز چپ */
+        }
+
+        .calendar-table .fc-recive-number,
+        .calendar-table .fc-pay-number,
+        .calendar-table .fc-loan-number {
+            font-size: 1.2rem; /* اندازه متن */
+            display: block; /* تقسیم نمایش به سطرهای جدید */
+        }
+
+        .calendar-table .fc-recive-number {
+            color: #007bff; /* رنگ سبد خرید */
+            text-align: right; /* تراز راست برای شماره دریافتی */
+        }
+
+        .calendar-table .fc-pay-number {
+            color: #df0808; /* رنگ  */
+            text-align: right; /* تراز راست برای شماره پرداختی */
+        }
+
+        .calendar-table .fc-loan-number {
+            color: #3b5998; /* رنگ  */
+            text-align: right; /* تراز راست برای شماره پرداختی */
+        }
+
+        .calendar-table th {
+            border: 1px solid #fdd49a;
+            background-color: transparent !important; /* حذف رنگ پس‌زمینه */
+        }
+    </style>
+    <style>
+        .small-logo {
+            width: 20px; /* تنظیم اندازه کوچک لوگو */
+            height: auto;
+        }
+    </style>
+
+
+    <div class="content-wrapper ">
+
+        <!--ردیف تایتل-->
+        <div class="page-title">
+            <div class="row">
+                <div class="col-sm-9">
+                    <h3 class="mb-0 text-facebook d-inline">داشبورد مدیریتی فروشگاه یاس مجلل</h3>
+                    <span id="datetime" class="datetime-small">در حال بارگذاری...</span>
+                </div>
+                <div class="col-sm-3">
+                    <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
+                        <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
+                        <li class="breadcrumb-item active">داشبورد 2</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+
+        <!--ردیف اول-->
+
+    <div class="row">
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+          <div class="card card-statistics h-100">
+            <div class="card-body">
+              <div class="clearfix">
+                <div class="float-left">
+                  <span class="text-danger">
+                    <i class="fa fa-bar-chart-o highlight-icon" aria-hidden="true"></i>
+                  </span>
+                </div>
+                <div class="float-right text-right">
+                  <p class="card-text text-dark">بازدیدکنندگان</p>
+                  <h4>65,650</h4>
+                </div>
+              </div>
+              <p class="text-muted mt-3 pt-3 border-top">
+                <i class="fa fa-exclamation-circle mr-1" aria-hidden="true"></i> رشد 81٪ کمتر است
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+          <div class="card card-statistics h-100">
+            <div class="card-body">
+              <div class="clearfix">
+                <div class="float-left">
+                  <span class="text-warning">
+                    <i class="fa fa-shopping-cart highlight-icon" aria-hidden="true"></i>
+                  </span>
+                </div>
+                <div class="float-right text-right">
+                  <p class="card-text text-dark">سفارشات</p>
+                  <h4>656</h4>
+                </div>
+              </div>
+              <p class="text-muted mt-3 pt-3 border-top">
+                <i class="fa fa-bookmark-o mr-1" aria-hidden="true"></i> کل فروش
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+          <div class="card card-statistics h-100">
+            <div class="card-body">
+              <div class="clearfix">
+                <div class="float-left">
+                  <span class="text-success">
+                    <i class="fa fa-dollar highlight-icon" aria-hidden="true"></i>
+                  </span>
+                </div>
+                <div class="float-right text-right">
+                  <p class="card-text text-dark">درامد</p>
+                  <h4>65656 تومان</h4>
+                </div>
+              </div>
+              <p class="text-muted mt-3 pt-3 border-top">
+                <i class="fa fa-calendar mr-1" aria-hidden="true"></i> فروش در هر هفته
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+          <div class="card card-statistics h-100 admin-followers">
+            <div class="card-body">
+              <div class="clearfix">
+                <div class="float-left">
+                  <span class="text-primary">
+                    <i class="fa fa-twitter highlight-icon" aria-hidden="true"></i>
+                  </span>
+                </div>
+                <div class="float-right text-right">
+                  <p class="card-text text-dark">دنبال کنندگان</p>
+                  <h4>62,500+</h4>
+                </div>
+              </div>
+              <p class="text-muted mt-3 pt-3 border-top">
+                <i class="fa fa-repeat mr-1" aria-hidden="true"></i> فقط به روز شد
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+{% endblock %}
+
+
+
+
+
+
+
+
+{% block myjs %}
+    <!-- نمایش تاریخ و ساعت-->
+    <script>
+        function updateDateTime() {
+            const now = new Date();
+            const days = ["یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه"];
+            const dayName = days[now.getDay()];
+            const date = now.toLocaleDateString('fa-IR');
+            const time = now.toLocaleTimeString('fa-IR');
+
+            document.getElementById("datetime").innerHTML = `${dayName}، ${date}، ${time}`;
+        }
+
+        // به روز رسانی هر ثانیه
+        setInterval(updateDateTime, 1000);
+
+        // نمایش اولیه
+        updateDateTime();
+    </script>
+
+
+
+    <!--    1   نمودار مقایسه سود ناویژه روزانه -->
+    <script>
+        // دریافت داده‌های تاریخی از Django
+        var labels = [
+            {% for report in chart1_data.labels %}
+                "{{ report }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var khales_forosh = [
+            {% for value in chart1_data.khales_forosh %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var baha_tamam_forosh = [
+            {% for value in chart1_data.baha_tamam_forosh %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var sood_navizhe = [
+            {% for value in chart1_data.sood_navizhe %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // ساختار داده برای رسم
+        var data = {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'خالص فروش',
+                    data: khales_forosh,
+                    backgroundColor: 'rgba(0, 123, 255, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'بهای تمام شده',
+                    data: baha_tamam_forosh,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'سود ناویژه',
+                    data: sood_navizhe,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                }
+            ]
+        };
+
+        var options = {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            }
+        };
+
+        // با استفاده از تابع drawChart برای رسم
+        drawChart('Chart1', 'bar', data, options);
+        // اعمال کلاس‌های CSS به عناصر نمودار
+
+    </script>
+
+
+    <!--    نمودار فروش ماهانه -->
+    <script>
+        // دریافت داده‌های تاریخی از Django
+        var labels = [
+            {% for report in chart2_data.labels %}
+                "{{ report }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var khales_forosh = [
+            {% for value in chart2_data.khales_forosh %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var baha_tamam_forosh = [
+            {% for value in chart2_data.baha_tamam_forosh %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var sood_navizhe = [
+            {% for value in chart2_data.sood_navizhe %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // ساختار داده برای رسم
+        var data = {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'خالص فروش',
+                    data: khales_forosh,
+                    backgroundColor: 'rgba(0,111,255,0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'بهای تمام شده',
+                    data: baha_tamam_forosh,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'سود ناویژه',
+                    data: sood_navizhe,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                }
+            ]
+        };
+
+        var options = {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            }
+        };
+
+        // با استفاده از تابع drawChart برای رسم
+        drawChart('Chart2', 'bar', data, options);
+
+        // بررسی داده‌ها در کنسول
+        console.log("Labels: ", labels);
+        console.log("Khales Forosh Data: ", khales_forosh);
+        console.log("Baha Tamam Forosh Data: ", baha_tamam_forosh);
+        console.log("Sood Navizhe Data: ", sood_navizhe);
+    </script>
+
+
+
+    <!--    4   نمودار مقایسه سود ناویژه روزانه -->
+    <script>
+        // دریافت داده‌های تاریخی از Django
+        var labels = [
+            {% for report in chart4_data.labels %}
+                "{{ report }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var total_daramad = [
+            {% for value in chart4_data.total_daramad %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var total_hazineh = [
+            {% for value in chart4_data.total_hazineh %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var sood_vizhe = [
+            {% for value in chart4_data.sood_vizhe %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // ساختار داده برای رسم
+        var data = {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'کل در آمد',
+                    data: total_daramad,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'کل هزینه',
+                    data: total_hazineh,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'سود ویژه',
+                    data: sood_vizhe,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                }
+            ]
+        };
+
+        var options = {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            }
+        };
+
+        // با استفاده از تابع drawChart برای رسم
+        drawChart('Chart4', 'bar', data, options);
+        // اعمال کلاس‌های CSS به عناصر نمودار
+
+    </script>
+
+
+
+    <!--    5   نمودار مقایسه سود ناویژه روزانه -->
+    <script>
+        // دریافت داده‌های تاریخی از Django
+        var labels = [
+            {% for report in chart5_data.labels %}
+                "{{ report }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var total_daramad = [
+            {% for value in chart5_data.total_daramad %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var total_hazineh = [
+            {% for value in chart5_data.total_hazineh %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        var sood_vizhe = [
+            {% for value in chart5_data.sood_vizhe %}
+                {{ value }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // ساختار داده برای رسم
+        var data = {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'کل در آمد',
+                    data: total_daramad,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'کل هزینه',
+                    data: total_hazineh,
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                },
+                {
+                    label: 'سود ویژه',
+                    data: sood_vizhe,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                }
+            ]
+        };
+
+        var options = {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            }
+        };
+
+        // با استفاده از تابع drawChart برای رسم
+        drawChart('Chart5', 'bar', data, options);
+        // اعمال کلاس‌های CSS به عناصر نمودار
+
+    </script>
+
+
+
+
+    <!-- چارت 7 میله ای برآیند روز های هفته -->
+    <script>
+        const today = new Date();
+        const dates = [];
+        for (let i = 0; i <= 7; i++) {
+            const day = new Date(today);
+            day.setDate(today.getDate() - i);
+            dates.push(day.toLocaleDateString('fa-IR', {weekday: 'long'}));
+        }
+
+        var dataValues = [
+            {% for value in chart7_data %}
+                {{ value }},
+            {% endfor %}
+        ];
+
+        dates.reverse();
+        {#dataValues.reverse(); // نیز باید برعکس شوند#}
+
+        console.log(dataValues); // چاپ داده‌ها برای بررسی
+
+        var backgroundColors = Array(dates.length).fill('rgba(75, 192, 192, 1)');
+        var borderColors = Array(dates.length).fill('rgba(75, 192, 192, 1)');
+
+        var data = {
+            labels: dates,
+            datasets: [{
+                label: 'عملکرد روزانه',
+                data: dataValues,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 1
+            }]
+        };
+
+        var options = {
+            scales: {
+                y: {
+                    beginAtZero: false // به منظور نمایش مقادیر منفی
+                }
+            }
+        };
+
+        drawChart('Chart7', 'bar', data, options);
+    </script>
+
+
+
+{% endblock %}
+
+
+{% block date %}
+
+
+{% endblock %}
+
+

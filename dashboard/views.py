@@ -785,6 +785,52 @@ def Home1(request, *args, **kwargs):
     print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
     return render(request, 'home1.html', context)
 
+@login_required(login_url='/login')
+def Home2(request, *args, **kwargs):
+    name = 'داشبورد 2'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
+    minfo = MasterInfo.objects.filter(is_active=True).last()
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='داشبورد 2')
+
+    start_time = time.time()  # زمان شروع تابع
+    today = date.today()
+    yesterday = today - timedelta(days=1)
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    start_date_jalali = jdatetime.date(acc_year, 1, 1)  # ۱ فروردین سال مالی
+    start_date_gregorian = start_date_jalali.togregorian()  # تبدیل به میلادی
+    last_update_time = Mtables.objects.filter(name='Sanad_detail').last().last_update_time
+
+
+
+
+
+
+    print(f"11: {time.time() - start_time:.2f} ثانیه")
+
+    context = {
+        'title': 'داشبورد مدیریتی',
+        'user': user,
+        'minfo': minfo,
+
+
+
+    }
+
+    total_time = time.time() - start_time  # محاسبه زمان اجرا
+    print(f"زمان کل اجرای تابع: {total_time:.2f} ثانیه")
+    return render(request, 'home2.html', context)
+
+
+
+
+
+
+
+
 
 @login_required(login_url='/login')
 def CalendarTotal(request, *args, **kwargs):
