@@ -108,7 +108,6 @@ import requests
 
 
 
-ip_panel_token=MasterInfo.objects.filter(is_active=True).last().ip_panel_token
 
 import requests
 
@@ -142,6 +141,8 @@ import requests
 import requests
 
 def send_smsold(phone_number, message):
+    ip_panel_token = MasterInfo.objects.filter(is_active=True).last().ip_panel_token
+
     url = "https://api2.ippanel.com/api/v1/sms/send/webservice/single"
     headers = {
         "accept": "application/json",
@@ -170,6 +171,8 @@ import requests
 # فرض می‌کنیم ip_panel_token قبلاً تعریف شده است.
 
 def send_sms(phone_number, message):
+    ip_panel_token = MasterInfo.objects.filter(is_active=True).last().ip_panel_token
+
     url = "https://api2.ippanel.com/api/v1/sms/send/webservice/single"
     headers = {
         "accept": "application/json",
@@ -216,6 +219,8 @@ import requests
 import requests
 
 def check_sms_status(message_id):
+    ip_panel_token = MasterInfo.objects.filter(is_active=True).last().ip_panel_token
+
     print('message_id',message_id)
     url = f"https://api2.ippanel.com/api/v1/sms/message/show-recipient/message-id/{message_id}?page=1&per_page=10"
     headers = {

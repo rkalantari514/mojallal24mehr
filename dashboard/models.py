@@ -29,6 +29,7 @@ class MasterInfo(models.Model):
     last_update_time = models.DateTimeField(default=timezone.now, verbose_name='زمان آخرین آپدیت')
 
     active_day=models.IntegerField(default=0,blank=True, null=True,verbose_name='روز فعال')
+    monthly_rate = models.DecimalField(max_digits=8, decimal_places=4, default=5.0, verbose_name='نرخ بهره ماهانه')
 
     khales_daramad_forosh = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='خالص درآمد فروش')
     tamam_shode = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='هزینه تمام شده کالای فروش رفته')

@@ -4,6 +4,7 @@ from decimal import Decimal
 from django.shortcuts import render
 from openpyxl.styles.builtins import title
 
+from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
 from custom_login.views import page_permision
 from dashboard.models import MasterInfo
@@ -43,6 +44,8 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
         'is_kol': True,
         'm_code': None,
     }
+    master_info = MasterInfo.objects.filter(is_active=True).last()
+    monthly_rate = master_info.monthly_rate
 
     if km=='k':
         sanads = SanadDetail.objects.filter(kol=103, acc_year=acc_year)
@@ -121,9 +124,14 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
         current_tafzili_code = None
         tafzili_data = None
 
+
         for entry in sanad_aggregates:
             tafzili_code = entry['tafzili']
             total_curramount = entry['total_curramount']
+            bedehi_moshtari=BedehiMoshtari.objects.filter(tafzili=tafzili_code).last()
+            if bedehi_moshtari:
+                sleep_investment=bedehi_moshtari.sleep_investment
+                bar_mali = sleep_investment / Decimal(30) * monthly_rate / Decimal(100)
 
             if tafzili_code != current_tafzili_code:
                 if tafzili_data:
@@ -142,6 +150,8 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
                     'num_creditors': 0,
                     'max_overall_debt': None,
                     'min_overall_credit': None,
+                    'total_positive_bar_mali': 0,
+                    'total_negative_bar_mali': 0,
                 }
 
             if total_curramount > 0:
@@ -149,11 +159,18 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
                 tafzili_data['num_debtors'] += 1
                 if tafzili_data['max_overall_debt'] is None or total_curramount > moein_data['max_overall_debt']:
                     tafzili_data['max_overall_debt'] = total_curramount
+
             elif total_curramount < 0:
                 tafzili_data['total_negative_balance'] += total_curramount
                 tafzili_data['num_creditors'] += 1
                 if tafzili_data['min_overall_credit'] is None or total_curramount < moein_data['min_overall_credit']:
                     tafzili_data['min_overall_credit'] = total_curramount
+
+            if bar_mali >0:
+                tafzili_data['total_positive_bar_mali'] += bar_mali
+
+            elif bar_mali <0:
+                tafzili_data['total_negative_bar_mali'] += bar_mali
 
 
         if tafzili_data:

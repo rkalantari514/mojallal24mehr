@@ -327,6 +327,14 @@
                                                 data-sortable="true" data-sorter="numericOnly"
                                                 data-footer-formatter="priceFormatter">مجموع بدهکاری
                                             </th>
+{                                            <th data-field="total_positive_bar_mali" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter">مجموع بار مالی بستانکار
+                                            </th>
+{                                            <th data-field="total_negative_bar_mali" class="card-text text-center"
+                                                data-sortable="true" data-sorter="numericOnly"
+                                                data-footer-formatter="priceFormatter">مجموع بار مالی بدهکار
+                                            </th>
 {% if is_kol %}
                                             <th data-field="num_debtors" class="card-text text-center"
                                                 data-sortable="true" data-sorter="numericOnly"
@@ -394,6 +402,10 @@
                                                     style="direction: ltr">{{ item.total_positive_balance|floatformat:0|intcomma:False }}</td>
                                                 <td class="card-text text-center"
                                                     style="direction: ltr">{{ item.total_negative_balance|floatformat:0|intcomma:False }}</td>
+                                                <td class="card-text text-center"
+                                                    style="direction: ltr">{{ item.total_positive_bar_mali|floatformat:0|intcomma:False }}</td>
+                                                <td class="card-text text-center"
+                                                    style="direction: ltr">{{ item.total_negative_bar_mali|floatformat:0|intcomma:False }}</td>
                                                 {% if is_kol %}
 
                                                 <td class="card-text text-center">{{ item.num_debtors }}</td>

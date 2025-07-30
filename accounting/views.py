@@ -1535,11 +1535,12 @@ def HesabMoshtariDetail(request, tafsili):
         except:
             pass
 
+    monthly_rate=master_info.monthly_rate
     khab=True
     if hesabmoshtari.sleep_investment and hesabmoshtari.sleep_investment >= 0:
         khab=False
     try:
-        bar_mali=hesabmoshtari.sleep_investment/Decimal(30) * Decimal(0.05)
+        bar_mali=hesabmoshtari.sleep_investment/Decimal(30) * monthly_rate / Decimal(100)
     except:
         bar_mali=0
     context = {
