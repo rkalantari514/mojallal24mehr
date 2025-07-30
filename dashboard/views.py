@@ -815,6 +815,7 @@ def Home2(request, *args, **kwargs):
         'title': 'داشبورد مدیریتی',
         'user': user,
         'minfo': minfo,
+        'force_dark': True,
 
 
 

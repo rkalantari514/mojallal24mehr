@@ -24950,7 +24950,10 @@ body.dark-mode-active .bg-white {
 body.dark-mode-active .text-capitalize{
   color:#ffffff;
 }
-
+body.dark-mode-active .text-dark,
+body.dark-mode-active .text-muted{
+  color:#ffffff !important;
+}
 
 body.dark-mode-active footer {
     background-color: #1f1f1f !important; /* رنگ پس‌زمینه footer */
