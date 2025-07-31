@@ -95,7 +95,7 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
                     'max_overall_debt': None,
                     'min_overall_credit': None,
                     'total_positive_bar_mali': 0,
-                    'total_negative_bar_mali': 0,
+                    'total_nagative_bar_mali': 0,
                 }
 
             if total_curramount > 0:
@@ -113,7 +113,7 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
                 moein_data['total_positive_bar_mali'] += bar_mali
 
             elif bar_mali <0:
-                moein_data['total_negative_bar_mali'] += bar_mali
+                moein_data['total_nagative_bar_mali'] += bar_mali
 
         if moein_data:
             table1.append(moein_data)
@@ -171,7 +171,7 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
                     'max_overall_debt': None,
                     'min_overall_credit': None,
                     'total_positive_bar_mali': 0,
-                    'total_negative_bar_mali': 0,
+                    'total_nagative_bar_mali': 0,
                 }
 
             if total_curramount > 0:
@@ -190,7 +190,7 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
                 tafzili_data['total_positive_bar_mali'] += bar_mali
 
             elif bar_mali <0:
-                tafzili_data['total_negative_bar_mali'] += bar_mali
+                tafzili_data['total_nagative_bar_mali'] += bar_mali
 
 
         if tafzili_data:
