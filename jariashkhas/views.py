@@ -64,7 +64,18 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
 
         for entry in tafzili_aggregates:
             moein_code = entry['moin']
+            tafzili_code = entry['tafzili']
             total_curramount = entry['total_curramount']
+
+
+            bedehi_moshtari=BedehiMoshtari.objects.filter(moin=moein_code,tafzili=tafzili_code)
+            if bedehi_moshtari:
+                sleep_investment=bedehi_moshtari.aggregate(total=Sum('sleep_investment'))['total']
+                if sleep_investment:
+                    bar_mali = sleep_investment / Decimal(30) * monthly_rate / Decimal(100)
+                else:
+                    bar_mali=0
+
 
             if moein_code != current_moein_code:
                 if moein_data:
@@ -83,6 +94,8 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
                     'num_creditors': 0,
                     'max_overall_debt': None,
                     'min_overall_credit': None,
+                    'total_positive_bar_mali': 0,
+                    'total_negative_bar_mali': 0,
                 }
 
             if total_curramount > 0:
@@ -96,6 +109,11 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
                 if moein_data['min_overall_credit'] is None or total_curramount < moein_data['min_overall_credit']:
                     moein_data['min_overall_credit'] = total_curramount
 
+            if bar_mali >0:
+                moein_data['total_positive_bar_mali'] += bar_mali
+
+            elif bar_mali <0:
+                moein_data['total_negative_bar_mali'] += bar_mali
 
         if moein_data:
             table1.append(moein_data)
@@ -131,8 +149,10 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
             bedehi_moshtari=BedehiMoshtari.objects.filter(tafzili=tafzili_code).last()
             if bedehi_moshtari:
                 sleep_investment=bedehi_moshtari.sleep_investment
-                bar_mali = sleep_investment / Decimal(30) * monthly_rate / Decimal(100)
-
+                if sleep_investment:
+                    bar_mali = sleep_investment / Decimal(30) * monthly_rate / Decimal(100)
+                else:
+                    bar_mali=0
             if tafzili_code != current_tafzili_code:
                 if tafzili_data:
                     table1.append(tafzili_data)
