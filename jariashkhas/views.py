@@ -209,6 +209,8 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
 
     total_positive_balance = Decimal('0')
     total_negative_balance = Decimal('0')
+    total_positive_barmali = Decimal('0')
+    total_nagative_barmali = Decimal('0')
     num_debtors = 0
     num_creditors = 0
     max_overall_debt = None
@@ -219,6 +221,9 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
         total_negative_balance += moin['total_negative_balance']
         num_debtors += moin['num_debtors']
         num_creditors += moin['num_creditors']
+
+        total_positive_barmali += moin['total_positive_bar_mali']
+        total_nagative_barmali += moin['total_negative_bar_mali']
 
         if moin['max_overall_debt'] is not None:
             if max_overall_debt is None or moin['max_overall_debt'] > max_overall_debt:
@@ -236,6 +241,8 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
         'num_creditors': num_creditors,
         'max_overall_debt': max_overall_debt/10 if max_overall_debt else 0 ,
         'min_overall_credit': min_overall_credit/10*-1 if min_overall_credit else 0,
+        'total_positive_barmali': total_positive_barmali/10 if total_positive_barmali else 0,
+        'total_negative_barmali': total_negative_barmali/10 if total_negative_barmali else 0,
     }
     context['master_data'] = master_data
     balance = master_data['total_balance']

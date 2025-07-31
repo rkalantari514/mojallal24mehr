@@ -159,9 +159,9 @@
     </span>
                             </div>
                             <div class="float-right text-right">
-                                <p class="card-text text-dark"> خواب بدهی از 1403</p>
+                                <p class="card-text text-dark">بار مالی بدهکاران</p>
                                 <h4>
-                                        {{ table1.9|floatformat:0|intcomma:False }} میلیون تومان
+                                        {{ master_data.total_nagative_barmali|intword }} تومان
                                 </h4>
                             </div>
                         </div>
@@ -238,9 +238,9 @@
     </span>
                             </div>
                             <div class="float-right text-right">
-                                <p class="card-text text-dark"> خواب طلب از 1403</p>
+                                <p class="card-text text-dark"> کمک مالی بستانکاران</p>
                                 <h4>
-                                        {{ table1.9|floatformat:0|intcomma:False }} میلیون تومان
+                                        {{ master_data.total_positive_barmali|intword }} تومان
                                 </h4>
                             </div>
                         </div>
