@@ -223,7 +223,7 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
         num_creditors += moin['num_creditors']
 
         total_positive_barmali += moin['total_positive_bar_mali']
-        total_nagative_barmali += moin['total_nagative_barmali']
+        total_nagative_barmali += moin['total_nagative_bar_mali']
 
         if moin['max_overall_debt'] is not None:
             if max_overall_debt is None or moin['max_overall_debt'] > max_overall_debt:
