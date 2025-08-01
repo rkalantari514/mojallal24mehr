@@ -89,7 +89,6 @@ def index(List, i):
 from django import template
 from django.template.defaultfilters import floatformat
 
-register = template.Library()
 
 @register.filter
 def custom_intword(value):
