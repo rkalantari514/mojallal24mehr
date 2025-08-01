@@ -16,7 +16,7 @@
 {#<body>#}
 <body class="{% if user.is_dark_mode or force_dark %}dark-mode-active{% endif %}">
 
-<div class="wrapper slide-menu">
+<div class="wrapper">
     <!--=================================
      preloader -->
     <div id="pre-loader">
@@ -51,4 +51,24 @@
     {% block myjs %}{% endblock %}
 </div>
 </body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // بررسی عرض صفحه
+    function checkWidth() {
+        const wrapper = document.querySelector('.wrapper');
+        if (window.innerWidth >= 768) {
+            // اگر در حالت دسکتاپ هستیم، کلاس slide-menu را اضافه کن
+            wrapper.classList.add('slide-menu');
+        } else {
+            // اگر در حالت موبایل هستیم، مطمئن شو که کلاس slide-menu وجود ندارد
+            wrapper.classList.remove('slide-menu');
+        }
+    }
+
+    // بررسی عرض صفحه هنگام بارگذاری و تغییر اندازه
+    window.addEventListener('resize', checkWidth);
+    checkWidth();
+});
+</script>
 </html>
+
