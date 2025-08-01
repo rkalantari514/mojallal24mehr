@@ -20,7 +20,7 @@ from django.db.models.functions import Coalesce
 from custom_login.views import page_permision
 
 
-def JariAshkasList(request,km,moin, *args, **kwargs):
+def JariAshkasList0510(request,km,moin, *args, **kwargs):
     start_time = time.time()
     name = 'لیست مطالبات و بدهی ها'
     result = page_permision(request, name)
@@ -252,3 +252,234 @@ def JariAshkasList(request,km,moin, *args, **kwargs):
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
     return render(request, 'ashkas-total.html', context)
+
+
+import time
+from django.shortcuts import render, redirect
+from django.db.models import Sum, Max, Min, Count, F, DecimalField
+from django.db.models.functions import Coalesce
+from decimal import Decimal
+
+
+
+
+def JariAshkasList(request, km, moin, *args, **kwargs):
+    start_time = time.time()
+    name = 'لیست مطالبات و بدهی ها'
+    result = page_permision(request, name)
+    if result:
+        return result
+
+    user = request.user
+    if user.mobile_number != '09151006447':
+        if km == 'k':
+            UserLog.objects.create(user=user, page='لیست مطالبات و بدهی ها', code=0)
+        elif km == 'm':
+            UserLog.objects.create(user=user, page='لیست مطالبات و بدهی ها', code=moin)
+
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    master_info = MasterInfo.objects.filter(is_active=True).last()
+    monthly_rate = master_info.monthly_rate if master_info and master_info.monthly_rate else Decimal('0')
+
+    context = {
+        'title': 'لیست مطالبات و بدهی ها',
+        'user': user,
+        'acc_year': acc_year,
+        'table1': [],
+        'master_data': [],
+        'is_kol': km == 'k',
+        'm_code': moin,
+    }
+
+    # --------------------------------------------------------------------------
+    # بهینه‌سازی عمومی: واکشی داده‌های مورد نیاز به صورت یکجا
+    # --------------------------------------------------------------------------
+    moein_names = {item.code: item.name for item in AccCoding.objects.filter(parent__code=103, level=2)}
+    person_names = {item.per_taf: f'{item.name} {item.lname}' for item in Person.objects.all()}
+
+    # تجمیع داده‌های BedehiMoshtari در یک کوئری و ذخیره در دیکشنری
+    bedehi_data = BedehiMoshtari.objects.values('moin', 'tafzili').annotate(
+        total_sleep=Coalesce(Sum('sleep_investment'), Decimal('0'))
+    )
+    bedehi_dict = {(item['moin'], item['tafzili']): item['total_sleep'] for item in bedehi_data}
+
+    # --------------------------------------------------------------------------
+    # بخش km='k'
+    # --------------------------------------------------------------------------
+    if km == 'k':
+        sanads = SanadDetail.objects.filter(kol=103, acc_year=acc_year)
+
+        tafzili_aggregates = sanads.values('moin', 'tafzili').annotate(
+            total_curramount=Coalesce(Sum('curramount'), Decimal('0'), output_field=DecimalField()),
+            num_transactions=Count('id'),
+            max_curramount=Coalesce(Max('curramount'), Decimal('0'), output_field=DecimalField()),
+            min_curramount=Coalesce(Min('curramount'), Decimal('0'), output_field=DecimalField()),
+        ).order_by('moin', 'tafzili')
+
+        table1 = []
+        current_moein_code = None
+        moein_data = None
+
+        for entry in tafzili_aggregates:
+            moein_code = entry['moin']
+            tafzili_code = entry['tafzili']
+            total_curramount = entry['total_curramount']
+
+            sleep_investment = bedehi_dict.get((moein_code, tafzili_code), Decimal('0'))
+            bar_mali = (sleep_investment / Decimal(30) * monthly_rate / Decimal(100)) if monthly_rate else Decimal('0')
+
+            if moein_code != current_moein_code:
+                if moein_data:
+                    table1.append(moein_data)
+
+                moein_name = moein_names.get(moein_code, f"نامعلوم ({moein_code})")
+                current_moein_code = moein_code
+
+                moein_data = {
+                    'code': moein_code,
+                    'name': moein_name,
+                    'total_positive_balance': Decimal('0'),
+                    'total_negative_balance': Decimal('0'),
+                    'num_debtors': 0,
+                    'num_creditors': 0,
+                    'max_overall_debt': None,
+                    'min_overall_credit': None,
+                    'total_positive_bar_mali': Decimal('0'),
+                    'total_nagative_bar_mali': Decimal('0'),
+                }
+
+            if total_curramount > 0:
+                moein_data['total_positive_balance'] += total_curramount
+                moein_data['num_debtors'] += 1
+                if moein_data['max_overall_debt'] is None or total_curramount > moein_data['max_overall_debt']:
+                    moein_data['max_overall_debt'] = total_curramount
+            elif total_curramount < 0:
+                moein_data['total_negative_balance'] += total_curramount
+                moein_data['num_creditors'] += 1
+                if moein_data['min_overall_credit'] is None or total_curramount < moein_data['min_overall_credit']:
+                    moein_data['min_overall_credit'] = total_curramount
+
+            if bar_mali > 0:
+                moein_data['total_positive_bar_mali'] += bar_mali
+            elif bar_mali < 0:
+                moein_data['total_nagative_bar_mali'] += bar_mali
+
+        if moein_data:
+            table1.append(moein_data)
+        context['table1'] = table1
+
+    # --------------------------------------------------------------------------
+    # بخش km='m'
+    # --------------------------------------------------------------------------
+    if km == 'm':
+        moein_code = int(moin)
+        moein_name = moein_names.get(moein_code, f"نامعلوم ({moein_code})")
+        context['title'] = f'مطالبات و بدهی معین {moein_name}'
+        context['is_kol'] = False
+        context['m_code'] = moein_code
+
+        sanads = SanadDetail.objects.filter(kol=103, moin=moein_code, acc_year=acc_year)
+
+        sanad_aggregates = sanads.values('tafzili').annotate(
+            total_curramount=Coalesce(Sum('curramount'), Decimal('0'), output_field=DecimalField()),
+            num_transactions=Count('id'),
+            max_curramount=Coalesce(Max('curramount'), Decimal('0'), output_field=DecimalField()),
+            min_curramount=Coalesce(Min('curramount'), Decimal('0'), output_field=DecimalField()),
+        ).order_by('tafzili')
+
+        table1 = []
+        for entry in sanad_aggregates:
+            tafzili_code = entry['tafzili']
+            total_curramount = entry['total_curramount']
+            num_transactions = entry['num_transactions']
+            max_curramount = entry['max_curramount']
+            min_curramount = entry['min_curramount']
+
+            sleep_investment = bedehi_dict.get((moein_code, tafzili_code), Decimal('0'))
+            bar_mali = (sleep_investment / Decimal(30) * monthly_rate / Decimal(100)) if monthly_rate else Decimal('0')
+
+            tafzili_name = person_names.get(tafzili_code, f"کد فرد ({tafzili_code})")
+
+            tafzili_data = {
+                'code': tafzili_code,
+                'name': tafzili_name,
+                'total_positive_balance': Decimal('0'),
+                'total_negative_balance': Decimal('0'),
+                'num_debtors': 0,
+                'num_creditors': 0,
+                'max_overall_debt': None,
+                'min_overall_credit': None,
+                'total_positive_bar_mali': Decimal('0'),
+                'total_nagative_bar_mali': Decimal('0'),
+            }
+
+            if total_curramount > 0:
+                tafzili_data['total_positive_balance'] = total_curramount
+                tafzili_data['num_debtors'] = 1
+                tafzili_data['max_overall_debt'] = total_curramount
+            elif total_curramount < 0:
+                tafzili_data['total_negative_balance'] = total_curramount
+                tafzili_data['num_creditors'] = 1
+                tafzili_data['min_overall_credit'] = total_curramount
+
+            if bar_mali > 0:
+                tafzili_data['total_positive_bar_mali'] = bar_mali
+            elif bar_mali < 0:
+                tafzili_data['total_nagative_bar_mali'] = bar_mali
+
+            table1.append(tafzili_data)
+        context['table1'] = table1
+
+    # --------------------------------------------------------------------------
+    # محاسبه Master Data
+    # --------------------------------------------------------------------------
+    total_positive_balance = Decimal('0')
+    total_negative_balance = Decimal('0')
+    total_positive_barmali = Decimal('0')
+    total_nagative_barmali = Decimal('0')
+    num_debtors = 0
+    num_creditors = 0
+    max_overall_debt = None
+    min_overall_credit = None
+
+    for item in context['table1']:
+        total_positive_balance += item.get('total_positive_balance', Decimal('0'))
+        total_negative_balance += item.get('total_negative_balance', Decimal('0'))
+        num_debtors += item.get('num_debtors', 0)
+        num_creditors += item.get('num_creditors', 0)
+        total_positive_barmali += item.get('total_positive_bar_mali', Decimal('0'))
+        total_nagative_barmali += item.get('total_nagative_bar_mali', Decimal('0'))
+
+        if item.get('max_overall_debt') is not None:
+            if max_overall_debt is None or item['max_overall_debt'] > max_overall_debt:
+                max_overall_debt = item['max_overall_debt']
+
+        if item.get('min_overall_credit') is not None:
+            if min_overall_credit is None or item['min_overall_credit'] < min_overall_credit:
+                min_overall_credit = item['min_overall_credit']
+
+    # --------------------------------------------------------------------------
+    # حفظ منطق تقسیم بر 10
+    # --------------------------------------------------------------------------
+    is_kol = km == 'k'
+    master_data = {
+        'total_positive_balance': total_positive_balance / Decimal(10) ,
+        'total_negative_balance': (total_negative_balance / Decimal(10)) ,
+        'total_balance': ((total_positive_balance + total_negative_balance) / Decimal(10)) ,
+        'num_debtors': num_debtors,
+        'num_creditors': num_creditors,
+        'max_overall_debt': max_overall_debt / Decimal(10),
+        'min_overall_credit': min_overall_credit / Decimal( 10) ,
+        'total_positive_barmali': total_positive_barmali / Decimal(10),
+        'total_nagative_barmali': total_nagative_barmali / Decimal(10),
+    }
+
+    context['master_data'] = master_data
+    balance = master_data.get('total_balance', Decimal('0'))
+    context['abs_balance'] = abs(balance)
+    context['is_negative'] = balance < 0
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+
+    return render(request, 'ashkas-total.html', context)
+
