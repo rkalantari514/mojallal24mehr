@@ -3,7 +3,7 @@
 {% load static %}
 {% block content %}
     {% load jalali_tags %}
-
+    {% load custom_filters %}
     <style>
         .circle-progress .in .text {
             position: absolute;
@@ -103,7 +103,7 @@
                             <div class="float-right text-right">
                                 <p class="card-text text-dark">مجموع بدهکارها</p>
                                 <h4>
-                                        {{ master_data.total_negative_balance|intword }} تومان
+                                    {{ master_data.total_negative_balance|custom_intword }}
                                 </h4>
                             </div>
                         </div>
@@ -123,7 +123,7 @@
                                 <p class="card-text text-dark"> تعداد بدهکار ها </p>
                                 <h4>
 
-                                        {{ master_data.num_creditors|intcomma:False }} مورد
+                                    {{ master_data.num_creditors|intcomma:False }} مورد
                                 </h4>
                             </div>
                         </div>
@@ -142,7 +142,7 @@
                             <div class="float-right text-right">
                                 <p class="card-text text-dark"> بیشترین بدهی</p>
                                 <h4>
-                                        {{ master_data.min_overall_credit|intword }} تومان
+                                    {{ master_data.min_overall_credit|custom_intword }}
                                 </h4>
                             </div>
                         </div>
@@ -161,7 +161,7 @@
                             <div class="float-right text-right">
                                 <p class="card-text text-dark">بار مالی بدهکاران</p>
                                 <h4>
-                                        {{ master_data.total_nagative_barmali|intword }} تومان
+                                    {{ master_data.total_nagative_barmali|custom_intword }}
                                 </h4>
                             </div>
                         </div>
@@ -182,7 +182,7 @@
                             <div class="float-right text-right">
                                 <p class="card-text text-dark">مجموع بستانکارها</p>
                                 <h4>
-                                        {{ master_data.total_positive_balance|intword }} تومان
+                                    {{ master_data.total_positive_balance|custom_intword }}
                                 </h4>
                             </div>
                         </div>
@@ -202,7 +202,7 @@
                                 <p class="card-text text-dark"> تعداد بستانکارها </p>
                                 <h4>
 
-                                        {{ master_data.num_debtors|intcomma:False }} مورد
+                                    {{ master_data.num_debtors|intcomma:False }} مورد
                                 </h4>
                             </div>
                         </div>
@@ -221,7 +221,7 @@
                             <div class="float-right text-right">
                                 <p class="card-text text-dark"> بیشترین طلب</p>
                                 <h4>
-                                        {{ master_data.max_overall_debt|intword }} تومان
+                                    {{ master_data.max_overall_debt|custom_intword }}
                                 </h4>
                             </div>
                         </div>
@@ -240,7 +240,7 @@
                             <div class="float-right text-right">
                                 <p class="card-text text-dark"> کمک مالی بستانکاران</p>
                                 <h4>
-                                        {{ master_data.total_positive_barmali|intword }} تومان
+                                    {{ master_data.total_positive_barmali|custom_intword }}
                                 </h4>
                             </div>
                         </div>
@@ -261,8 +261,8 @@
                             </div>
                             <div class="float-right text-right">
                                 <p class="card-text text-dark">بالانس کلی</p>
-                                <h4 style="direction: ltr">
-                                        {{ master_data.total_balance|intword }} تومان
+                                <h4>
+                                    {{ master_data.total_balance|custom_intword }}
                                 </h4>
                             </div>
                         </div>
@@ -327,33 +327,35 @@
                                                 data-sortable="true" data-sorter="numericOnly"
                                                 data-footer-formatter="priceFormatter">مجموع بدهکاری
                                             </th>
-{                                            <th data-field="total_positive_bar_mali" class="card-text text-center"
+                                            {
+                                            <th data-field="total_positive_bar_mali" class="card-text text-center"
                                                 data-sortable="true" data-sorter="numericOnly"
                                                 data-footer-formatter="priceFormatter">مجموع بار مالی بستانکار
                                             </th>
-{                                            <th data-field="total_negative_bar_mali" class="card-text text-center"
+                                            {
+                                            <th data-field="total_negative_bar_mali" class="card-text text-center"
                                                 data-sortable="true" data-sorter="numericOnly"
                                                 data-footer-formatter="priceFormatter">مجموع بار مالی بدهکار
                                             </th>
-{% if is_kol %}
-                                            <th data-field="num_debtors" class="card-text text-center"
-                                                data-sortable="true" data-sorter="numericOnly"
-                                                data-footer-formatter="priceFormatter">تعداد بستانکاران
-                                            </th>
-                                            <th data-field="num_creditors" class="card-text text-center"
-                                                data-sortable="true" data-sorter="numericOnly"
-                                                data-footer-formatter="priceFormatter">تعداد بدهکاران
-                                            </th>
-                                            <th data-field="max_overall_debt" class="card-text text-center"
-                                                data-sortable="true" data-sorter="numericOnly">بیشترین طلب یک
-                                                بستانکار
-                                            </th>
-                                            <th data-field="min_overall_credit" class="card-text text-center"
-                                                data-sortable="true" data-sorter="numericOnly"
-                                            >بیشترین بدهی یک بدهکار
-                                            </th>
+                                            {% if is_kol %}
+                                                <th data-field="num_debtors" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">تعداد بستانکاران
+                                                </th>
+                                                <th data-field="num_creditors" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">تعداد بدهکاران
+                                                </th>
+                                                <th data-field="max_overall_debt" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly">بیشترین طلب یک
+                                                    بستانکار
+                                                </th>
+                                                <th data-field="min_overall_credit" class="card-text text-center"
+                                                    data-sortable="true" data-sorter="numericOnly"
+                                                >بیشترین بدهی یک بدهکار
+                                                </th>
 
-{% endif %}
+                                            {% endif %}
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -361,36 +363,36 @@
                                             <tr>
                                                 <td>
                                                     {% if is_kol %}
-                                                    <a href="/jariashkhas/m/{{ item.code }}"
-                                                       target="_blank">
-                                                        <button type="button"
-                                                                class="btn btn-sm btn-success btn-fixed-width">
-                                                            <i class="ti-list pr-1"></i> جزئیات
-                                                        </button>
-                                                    </a>
-                                                    <a href="/balance-sheet-tafsili/{{ acc_year }}/103/{{ item.code }}/"
-                                                       target="_blank">
-                                                        <button type="button"
-                                                                class="btn btn-sm btn-primary btn-fixed-width">
-                                                            <i class="ti-wallet pr-1"></i> تراز {{ acc_year }}
-                                                        </button>
-                                                    </a>
+                                                        <a href="/jariashkhas/m/{{ item.code }}"
+                                                           target="_blank">
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-success btn-fixed-width">
+                                                                <i class="ti-list pr-1"></i> جزئیات
+                                                            </button>
+                                                        </a>
+                                                        <a href="/balance-sheet-tafsili/{{ acc_year }}/103/{{ item.code }}/"
+                                                           target="_blank">
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-primary btn-fixed-width">
+                                                                <i class="ti-wallet pr-1"></i> تراز {{ acc_year }}
+                                                            </button>
+                                                        </a>
                                                     {% else %}
-                                                      <a href="/acc/jariashkhas/moshtari/{{ item.code }}"
-                                                       target="_blank">
-                                                        <button type="button"
-                                                                class="btn btn-sm btn-success btn-fixed-width">
-                                                            <i class="ti-user pr-1"></i>حساب شخص
-                                                        </button>
-                                                    </a>
+                                                        <a href="/acc/jariashkhas/moshtari/{{ item.code }}"
+                                                           target="_blank">
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-success btn-fixed-width">
+                                                                <i class="ti-user pr-1"></i>حساب شخص
+                                                            </button>
+                                                        </a>
 
-                                                    <a href="/sanad_total/{{ acc_year }}/103/{{ m_code }}/{{ item.code }}/"
-                                                       target="_blank">
-                                                        <button type="button"
-                                                                class="btn btn-sm btn-primary btn-fixed-width">
-                                                            <i class="ti-wallet pr-1"></i> اسناد {{ acc_year }}
-                                                        </button>
-                                                    </a>
+                                                        <a href="/sanad_total/{{ acc_year }}/103/{{ m_code }}/{{ item.code }}/"
+                                                           target="_blank">
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-primary btn-fixed-width">
+                                                                <i class="ti-wallet pr-1"></i> اسناد {{ acc_year }}
+                                                            </button>
+                                                        </a>
 
 
                                                     {% endif %}
@@ -408,13 +410,13 @@
                                                     style="direction: ltr">{{ item.total_nagative_bar_mali|floatformat:0|intcomma:False }}</td>
                                                 {% if is_kol %}
 
-                                                <td class="card-text text-center">{{ item.num_debtors }}</td>
-                                                <td class="card-text text-center">{{ item.num_creditors }}</td>
-                                                <td class="card-text text-center"
-                                                    style="direction: ltr">{{ item.max_overall_debt|floatformat:0|intcomma:False }}</td>
-                                                <td class="card-text text-center"
-                                                    style="direction: ltr">{{ item.min_overall_credit|floatformat:0|intcomma:False }}</td>
-{% endif %}
+                                                    <td class="card-text text-center">{{ item.num_debtors }}</td>
+                                                    <td class="card-text text-center">{{ item.num_creditors }}</td>
+                                                    <td class="card-text text-center"
+                                                        style="direction: ltr">{{ item.max_overall_debt|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center"
+                                                        style="direction: ltr">{{ item.min_overall_credit|floatformat:0|intcomma:False }}</td>
+                                                {% endif %}
 
                                             </tr>
                                         {% endfor %}

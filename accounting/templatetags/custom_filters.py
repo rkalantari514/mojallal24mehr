@@ -1,8 +1,10 @@
 # your_app/templatetags/custom_filters.py
 
 from django import template
+from django.contrib import humanize
 from django.utils import timezone
 import locale
+
 
 register = template.Library()
 
@@ -78,3 +80,46 @@ def index(List, i):
         return List[i]
     except:
         return ''
+
+
+
+
+
+
+from django import template
+from django.template.defaultfilters import floatformat
+
+register = template.Library()
+
+@register.filter
+def custom_intword(value):
+    try:
+        value = int(value)
+    except (TypeError, ValueError):
+        return value
+
+    sign = '-' if value < 0 else '+'
+    abs_value = abs(value)
+
+    # اگر عدد کمتر از ۱ میلیون باشد، همان مقدار را برمی‌گردانیم
+    if abs_value < 1_000_000:
+        return str(value)
+
+    units = [
+        (10**9, 'میلیارد'),
+        (10**6, 'میلیون'),
+        (10**3, 'هزار'),
+    ]
+
+    def round_one_decimal(v):
+        return round(v, 1)
+
+    for multiplier, unit_name in units:
+        if abs_value >= multiplier:
+            number = abs_value / multiplier
+            rounded_number = round_one_decimal(number)
+            # ساختن رشته نهایی با علامت منفی در ابتدای عدد
+            return f"{floatformat(rounded_number, 1)} {sign} {unit_name} تومان "
+
+    # اگر هیچکدام از شرط‌ها برقرار نشد، عدد اولیه را برمی‌گردانیم
+    return str(value)
