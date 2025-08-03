@@ -305,7 +305,7 @@
                                                 </th>
 
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-field="last_tracks" data-sorter="numericOnly">آخرین پیگیری
+                                                    data-field="last_tracks" data-sorter="numericOnly">آخرین پیگیری(روز پیش)
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-field="reminderoverdo">یاد آور فراموش شده
@@ -354,7 +354,7 @@
                                                     <td class="card-text text-center">{{ p.from_last_daryaft|default_if_none:'' }}</td>
                                                     {% if p.last_tracks.created_at %}
                                                         <td class="card-text text-center">
-                                                            {{ p.last_tracks.created_at|abs_days_diff:today }} روز پیش
+                                                            {{ p.last_tracks.created_at|abs_days_diff:today }}
                                                         </td>
                                                     {% else %}
                                                         <td></td>
