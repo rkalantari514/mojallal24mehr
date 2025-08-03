@@ -1888,10 +1888,12 @@ def LoanTotal(request, status, *args, **kwargs):
         # گرفتن مقدار from_last_daryaft
         try:
             from_last_daryaft = BedehiMoshtari.objects.filter(person=p).last().from_last_daryaft
+            if from_last_daryaft is None:
+                from_last_daryaft = 0
         except:
             from_last_daryaft = 0
 
-        # بروزرسانی خصیصه‌های شخص
+            # بروزرسانی خصیصه‌های شخص
         p.mandeh = total_mandeh
         p.last_tracks = last_tracks
         p.loan_count = count
