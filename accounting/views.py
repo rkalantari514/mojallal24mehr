@@ -1909,7 +1909,7 @@ def LoanTotal(request, status, *args, **kwargs):
 
         # جمع‌بندی مقادیر کل
         total_cost += cost
-        total_mtday += mtday / 10000000
+        total_mtday += mtday
 
         # بروزرسانی کمینه و بیشینه‌ها
         min_mandeh = min(min_mandeh, p.mandeh)
@@ -1937,6 +1937,8 @@ def LoanTotal(request, status, *args, **kwargs):
     if updated_objects:
         Tracking.objects.bulk_update(updated_objects, ['status_code'])
 
+    # total_mtday = Decimal(total_mtday) / Decimal(30) * monthly_rate / Decimal(100) if total_mtday else Decimal('0')
+
     # ساختن کانتکست نهایی برای قالب
     context = {
         'title': title,
@@ -1944,8 +1946,8 @@ def LoanTotal(request, status, *args, **kwargs):
         'today': today,
         'person': persons,
         "total_count": persons.count(),
-        "total_cost": total_cost / 10000000000,
-        "total_mtday": total_mtday / 1000,
+        "total_cost": (-total_cost if total_cost == 'soon' else total_cost)/10,
+        "total_mtday": (-total_mtday if total_mtday == 'soon' else total_mtday)/10
         'status': status,
         'min_mandeh': min_mandeh,
         'max_mandeh': max_mandeh,

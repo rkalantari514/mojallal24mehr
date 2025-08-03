@@ -125,7 +125,7 @@
                                     {% if status == 'soon' %}
                                         <p class="card-text text-dark">جمع اقساط دارای تعجیل</p>
                                     {% endif %}
-                                    <h4>{{ total_cost|floatformat:3|intcomma:False }} میلیارد تومان</h4>
+                                    <h4>{{ total_cost|custom_intword }} </h4>
                                 </div>
                             </div>
                         </div>
@@ -142,12 +142,12 @@
                                 </div>
                                 <div class="float-right text-right">
                                     {% if status == 'overdue' %}
-                                        <p class="card-text text-dark"> خواب تعویق </p>
+                                        <p class="card-text text-dark"> بار مالی تعویق </p>
                                     {% endif %}
                                     {% if status == 'soon' %}
-                                        <p class="card-text text-dark"> معادل تعجیل </p>
+                                        <p class="card-text text-dark"> بار مالی تعجیل </p>
                                     {% endif %}
-                                    <h4>{{ total_mtday|floatformat:0|intcomma:False }} میلیارد تومان روز</h4>
+                                    <h4>{{ total_mtday|custom_intword }}</h4>
                                 </div>
                             </div>
                         </div>
