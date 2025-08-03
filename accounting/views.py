@@ -1579,7 +1579,7 @@ from django.db.models import OuterRef, Subquery
 
 
 @login_required(login_url='/login')
-def LoanTotal(request, status, *args, **kwargs):
+def LoanTotal1(request, status, *args, **kwargs):
     name = 'اقساط معوق'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
@@ -1808,12 +1808,166 @@ def LoanTotal(request, status, *args, **kwargs):
     return render(request, 'loan-total.html', context)
 
 
-# برای api
-from django.http import JsonResponse
+@login_required(login_url='/login')
+def LoanTotal(request, status, *args, **kwargs):
+    from django.utils import timezone
+    import time
 
-from django.http import JsonResponse
-from django.db.models import ExpressionWrapper, F, IntegerField, Sum
+    # بررسی مجوز دسترسی
+    name = 'اقساط معوق'
+    result = page_permision(request, name)
+    if result:
+        return result
+
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page=' اقساط معوق', code=0)
+
+    start_time = time.time()
+    today = timezone.now().date()
+
+    # تعیین شرایط فیلتر بر اساس وضعیت
+    if status == 'overdue':
+        title = 'گزارش اقساط معوق'
+        loans_qs = LoanDetil.objects.filter(complete_percent__lt=1, date__lt=today)
+    elif status == 'soon':
+        title = 'گزارش اقساط دارای تعجیل'
+        loans_qs = LoanDetil.objects.filter(complete_percent__gt=0, date__gte=today)
+    else:
+        loans_qs = LoanDetil.objects.none()
+
+    # گرفتن لیست افراد بدون تکرار
+    persons = Person.objects.filter(pk__in=loans_qs.values('loan__person__pk')).distinct()
+
+    total_cost = 0
+    total_mtday = 0
+
+    # گرفتن لیست افراد بدون تکرار
+    persons = Person.objects.filter(pk__in=loans_qs.values('loan__person__pk')).distinct()
+
+    total_cost = 0
+    total_mtday = 0
+    min_mandeh = float('inf')
+    max_mandeh = float('-inf')
+    min_cost = float('inf')
+    max_cost = float('-inf')
+    min_from_last_daryaft = float('inf')
+    max_from_last_daryaft = float('-inf')
+
+    # حلقه روی هر شخص برای محاسبات و بروزرسانی
+    for p in persons:
+        l_p = loans_qs.filter(loan__person=p)
+
+        # تعیین تاریخ اولیه
+        p.f_date = l_p.first().tarikh if l_p.exists() else "-"
+
+        count = 0
+        cost = 0
+        from_last_daryaft = 0
+        mtday = 0
+
+        # گرفتن بدهی مشتری
+        try:
+            total_mandeh = BedehiMoshtari.objects.filter(person=p).last().total_mandeh
+        except:
+            total_mandeh = 0
+
+        last_tracks = Tracking.objects.filter(customer__person=p).last()
+
+        for l in l_p:
+            if (status == 'overdue' and l.date < today) or (status == 'soon' and l.date > today):
+                if status == 'overdue':
+                    count += (1 - l.complete_percent)
+                    cost += (1 - l.complete_percent) * float(l.cost)
+                    mtday += ((1 - l.complete_percent) * float(l.cost)) * int((today - l.date).days)
+                else:
+                    count += l.complete_percent
+                    cost += l.complete_percent * float(l.cost)
+                    mtday += (l.complete_percent * float(l.cost)) * int((today - l.date).days)
+
+        # گرفتن مقدار from_last_daryaft
+        try:
+            from_last_daryaft = BedehiMoshtari.objects.filter(person=p).last().from_last_daryaft
+        except:
+            from_last_daryaft = 0
+
+        # بروزرسانی خصیصه‌های شخص
+        p.mandeh = total_mandeh
+        p.last_tracks = last_tracks
+        p.loan_count = count
+        p.cost = cost
+        p.mtday = -mtday / 10000000 if status == 'soon' else mtday / 10000000
+        p.from_last_daryaft = from_last_daryaft
+        p.save()
+
+        # جمع‌بندی مقادیر کل
+        total_cost += cost
+        total_mtday += mtday / 10000000
+
+        # بروزرسانی کمینه و بیشینه‌ها
+        min_mandeh = min(min_mandeh, p.mandeh)
+        max_mandeh = max(max_mandeh, p.mandeh)
+        min_cost = min(min_cost, cost)
+        max_cost = max(max_cost, cost)
+        min_from_last_daryaft = min(min_from_last_daryaft, from_last_daryaft)
+        max_from_last_daryaft = max(max_from_last_daryaft, from_last_daryaft)
+
+    # بروزرسانی وضعیت پیامک‌ها
+    tracking_qs = Tracking.objects.filter(
+        message_id__isnull=False
+    ).exclude(status_code__in=[2, 3, 4])
+
+    updated_objects = []
+    for t in tracking_qs:
+        try:
+            status_code = check_sms_status(t.message_id)
+            if status_code is not None:
+                t.status_code = status_code
+                updated_objects.append(t)
+        except Exception as e:
+            print(f"خطا در پردازش {t.id}: {e}")
+
+    if updated_objects:
+        Tracking.objects.bulk_update(updated_objects, ['status_code'])
+
+    # ساختن کانتکست نهایی برای قالب
+    context = {
+        'title': title,
+        'user': user,
+        'today': today,
+        'person': persons,
+        "total_count": persons.count(),
+        "total_cost": total_cost / 10000000000,
+        "total_mtday": total_mtday / 1000,
+        'status': status,
+        'min_mandeh': min_mandeh,
+        'max_mandeh': max_mandeh,
+        'min_cost': min_cost,
+        'max_cost': max_cost,
+        'min_from_last_daryaft': min_from_last_daryaft,
+        'max_from_last_daryaft': max_from_last_daryaft,
+    }
+
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+    return render(request, 'loan-total.html', context)
+
+
+
+
+
+
+
+from django.db.models import Sum, F, Q, Case, When, Value, IntegerField, FloatField, ExpressionWrapper, Min, Max
 from django.utils import timezone
+from datetime import timedelta
+import time
+
+
+
+
+
+
+
 
 
 def loan_summary_api(request):
