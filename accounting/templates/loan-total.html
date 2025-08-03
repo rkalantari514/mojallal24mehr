@@ -162,14 +162,14 @@
                             <div class="card-body">
                                 <div class="table-responsive mt-15 ">
                                     {% if status == 'overdue' %}
-                                        <h6 class="card-title pb-0 border-0">خواب تعویق: <span id="total-mandah"
+                                        <h6 class="card-title pb-0 border-0">بار مالی تعویق: <span id="total-mandah"
                                                                                                class="text-primary"></span>
-                                            میلیون تومان روز </h6>
+                                            ریال</h6>
                                     {% endif %}
                                     {% if status == 'soon' %}
-                                        <h6 class="card-title pb-0 border-0">معادل تعجیل: <span id="total-mandah"
+                                        <h6 class="card-title pb-0 border-0">بار مالی تعجیل: <span id="total-mandah"
                                                                                                 class="text-primary"></span>
-                                            میلیون تومان روز </h6>
+                                            ریال </h6>
                                     {% endif %}
 
                                     <div class="card p-3 mb-3">
@@ -317,10 +317,10 @@
                                                     data-sorter="numericOnly" data-footer-formatter="priceFormatter"
                                                     data-field="mtday">
                                                     {% if status == 'overdue' %}
-                                                        خواب تعویق (میلیون تومان روز)
+                                                        بار مالی تعویق
                                                     {% endif %}
                                                     {% if status == 'soon' %}
-                                                        معادل تعجیل (میلیون تومان روز)
+                                                        بار مالی تعجیل
                                                     {% endif %}
                                                 </th>
                                             </tr>

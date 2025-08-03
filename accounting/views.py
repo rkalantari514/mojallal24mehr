@@ -1893,12 +1893,17 @@ def LoanTotal(request, status, *args, **kwargs):
         except:
             from_last_daryaft = 0
 
+        acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+        master_info = MasterInfo.objects.filter(is_active=True).last()
+        monthly_rate = master_info.monthly_rate if master_info and master_info.monthly_rate else Decimal('0')
+        mtday=Decimal(mtday) / Decimal(30) * monthly_rate / Decimal(100) if mtday else Decimal('0')
+
             # بروزرسانی خصیصه‌های شخص
         p.mandeh = total_mandeh
         p.last_tracks = last_tracks
         p.loan_count = count
         p.cost = cost
-        p.mtday = -mtday / 10000000 if status == 'soon' else mtday / 10000000
+        p.mtday = -mtday if status == 'soon' else mtday
         p.from_last_daryaft = from_last_daryaft
         p.save()
 
