@@ -397,9 +397,126 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/wnumb/1.2.0/wNumb.min.js"></script>
 
+{#<script>#}
+{#    document.addEventListener('DOMContentLoaded', function () {#}
+{#        const $table = $('#table');#}
+{##}
+{#        // 1. دریافت مقادیر حداقل و حداکثر از ویو (جنگو)#}
+{#        const mandehLimits = {#}
+{#            min: {{ min_mandeh|default:0 }},#}
+{#            max: {{ max_mandeh|default:1000 }}#}
+{#        };#}
+{#        const delaycostLimits = {#}
+{#            min: {{ min_cost|default:0 }},#}
+{#            max: {{ max_cost|default:1000 }}#}
+{#        };#}
+{#        const lastDaryaftLimits = {#}
+{#            min: {{ min_from_last_daryaft|default:0 }},#}
+{#            max: {{ max_from_last_daryaft|default:1000 }}#}
+{#        };#}
+{##}
+{#        // 2. تابع کمکی برای ایجاد اسلایدر#}
+{#        function createSlider(elementId, limits, format, minId, maxId) {#}
+{#            const element = document.getElementById(elementId);#}
+{#            if (element) {#}
+{#                noUiSlider.create(element, {#}
+{#                    start: [limits.min, limits.max],#}
+{#                    connect: true,#}
+{#                    range: {'min': limits.min, 'max': limits.max},#}
+{#                    tooltips: true,#}
+{#                    format: format#}
+{#                });#}
+{#                element.noUiSlider.on('update', function (values, handle) {#}
+{#                    document.getElementById(minId).innerHTML = values[0];#}
+{#                    document.getElementById(maxId).innerHTML = values[1];#}
+{#                });#}
+{#                return element;#}
+{#            }#}
+{#            return null;#}
+{#        }#}
+{##}
+{#        // 3. ایجاد اسلایدرها با استفاده از مقادیر از ویو#}
+{#        const mandehSlider = createSlider('mandeh-slider', mandehLimits, wNumb({#}
+{#            decimals: 0,#}
+{#            thousand: ','#}
+{#        }), 'mandeh-min', 'mandeh-max');#}
+{#        const delaycostSlider = createSlider('delaycost-slider', delaycostLimits, wNumb({#}
+{#            decimals: 0,#}
+{#            thousand: ','#}
+{#        }), 'delaycost-min', 'delaycost-max');#}
+{#        const lastDaryaftSlider = createSlider('last-daryaft-slider', lastDaryaftLimits, wNumb({#}
+{#            decimals: 0#}
+{#        }), 'last-daryaft-min', 'last-daryaft-max');#}
+{##}
+{#        // 4. تعریف تابع فیلتر سفارشی#}
+{#        function customRangeFilter(item) {#}
+{#            const mandehRange = mandehSlider ? mandehSlider.noUiSlider.get().map(v => parseFloat(v.toString().replace(/,/g, ''))) : [mandehLimits.min, mandehLimits.max];#}
+{#            const delaycostRange = delaycostSlider ? delaycostSlider.noUiSlider.get().map(v => parseFloat(v.toString().replace(/,/g, ''))) : [delaycostLimits.min, delaycostLimits.max];#}
+{#            const lastDaryaftRange = lastDaryaftSlider ? lastDaryaftSlider.noUiSlider.get().map(v => parseFloat(v.toString().replace(/,/g, ''))) : [lastDaryaftLimits.min, lastDaryaftLimits.max];#}
+{##}
+{#            const mandeh = parseFloat(item.mandeh?.toString().replace(/,/g, '')) || 0;#}
+{#            const delaycost = parseFloat(item.cost?.toString().replace(/,/g, '')) || 0;#}
+{#            const lastDaryaft = parseFloat(item.from_last_daryaft) || 0;#}
+{##}
+{#            const mandehPass = isNaN(mandeh) || (mandeh >= mandehRange[0] && mandeh <= mandehRange[1]);#}
+{#            const delaycostPass = isNaN(delaycost) || (delaycost >= delaycostRange[0] && delaycost <= delaycostRange[1]);#}
+{#            const lastDaryaftPass = isNaN(lastDaryaft) || (lastDaryaft >= lastDaryaftRange[0] && lastDaryaft <= lastDaryaftRange[1]);#}
+{##}
+{#            return mandehPass && delaycostPass && lastDaryaftPass;#}
+{#        }#}
+{##}
+{#        // 5. اتصال دکمه فیلتر به تابع با رویکرد جدید#}
+{#        document.getElementById('apply-filter').addEventListener('click', function () {#}
+{#            console.log('Filter button clicked. Filtering data manually...');#}
+{##}
+{#            // دریافت تمام داده‌های جدول#}
+{#            const allData = $table.bootstrapTable('getData');#}
+{##}
+{#            // فیلتر کردن داده‌ها با تابع سفارشی#}
+{#            const filteredData = allData.filter(customRangeFilter);#}
+{##}
+{#            // Console.log برای بررسی تعداد ردیف های فیلتر شده#}
+{#            console.log(`Found ${filteredData.length} items matching the filter.`);#}
+{##}
+{#            // بارگذاری مجدد جدول با داده‌های فیلتر شده#}
+{#            $table.bootstrapTable('load', filteredData);#}
+{#        });#}
+{#    });#}
+{#</script>#}
+
 <script>
+    var $table = $('#table');
+    let originalData = []; // متغیر برای نگهداری داده‌های کامل و اصلی جدول
+    var totalMandah = 0; // متغیر برای ذخیره مجموع مانده
+
     document.addEventListener('DOMContentLoaded', function () {
-        const $table = $('#table');
+        // ابتدا جدول را بدون هیچ فیلتری بارگذاری کنید
+        $table.bootstrapTable();
+
+        // **مهم:** داده‌های اصلی را بلافاصله پس از بارگذاری جدول ذخیره کنید
+        originalData = $table.bootstrapTable('getData');
+        console.log('Original data loaded. Total items:', originalData.length);
+
+        // تابع قیمت‌دهی
+        function priceFormatter(data) {
+            var field = this.field;
+            var result = data.map(function (row) {
+                var valueString = row[field].toString().replace(/,/g, '');
+                var value = parseFloat(valueString);
+                return isNaN(value) ? 0 : value;
+            }).reduce(function (sum, i) {
+                return sum + i;
+            }, 0);
+            totalMandah = result;
+            updateTotalMandah();
+            return result.toLocaleString('fa-IR');
+        }
+
+        function updateTotalMandah() {
+            $('#total-mandah').text(totalMandah.toLocaleString('fa-IR'));
+        }
+
+        updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده هنگام بارگذاری جدول
 
         // 1. دریافت مقادیر حداقل و حداکثر از ویو (جنگو)
         const mandehLimits = {
@@ -450,17 +567,14 @@
 
         // 4. تعریف تابع فیلتر سفارشی
         function customRangeFilter(item) {
-            // استفاده از مقادیر اسلایدر
             const mandehRange = mandehSlider ? mandehSlider.noUiSlider.get().map(v => parseFloat(v.toString().replace(/,/g, ''))) : [mandehLimits.min, mandehLimits.max];
             const delaycostRange = delaycostSlider ? delaycostSlider.noUiSlider.get().map(v => parseFloat(v.toString().replace(/,/g, ''))) : [delaycostLimits.min, delaycostLimits.max];
             const lastDaryaftRange = lastDaryaftSlider ? lastDaryaftSlider.noUiSlider.get().map(v => parseFloat(v.toString().replace(/,/g, ''))) : [lastDaryaftLimits.min, lastDaryaftLimits.max];
 
-            // استخراج مقادیر از آیتم جدول
             const mandeh = parseFloat(item.mandeh?.toString().replace(/,/g, '')) || 0;
             const delaycost = parseFloat(item.cost?.toString().replace(/,/g, '')) || 0;
             const lastDaryaft = parseFloat(item.from_last_daryaft) || 0;
 
-            // اعمال فیلتر
             const mandehPass = isNaN(mandeh) || (mandeh >= mandehRange[0] && mandeh <= mandehRange[1]);
             const delaycostPass = isNaN(delaycost) || (delaycost >= delaycostRange[0] && delaycost <= delaycostRange[1]);
             const lastDaryaftPass = isNaN(lastDaryaft) || (lastDaryaft >= lastDaryaftRange[0] && lastDaryaft <= lastDaryaftRange[1]);
@@ -470,7 +584,15 @@
 
         // 5. اتصال دکمه فیلتر به تابع
         document.getElementById('apply-filter').addEventListener('click', function () {
-            $table.bootstrapTable('filterBy', {}, {'custom': customRangeFilter});
+            console.log('Filter button clicked. Filtering from original data...');
+
+            // فیلتر کردن داده‌ها با تابع سفارشی روی داده‌های اصلی
+            const filteredData = originalData.filter(customRangeFilter);
+
+            console.log(`Found ${filteredData.length} items matching the filter.`);
+
+            // بارگذاری مجدد جدول با داده‌های فیلتر شده
+            $table.bootstrapTable('load', filteredData);
         });
     });
 </script>
