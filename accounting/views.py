@@ -1947,7 +1947,7 @@ def LoanTotal(request, status, *args, **kwargs):
         'person': persons,
         "total_count": persons.count(),
         "total_cost": (-total_cost if total_cost == 'soon' else total_cost)/10,
-        "total_mtday": (-total_mtday if total_mtday == 'soon' else total_mtday)/10
+        "total_mtday": (-total_mtday if total_mtday == 'soon' else total_mtday)/10,
         'status': status,
         'min_mandeh': min_mandeh,
         'max_mandeh': max_mandeh,
