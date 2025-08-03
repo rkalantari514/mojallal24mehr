@@ -1608,6 +1608,12 @@ def LoanTotal(request, status, *args, **kwargs):
         total_mtday=0
         print(f"stage 2 : {time.time() - start_time2:.2f} ثانیه")
         start_time2 = time.time()
+        min_mandeh=0
+        max_mandeh=0
+        min_cost=0
+        max_cost=0
+        min_from_last_daryaft=0
+        max_from_last_daryaft=0
         for p in person:
             l_p = loans.filter(loan__person=p)
             try:
@@ -1641,12 +1647,38 @@ def LoanTotal(request, status, *args, **kwargs):
             total_cost+=cost
             total_mtday+= mtday*1/10000000
 
+
+            if p.mandeh > max_mandeh:
+                max_mandeh = p.mandeh
+
+            if p.mandeh < min_mandeh:
+                min_mandeh = p.mandeh
+
+            if cost > max_cost:
+                max_cost = cost
+
+            if cost < min_cost:
+                min_cost = cost
+
+            if from_last_daryaft > max_from_last_daryaft:
+                max_from_last_daryaft = from_last_daryaft
+
+            if from_last_daryaft < min_from_last_daryaft:
+                min_from_last_daryaft = from_last_daryaft
+
+
     if status == 'soon':
         title = 'گزارش اقساط دارای تعجیل'
         loans = LoanDetil.objects.filter(complete_percent__gt=0, date__gte=today)
         person = Person.objects.filter(pk__in=loans.values('loan__person__pk')).distinct()
         total_cost=0
         total_mtday=0
+        min_mandeh=0
+        max_mandeh=0
+        min_cost=0
+        max_cost=0
+        min_from_last_daryaft=0
+        max_from_last_daryaft=0
         for p in person:
             l_p = loans.filter(loan__person=p)
             try:
@@ -1680,6 +1712,24 @@ def LoanTotal(request, status, *args, **kwargs):
             p.save()
             total_cost += cost
             total_mtday += mtday * 1 / 10000000
+
+            if p.mandeh > max_mandeh:
+                max_mandeh = p.mandeh
+
+            if p.mandeh < min_mandeh:
+                min_mandeh = p.mandeh
+
+            if cost > max_cost:
+                max_cost = cost
+
+            if cost < min_cost:
+                min_cost = cost
+
+            if from_last_daryaft > max_from_last_daryaft:
+                max_from_last_daryaft = from_last_daryaft
+
+            if from_last_daryaft < min_from_last_daryaft:
+                min_from_last_daryaft = from_last_daryaft
 
     print(f"stage 3 : {time.time() - start_time2:.2f} ثانیه")
     start_time2 = time.time()
@@ -1728,6 +1778,9 @@ def LoanTotal(request, status, *args, **kwargs):
     if updated_objects:
         Tracking.objects.bulk_update(updated_objects, ["status_code"])
 
+
+
+
     context = {
         'title': title,
         'user': user,
@@ -1738,6 +1791,15 @@ def LoanTotal(request, status, *args, **kwargs):
         "total_cost": total_cost/ 10000000000,
         "total_mtday": total_mtday/ 1000,
         'status': status,
+
+        'min_mandeh': min_mandeh,
+        'max_mandeh': max_mandeh,
+        'min_cost': min_cost,
+        'max_cost': max_cost,
+        'min_from_last_daryaft': min_from_last_daryaft,
+        'max_from_last_daryaft': max_from_last_daryaft,
+
+
 
     }
 

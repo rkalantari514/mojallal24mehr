@@ -67,6 +67,26 @@
     </style>
 
 
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css">
+
+    <style>
+        .noUi-connect {
+            background: #0d6efd;
+        }
+
+        .noUi-horizontal .noUi-handle {
+            width: 18px;
+            height: 18px;
+            top: -4px;
+        }
+
+        .noUi-target {
+            height: 10px;
+            border-radius: 5px;
+        }
+    </style>
+
     <div class="content-wrapper">
 
         <div class="page-title">
@@ -148,40 +168,7 @@
                         </div>
                     </div>
                 </div>
-                {#                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">#}
-                {#                    <div class="card card-statistics h-100">#}
-                {#                        <div class="card-body">#}
-                {#                            <div class="clearfix">#}
-                {#                                <div class="float-left icon-box bg-success rounded-circle">#}
-                {#    <span class="text-white">#}
-                {#    <i class="fa fa-hourglass-start highlight-icon" aria-hidden="true"></i>#}
-                {#    </span>#}
-                {#                                </div>#}
-                {#                                <div class="float-right text-right">#}
-                {#                                    <p class="card-text text-dark"> --------------- </p>#}
-                {#                                    <h4>{{ total_data.postmandeh|floatformat:0|intcomma:False }} میلیون تومان</h4>#}
-                {#                                </div>#}
-                {#                            </div>#}
-                {#                        </div>#}
-                {#                    </div>#}
-                {#                </div>#}
-                {#                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">#}
-                {#                    <div class="card card-statistics h-100">#}
-                {#                        <div class="card-body">#}
-                {#                            <div class="clearfix">#}
-                {#                                <div class="float-left icon-box bg-info rounded-circle">#}
-                {#    <span class="text-white">#}
-                {#    <i class="fa fa-percent highlight-icon" aria-hidden="true"></i>#}
-                {#    </span>#}
-                {#                                </div>#}
-                {#                                <div class="float-right text-right">#}
-                {#                                    <p class="card-text text-dark"> ------------------- </p>#}
-                {#                                    <h4>{{ total_data.ceque_ratio|floatformat:2 }}%</h4>#}
-                {#                                </div>#}
-                {#                            </div>#}
-                {#                        </div>#}
-                {#                    </div>#}
-                {#                </div>#}
+
             </div>
 
 
@@ -203,8 +190,52 @@
                                             میلیون تومان روز </h6>
                                     {% endif %}
 
+                                    <div class="card p-3 mb-3">
+                                        <h5 class="card-title">فیلترهای پیشرفته</h5>
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label for="mandeh-slider" class="form-label">محدوده مانده حساب:</label>
+                                                <div id="mandeh-slider"></div>
+                                                <div class="mt-2 text-center">
+                                                    <span id="mandeh-min">0</span> - <span id="mandeh-max">0</span>
+                                                </div>
+                                            </div>
 
+                                            <div class="col-md-4 mb-3">
+                                                {% if status == 'overdue' %}
+                                                    <label for="delaycost-slider" class="form-label">محدوده مبلغ
+                                                        معوق:</label>
+                                                    <div id="delaycost-slider"></div>
+                                                    <div class="mt-2 text-center">
+                                                        <span id="delaycost-min">0</span> - <span
+                                                            id="delaycost-max">0</span>
+                                                    </div>
+                                                {% endif %}
+                                                {% if status == 'soon' %}
+                                                    <label for="delaycost-slider" class="form-label">محدوده مبلغ
+                                                        تعجیل:</label>
+                                                    <div id="delaycost-slider"></div>
+                                                    <div class="mt-2 text-center">
+                                                        <span id="delaycost-min">0</span> - <span
+                                                            id="delaycost-max">0</span>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
 
+                                            <div class="col-md-4 mb-3">
+                                                <label for="last-daryaft-slider" class="form-label">محدوده روز از آخرین
+                                                    پرداختی:</label>
+                                                <div id="last-daryaft-slider"></div>
+                                                <div class="mt-2 text-center">
+                                                    <span id="last-daryaft-min">0</span> - <span
+                                                        id="last-daryaft-max">0</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-center">
+                                            <button id="apply-filter" class="btn btn-primary mt-3">اعمال فیلتر</button>
+                                        </div>
+                                    </div>
 
                                     <div class="table-responsive">
                                         <table id="table"
@@ -252,26 +283,27 @@
                                                 >فرد
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-field="date" data-sorter="numericOnly" data-footer-formatter="priceFormatter">مانده حساب
+                                                    data-field="date" data-sorter="numericOnly"
+                                                    data-footer-formatter="priceFormatter">مانده حساب
                                                 </th>
                                                 <th class="card-text text-center" data-sortable="true"
-                                                    data-field="mandeh" >قدیمی ترین قسط
+                                                    data-field="mandeh">قدیمی ترین قسط
                                                 </th>
                                                 {% if status == 'overdue' %}
                                                     <th class="card-text text-center" data-sortable="true"
                                                         data-sorter="numericOnly"
-                                                        data-field="persent" >تعداد معوق
+                                                        data-field="persent">تعداد معوق
                                                     </th>
                                                 {% endif %}
                                                 {% if status == 'soon' %}
                                                     <th class="card-text text-center" data-sortable="true"
                                                         data-sorter="numericOnly"
-                                                        data-field="persent" >تعداد تعجیل
+                                                        data-field="persent">تعداد تعجیل
                                                     </th>
                                                 {% endif %}
                                                 <th class="card-text text-center" data-sortable="true"
                                                     data-sorter="numericOnly"
-                                                    data-field="delaycost" data-footer-formatter="priceFormatter" >
+                                                    data-field="delaycost" data-footer-formatter="priceFormatter">
                                                     {% if status == 'overdue' %}
                                                         مبلغ معوق
                                                     {% endif %}
@@ -328,15 +360,14 @@
                                                             {{ p.name }} {{ p.lname }}
                                                         </a>
                                                     </td>
-                                                    <td class="card-text text-center" style="direction: ltr">{{ p.mandeh|floatformat:0|intcomma:False }}</td>
+                                                    <td class="card-text text-center"
+                                                        style="direction: ltr">{{ p.mandeh|floatformat:0|intcomma:False }}</td>
 
                                                     <td class="card-text text-center">{{ p.f_date }}</td>
                                                     <td class="card-text text-center">{{ p.loan_count|floatformat:2 }}</td>
                                                     <td class="card-text text-center">{{ p.cost|floatformat:0|intcomma:False }}</td>
 
-                                                    {#                                                    <td class="card-text text-center">{{ l.delaycost|floatformat:0|intcomma:False }}</td>#}
                                                     <td class="card-text text-center">{{ p.from_last_daryaft|default_if_none:'' }}</td>
-                                                    {#                                                    <td class="card-text text-center">{{ l.category_fa }}</td>#}
                                                     {% if p.last_tracks.created_at %}
                                                         <td class="card-text text-center">
                                                             {{ p.last_tracks.created_at|abs_days_diff:today }} روز پیش
@@ -364,31 +395,6 @@
                                                             {% endif %}
                                                         {% endif %}
                                                     </td>
-
-
-                                                    {#                                                    <td class="card-text text-center">#}
-                                                    {#                                                        {% if l.last_tracks.call_status == 4 %}#}
-                                                    {#                                                            <i class="fa fa-hourglass-start text-warning fa-2x"></i>#}
-                                                    {##}
-                                                    {#                                                        {% else %}#}
-                                                    {#                                                            <i class="fa {{ l.last_tracks.track_kind.kind_icon }} text-{{ l.last_tracks.track_kind.kind_color }} fa-2x"></i>#}
-                                                    {#                                                        {% endif %}#}
-                                                    {#                                                        {% if l.last_tracks.track_kind.is_call_related %}#}
-                                                    {#                                                            <span class="{{ l.last_tracks.get_call_status_details.color }}">#}
-                                                    {#                        <i class="fa {{ l.last_tracks.get_call_status_details.icon }}"></i>#}
-                                                    {#                        {{ l.last_tracks.get_call_status_details.persian }}#}
-                                                    {#                    </span>#}
-                                                    {#                                                        {% else %}#}
-                                                    {##}
-                                                    {#                                                            <span class="{{ l.last_tracks.get_status_details.color }}">#}
-                                                    {#                                                    <i class="fa {{ l.last_tracks.get_status_details.icon }}"></i>#}
-                                                    {#                                                    {{ l.last_tracks.get_status_details.persian }}#}
-                                                    {#                                                </span>#}
-                                                    {##}
-                                                    {#                                                        {% endif %}#}
-                                                    {#                                                    </td>#}
-                                                    {##}
-                                                    {#                                                    <td class="card-text text-center">{{ l.delay_days }} </td>#}
                                                     <td class="card-text text-center">{{ p.mtday|floatformat:0|intcomma:False }} </td>
                                                 </tr>
                                             {% endfor %}
@@ -396,8 +402,6 @@
                                         </table>
                                     </div>
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
@@ -422,6 +426,7 @@
 
 
 {% block date %}
+
     <script src="{% static 'js/table1/tableExport.min.js' %}"></script>
     <script src="{% static 'js/table1/bootstrap-table.min.js' %}"></script>
     <script src="{% static 'js/table1/bootstrap-table-locale-all.min.js' %}"></script>
@@ -431,8 +436,86 @@
     <script src="{% static 'js/table1/bootstrap-table-print.min.js' %}"></script>
     <script src="{% static 'js/table1/jspdf.min.js' %}"></script>
     <script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wnumb/1.2.0/wNumb.min.js"></script>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const $table = $('#table');
 
+        // 1. دریافت مقادیر حداقل و حداکثر از ویو (جنگو)
+        const mandehLimits = {
+            min: {{ min_mandeh|default:0 }},
+            max: {{ max_mandeh|default:1000 }}
+        };
+        const delaycostLimits = {
+            min: {{ min_cost|default:0 }},
+            max: {{ max_cost|default:1000 }}
+        };
+        const lastDaryaftLimits = {
+            min: {{ min_from_last_daryaft|default:0 }},
+            max: {{ max_from_last_daryaft|default:1000 }}
+        };
+
+        // 2. تابع کمکی برای ایجاد اسلایدر
+        function createSlider(elementId, limits, format, minId, maxId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                noUiSlider.create(element, {
+                    start: [limits.min, limits.max],
+                    connect: true,
+                    range: {'min': limits.min, 'max': limits.max},
+                    tooltips: true,
+                    format: format
+                });
+                element.noUiSlider.on('update', function (values, handle) {
+                    document.getElementById(minId).innerHTML = values[0];
+                    document.getElementById(maxId).innerHTML = values[1];
+                });
+                return element;
+            }
+            return null;
+        }
+
+        // 3. ایجاد اسلایدرها با استفاده از مقادیر از ویو
+        const mandehSlider = createSlider('mandeh-slider', mandehLimits, wNumb({
+            decimals: 0,
+            thousand: ','
+        }), 'mandeh-min', 'mandeh-max');
+        const delaycostSlider = createSlider('delaycost-slider', delaycostLimits, wNumb({
+            decimals: 0,
+            thousand: ','
+        }), 'delaycost-min', 'delaycost-max');
+        const lastDaryaftSlider = createSlider('last-daryaft-slider', lastDaryaftLimits, wNumb({
+            decimals: 0
+        }), 'last-daryaft-min', 'last-daryaft-max');
+
+        // 4. تعریف تابع فیلتر سفارشی
+        function customRangeFilter(item) {
+            // استفاده از مقادیر اسلایدر
+            const mandehRange = mandehSlider ? mandehSlider.noUiSlider.get().map(v => parseFloat(v.toString().replace(/,/g, ''))) : [mandehLimits.min, mandehLimits.max];
+            const delaycostRange = delaycostSlider ? delaycostSlider.noUiSlider.get().map(v => parseFloat(v.toString().replace(/,/g, ''))) : [delaycostLimits.min, delaycostLimits.max];
+            const lastDaryaftRange = lastDaryaftSlider ? lastDaryaftSlider.noUiSlider.get().map(v => parseFloat(v.toString().replace(/,/g, ''))) : [lastDaryaftLimits.min, lastDaryaftLimits.max];
+
+            // استخراج مقادیر از آیتم جدول
+            const mandeh = parseFloat(item.mandeh?.toString().replace(/,/g, '')) || 0;
+            const delaycost = parseFloat(item.cost?.toString().replace(/,/g, '')) || 0;
+            const lastDaryaft = parseFloat(item.from_last_daryaft) || 0;
+
+            // اعمال فیلتر
+            const mandehPass = isNaN(mandeh) || (mandeh >= mandehRange[0] && mandeh <= mandehRange[1]);
+            const delaycostPass = isNaN(delaycost) || (delaycost >= delaycostRange[0] && delaycost <= delaycostRange[1]);
+            const lastDaryaftPass = isNaN(lastDaryaft) || (lastDaryaft >= lastDaryaftRange[0] && lastDaryaft <= lastDaryraftRange[1]);
+
+            return mandehPass && delaycostPass && lastDaryaftPass;
+        }
+
+        // 5. اتصال دکمه فیلتر به تابع
+        document.getElementById('apply-filter').addEventListener('click', function () {
+            $table.bootstrapTable('filterBy', {}, {'custom': customRangeFilter});
+        });
+    });
+</script>
     <script>
         var $table = $('#table');
         var totalMandah = 0; // متغیر برای ذخیره مجموع مانده
@@ -444,18 +527,13 @@
 
         function priceFormatter(data) {
             var field = this.field;
-            console.log("Data received for priceFormatter:", data);
             var result = data.map(function (row) {
                 var valueString = row[field].replace(/,/g, ''); // حذف کاماها
                 var value = parseFloat(valueString);
-                console.log("Processing row:", row);
-                console.log("Parsed value:", value);
                 return isNaN(value) ? 0 : value;
             }).reduce(function (sum, i) {
-                console.log("Current sum:", sum);
                 return sum + i;
             }, 0);
-            console.log("Final result for priceFormatter:", result);
             totalMandah = result; // ذخیره مجموع مانده
             updateTotalMandah(); // به‌روزرسانی نمایش مجموع مانده
             return result.toLocaleString('fa-IR'); // نمایش با کاما به صورت 3 تا 3 تا
@@ -465,6 +543,17 @@
             $('#total-mandah').text(totalMandah.toLocaleString('fa-IR'));
         }
     </script>
+
+
+
+
+
+
+
+
+
+
+
 
 
 
