@@ -201,6 +201,25 @@ def Updateall(request):
     else:
         print(f' ساعت غیر  کاری: {now.hour}')
         send_to_admin(f' ساعت غیر کاری: {now.hour}')
+
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+    # دریافت داده‌ها از دیتابیس خارجی
+    cursor.execute(
+        "SELECT code, radif FROM Sanad_detail")
+    mahakt_data = cursor.fetchall()
+    existing_in_mahak = {(int(row[0]), int(row[1])) for row in mahakt_data}
+    print('تعداد رکوردهای موجود در Mahak:', len(existing_in_mahak))
+    send_to_admin(f'sanad detile {len(existing_in_mahak)}')
+    if len(existing_in_mahak) < 135000:
+        send_to_admin(f'sanad detile loss')
+        return redirect('/updatedb')
+    if conn:
+        conn.close()
+
+
+
+
     acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
 
     if now.hour == 1 or now.hour == 2:
