@@ -379,6 +379,57 @@
                         </div>
                     </div>
                 </div>
+                <!-- ردیف طلای امانی -->
+
+                <div class="col-xl-4 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="p-4 text-center bg-warning">
+                            <h5 class="mb-60 text-white"></h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="avatar-top">
+                                <img class="img-fluid w-25 rounded-circle " src="{% static 'images/gold_baskt.jpg' %}"
+                                     alt="">
+                            </div>
+                            <div class="card-body">
+                                <div class="clearfix">
+                                    <div class="float-left icon-box bg-warning rounded-circle">
+                  <span class="text-white">
+                    <i class="fa fa-lock highlight-icon" aria-hidden="true"></i>
+                  </span>
+                                    </div>
+                                    <div class="float-right text-right">
+                                        <h4>لیست طلای امانی</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <table class="table center-aligned-table mb-0">
+                                <thead>
+                                <tr class="text-dark">
+                                    <th>ردیف</th>
+                                    <th>وزن</th>
+                                    <th>تاریخ</th>
+                                    <th>تاریخ برگشت</th>
+                                    <th>توضیحات</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for a in amani %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ a.amount1 }}</td>
+                                        <td>{{ a.p_date }}</td>
+                                        <td>{{ a.p_return_date }}</td>
+                                        <td>{{ a.comment }}</td>
+
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
             </div>
 
 

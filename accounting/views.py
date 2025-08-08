@@ -27,7 +27,8 @@ from dashboard.models import MasterInfo, MasterReport, MonthlyReport
 from dashboard.views import generate_calendar_data_cheque
 from loantracker.forms import SMSTrackingForm, CallTrackingForm
 from loantracker.models import TrackKinde, Tracking
-from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan, LoanDetil, Kala
+from mahakupdate.models import SanadDetail, AccCoding, ChequesRecieve, ChequesPay, Person, Loan, LoanDetil, Kala, \
+    GoodConsign
 from jdatetime import date as jdate
 from khayyam import JalaliDate, JalaliDatetime
 from django.db.models import F
@@ -1432,6 +1433,7 @@ def HesabMoshtariDetail(request, tafsili):
 
 
     hesabmoshtari = BedehiMoshtari.objects.filter(tafzili=tafsili).last()
+
     m_name = None
 
     if request.method == 'POST':
@@ -1543,6 +1545,13 @@ def HesabMoshtariDetail(request, tafsili):
         bar_mali=hesabmoshtari.sleep_investment/Decimal(30) * monthly_rate / Decimal(100)
     except:
         bar_mali=0
+    person=Person.objects.filter(per_taf=tafsili).last()
+    amani=None
+    if person:
+        per_code=person.code
+        amani=GoodConsign.objects.filter(per_code=per_code)
+
+
     context = {
         'title': 'حساب مشتری',
         'hesabmoshtari': hesabmoshtari,
@@ -1564,6 +1573,7 @@ def HesabMoshtariDetail(request, tafsili):
         'chart_date': chart_date,
         'year_list': year_list,
 
+        'amani': amani,
 
 
     }
