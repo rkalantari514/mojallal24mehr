@@ -5578,4 +5578,9 @@ def UpdateGoodConsign(request):
         table.save()
 
     conn.close()
+    tend = time.time()
+    total_time = tend - t0
+    print('len(to_update)',len(to_update))
+    print('len(to_create)',len(to_create))
+    print(f"زمان کل: {total_time:.2f} ثانیه")
     return redirect('/updatedb')
