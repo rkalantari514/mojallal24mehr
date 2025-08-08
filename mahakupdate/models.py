@@ -838,3 +838,30 @@ class LoanDetil(models.Model):
     def last_tracks(self):
         from loantracker.models import Tracking
         return Tracking.objects.filter(customer__person=self.loan.person).last() or None
+
+
+
+
+class GoodConsign(models.Model):
+    code = models.IntegerField(unique=True, verbose_name='کد حواله')
+    per_code = models.IntegerField(blank=True, null=True, verbose_name='کد فرد')
+    person = models.ForeignKey('Person', on_delete=models.SET_NULL, blank=True, null=True)
+    good_code = models.IntegerField(blank=True, null=True, verbose_name='کد کالا')
+    kala = models.ForeignKey(Kala, on_delete=models.SET_NULL, null=True, blank=True)
+    store_code = models.IntegerField(blank=True, null=True, verbose_name='کد انبار')
+    storage =  models.ForeignKey(Storagek, on_delete=models.SET_NULL, null=True, blank=True)
+    p_date = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاریخ  شمسی')
+    date = models.DateField(blank=True, null=True,verbose_name="تاریخ میلادی")
+    p_return_date = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاریخ شمسی بازگشت')
+    return_date = models.DateField(blank=True, null=True,verbose_name="تاریخ برگشت میلادی")
+    amount1 = models.DecimalField(max_digits=12, decimal_places=3, blank=True, null=True, verbose_name='مقدار۱')
+    operation_type = models.IntegerField(blank=True, null=True, verbose_name='نوع عملیات')
+    comment = models.CharField(max_length=550, blank=True, null=True, verbose_name='توضیحات')
+    owner_consign_code = models.IntegerField(blank=True, null=True, verbose_name='کد مالک حواله')
+
+    class Meta:
+        verbose_name = 'کالای امانی'
+        verbose_name_plural = 'کالاهای امانی'
+
+    def __str__(self):
+        return f"حواله {self.code}"

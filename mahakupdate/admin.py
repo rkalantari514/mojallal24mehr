@@ -3,7 +3,7 @@ from django.contrib import admin
 from accounting.models import BedehiMoshtari
 from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo, \
     Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve, MyCondition, ChequesPay, Bank, Loan, LoanDetil, \
-    BackFactor, BackFactorDetail
+    BackFactor, BackFactorDetail, GoodConsign
 
 
 # Register your models here.
@@ -252,6 +252,16 @@ class BackFactorAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'acc_year','code','type','per_code','person','pdate','date','takhfif','sharh',)
     list_filter = ('acc_year','type','person','date',)
     search_fields = ('code','per_code','pdate','sharh', 'person__name',)
+
+@admin.register(GoodConsign)
+class GoodConsignAdmin(admin.ModelAdmin):
+    list_display = ('code', 'per_code', 'person', 'good_code', 'kala', 'store_code', 'storage', 'p_date', 'date', 'p_return_date', 'return_date', 'amount1', 'operation_type', 'owner_consign_code')
+    search_fields = ('code', 'per_code', 'good_code', 'store_code')
+    list_filter = ('operation_type',)
+
+
+
+
 
 
 

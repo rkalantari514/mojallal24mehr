@@ -163,6 +163,7 @@ def Updatedb(request):
         'LoanDetail': 'update/loandetail',
         'BackForosh': 'update/backfactor',
         'BackFact_Detail': 'update/back-factor-detail',
+        'GoodConsign': 'update/good_consign',
 
     }
 
@@ -250,6 +251,7 @@ def Updateall(request):
         'LoanDetail': UpdateLoanDetail,
         'BackForosh': UpdateBackFactor,
         'BackFact_Detail': UpdateBackFactorDetail,
+        'GoodConsign': UpdateGoodConsign,
     }
 
     responses = []
@@ -5471,4 +5473,109 @@ def LoanBedehiMoshtari(request):
     tend = time.time()
     total_time = tend - t0
     print(f"زمان کل: {total_time:.2f} ثانیه")
+    return redirect('/updatedb')
+
+
+
+from django.db import transaction
+from django.utils import timezone
+from .models import GoodConsign, Person, Kala, Storagek, Mtables
+import time
+
+def UpdateGoodConsign(request):
+    send_to_admin('شروع آپدیت GoodConsign')
+    t0 = time.time()
+
+    conn = connect_to_mahak()
+    cursor = conn.cursor()
+
+    # گرفتن همه داده‌های GoodConsign از Mahak
+    cursor.execute("""
+        SELECT [Code], [Per_Code], [Good_Code], [Store_Code], 
+               [Date], [Return_Date], [Amount1], [Operation_Type], 
+               [Comment], [OwnerConsign_Code]
+        FROM GoodConsign
+    """)
+    mahak_data = cursor.fetchall()
+    existing_codes_in_mahak = {row[0] for row in mahak_data}
+
+    # ساخت دیکشنری‌های lookup برای ForeignKey ها
+    persons_map = {p.code: p for p in Person.objects.all()}
+    kalas_map = {k.code: k for k in Kala.objects.all()}
+    storages_map = {s.code: s for s in Storagek.objects.all()}
+
+    current_records = {gc.code: gc for gc in GoodConsign.objects.iterator()}
+    created_codes_in_this_run = set()
+
+    to_create = []
+    to_update = []
+
+    for row in mahak_data:
+        code = int(row[0])
+        per_code = row[1]
+        good_code = row[2]
+        store_code = row[3]
+
+        p_date_str = row[4]
+        p_return_date_str = row[5]
+
+        # تبدیل تاریخ شمسی به میلادی (اگر مقدار داشت)
+        date_greg = jalali_to_gregorian(p_date_str) if p_date_str else None
+        return_date_greg = jalali_to_gregorian(p_return_date_str) if p_return_date_str else None
+
+        defaults = {
+            'per_code': per_code,
+            'person': persons_map.get(per_code),
+            'good_code': good_code,
+            'kala': kalas_map.get(good_code),
+            'store_code': store_code,
+            'storage': storages_map.get(store_code),
+            'p_date': p_date_str,
+            'date': date_greg,
+            'p_return_date': p_return_date_str,
+            'return_date': return_date_greg,
+            'amount1': Decimal(str(row[6])) if row[6] is not None else None,
+            'operation_type': row[7],
+            'comment': row[8],
+            'owner_consign_code': row[9]
+        }
+
+        if code in current_records:
+            gc = current_records[code]
+            if any(getattr(gc, attr) != value for attr, value in defaults.items()):
+                for attr, value in defaults.items():
+                    setattr(gc, attr, value)
+                to_update.append(gc)
+        elif code not in created_codes_in_this_run:
+            to_create.append(GoodConsign(code=code, **defaults))
+            created_codes_in_this_run.add(code)
+
+    with transaction.atomic():
+        if to_create:
+            GoodConsign.objects.bulk_create(to_create, ignore_conflicts=True)
+        if to_update:
+            GoodConsign.objects.bulk_update(to_update, [
+                'per_code', 'person', 'good_code', 'kala',
+                'store_code', 'storage', 'p_date', 'date',
+                'p_return_date', 'return_date', 'amount1',
+                'operation_type', 'comment', 'owner_consign_code'
+            ])
+        GoodConsign.objects.exclude(code__in=existing_codes_in_mahak).delete()
+
+    # ثبت آمار در Mtables
+    cursor.execute("SELECT COUNT(*) FROM GoodConsign")
+    row_count = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'GoodConsign'")
+    column_count = cursor.fetchone()[0]
+
+    table = Mtables.objects.filter(name='GoodConsign').last()
+    if table:
+        table.last_update_time = timezone.now()
+        table.update_duration = time.time() - t0
+        table.row_count = row_count
+        table.cloumn_count = column_count
+        table.save()
+
+    conn.close()
     return redirect('/updatedb')
