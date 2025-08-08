@@ -407,9 +407,9 @@
                                 <thead>
                                 <tr class="text-dark">
                                     <th>ردیف</th>
+                                    <th>کد حواله</th>
                                     <th>وزن</th>
                                     <th>تاریخ</th>
-                                    <th>تاریخ برگشت</th>
                                     <th>توضیحات</th>
                                 </tr>
                                 </thead>
@@ -417,9 +417,9 @@
                                 {% for a in amani %}
                                     <tr>
                                         <td>{{ forloop.counter }}</td>
-                                        <td>{{ a.amount1 }}</td>
+                                        <td>{{ a.code }}</td>
+                                        <td>{{ a.amount1|floatformat:2 }}</td>
                                         <td>{{ a.p_date }}</td>
-                                        <td>{{ a.p_return_date }}</td>
                                         <td>{{ a.comment }}</td>
 
                                     </tr>
