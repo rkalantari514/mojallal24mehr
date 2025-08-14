@@ -134,15 +134,53 @@ class MojodiAdmin(admin.ModelAdmin):
     class Meta:
         model = Mojodi
 
+# admin.py
+
+from django.contrib import admin
+from .models import Person
+
 
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'code','per_taf', 'name', 'lname','clname', 'group']
-    # list_filter = ['level','parent',]
-    list_editable = ['clname']
-    search_fields = ['name', 'code','per_taf']
+    list_display = [
+        'full_name', 'code', 'per_taf', 'prefix', 'name', 'lname',
+        'identifier', 'comname', 'mobile', 'clname', 'group'
+    ]
+    list_filter = ['group', 'prefix']
+    search_fields = ['name', 'lname', 'code', 'mobile', 'identifier', 'comname', 'clname']
+    list_editable = ['clname', 'prefix']
+    readonly_fields = ['created_time', 'created_date', 'modified_time', 'modified_date']
+    fieldsets = (
+        ('اطلاعات پایه', {
+            'fields': ('code', 'prefix', 'name', 'lname', 'group')
+        }),
+        ('اطلاعات تماس', {
+            'fields': ('tel1', 'tel2', 'fax', 'mobile')
+        }),
+        ('اطلاعات معرفی', {
+            'fields': ('identifier', 'comname')
+        }),
+        ('آدرس و توضیحات', {
+            'fields': ('address', 'comment')
+        }),
+        ('اطلاعات تکمیلی', {
+            'fields': ('per_taf', 'clname')
+        }),
+        ('تاریخچه', {
+            'classes': ('collapse',),
+            'fields': ('created_time', 'created_date', 'modified_time', 'modified_date')
+        }),
+    )
+    ordering = ['name', 'lname']
+    list_per_page = 50
+
+    def full_name(self, obj):
+        return obj.full_name()
+    full_name.short_description = 'نام کامل'
 
     class Meta:
         model = Person
+
+
 
 
 class KalaGroupinfoAdmin(admin.ModelAdmin):

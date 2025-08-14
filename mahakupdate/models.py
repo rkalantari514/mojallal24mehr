@@ -475,49 +475,73 @@ import re
 
 
 
+# models.py
+
 class Person(models.Model):
-    code = models.IntegerField(default=0, verbose_name='کد فرد')
+    code = models.IntegerField(default=0, verbose_name='کد فرد', db_index=True)
     grpcode = models.IntegerField(default=0, verbose_name='کد گروه')
-    group = models.ForeignKey(PersonGroup, on_delete=models.SET_NULL, blank=True, null=True)
-    name = models.CharField(blank=True, null=True,max_length=150, verbose_name='نام')
-    lname = models.CharField(blank=True, null=True,max_length=150, verbose_name='نام خانوادگی')
-    tel1 = models.CharField(blank=True, null=True,max_length=150, verbose_name='تلفن1')
-    tel2 = models.CharField(blank=True, null=True,max_length=150, verbose_name='تلفن2')
-    fax = models.CharField(blank=True, null=True,max_length=150, verbose_name='فکس')
-    mobile = models.CharField(blank=True, null=True,max_length=150, verbose_name='موبایل')
-    address = models.CharField(blank=True, null=True,max_length=550, verbose_name='آدرس')
-    comment = models.CharField(blank=True, null=True,max_length=550, verbose_name='توضیحات')
-    per_taf=models.IntegerField(blank=True, null=True,default=0, verbose_name='کد تفصیلی فرد')
-    clname = models.CharField(max_length=150, verbose_name='نام مخاطب', blank=True, null=True)
+    group = models.ForeignKey(PersonGroup, on_delete=models.SET_NULL, blank=True, null=True, verbose_name='گروه')
+
+    prefix = models.CharField(max_length=20, blank=True, null=True, verbose_name='پیشوند نام')  # جدید
+    name = models.CharField(max_length=150, blank=True, null=True, verbose_name='نام')
+    lname = models.CharField(max_length=150, blank=True, null=True, verbose_name='نام خانوادگی')
+
+    identifier = models.CharField(max_length=150, blank=True, null=True, verbose_name='کد معرف')  # جدید
+    comname = models.CharField(max_length=255, blank=True, null=True, verbose_name='نام شرکت / نام معرف')  # جدید
+
+    tel1 = models.CharField(max_length=150, blank=True, null=True, verbose_name='تلفن 1')
+    tel2 = models.CharField(max_length=150, blank=True, null=True, verbose_name='تلفن 2')
+    fax = models.CharField(max_length=150, blank=True, null=True, verbose_name='فکس')
+    mobile = models.CharField(max_length=150, blank=True, null=True, verbose_name='موبایل')
+
+    address = models.CharField(max_length=1000, blank=True, null=True, verbose_name='آدرس')  # افزایش طول
+    comment = models.TextField(blank=True, null=True, verbose_name='توضیحات')  # از CharField به TextField
+
+    per_taf = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد تفصیلی فرد')
+    clname = models.CharField(max_length=150, blank=True, null=True, verbose_name='نام مخاطب')
+
+    # Timestamps
+    created_time = models.CharField(max_length=20, blank=True, null=True, verbose_name='زمان ایجاد')
+    created_date = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاریخ ایجاد')
+    modified_time = models.CharField(max_length=20, blank=True, null=True, verbose_name='زمان ویرایش')
+    modified_date = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاریخ ویرایش')
 
     class Meta:
         verbose_name = 'فرد'
         verbose_name_plural = 'افراد'
+        unique_together = ('code',)  # تضمین یکتایی کد
 
     def __str__(self):
-        return f'{self.name}  {self.lname}'
+        return f'{self.full_name()}'
 
-    import re
-
-    import re
+    def full_name(self):
+        """نام کامل با پیشوند"""
+        prefix = self.prefix or ''
+        name = self.name or ''
+        lname = self.lname or ''
+        full = f"{prefix} {name} {lname}".strip()
+        return full if full else f"فرد {self.code}"
 
     def cleaned_name(self):
-        full_name = f'{self.name} {self.lname}'
+        """نام مخاطب بدون کلمات اضافی"""
+        full_name = f'{self.name or ""} {self.lname or ""}'.strip()
 
-        # اگر نام دقیقاً "رسول غریبانی مرزبانی استان خراسان رضوی" باشد، فقط "رسول غریبانی" را نگه دار
         if full_name == "رسول غريباني مرزباني استان خراسان رضوي":
             return "رسول غريباني"
 
-        # حذف موارد اضافی و کاراکترهای خاص
-        cleaned_name = re.split(r"[a-zA-Z-$/]|قسط|طرح رفاه\s*\d+ماهه|ماهی\d+|[._+()]", full_name, maxsplit=1)[0].strip()
-
-        return cleaned_name
+        # حذف کلمات و کاراکترهای اضافی
+        cleaned = re.split(
+            r"[a-zA-Z-$/]|قسط|طرح رفاه\s*\d+ماهه|ماهی\d+|[._+()]", full_name, maxsplit=1
+        )[0].strip()
+        return cleaned
 
     def save(self, *args, **kwargs):
-        if not self.clname:  # فقط اگر clname مقدار ندارد
+        if not self.clname:
             self.clname = self.cleaned_name()
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return self.full_name()
 
 class WordCount(models.Model):
     word = models.CharField(max_length=100, unique=True, verbose_name='کلمه')  # کلید واژه

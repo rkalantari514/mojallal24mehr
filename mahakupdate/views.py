@@ -1663,16 +1663,21 @@ def UpdatePerson0523(request):
         conn.close()
     return redirect('/updatedb')
 
-# qwen 1404/05/23
+
+
+import pyodbc
 import time
+import re
 import os
 import pyodbc
 from django.db import transaction
-from django.db.models import Count, Min, Value, Case
-from django.db.models.functions import Concat
+from django.db.models import Count, Min
 from django.shortcuts import redirect
 from django.utils import timezone
 
+
+
+# qwen 1404/05/23
 def UpdatePerson(request):
     send_to_admin('شروع آپدیت افراد')
     t0 = time.time()
@@ -1686,22 +1691,29 @@ def UpdatePerson(request):
         print(f"✅ اتصال موفق به دیتابیس: {db_name}")
 
         # 🔹 دریافت mapping AccDetailsCollection
-        cursor.execute("""
-            SELECT AccDetailCode, AccountCode 
-            FROM AccDetailsCollection 
-            WHERE AccDetailsTypesID = 1
-        """)
-        acc_details_mapping = {}
-        for row in cursor.fetchall():
-            try:
-                code = int(row[0])
-                acc_details_mapping[code] = row[1]
-            except (ValueError, TypeError):
-                continue  # نادیده گرفتن کدهای نامعتبر
+        try:
+            cursor.execute("""
+                SELECT AccDetailCode, AccountCode 
+                FROM AccDetailsCollection 
+                WHERE AccDetailsTypesID = 1
+            """)
+            acc_details_mapping = {}
+            for row in cursor.fetchall():
+                try:
+                    code = int(row[0])
+                    acc_details_mapping[code] = row[1]
+                except (ValueError, TypeError):
+                    continue
+        except pyodbc.Error as e:
+            print(f"⚠️ جدول AccDetailsCollection یافت نشد یا خطایی رخ داد: {e}")
+            acc_details_mapping = {}
 
-        # 🔹 دریافت داده‌های PerInf با نام دیتابیس پویا
+        # 🔹 دریافت داده‌های PerInf با تمام فیلدهای مورد نیاز
         query = f"""
-            SELECT [code], [Name], [LName], [GrpCode], [Tel1], [Tel2], [Fax], [Mobile], [Addr1], [Comment]
+            SELECT 
+                [code], [Name], [LName], [GrpCode], [Identifier], [ComName], 
+                [Tel1], [Tel2], [Fax], [Mobile], [Addr1], [Comment], [Prifix],
+                [CreatedTime], [CreatedDate], [ModifiedTime], [ModifiedDate]
             FROM [{db_name}].[dbo].[PerInf]
         """
         cursor.execute(query)
@@ -1735,15 +1747,22 @@ def UpdatePerson(request):
 
             defaults = {
                 'grpcode': row[3] or 0,
+                'prefix': (row[12] or '').strip(),
                 'name': (row[1] or '').strip(),
                 'lname': (row[2] or '').strip(),
-                'tel1': (row[4] or '').strip(),
-                'tel2': (row[5] or '').strip(),
-                'fax': (row[6] or '').strip(),
-                'mobile': (row[7] or '').strip(),
-                'address': (row[8] or '').strip(),
-                'comment': (row[9] or '').strip(),
+                'identifier': (row[4] or '').strip(),
+                'comname': (row[5] or '').strip(),
+                'tel1': (row[6] or '').strip(),
+                'tel2': (row[7] or '').strip(),
+                'fax': (row[8] or '').strip(),
+                'mobile': (row[9] or '').strip(),
+                'address': (row[10] or '').strip(),
+                'comment': (row[11] or '').strip(),
                 'per_taf': per_taf_value,
+                'created_time': (row[13] or '').strip(),
+                'created_date': (row[14] or '').strip(),
+                'modified_time': (row[15] or '').strip(),
+                'modified_date': (row[16] or '').strip(),
             }
 
             if code in current_persons:
@@ -1770,8 +1789,9 @@ def UpdatePerson(request):
                 Person.objects.bulk_update(
                     persons_to_update,
                     fields=[
-                        'grpcode', 'name', 'lname', 'tel1', 'tel2', 'fax',
-                        'mobile', 'address', 'comment', 'per_taf'
+                        'grpcode', 'prefix', 'name', 'lname', 'identifier', 'comname',
+                        'tel1', 'tel2', 'fax', 'mobile', 'address', 'comment',
+                        'per_taf', 'created_time', 'created_date', 'modified_time', 'modified_date'
                     ],
                     batch_size=1000
                 )
@@ -1817,7 +1837,7 @@ def UpdatePerson(request):
                 table.last_update_time = timezone.now()
                 table.update_duration = update_time
                 table.row_count = Person.objects.count()
-                table.cloumn_count = 10  # تعداد ستون‌های مدل Person (یا بگیرید از INFORMATION_SCHEMA)
+                table.cloumn_count = 17  # تعداد فیلدهای اصلی در مدل
                 table.save()
         except Exception as e:
             print(f"⚠️ خطا در به‌روزرسانی Mtables: {e}")
@@ -1825,9 +1845,9 @@ def UpdatePerson(request):
         send_to_admin('آپدیت افراد با موفقیت انجام شد')
 
     except Exception as e:
-        print(f"❌ خطای داخلی در UpdatePerson: {e}")
+        error_msg = f"❌ خطای داخلی در UpdatePerson: {e}"
+        print(error_msg)
         send_to_admin(f'خطا در آپدیت افراد: {str(e)}')
-        # نمایش خطای دقیق در محیط توسعه — در محیط تولید حذف شود
         raise
 
     finally:
@@ -1836,6 +1856,10 @@ def UpdatePerson(request):
             print("🔌 اتصال به محک بسته شد")
 
     return redirect('/updatedb')
+
+
+
+
 def UpdatePerson2(request):
     send_to_admin('شروع آپدیت افراد')
     t0 = time.time()
