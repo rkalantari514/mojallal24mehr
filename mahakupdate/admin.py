@@ -160,7 +160,7 @@ class PersonAdmin(admin.ModelAdmin):
             'fields': ('identifier', 'comname')
         }),
         ('آدرس و توضیحات', {
-            'fields': ('address', 'comment')
+            'fields': ('address','address2', 'comment')
         }),
         ('اطلاعات تکمیلی', {
             'fields': ('per_taf', 'clname')
