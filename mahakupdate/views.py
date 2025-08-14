@@ -1750,15 +1750,15 @@ def UpdatePerson(request):
             except (ValueError, TypeError):
                 continue
 
-            # title = (row[1] or '').strip()
+            title = (row[1] or '').strip()
             address = (row[2] or '').strip()
             tel = (row[3] or '').strip()
             mobile = (row[4] or '').strip()
 
             # فرمت: "عنوان: آدرس (تلفن: ...، موبایل: ...)"
             parts = []
-            # if title:
-            #     parts.append(title)
+            if title:
+                parts.append((f"عنوان: {title}"))
             if address:
                 parts.append(address)
             contact = []
