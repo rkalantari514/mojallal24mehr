@@ -1677,6 +1677,18 @@ from django.utils import timezone
 
 
 
+
+
+import time
+import re
+import os
+import pyodbc
+from django.db import transaction
+from django.db.models import Count, Min
+from django.shortcuts import redirect
+from django.utils import timezone
+
+
 # qwen 1404/05/23
 def UpdatePerson(request):
     send_to_admin('شروع آپدیت افراد')
@@ -1690,7 +1702,7 @@ def UpdatePerson(request):
         t1 = time.time()
         print(f"✅ اتصال موفق به دیتابیس: {db_name}")
 
-        # 🔹 دریافت mapping AccDetailsCollection
+        # 🔹 دریافت mapping AccDetailsCollection (اختیاری)
         try:
             cursor.execute("""
                 SELECT AccDetailCode, AccountCode 
@@ -1705,10 +1717,10 @@ def UpdatePerson(request):
                 except (ValueError, TypeError):
                     continue
         except pyodbc.Error as e:
-            print(f"⚠️ جدول AccDetailsCollection یافت نشد یا خطایی رخ داد: {e}")
+            print(f"⚠️ جدول AccDetailsCollection یافت نشد: {e}")
             acc_details_mapping = {}
 
-        # 🔹 دریافت داده‌های PerInf با تمام فیلدهای مورد نیاز
+        # 🔹 دریافت داده‌های PerInf
         query = f"""
             SELECT 
                 [code], [Name], [LName], [GrpCode], [Identifier], [ComName], 
@@ -1720,11 +1732,56 @@ def UpdatePerson(request):
         mahak_data = cursor.fetchall()
         existing_codes = set()
 
+        # 🔹 دریافت آدرس‌های اضافی (Person_Addresses)
+        query_addr2 = f"""
+            SELECT [PersonCode], [Title], [Address], [Tel], [Mobile]
+            FROM [{db_name}].[dbo].[Person_Addresses]
+            WHERE [PersonCode] IS NOT NULL
+            ORDER BY [PersonCode], [Radif]
+        """
+        cursor.execute(query_addr2)
+        extra_addresses = cursor.fetchall()
+
+        # 🔹 ساخت دیکشنری: PersonCode → لیست آدرس‌های اضافی
+        addr2_dict = {}
+        for row in extra_addresses:
+            try:
+                person_code = int(row[0])
+            except (ValueError, TypeError):
+                continue
+
+            title = (row[1] or '').strip()
+            address = (row[2] or '').strip()
+            tel = (row[3] or '').strip()
+            mobile = (row[4] or '').strip()
+
+            # فرمت: "عنوان: آدرس (تلفن: ...، موبایل: ...)"
+            parts = []
+            if title:
+                parts.append(title)
+            if address:
+                parts.append(address)
+            contact = []
+            if tel:
+                contact.append(f"تلفن: {tel}")
+            if mobile:
+                contact.append(f"موبایل: {mobile}")
+            if contact:
+                parts.append(f"({', '.join(contact)})")
+
+            full_addr = " - ".join(parts)
+            if full_addr.strip():
+                addr2_dict.setdefault(person_code, []).append(full_addr)
+
+        # 🔹 ترکیب آدرس‌ها با "/+" برای هر شخص
+        combined_addr2 = {
+            code: " /+ ".join(addrs) for code, addrs in addr2_dict.items()
+        }
+
+        # 🔹 آماده‌سازی لیست ایجاد/آپدیت
         persons_to_create = []
         persons_to_update = []
         created_codes_in_run = set()
-
-        # 🔹 آماده‌سازی دیکشنری از افراد فعلی در دیتابیس محلی
         current_persons = {p.code: p for p in Person.objects.all()}
 
         for row in mahak_data:
@@ -1745,6 +1802,9 @@ def UpdatePerson(request):
                 except (ValueError, TypeError):
                     per_taf_value = 0
 
+            # آدرس دوم ترکیبی
+            address2 = combined_addr2.get(code, '')
+
             defaults = {
                 'grpcode': row[3] or 0,
                 'prefix': (row[12] or '').strip(),
@@ -1759,6 +1819,7 @@ def UpdatePerson(request):
                 'address': (row[10] or '').strip(),
                 'comment': (row[11] or '').strip(),
                 'per_taf': per_taf_value,
+                'address2': address2,
                 'created_time': (row[13] or '').strip(),
                 'created_date': (row[14] or '').strip(),
                 'modified_time': (row[15] or '').strip(),
@@ -1767,7 +1828,6 @@ def UpdatePerson(request):
 
             if code in current_persons:
                 person = current_persons[code]
-                # بررسی تغییر در فیلدها
                 if any(getattr(person, k, None) != v for k, v in defaults.items()):
                     for k, v in defaults.items():
                         setattr(person, k, v)
@@ -1776,7 +1836,7 @@ def UpdatePerson(request):
                 persons_to_create.append(Person(code=code, **defaults))
                 created_codes_in_run.add(code)
 
-        # 🔥 اجرای عملیات دسته‌ای در تراکنش
+        # 🔥 اجرای عملیات دسته‌ای
         with transaction.atomic():
             if persons_to_create:
                 try:
@@ -1791,7 +1851,8 @@ def UpdatePerson(request):
                     fields=[
                         'grpcode', 'prefix', 'name', 'lname', 'identifier', 'comname',
                         'tel1', 'tel2', 'fax', 'mobile', 'address', 'comment',
-                        'per_taf', 'created_time', 'created_date', 'modified_time', 'modified_date'
+                        'per_taf', 'address2', 'created_time', 'created_date',
+                        'modified_time', 'modified_date'
                     ],
                     batch_size=1000
                 )
@@ -1801,7 +1862,7 @@ def UpdatePerson(request):
             deleted_count, _ = Person.objects.exclude(code__in=existing_codes).delete()
             print(f"🗑️ {deleted_count} فرد حذف شد (در منبع موجود نبودند)")
 
-        # 🗑️ حذف رکوردهای تکراری (نگه‌داری قدیمی‌ترین)
+        # 🗑️ حذف رکوردهای تکراری
         duplicate_ids = (
             Person.objects.values('code')
             .annotate(min_id=Min('id'))
@@ -1810,7 +1871,7 @@ def UpdatePerson(request):
         deleted_dupes, _ = Person.objects.exclude(id__in=duplicate_ids).delete()
         print(f"🧹 {deleted_dupes} رکورد تکراری حذف شد")
 
-        # 🧹 پر کردن clname برای افرادی که خالی است
+        # 🧹 پر کردن clname
         null_clname = Person.objects.filter(clname__isnull=True).exclude(name='', lname='')
         updated_clname_count = 0
         for person in null_clname:
@@ -1819,7 +1880,7 @@ def UpdatePerson(request):
             updated_clname_count += 1
         print(f"🔤 {updated_clname_count} نام مخاطب (clname) به‌روز شد")
 
-        # 📊 آمار و به‌روزرسانی جدول Mtables
+        # 📊 آمار
         tend = time.time()
         total_time = tend - t0
         db_time = t1 - t0
@@ -1830,14 +1891,14 @@ def UpdatePerson(request):
         print(f"🔗 اتصال به دیتابیس: {db_time:.2f} ثانیه")
         print(f"🔄 زمان پردازش: {update_time:.2f} ثانیه")
 
-        # 🔹 به‌روزرسانی آمار در Mtables
+        # 🔹 به‌روزرسانی Mtables
         try:
             table = Mtables.objects.filter(name='PerInf').last()
             if table:
                 table.last_update_time = timezone.now()
                 table.update_duration = update_time
                 table.row_count = Person.objects.count()
-                table.cloumn_count = 17  # تعداد فیلدهای اصلی در مدل
+                table.cloumn_count = 18  # تعداد فیلدهای مدل
                 table.save()
         except Exception as e:
             print(f"⚠️ خطا در به‌روزرسانی Mtables: {e}")
@@ -1856,7 +1917,6 @@ def UpdatePerson(request):
             print("🔌 اتصال به محک بسته شد")
 
     return redirect('/updatedb')
-
 
 
 

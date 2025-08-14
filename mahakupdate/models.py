@@ -494,7 +494,8 @@ class Person(models.Model):
     fax = models.CharField(max_length=150, blank=True, null=True, verbose_name='فکس')
     mobile = models.CharField(max_length=150, blank=True, null=True, verbose_name='موبایل')
 
-    address = models.CharField(max_length=1000, blank=True, null=True, verbose_name='آدرس')  # افزایش طول
+    address = models.CharField(max_length=1000, blank=True, null=True, verbose_name='آدرس')
+    address2 = models.CharField(max_length=1000, blank=True, null=True, verbose_name='آدرس 2')
     comment = models.TextField(blank=True, null=True, verbose_name='توضیحات')  # از CharField به TextField
 
     per_taf = models.IntegerField(blank=True, null=True, default=0, verbose_name='کد تفصیلی فرد')
