@@ -48,7 +48,7 @@ def get_all_table_data(cursor):
 
 @login_required(login_url='/login')
 def MTable(request):
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     table_data = get_all_table_data(cursor)
 
@@ -63,7 +63,7 @@ def MTable(request):
 
 
 def search_in_tables(request, search_text):
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     table_data = {}
     cursor.execute("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'")
@@ -111,7 +111,7 @@ from django.db import connection
 
 # views.py
 def list_tables(request):
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
 
     # گرفتن اسکیما و نام جدول
@@ -176,7 +176,7 @@ def get_table_columns(cursor, schema, table):
 
 
 def table_detail(request, schema_name, table_name):
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
 
     search_query = request.GET.get('search', '')
@@ -236,7 +236,7 @@ from django.apps import apps
 
 
 def export_all_tables(request):
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
 
     # دریافت لیست جداول
@@ -266,7 +266,7 @@ if not os.path.exists(TEMP_DIR):
 
 # نام دیتابیس را دریافت کنیم تا پوشه مخصوص آن ساخته شود
 def get_database_name():
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     cursor.execute("SELECT DB_NAME()")
     database_name = cursor.fetchone()[0]

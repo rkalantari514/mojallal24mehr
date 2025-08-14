@@ -168,7 +168,7 @@ def jalali_to_gregorian(jalali_date):
 
 def get_databases(request):
     try:
-        conn = connect_to_mahak()
+        conn, db_name = connect_to_mahak()
         cursor = conn.cursor()
         cursor.execute("SELECT name FROM sys.databases WHERE state_desc = 'ONLINE'")
 
@@ -194,7 +194,7 @@ from django.http import JsonResponse
 
 def BackupFromMahak(request, dbname):
     try:
-        conn = connect_to_mahak()
+        conn, db_name = connect_to_mahak()
         conn.autocommit = True  # اطمینان از اجرای دستور خارج از تراکنش
         cursor = conn.cursor()
 
@@ -282,7 +282,7 @@ def Updateall(request):
         print(f' ساعت غیر  کاری: {now.hour}')
         send_to_admin(f' ساعت غیر کاری: {now.hour}')
 
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     # دریافت داده‌ها از دیتابیس خارجی
     cursor.execute(
@@ -410,7 +410,7 @@ def Updateall(request):
 def UpdateFactor2(request):
     t0 = time.time()
     print('شروع آپدیت فاکتور--------------------------------------')
-    conn = connect_to_mahak()  # تابع تخمینی برای اتصال به پایگاه داده Mahak
+    conn, db_name = connect_to_mahak()  # تابع تخمینی برای اتصال به پایگاه داده Mahak
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -505,7 +505,7 @@ import pyodbc
 
 
 def TsesFactorDuplicatte(request):
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
 
     # یافتن کدهای تکراری
@@ -553,7 +553,7 @@ def TsesFactorDuplicatte(request):
 def UpdateFactor(request):
     t0 = time.time()
     print('شروع آپدیت فاکتور--------------------------------------')
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -689,7 +689,7 @@ def UpdateFactor(request):
 def UpdateBackFactor(request):
     t0 = time.time()
     print('شروع آپدیت فاکتوربرگشتی ---------------------------------')
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
     cursor.execute("SELECT [code],[type],[shakhs_code],[tarikh],[sharh], [takhfif] FROM BackForosh")
@@ -850,7 +850,7 @@ def UpdateKardex(request):
         to_keep.sync_mojodi = False
         to_keep.save()
 
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -1039,7 +1039,7 @@ def UpdateFactorDetail2(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات فاکتور-------------------------------------------------')
 
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Fact_Fo_Detail")
     mahakt_data = cursor.fetchall()
@@ -1147,7 +1147,7 @@ def UpdateFactorDetail(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات فاکتور-------------------------------------------------')
 
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     cursor.execute("SELECT [code], [radif], [kala_code], [meghdar], [naghdi], [TotalCost] FROM [Fact_Fo_Detail]")
     mahakt_data = cursor.fetchall()
@@ -1334,7 +1334,7 @@ def UpdateBackFactorDetail(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات فاکتور برگشتی------------------------------------------')
 
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     cursor.execute("SELECT [code], [radif],[type], [kala_code], [meghdar], [naghdi] FROM [BackFact_Detail]")
     mahakt_data = cursor.fetchall()
@@ -1493,7 +1493,7 @@ def UpdateKala(request):
     t0 = time.time()
     print('شروع آپدیت کالا---------------------------------------------------')
 
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -1565,7 +1565,7 @@ def UpdatePerson0523(request):
     t0 = time.time()
     print('🚀 شروع آپدیت افراد --------------------------------------------')
 
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -1841,7 +1841,7 @@ def UpdatePerson2(request):
     t0 = time.time()
     print('شروع آپدیت افراد--------------------------------------------')
 
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -1920,7 +1920,7 @@ def UpdateStorage(request):
     t0 = time.time()
     print('شروع آپدیت کالا---------------------------------------------------')
 
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -1981,7 +1981,7 @@ def UpdateStorage(request):
 def Update_from_mahak0523(request):
     t0 = time.time()
     print('شروع آپدیت---------------------------------------')
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     print('cursor')
     print(cursor)
@@ -2066,7 +2066,7 @@ def Update_from_mahak(request):
 
     try:
         # اتصال به دیتابیس محک
-        conn = connect_to_mahak()
+        conn, db_name = connect_to_mahak()
         cursor = conn.cursor()
         print('اتصال برقرار شد. Cursor ایجاد شد.')
 
@@ -2217,7 +2217,7 @@ def UpdateKalaGroupinfo_old(request):
 def UpdateKalaGroupinfo(request):
     print('شروع آپدیت شروط گروه بندی کالا---------------------------------------------------')
     mahakt_data = []
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     cursor.execute("SELECT Name, Code FROM GoodGrps")
     mahakt_data = cursor.fetchall()
@@ -2625,7 +2625,7 @@ def UpdateMojodi(request):
 
 def temp_compare_kardex_view(request):
     # اتصال به دیتابیس
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
 
     # خواندن تمام رکوردها از دیتابیس
@@ -2723,7 +2723,7 @@ def Update_Sales_Mojodi_Ratio(request):
 def UpdateSanad(request):
     t0 = time.time()
     print('شروع آپدیت سند---------------------------------------------------')
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -2843,7 +2843,7 @@ def UpdateSanadDetail(request):
     #         sanad.delete()
     # return redirect('/updatedb')
 
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -3178,7 +3178,7 @@ def UpdateSanadDetail(request):
 def UpdateSanadDetail1403(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات سند---------------------------------------------------')
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -3426,7 +3426,7 @@ def UpdateSanadDetail1403(request):
 def UpdateSanadDetail1(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات سند---------------------------------------------------')
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
     # دریافت داده‌ها از دیتابیس خارجی
@@ -3568,7 +3568,7 @@ def UpdateAccCoding(request):
     print('شروع آپدیت کدینگ حسابداری (سطح کل) -----------------------')
 
     # اتصال به دیتابیس خارجی و خواندن داده‌های سطح 1 (کل)
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -3709,7 +3709,7 @@ def safe_int(val):
 def UpdateBank(request):
     t0 = time.time()
     print('شروع آپدیت بانک‌ها---------------------------------------------------')
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -3852,7 +3852,7 @@ def UpdateBank(request):
 def Cheques_Recieve(request):
     t0 = time.time()
     print('شروع آپدیت چک‌ها---------------------------------------------------')
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -4046,7 +4046,7 @@ def Cheques_Recieve(request):
 def Cheque_Pay(request):
     t0 = time.time()
     print('شروع آپدیت چک‌های پرداختی---------------------------------------------------')
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -4226,7 +4226,7 @@ def UpdateLoan(request):
     t0 = time.time()
     print('شروع آپدیت وام‌ها---------------------------------------------------')
 
-    conn = connect_to_mahak()  # فرض بر این است که این تابع به پایگاه داده خارجی متصل می‌شود
+    conn, db_name = connect_to_mahak()  # فرض بر این است که این تابع به پایگاه داده خارجی متصل می‌شود
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -4340,7 +4340,7 @@ def UpdateLoanDetail(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات وام-----------------------------------')
 
-    conn = connect_to_mahak()  # فرض بر این است که این تابع به پایگاه داده خارجی متصل می‌شود
+    conn, db_name = connect_to_mahak()  # فرض بر این است که این تابع به پایگاه داده خارجی متصل می‌شود
     cursor = conn.cursor()
     t1 = time.time()
 
@@ -5745,7 +5745,7 @@ def UpdateGoodConsign(request):
     send_to_admin('شروع آپدیت GoodConsign')
     t0 = time.time()
 
-    conn = connect_to_mahak()
+    conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
 
     # گرفتن همه داده‌های GoodConsign از Mahak
