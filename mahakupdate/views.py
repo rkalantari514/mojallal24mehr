@@ -120,7 +120,7 @@ def connect_to_mahak():
         if sn == 'RP-MAHAK':
             # استفاده از احراز هویت SQL Server
             conn_str = (
-                f"Driver={{ODBC Driver 17 for SQL Server}};"
+                f"Driver={{SQL Server}};"  # ⚠️ درایور قدیمی
                 f"Server={server};"
                 f"Database={database};"
                 f"UID=sa;"
@@ -129,7 +129,14 @@ def connect_to_mahak():
             )
         else:
             # استفاده از احراز هویت ویندوز
-            conn_str = (f'Driver={{SQL Server}};Server={server};Database={database};UID=sa;PWD=6070582;Integrated Security=False;')
+            conn_str = (
+                # f"Driver={{ODBC Driver 17 for SQL Server}};"
+                f"Driver={{SQL Server}};"  # ⚠️ درایور قدیمی
+                f"Server={server};"
+                f"Database={database};"
+                # f"UID=sa;"
+                # f"PWD=6070582;"
+            )
 
         # اضافه کردن timeout برای جلوگیری از معلق ماندن
         conn = pyodbc.connect(conn_str, timeout=30)
