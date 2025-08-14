@@ -1,6 +1,7 @@
 {% extends 'shared/_MainLayout.html' %}
 {% load humanize %}
 {% load static %}
+{% load custom_filters %}
 {% block content %}
 
     <style>
@@ -66,112 +67,154 @@
 
     <div class="content-wrapper ">
 
-        <!--ردیف تایتل-->
-        <div class="page-title">
-            <div class="row">
-                <div class="col-sm-9">
-                    <h3 class="mb-0 text-facebook d-inline">داشبورد مدیریتی فروشگاه یاس مجلل</h3>
-                    <span id="datetime" class="datetime-small">در حال بارگذاری...</span>
-                </div>
-                <div class="col-sm-3">
-                    <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
-                        <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
-                        <li class="breadcrumb-item active">داشبورد 2</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
+
+        <!--تب ها-->
+        <div class="row">
+            <div class="col-xl-12 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <h3 class="mb-0 text-facebook d-inline">داشبورد مدیریتی فروشگاه یاس مجلل</h3>
+                        <span id="datetime" class="datetime-small">در حال بارگذاری...</span>
+                        <div class="tab round nav-center">
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active show" id="home-tab" data-toggle="tab" href="#home"
+                                       role="tab" aria-controls="home" aria-selected="true"> <i class="fa fa-home"></i>
+                                        خانه</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="month-tab" data-toggle="tab" href="#month" role="tab"
+                                       aria-controls="month" aria-selected="false"><i class="fa fa-user"></i> ماه </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="week-tab" data-toggle="tab" href="#week" role="tab"
+                                       aria-controls="week" aria-selected="false"><i class="fa fa-picture-o"></i> هفته
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="day-tab" data-toggle="tab" href="#day" role="tab"
+                                       aria-controls="day" aria-selected="false"><i class="fa fa-check-square-o"></i>
+                                        روز </a>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
 
 
-        <!--ردیف اول-->
-
-    <div class="row">
-        <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-          <div class="card card-statistics h-100">
-            <div class="card-body">
-              <div class="clearfix">
-                <div class="float-left">
+                                <!--تب کل--------->
+                                <div class="tab-pane fade active show" id="home" role="tabpanel"
+                                     aria-labelledby="home-tab">
+                                    <br>
+                                    <!--ردیف اول-->
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                                                <div class="card card-statistics h-100">
+                                                    <div class="card-body">
+                                                        <div class="clearfix">
+                                                            <div class="float-left">
                   <span class="text-danger">
                     <i class="fa fa-bar-chart-o highlight-icon" aria-hidden="true"></i>
                   </span>
-                </div>
-                <div class="float-right text-right">
-                  <p class="card-text text-dark">بازدیدکنندگان</p>
-                  <h4>65,650</h4>
-                </div>
-              </div>
-              <p class="text-muted mt-3 pt-3 border-top">
-                <i class="fa fa-exclamation-circle mr-1" aria-hidden="true"></i> رشد 81٪ کمتر است
-              </p>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-          <div class="card card-statistics h-100">
-            <div class="card-body">
-              <div class="clearfix">
-                <div class="float-left">
+                                                            </div>
+                                                            <div class="float-right text-right">
+                                                                <p class="card-text text-dark">خالص فروش</p>
+                                                                <h4>{{ minfo.khales_daramad_forosh|floatformat:0|intcomma:False }} میلیون تومان </h4>
+                                                            </div>
+                                                        </div>
+                                                        <p class="text-muted mt-3 pt-3 border-top">
+                                                            <i class="fa fa-exclamation-circle mr-1"
+                                                               aria-hidden="true"></i> رشد 81٪ کمتر است
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                                                <div class="card card-statistics h-100">
+                                                    <div class="card-body">
+                                                        <div class="clearfix">
+                                                            <div class="float-left">
                   <span class="text-warning">
                     <i class="fa fa-shopping-cart highlight-icon" aria-hidden="true"></i>
                   </span>
-                </div>
-                <div class="float-right text-right">
-                  <p class="card-text text-dark">سفارشات</p>
-                  <h4>656</h4>
-                </div>
-              </div>
-              <p class="text-muted mt-3 pt-3 border-top">
-                <i class="fa fa-bookmark-o mr-1" aria-hidden="true"></i> کل فروش
-              </p>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-          <div class="card card-statistics h-100">
-            <div class="card-body">
-              <div class="clearfix">
-                <div class="float-left">
+                                                            </div>
+                                                            <div class="float-right text-right">
+                                                                <p class="card-text text-dark">سفارشات</p>
+                                                                <h4>656</h4>
+                                                            </div>
+                                                        </div>
+                                                        <p class="text-muted mt-3 pt-3 border-top">
+                                                            <i class="fa fa-bookmark-o mr-1" aria-hidden="true"></i> کل
+                                                            فروش
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                                                <div class="card card-statistics h-100">
+                                                    <div class="card-body">
+                                                        <div class="clearfix">
+                                                            <div class="float-left">
                   <span class="text-success">
                     <i class="fa fa-dollar highlight-icon" aria-hidden="true"></i>
                   </span>
-                </div>
-                <div class="float-right text-right">
-                  <p class="card-text text-dark">درامد</p>
-                  <h4>65656 تومان</h4>
-                </div>
-              </div>
-              <p class="text-muted mt-3 pt-3 border-top">
-                <i class="fa fa-calendar mr-1" aria-hidden="true"></i> فروش در هر هفته
-              </p>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-          <div class="card card-statistics h-100 admin-followers">
-            <div class="card-body">
-              <div class="clearfix">
-                <div class="float-left">
+                                                            </div>
+                                                            <div class="float-right text-right">
+                                                                <p class="card-text text-dark">درامد</p>
+                                                                <h4>65656 تومان</h4>
+                                                            </div>
+                                                        </div>
+                                                        <p class="text-muted mt-3 pt-3 border-top">
+                                                            <i class="fa fa-calendar mr-1" aria-hidden="true"></i> فروش
+                                                            در هر هفته
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                                                <div class="card card-statistics h-100 admin-followers">
+                                                    <div class="card-body">
+                                                        <div class="clearfix">
+                                                            <div class="float-left">
                   <span class="text-primary">
                     <i class="fa fa-twitter highlight-icon" aria-hidden="true"></i>
                   </span>
+                                                            </div>
+                                                            <div class="float-right text-right">
+                                                                <p class="card-text text-dark">دنبال کنندگان</p>
+                                                                <h4>62,500+</h4>
+                                                            </div>
+                                                        </div>
+                                                        <p class="text-muted mt-3 pt-3 border-top">
+                                                            <i class="fa fa-repeat mr-1" aria-hidden="true"></i> فقط به
+                                                            روز شد
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                                <!--تب ماه--------->
+                                <div class="tab-pane fade" id="month" role="tabpanel" aria-labelledby="month-tab">
+                                    <p>ماه</p>
+                                </div>
+                                <!--تب هفته--------->
+                                <div class="tab-pane fade" id="week" role="tabpanel" aria-labelledby="week-tab">
+                                    <p>هفته</p>
+                                </div>
+
+                                <!--تب روز--------->
+                                <div class="tab-pane fade " id="day" role="tabpanel" aria-labelledby="day-tab">
+                                    <p>روز</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="float-right text-right">
-                  <p class="card-text text-dark">دنبال کنندگان</p>
-                  <h4>62,500+</h4>
-                </div>
-              </div>
-              <p class="text-muted mt-3 pt-3 border-top">
-                <i class="fa fa-repeat mr-1" aria-hidden="true"></i> فقط به روز شد
-              </p>
             </div>
-          </div>
         </div>
-      </div>
-
-
-
-
-
 
 
     </div>
