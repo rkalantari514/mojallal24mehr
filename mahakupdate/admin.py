@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
 
 from accounting.models import BedehiMoshtari
 from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo, \
@@ -9,16 +10,42 @@ from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, 
 # Register your models here.
 
 
+class RowCountFilter(SimpleListFilter):
+    title = 'تعداد ردیف‌ها'  # نام فیلتر در ادمین
+    parameter_name = 'row_count_status'  # نام پارامتر در URL
+
+    def lookups(self, request, model_admin):
+        return (
+            ('zero', 'تعداد ردیف: 0'),
+            ('non_zero', 'تعداد ردیف: غیرصفر'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'zero':
+            return queryset.filter(row_count=0)
+        if self.value() == 'non_zero':
+            return queryset.filter(row_count__gt=0)
+        return queryset
+
+
+@admin.register(Mtables)
 class MtablesAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'name', 'description', 'in_use', 'update_priority', 'last_update_time', 'row_count',
-                    'cloumn_count']
-    list_filter = ['in_use']
-    list_editable = ['description', 'in_use', 'update_priority']
-    search_fields = ['name', 'description', 'in_use', 'update_priority']
-
-    class Meta:
-        model = Mtables
-
+    list_display = ('schema_name', 'name', 'row_count', 'cloumn_count', 'in_use', 'update_priority')
+    list_filter = ('in_use', 'schema_name', 'update_priority', RowCountFilter)  # ✅ فیلتر جدید اضافه شد
+    search_fields = ('name', 'schema_name', 'description')
+    list_editable = ('in_use', 'update_priority')
+    readonly_fields = ('row_count', 'cloumn_count', 'last_update_time', 'update_duration')
+    fieldsets = (
+        (None, {
+            'fields': ('in_use', 'none_use', 'schema_name', 'name', 'description')
+        }),
+        ('آمار', {
+            'fields': ('row_count', 'cloumn_count', 'last_update_time', 'update_duration')
+        }),
+        ('به‌روزرسانی', {
+            'fields': ('update_period', 'update_priority')
+        }),
+    )
 
 class KalaAdmin(admin.ModelAdmin):
     list_display = ['__str__', 'name', 'code','kala_taf', 'grpcode','category', 's_m_ratio', 'total_sale']
@@ -267,7 +294,6 @@ class GoodConsignAdmin(admin.ModelAdmin):
 
 
 
-admin.site.register(Mtables, MtablesAdmin)
 admin.site.register(Kala, KalaAdmin)
 admin.site.register(Factor, FactorAdmin)
 admin.site.register(FactorDetaile, FactorDetaileAdmin)

@@ -35,7 +35,7 @@ from django.http import JsonResponse
 from django.db.models import Sum, Count, F, Q
 
 
-def connect_to_mahak():
+def connect_to_mahak0523():
     sn = os.getenv('COMPUTERNAME')
     print('sn')
     print(sn)
@@ -43,7 +43,7 @@ def connect_to_mahak():
 
     if acc_year == 1403:
         connections = {
-            'DESKTOP-ITU3EHV': ('DESKTOP-ITU3EHV\\MAHAK14', 'mahak'),
+            'DESKTOP-ITU3EHV': ('DESKTOP-ITU3EHV', 'mahak'),
             'TECH_MANAGER': ('TECH_MANAGER\\RKALANTARI', 'mahak'),
             'DESKTOP-1ERPR1M': ('DESKTOP-1ERPR1M\\MAHAK', 'mahak'),
             # 'RP-MAHAK': ('Ac\\MAHAK', 'mahak'),
@@ -53,7 +53,7 @@ def connect_to_mahak():
     if acc_year == 1404:
         print('acc_year=1404')
         connections = {
-            'DESKTOP-ITU3EHV': ('DESKTOP-ITU3EHV\\MAHAK14', 'mahak'),
+            'DESKTOP-ITU3EHV': ('DESKTOP-ITU3EHV', 'mahak'),
             'TECH_MANAGER': ('TECH_MANAGER\\RKALANTARI', 'mahak'),
             'DESKTOP-1ERPR1M': ('DESKTOP-1ERPR1M\\MAHAK', 'mahak'),
             'RP-MAHAK': ('Ac\\MAHAK', 'mahak'),
@@ -75,6 +75,79 @@ def connect_to_mahak():
     else:
         raise EnvironmentError("The computer name does not match.")
 
+import os
+import pyodbc
+from django.conf import settings
+
+
+##bt qwen 1404/05/23
+def connect_to_mahak():
+    sn = os.getenv('COMPUTERNAME')
+    print('Computer Name:', sn)
+
+    # گرفتن سال مالی فعال از دیتابیس دجانگو
+    try:
+        acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    except Exception as e:
+        raise EnvironmentError(f"Cannot fetch acc_year from MasterInfo: {e}")
+
+    # تنظیمات اتصال بر اساس سال مالی
+    if acc_year == 1403:
+        connections = {
+            'DESKTOP-ITU3EHV': ('DESKTOP-ITU3EHV', 'mahak'),
+            'TECH_MANAGER': ('TECH_MANAGER\\RKALANTARI', 'mahak'),
+            'DESKTOP-1ERPR1M': ('DESKTOP-1ERPR1M\\MAHAK', 'mahak'),
+            'RP-MAHAK': ('Ac\\MAHAK', 'mahak_FY_1403')
+        }
+    elif acc_year == 1404:
+        print('acc_year = 1404')
+        connections = {
+            'DESKTOP-ITU3EHV': ('DESKTOP-ITU3EHV', 'mahak'),
+            'TECH_MANAGER': ('TECH_MANAGER\\RKALANTARI', 'mahak'),
+            'DESKTOP-1ERPR1M': ('DESKTOP-1ERPR1M\\MAHAK', 'mahak'),
+            'RP-MAHAK': ('Ac\\MAHAK', 'mahak'),
+        }
+    else:
+        raise ValueError(f"Unsupported accounting year: {acc_year}")
+
+    if sn not in connections:
+        raise EnvironmentError(f"Unsupported machine: {sn}")
+
+    server, database = connections[sn]
+
+    # تنظیم رشته اتصال با درایور جدید
+    try:
+        if sn == 'RP-MAHAK':
+            # استفاده از احراز هویت SQL Server
+            conn_str = (
+                f"Driver={{ODBC Driver 17 for SQL Server}};"
+                f"Server={server};"
+                f"Database={database};"
+                f"UID=sa;"
+                f"PWD=6070582;"
+                f"TrustServerCertificate=yes;"  # مهم برای اتصال بدون خطای SSL
+            )
+        else:
+            # استفاده از احراز هویت ویندوز
+            conn_str = (
+                f"Driver={{ODBC Driver 17 for SQL Server}};"
+                f"Server={server};"
+                f"Database={database};"
+                f"Trusted_Connection=yes;"
+                f"TrustServerCertificate=yes;"
+            )
+
+        # اضافه کردن timeout برای جلوگیری از معلق ماندن
+        conn = pyodbc.connect(conn_str, timeout=30)
+        print(f"Connected to {server} | DB: {database}")
+        return conn
+
+    except pyodbc.Error as e:
+        print(f"Database connection failed: {e}")
+        raise
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        raise
 
 def jalali_to_gregorian(jalali_date):
     # تابع تبدیل تاریخ شمسی به میلادی (نیاز به پیاده سازی دارد)
@@ -1727,7 +1800,7 @@ def UpdateStorage(request):
     return redirect('/updatedb')
 
 
-def Update_from_mahak(request):
+def Update_from_mahak0523(request):
     t0 = time.time()
     print('شروع آپدیت---------------------------------------')
     conn = connect_to_mahak()
@@ -1780,107 +1853,16 @@ def Update_from_mahak(request):
 
     t2 = time.time()
 
-    #  ================================================== پر کردن جدول کالا ============
-    # cursor.execute("SELECT * FROM GoodInf")
-    # mahakt_data = cursor.fetchall()
-    # existing_in_mahak = {row[1] for row in mahakt_data}
-    # print('existing_in_mahak')
-    # print(existing_in_mahak)
-    # for row in mahakt_data:
-    #     Kala.objects.update_or_create(
-    #         code=row[1],
-    #         defaults={
-    #             'name': row[2],
-    #         }
-    #     )
-    # print('update finish')
-    # model_to_delete = Kala.objects.exclude(code__in=existing_in_mahak)
-    # print('model_to_delete')
-    # print(model_to_delete)
-    # model_to_delete.delete()
-    # print('delete finish')
-
     t3 = time.time()
-    # ==============================================================# پر کردن جدول فاکتور
-    # cursor.execute("SELECT * FROM Fact_Fo")  # یا نام همه ستون‌ها را به جا column4, column7, column11 وارد کنید
-    # mahakt_data = cursor.fetchall()
-    # existing_in_mahak = {row[0] for row in mahakt_data}  # مجموعه‌ای از کدهای موجود در Fact_Fo
-    # print('existing_in_mahak')
-    # print(existing_in_mahak)
-    # for row in mahakt_data:
-    #     Factor.objects.update_or_create(
-    #         code=row[0],
-    #         defaults={
-    #             'pdate': row[4],
-    #             'mablagh_factor': row[5],
-    #             'takhfif': row[6],
-    #             'create_time': row[38],
-    #             'darsad_takhfif': row[44],
-    #         }
-    #     )
-    # print('update finish')
-    # model_to_delete = Factor.objects.exclude(code__in=existing_in_mahak)
-    # print('model_to_delete')
-    # print(model_to_delete)
-    # model_to_delete.delete()
-    # print('delete finish')
 
     t4 = time.time()
-    # ==================================================================پر کردن جدول جزئیات فاکتور
-    # cursor.execute("SELECT * FROM Fact_Fo_Detail")
-    # mahakt_data = cursor.fetchall()
-    # existing_in_mahak = set((row[0], row[1]) for row in mahakt_data)
-    # for row in mahakt_data:
-    #     print(row)
-    #     # با استفاده از ترکیب چند فیلد
-    #     FactorDetaile.objects.update_or_create(
-    #         code_factor=row[0],  # فیلد اول برای شناسایی
-    #         radif=row[1],  # فیلد دوم برای شناسایی
-    #         defaults={
-    #             'code_kala': row[3],
-    #             'count': row[5],
-    #             'mablagh_vahed': row[6],
-    #             'mablagh_nahaee': row[29],
-    #         }
-    #     )
-    #
-    # existing_keys = set((detail.code_factor, detail.radif) for detail in FactorDetaile.objects.all())
-    # model_to_delete = existing_keys - existing_in_mahak
-    # for key in model_to_delete:
-    #     FactorDetaile.objects.filter(code_factor=key[0], radif=key[1]).delete()
-
-    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    # جدول کاردکس
     t5 = time.time()
     cursor.execute("SELECT * FROM PerInf")  # یا نام همه ستون‌ها را به جا column4, column7, column11 وارد کنید
     mahakt_data = cursor.fetchall()
-    # existing_in_mahak = {row[0] for row in mahakt_data}  # مجموعه‌ای از کدهای موجود در Fact_Fo
-    # print('existing_in_mahak')
-    # print(existing_in_mahak)
     for row in mahakt_data:
-        # if row[4] == 58692:
         print(row)
-    #     ======.objects.update_or_create(
-    #         code=row[0],
-    #         defaults={
-    #             'pdate': row[4],
-    #             'mablagh_factor': row[5],
-    #             'takhfif': row[6],
-    #             'create_time': row[38],
-    #             'darsad_takhfif': row[44],
-    #         }
-    #     )
-    # print('update finish')
-    # model_to_delete = Factor.objects.exclude(code__in=existing_in_mahak)
-    # print('model_to_delete')
-    # print(model_to_delete)
-    # model_to_delete.delete()
-    # print('delete finish')
-
     t6 = time.time()
-
     tend = time.time()
-
     total_time = tend - t0
     db_time = t1 - t0
     table_time = t2 - t1
@@ -1888,16 +1870,115 @@ def Update_from_mahak(request):
     factor_time = t4 - t3
     factor_detail_time = t5 - t4
     kardex_time = t6 - t5
-
     print(f"زمان کل: {total_time:.2f} ثانیه")
     print(f" اتصال به دیتا بیس:{db_time:.2f} ثانیه")
-    print(f"شناسایی جداول:{table_time:.2f} ثانیه")
-    print(f"شناسایی کالاها: {kala_time:.2f} ثانیه")
-    print(f"فاکتورها {factor_time:.2f} ثانیه")
-    print(f"جزئیات فاکتورها {factor_detail_time:.2f} ثانیه")
-    print(f"جزئیات  {kardex_time:.2f} ثانیه")
+
+# views.py
+import time
+from django.shortcuts import redirect
+from django.contrib import messages
+from django.utils import timezone
+from .models import Mtables
 
 
+# by qwin 1404/05/23
+def Update_from_mahak(request):
+    t0 = time.time()
+    print('شروع آپدیت جداول محک ---------------------------------------')
+
+    try:
+        # اتصال به دیتابیس محک
+        conn = connect_to_mahak()
+        cursor = conn.cursor()
+        print('اتصال برقرار شد. Cursor ایجاد شد.')
+
+        # مرحله 1: گرفتن لیست تمام جدول‌ها با اسکیما
+        cursor.execute("""
+            SELECT 
+                TABLE_SCHEMA, 
+                TABLE_NAME 
+            FROM INFORMATION_SCHEMA.TABLES 
+            WHERE TABLE_TYPE = 'BASE TABLE'
+            ORDER BY TABLE_SCHEMA, TABLE_NAME
+        """)
+        tables = cursor.fetchall()
+
+        print(f"تعداد جدول پیدا شده: {len(tables)}")
+
+        updated_count = 0
+        error_count = 0
+
+        for table in tables:
+            schema_name = table.TABLE_SCHEMA
+            table_name = table.TABLE_NAME
+            full_table_name = f"[{schema_name}].[{table_name}]"
+
+            try:
+                # تعداد سطرها
+                cursor.execute(f"SELECT COUNT(*) FROM {full_table_name}")
+                row_count = cursor.fetchone()[0]
+
+                # تعداد ستون‌ها
+                cursor.execute("""
+                    SELECT COUNT(*) 
+                    FROM INFORMATION_SCHEMA.COLUMNS 
+                    WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?
+                """, schema_name, table_name)
+                column_count = cursor.fetchone()[0]
+
+                # آپدیت یا ایجاد در مدل دجانگو
+                obj, created = Mtables.objects.update_or_create(
+                    schema_name=schema_name,
+                    name=table_name,
+                    defaults={
+                        'row_count': row_count,
+                        'cloumn_count': column_count,
+                        'last_update_time': timezone.now(),
+                        'in_use': obj.in_use if 'obj' in locals() else False,
+                        'none_use': obj.none_use if 'obj' in locals() else False,
+                        'update_duration': 0.0,
+                    }
+                )
+                updated_count += 1
+                print(f"✓ آپدیت شد: {full_table_name} | سطر: {row_count:,} | ستون: {column_count}")
+
+            except Exception as e:
+                error_count += 1
+                print(f"✗ خطا در خواندن جدول: {full_table_name} | خطا: {e}")
+
+                # اختیاری: ذخیره حداقل اطلاعات با row_count=0
+                try:
+                    Mtables.objects.update_or_create(
+                        schema_name=schema_name,
+                        name=table_name,
+                        defaults={
+                            'row_count': 0,
+                            'cloumn_count': 0,
+                            'last_update_time': timezone.now(),
+                            'in_use': False,
+                            'none_use': False,
+                        }
+                    )
+                except Exception as inner_e:
+                    print(f"   → ذخیره حداقلی هم ناموفق بود: {inner_e}")
+
+        conn.close()
+        t_end = time.time()
+        total_time = t_end - t0
+
+        # نمایش پیام در ادمین
+        messages.success(request, f"✅ آپدیت جداول محک با موفقیت انجام شد.\n"
+                                  f"تعداد: {updated_count}, خطا: {error_count}, "
+                                  f"زمان کل: {total_time:.2f} ثانیه")
+
+        print(f"✅ آپدیت با موفقیت انجام شد. "
+              f"تعداد: {updated_count}, خطا: {error_count}, زمان: {total_time:.2f} ثانیه")
+
+    except Exception as e:
+        print(f"❌ خطا در اتصال به دیتابیس محک: {e}")
+        messages.error(request, f"❌ اتصال به محک ناموفق بود: {e}")
+
+    return redirect('/updatedb')
 def Kala_group(request):
     # دریافت کالاهای موجود در جزئیات فاکتور
     # WordCount.objects.all().delete()

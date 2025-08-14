@@ -13,13 +13,15 @@ from django.db.models import Sum, Min
 # Create your models here.
 
 
+
 class Mtables(models.Model):
     in_use = models.BooleanField(default=False, verbose_name='در حال استفاده است')
-    none_use = models.BooleanField(default=False, verbose_name=' بدون استفاده')
+    none_use = models.BooleanField(default=False, verbose_name='بدون استفاده')
+    schema_name = models.CharField(max_length=150,blank=True,null=True,default='dbo',verbose_name='نام اسکیما',db_index=True)
     name = models.CharField(blank=True, null=True, max_length=150, verbose_name='نام جدول')
     description = models.CharField(blank=True, null=True, max_length=150, verbose_name='توضیح')
-    row_count = models.IntegerField(blank=True, null=True, default=0, verbose_name='تعداد ردیف ها')
-    cloumn_count = models.IntegerField(blank=True, null=True, default=0, verbose_name='تعداد ستون ها')
+    row_count = models.IntegerField(blank=True, null=True, default=0, verbose_name='تعداد ردیف‌ها')
+    cloumn_count = models.IntegerField(blank=True, null=True, default=0, verbose_name='تعداد ستون‌ها')  # نگران تایپو نباش
     last_update_time = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='آخرین آپدیت')
     update_period = models.IntegerField(default=60, blank=True, null=True, verbose_name='بازه به‌روزرسانی (دقیقه)')
     update_duration = models.FloatField(blank=True, null=True, verbose_name='مدت زمان به‌روزرسانی (ثانیه)')
@@ -29,9 +31,13 @@ class Mtables(models.Model):
         verbose_name = 'جدول محک'
         verbose_name_plural = 'جداول محک'
         ordering = ['update_priority']
+        # ✅ اضافه کردن unique_together برای جلوگیری از تکرار
+        unique_together = ('schema_name', 'name')  # مهم: جلوگیری از تکرار جدول با همان نام و اسکیما
 
     def __str__(self):
-        return self.name
+        if self.schema_name and self.name:
+            return f"{self.schema_name}.{self.name}"
+        return self.name or "جدول ناشناس"
 
 
 class KalaGroupinfo(models.Model):
