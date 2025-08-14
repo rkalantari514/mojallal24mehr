@@ -120,20 +120,25 @@ def connect_to_mahak():
         if sn == 'RP-MAHAK':
             # استفاده از احراز هویت SQL Server
             conn_str = (
-                f"Driver={{SQL Server}};"  # ⚠️ درایور قدیمی
+                f"Driver={{ODBC Driver 17 for SQL Server}};"
+                # f"Driver={{SQL Server}};"  # ⚠️ درایور قدیمی
                 f"Server={server};"
                 f"Database={database};"
                 f"UID=sa;"
                 f"PWD=6070582;"
                 f"TrustServerCertificate=yes;"  # مهم برای اتصال بدون خطای SSL
+                f"Trusted_Connection=yes;"
+
             )
         else:
             # استفاده از احراز هویت ویندوز
             conn_str = (
-                # f"Driver={{ODBC Driver 17 for SQL Server}};"
-                f"Driver={{SQL Server}};"  # ⚠️ درایور قدیمی
+                f"Driver={{ODBC Driver 17 for SQL Server}};"
+                # f"Driver={{SQL Server}};"  # ⚠️ درایور قدیمی
                 f"Server={server};"
                 f"Database={database};"
+                f"Trusted_Connection=yes;"
+                f"TrustServerCertificate=yes;"
                 # f"UID=sa;"
                 # f"PWD=6070582;"
             )
