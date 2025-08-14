@@ -133,8 +133,8 @@ def connect_to_mahak():
         else:
             # استفاده از احراز هویت ویندوز
             conn_str = (
-                f"Driver={{ODBC Driver 17 for SQL Server}};"
-                # f"Driver={{SQL Server}};"  # ⚠️ درایور قدیمی
+                # f"Driver={{ODBC Driver 17 for SQL Server}};"
+                f"Driver={{SQL Server}};"  # ⚠️ درایور قدیمی
                 f"Server={server};"
                 f"Database={database};"
                 f"Trusted_Connection=yes;"
@@ -146,7 +146,7 @@ def connect_to_mahak():
         # اضافه کردن timeout برای جلوگیری از معلق ماندن
         conn = pyodbc.connect(conn_str, timeout=30)
         print(f"Connected to {server} | DB: {database}")
-        return conn
+        return conn, database  # ✅ برگرداندن هم اتصال، هم نام دیتابیس
 
     except pyodbc.Error as e:
         print(f"Database connection failed: {e}")
@@ -1560,7 +1560,7 @@ def UpdateKala(request):
     return redirect('/updatedb')
 
 
-def UpdatePerson(request):
+def UpdatePerson0523(request):
     send_to_admin('شروع آپدیت افراد')
     t0 = time.time()
     print('🚀 شروع آپدیت افراد --------------------------------------------')
@@ -1663,7 +1663,179 @@ def UpdatePerson(request):
         conn.close()
     return redirect('/updatedb')
 
+# qwen 1404/05/23
+import time
+import os
+import pyodbc
+from django.db import transaction
+from django.db.models import Count, Min, Value, Case
+from django.db.models.functions import Concat
+from django.shortcuts import redirect
+from django.utils import timezone
 
+def UpdatePerson(request):
+    send_to_admin('شروع آپدیت افراد')
+    t0 = time.time()
+    print('🚀 شروع آپدیت افراد --------------------------------------------')
+
+    try:
+        # 🔹 اتصال به دیتابیس محک + دریافت نام دیتابیس
+        conn, db_name = connect_to_mahak()
+        cursor = conn.cursor()
+        t1 = time.time()
+        print(f"✅ اتصال موفق به دیتابیس: {db_name}")
+
+        # 🔹 دریافت mapping AccDetailsCollection
+        cursor.execute("""
+            SELECT AccDetailCode, AccountCode 
+            FROM AccDetailsCollection 
+            WHERE AccDetailsTypesID = 1
+        """)
+        acc_details_mapping = {}
+        for row in cursor.fetchall():
+            try:
+                code = int(row[0])
+                acc_details_mapping[code] = row[1]
+            except (ValueError, TypeError):
+                continue  # نادیده گرفتن کدهای نامعتبر
+
+        # 🔹 دریافت داده‌های PerInf با نام دیتابیس پویا
+        query = f"""
+            SELECT [code], [Name], [LName], [GrpCode], [Tel1], [Tel2], [Fax], [Mobile], [Addr1], [Comment]
+            FROM [{db_name}].[dbo].[PerInf]
+        """
+        cursor.execute(query)
+        mahak_data = cursor.fetchall()
+        existing_codes = set()
+
+        persons_to_create = []
+        persons_to_update = []
+        created_codes_in_run = set()
+
+        # 🔹 آماده‌سازی دیکشنری از افراد فعلی در دیتابیس محلی
+        current_persons = {p.code: p for p in Person.objects.all()}
+
+        for row in mahak_data:
+            try:
+                code = int(row[0])
+            except (ValueError, TypeError):
+                print(f"⚠️ کد نامعتبر نادیده گرفته شد: {row[0]}")
+                continue
+
+            existing_codes.add(code)
+
+            # محاسبه per_taf_value
+            raw_per_taf = acc_details_mapping.get(code)
+            per_taf_value = 0
+            if raw_per_taf is not None:
+                try:
+                    per_taf_value = int(raw_per_taf)
+                except (ValueError, TypeError):
+                    per_taf_value = 0
+
+            defaults = {
+                'grpcode': row[3] or 0,
+                'name': (row[1] or '').strip(),
+                'lname': (row[2] or '').strip(),
+                'tel1': (row[4] or '').strip(),
+                'tel2': (row[5] or '').strip(),
+                'fax': (row[6] or '').strip(),
+                'mobile': (row[7] or '').strip(),
+                'address': (row[8] or '').strip(),
+                'comment': (row[9] or '').strip(),
+                'per_taf': per_taf_value,
+            }
+
+            if code in current_persons:
+                person = current_persons[code]
+                # بررسی تغییر در فیلدها
+                if any(getattr(person, k, None) != v for k, v in defaults.items()):
+                    for k, v in defaults.items():
+                        setattr(person, k, v)
+                    persons_to_update.append(person)
+            elif code not in created_codes_in_run:
+                persons_to_create.append(Person(code=code, **defaults))
+                created_codes_in_run.add(code)
+
+        # 🔥 اجرای عملیات دسته‌ای در تراکنش
+        with transaction.atomic():
+            if persons_to_create:
+                try:
+                    Person.objects.bulk_create(persons_to_create, batch_size=1000, ignore_conflicts=True)
+                    print(f"✅ {len(persons_to_create)} فرد جدید ایجاد شد")
+                except Exception as e:
+                    print(f"❌ خطا در ایجاد فرد جدید: {e}")
+
+            if persons_to_update:
+                Person.objects.bulk_update(
+                    persons_to_update,
+                    fields=[
+                        'grpcode', 'name', 'lname', 'tel1', 'tel2', 'fax',
+                        'mobile', 'address', 'comment', 'per_taf'
+                    ],
+                    batch_size=1000
+                )
+                print(f"✅ {len(persons_to_update)} فرد به‌روزرسانی شد")
+
+            # 🔴 حذف افرادی که در منبع وجود ندارند
+            deleted_count, _ = Person.objects.exclude(code__in=existing_codes).delete()
+            print(f"🗑️ {deleted_count} فرد حذف شد (در منبع موجود نبودند)")
+
+        # 🗑️ حذف رکوردهای تکراری (نگه‌داری قدیمی‌ترین)
+        duplicate_ids = (
+            Person.objects.values('code')
+            .annotate(min_id=Min('id'))
+            .values('min_id')
+        )
+        deleted_dupes, _ = Person.objects.exclude(id__in=duplicate_ids).delete()
+        print(f"🧹 {deleted_dupes} رکورد تکراری حذف شد")
+
+        # 🧹 پر کردن clname برای افرادی که خالی است
+        null_clname = Person.objects.filter(clname__isnull=True).exclude(name='', lname='')
+        updated_clname_count = 0
+        for person in null_clname:
+            person.clname = person.cleaned_name()
+            person.save(update_fields=['clname'])
+            updated_clname_count += 1
+        print(f"🔤 {updated_clname_count} نام مخاطب (clname) به‌روز شد")
+
+        # 📊 آمار و به‌روزرسانی جدول Mtables
+        tend = time.time()
+        total_time = tend - t0
+        db_time = t1 - t0
+        update_time = tend - t1
+
+        print(f"✅ آپدیت افراد با موفقیت انجام شد.")
+        print(f"🕒 زمان کل: {total_time:.2f} ثانیه")
+        print(f"🔗 اتصال به دیتابیس: {db_time:.2f} ثانیه")
+        print(f"🔄 زمان پردازش: {update_time:.2f} ثانیه")
+
+        # 🔹 به‌روزرسانی آمار در Mtables
+        try:
+            table = Mtables.objects.filter(name='PerInf').last()
+            if table:
+                table.last_update_time = timezone.now()
+                table.update_duration = update_time
+                table.row_count = Person.objects.count()
+                table.cloumn_count = 10  # تعداد ستون‌های مدل Person (یا بگیرید از INFORMATION_SCHEMA)
+                table.save()
+        except Exception as e:
+            print(f"⚠️ خطا در به‌روزرسانی Mtables: {e}")
+
+        send_to_admin('آپدیت افراد با موفقیت انجام شد')
+
+    except Exception as e:
+        print(f"❌ خطای داخلی در UpdatePerson: {e}")
+        send_to_admin(f'خطا در آپدیت افراد: {str(e)}')
+        # نمایش خطای دقیق در محیط توسعه — در محیط تولید حذف شود
+        raise
+
+    finally:
+        if 'conn' in locals() and conn:
+            conn.close()
+            print("🔌 اتصال به محک بسته شد")
+
+    return redirect('/updatedb')
 def UpdatePerson2(request):
     send_to_admin('شروع آپدیت افراد')
     t0 = time.time()
