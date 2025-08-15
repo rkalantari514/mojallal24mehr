@@ -1300,7 +1300,7 @@ from decimal import Decimal
 
 
 @login_required(login_url='/login')
-def HesabMoshtariDetail(request, tafsili):
+def HesabMoshtariDetail0524(request, tafsili):
     start_time = time.time()  # زمان شروع تابع
 
     name = 'جزئیات حساب مشتری'
@@ -1580,6 +1580,268 @@ def HesabMoshtariDetail(request, tafsili):
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
     # return render(request, 'moshrari_detail.html', context)
     return render(request, 'master_moshrari_detail.html', context)
+
+from django.core.cache import cache
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from datetime import timedelta
+from dateutil.relativedelta import relativedelta
+from jdatetime import date as jdate
+from django.db.models import Sum, Min, Max
+from django.core.cache import cache
+import time
+import re
+
+
+# byqwen 1404.05.14
+@login_required(login_url='/login')
+def HesabMoshtariDetail(request, tafsili):
+    start_time = time.time()
+
+    # بررسی دسترسی
+    name = 'جزئیات حساب مشتری'
+    result = page_permision(request, name)
+    if result:
+        return result
+
+    user = request.user
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='حساب مشتری', code=tafsili)
+
+    # کش MasterInfo
+    master_info = cache.get('active_master_info')
+    if not master_info:
+        master_info = MasterInfo.objects.filter(is_active=True).last()
+        if master_info:
+            cache.set('active_master_info', master_info, 3600)  # 1 ساعت
+    acc_year = master_info.acc_year
+    base_year = acc_year - 1
+
+    # گرفتن اسناد مشتری
+    asnad = (SanadDetail.objects
+             .filter(kol=103, tafzili=tafsili, is_active=True)
+             .exclude(sharh__contains='بستن حساب هاي دارائي')
+             .order_by('date'))
+
+    # محاسبه مانده تجمعی
+    mandeh = 0
+    for s in asnad:
+        mandeh += s.curramount
+        s.mandeh = mandeh
+
+    # جمع‌بندی داده‌ها بر اساس سال و تاریخ (برای نمودار)
+    from collections import defaultdict
+    yearly_data = defaultdict(lambda: defaultdict(float))
+    for s in asnad:
+        yearly_data[s.acc_year][str(s.date)] += float(s.curramount or 0)
+
+    # محاسبه تاریخ‌های پایه (سال قبل)
+    base_year_dates = SanadDetail.objects.filter(acc_year=base_year).aggregate(
+        min_date=Min('date'),
+        max_date=Max('date')
+    )
+    start_date = base_year_dates['min_date']
+    end_date = base_year_dates['max_date']
+
+    chart_labels = []
+    chart_date = []
+    year_list = []
+
+    if start_date and end_date:
+        # ساخت لیست تاریخ‌های سال پایه
+        current = start_date
+        date_list_miladi = []
+        while current <= end_date:
+            date_list_miladi.append(current)
+            current += timedelta(days=1)
+
+        # شیفت به سال جاری (acc_year): +1 سال
+        acc_date_list_miladi = [d + relativedelta(years=1) for d in date_list_miladi]
+
+        # تبدیل به شمسی برای نمایش
+        chart_labels = [
+            jdate.fromgregorian(date=d).strftime('%Y-%m-%d')
+            for d in acc_date_list_miladi
+        ]
+
+        # ساخت خطوط نمودار برای هر سال
+        year_list = sorted(yearly_data.keys())
+        acc_days = 0
+
+        for year in year_list:
+            delta = year - acc_year
+            daily_totals = yearly_data[year]
+            cumulative = 0
+            chart_y = []
+            l_start = False
+            l_finish = False
+
+            for acc_date in acc_date_list_miladi:
+                # تاریخ متناظر در سال `year`
+                by_date = acc_date + relativedelta(years=delta)
+                str_by_date = str(by_date)
+
+                # متوقف در امروز (فقط برای سال جاری)
+                if year == acc_year and not l_finish and acc_date > timezone.now().date():
+                    l_finish = True
+
+                # اگر داده‌ای در این تاریخ وجود داشت
+                if str_by_date in daily_totals:
+                    amount = daily_totals[str_by_date]
+                    if not l_start and amount != 0:
+                        l_start = True
+                    if l_start and not l_finish:
+                        cumulative += amount
+
+                # اضافه کردن مقدار یا خط تیره
+                if l_start and not l_finish:
+                    chart_y.append(cumulative)
+                    if year == acc_year:
+                        acc_days += 1
+                else:
+                    chart_y.append('-')
+
+            chart_date.append(chart_y)
+
+        # محاسبه میانگین
+        all_vals = [v for line in chart_date for v in line if v != '-']
+        ave = sum(all_vals) / len(all_vals) if all_vals else 0
+        average_line = [ave] * len(chart_labels)
+        chart_date.insert(0, average_line)
+        year_list.insert(0, 'میانگین')
+    else:
+        acc_days = 0
+        ave = 0
+
+    # گرفتن اطلاعات مشتری
+    hesabmoshtari = (BedehiMoshtari.objects
+                     .filter(tafzili=tafsili)
+                     .select_related('person')
+                     .last())
+
+    person = hesabmoshtari.person if hesabmoshtari else None
+    amani = GoodConsign.objects.filter(per_code=person.code) if person else None
+
+    # فرم‌ها
+    sms_form = SMSTrackingForm(customer=hesabmoshtari)
+    call_form = CallTrackingForm(customer=hesabmoshtari)
+
+    # پردازش POST
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'send_sms':
+            sms_form = SMSTrackingForm(request.POST, customer=hesabmoshtari)
+            if sms_form.is_valid():
+                phone_number = sms_form.cleaned_data.get('phone_number')
+                sample_sms = sms_form.cleaned_data.get('sample_sms')
+                message = sms_form.cleaned_data.get('message')
+
+                if not sample_sms and not message:
+                    sms_form.add_error('message', "حداقل یکی از فیلدهای متن پیامک یا پیامک نمونه باید مقدار داشته باشد.")
+                else:
+                    message_to_send = f'مشتری گرامی\n{hesabmoshtari.person.clname}\n'
+                    if sample_sms:
+                        message_to_send += sample_sms.text
+                    if message:
+                        message_to_send += f'\n{message}'
+
+                    # ارسال پیامک
+                    message_id = send_sms(phone_number or user.mobile_number, message_to_send)
+
+                    if message_id:
+                        try:
+                            track_kind = TrackKinde.objects.get(kind_name="پیامک")
+                        except TrackKinde.DoesNotExist:
+                            track_kind = None
+                            sms_form.add_error(None, "نوع پیگیری 'پیامک' در سیستم وجود ندارد.")
+
+                        if track_kind:
+                            tracking = sms_form.save(commit=False)
+                            tracking.customer = hesabmoshtari
+                            tracking.message_to_send = message_to_send
+                            tracking.created_by = user
+                            tracking.track_kind = track_kind
+                            tracking.message_id = message_id
+                            tracking.save()
+                            return redirect(f'/acc/jariashkhas/moshtari/{tafsili}')
+                    else:
+                        sms_form.add_error('phone_number', "ارسال پیامک موفقیت‌آمیز نبود.")
+
+        elif action == 'track_call':
+            call_form = CallTrackingForm(request.POST, customer=hesabmoshtari)
+            if call_form.is_valid():
+                try:
+                    track_kind = TrackKinde.objects.get(kind_name="تماس تلفنی")
+                except TrackKinde.DoesNotExist:
+                    track_kind = None
+                    call_form.add_error(None, "نوع پیگیری 'تماس تلفنی' در سیستم وجود ندارد.")
+
+                if track_kind:
+                    tracking = call_form.save(commit=False)
+                    tracking.customer = hesabmoshtari
+                    tracking.track_kind = track_kind
+                    tracking.created_by = user
+                    tracking.call_duration = int(request.POST.get('call_duration', 0))
+                    tracking.phone_number = call_form.cleaned_data.get('phone_number')
+                    tracking.next_reminder_date = call_form.cleaned_data['next_reminder_date']
+                    tracking.save()
+                    return redirect(f'/acc/jariashkhas/moshtari/{tafsili}')
+
+    # دریافت رکوردهای پیگیری
+    tracking = (Tracking.objects
+                .filter(customer=hesabmoshtari)
+                .select_related('track_kind', 'created_by')
+                .order_by('-id'))
+
+    # به‌روزرسانی وضعیت پیامک‌ها
+    for t in tracking:
+        if t.message_id and t.status_code not in [2, 3, 4]:
+            try:
+                status = check_sms_status(t.message_id)
+                if status in [2, 3, 4]:
+                    t.status_code = status
+                    t.save()
+            except:
+                pass
+
+    # محاسبات مالی
+    monthly_rate = master_info.monthly_rate
+    khab = True
+    if hesabmoshtari.sleep_investment and hesabmoshtari.sleep_investment > 0:
+        khab = False
+
+    try:
+        bar_mali = (hesabmoshtari.sleep_investment or 0) / 30 * monthly_rate / 100
+    except:
+        bar_mali = 0
+
+    # context نهایی
+    context = {
+        'title': 'حساب مشتری',
+        'hesabmoshtari': hesabmoshtari,
+        'user': user,
+        'today': timezone.now().date().isoformat(),
+        'asnad': asnad,
+        'm_name': None,
+        'sms_form': sms_form,
+        'call_form': call_form,
+        'tracking': tracking,
+        'khab': khab,
+        'acc_days': acc_days,
+        'ave': ave,
+        'khab2': acc_days * ave / 10,
+        'bar_mali': bar_mali,
+        'chart_labels': chart_labels,
+        'chart_date': chart_date,
+        'year_list': year_list,
+        'amani': amani,
+    }
+
+    print(f"زمان اجرا: {time.time() - start_time:.2f} ثانیه")
+    return render(request, 'master_moshrari_detail.html', context)
+
 
 
 from django.utils import timezone
