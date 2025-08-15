@@ -42,102 +42,126 @@
                 <div class="col-xl-12 mb-30">
                     <div class="card mb-30 about-me">
                         <div class="card-body">
-                            <h5 class="card-title">اطلاعات مشتری</h5>
+                            <h5 class="card-title">اطلاعات طرف حساب</h5>
 
-                            {% with person=hesabmoshtari.person %}
+                            {% with person=hesabmoshtari.person amani_list=amani %}
                                 {% if person %}
-                                    <p><strong>{{ person.clname }}</strong></p>
+                                    <!-- نمایش نام با پیشوند -->
+                                    <p class="font-weight-bold">
+                                        {% if person.prefix %}{{ person.prefix }} {% endif %}
+                                        {{ person.clname }}
+                                    </p>
 
-                                    <ul class="list-unstyled">
+                                    <ul class="list-unstyled" style="text-align: right; direction: rtl;">
                                         {# موبایل #}
                                         {% if person.mobile %}
-                                            <li class="list-item">
-                                                <span class="text-success ti-mobile"></span>
-                                                {{ person.mobile }}
+                                            <li class="list-item d-flex align-items-center" style="margin-bottom: 8px;">
+                                                <span class="ti-mobile text-success ml-2"
+                                                      style="font-size: 1.2em;"></span>
+                                                <span>{{ person.mobile }}</span>
                                             </li>
                                         {% endif %}
 
                                         {# تلفن 1 #}
                                         {% if person.tel1 %}
-                                            <li class="list-item">
-                                                <span class="text-primary ti-headphone-alt"></span>
-                                                {{ person.tel1 }}
+                                            <li class="list-item d-flex align-items-center" style="margin-bottom: 8px;">
+                                                <span class="ti-headphone-alt text-primary ml-2"
+                                                      style="font-size: 1.2em;"></span>
+                                                <span>{{ person.tel1 }}</span>
                                             </li>
                                         {% endif %}
 
                                         {# تلفن 2 #}
                                         {% if person.tel2 %}
-                                            <li class="list-item">
-                                                <span class="text-primary ti-headphone-alt"></span>
-                                                {{ person.tel2 }}
+                                            <li class="list-item d-flex align-items-center" style="margin-bottom: 8px;">
+                                                <span class="ti-headphone-alt text-primary ml-2"
+                                                      style="font-size: 1.2em;"></span>
+                                                <span>{{ person.tel2 }}</span>
                                             </li>
                                         {% endif %}
 
                                         {# فکس #}
                                         {% if person.fax %}
-                                            <li class="list-item">
-                                                <span class="text-muted ti-printer"></span>
-                                                {{ person.fax }}
+                                            <li class="list-item d-flex align-items-center" style="margin-bottom: 8px;">
+                                                <span class="ti-printer text-muted ml-2"
+                                                      style="font-size: 1.2em;"></span>
+                                                <span>{{ person.fax }}</span>
                                             </li>
                                         {% endif %}
 
-                                        {# ایمیل — فقط اگر comname شبیه ایمیل باشد #}
-                                        {% if person.comname and person.comname|slice:":" in "@" %}
-                                            <li class="list-item">
-                                                <span class="text-info ti-email"></span>
-                                                {{ person.comname }}
+                                        {# ایمیل — تشخیص از طریق @ #}
+                                        {% if person.comname and "@" in person.comname %}
+                                            <li class="list-item d-flex align-items-center" style="margin-bottom: 8px;">
+                                                <span class="ti-email text-info ml-2" style="font-size: 1.2em;"></span>
+                                                <span>{{ person.comname }}</span>
                                             </li>
                                         {% endif %}
 
                                         {# نام شرکت / معرف #}
-                                        {% if person.comname and person.comname|slice:":" not in "@" %}
-                                            <li class="list-item">
-                                                <span class="text-warning ti-briefcase"></span>
-                                                {{ person.comname }}
+                                        {% if person.comname and "@" not in person.comname %}
+                                            <li class="list-item d-flex align-items-center" style="margin-bottom: 8px;">
+                                                <span class="ti-briefcase text-warning ml-2"
+                                                      style="font-size: 1.2em;"></span>
+                                                <span>{{ person.comname }}</span>
                                             </li>
                                         {% endif %}
 
                                         {# کد معرف #}
                                         {% if person.identifier %}
-                                            <li class="list-item">
-                                                <span class="text-dark ti-id-badge"></span>
-                                                کد معرف: {{ person.identifier }}
+                                            <li class="list-item d-flex align-items-center" style="margin-bottom: 8px;">
+                                                <span class="ti-id-badge text-dark ml-2"
+                                                      style="font-size: 1.2em;"></span>
+                                                <span>کد معرف: {{ person.identifier }}</span>
                                             </li>
                                         {% endif %}
 
                                         {# آدرس 1 #}
                                         {% if person.address %}
-                                            <li class="list-item">
-                                                <span class="text-danger ti-location-pin"></span>
-                                                {{ person.address }}
+                                            <li class="list-item d-flex align-items-center" style="margin-bottom: 8px;">
+                                                <span class="ti-location-pin text-danger ml-2"
+                                                      style="font-size: 1.2em;"></span>
+                                                <span>{{ person.address }}</span>
                                             </li>
                                         {% endif %}
 
                                         {# آدرس 2 #}
                                         {% if person.address2 %}
-                                            <li class="list-item">
-                                                <span class="text-danger ti-location-pin"></span>
-                                                {{ person.address2 }}
+                                            <li class="list-item d-flex align-items-center" style="margin-bottom: 8px;">
+                                                <span class="ti-location-pin text-danger ml-2"
+                                                      style="font-size: 1.2em;"></span>
+                                                <span>{{ person.address2 }}</span>
                                             </li>
                                         {% endif %}
 
-                                        {# توضیحات #}
+                                        {# توضیحات شخص #}
                                         {% if person.comment %}
-                                            <li class="list-item">
-                                                <span class="text-secondary ti-comments-smiley"></span>
-                                                {{ person.comment|truncatechars:100 }}
+                                            <li class="list-item d-flex align-items-center" style="margin-bottom: 8px;">
+                                                <span class="ti-comments-smiley text-secondary ml-2"
+                                                      style="font-size: 1.2em;"></span>
+                                                <span>{{ person.comment|truncatechars:100 }}</span>
                                             </li>
                                         {% endif %}
+
+                                        {# توضیحات حواله‌های امانی (amani) #}
+                                        {% for item in amani_list %}
+                                            {% if item.comment %}
+                                                <li class="list-item d-flex align-items-center"
+                                                    style="margin-bottom: 8px;">
+                                                    <span class="ti-package text-info ml-2"
+                                                          style="font-size: 1.2em;"></span>
+                                                    <span>توضیحات امانی (حواله {{ item.code }}): {{ item.comment|truncatechars:100 }}</span>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
                                     </ul>
                                 {% else %}
-                                    <p>اطلاعات مشتری یافت نشد.</p>
+                                    <p>اطلاعات طرف حساب یافت نشد.</p>
                                 {% endif %}
                             {% endwith %}
                         </div>
                     </div>
                 </div>
             </div>
-
 
             <!-- ردیف اول خلاصه ها -->
             <div class="row">
