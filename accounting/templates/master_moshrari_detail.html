@@ -35,6 +35,110 @@
                     </ol>
                 </div>
             </div>
+
+
+            <!-- ردیف درباره مشتری -->
+            <div class="row">
+                <div class="col-xl-12 mb-30">
+                    <div class="card mb-30 about-me">
+                        <div class="card-body">
+                            <h5 class="card-title">اطلاعات مشتری</h5>
+
+                            {% with person=hesabmoshtari.person %}
+                                {% if person %}
+                                    <p><strong>{{ person.clname }}</strong></p>
+
+                                    <ul class="list-unstyled">
+                                        {# موبایل #}
+                                        {% if person.mobile %}
+                                            <li class="list-item">
+                                                <span class="text-success ti-mobile"></span>
+                                                {{ person.mobile }}
+                                            </li>
+                                        {% endif %}
+
+                                        {# تلفن 1 #}
+                                        {% if person.tel1 %}
+                                            <li class="list-item">
+                                                <span class="text-primary ti-headphone-alt"></span>
+                                                {{ person.tel1 }}
+                                            </li>
+                                        {% endif %}
+
+                                        {# تلفن 2 #}
+                                        {% if person.tel2 %}
+                                            <li class="list-item">
+                                                <span class="text-primary ti-headphone-alt"></span>
+                                                {{ person.tel2 }}
+                                            </li>
+                                        {% endif %}
+
+                                        {# فکس #}
+                                        {% if person.fax %}
+                                            <li class="list-item">
+                                                <span class="text-muted ti-printer"></span>
+                                                {{ person.fax }}
+                                            </li>
+                                        {% endif %}
+
+                                        {# ایمیل — فقط اگر comname شبیه ایمیل باشد #}
+                                        {% if person.comname and person.comname|slice:":" in "@" %}
+                                            <li class="list-item">
+                                                <span class="text-info ti-email"></span>
+                                                {{ person.comname }}
+                                            </li>
+                                        {% endif %}
+
+                                        {# نام شرکت / معرف #}
+                                        {% if person.comname and person.comname|slice:":" not in "@" %}
+                                            <li class="list-item">
+                                                <span class="text-warning ti-briefcase"></span>
+                                                {{ person.comname }}
+                                            </li>
+                                        {% endif %}
+
+                                        {# کد معرف #}
+                                        {% if person.identifier %}
+                                            <li class="list-item">
+                                                <span class="text-dark ti-id-badge"></span>
+                                                کد معرف: {{ person.identifier }}
+                                            </li>
+                                        {% endif %}
+
+                                        {# آدرس 1 #}
+                                        {% if person.address %}
+                                            <li class="list-item">
+                                                <span class="text-danger ti-location-pin"></span>
+                                                {{ person.address }}
+                                            </li>
+                                        {% endif %}
+
+                                        {# آدرس 2 #}
+                                        {% if person.address2 %}
+                                            <li class="list-item">
+                                                <span class="text-danger ti-location-pin"></span>
+                                                {{ person.address2 }}
+                                            </li>
+                                        {% endif %}
+
+                                        {# توضیحات #}
+                                        {% if person.comment %}
+                                            <li class="list-item">
+                                                <span class="text-secondary ti-comments-smiley"></span>
+                                                {{ person.comment|truncatechars:100 }}
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                {% else %}
+                                    <p>اطلاعات مشتری یافت نشد.</p>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
             <!-- ردیف اول خلاصه ها -->
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
@@ -381,55 +485,56 @@
                 </div>
                 <!-- ردیف طلای امانی -->
                 {% if amani %}
-                <div class="col-xl-4 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="p-4 text-center bg-warning">
-                            <h5 class="mb-60 text-white"></h5>
-                        </div>
-                        <div class="card-body text-center">
-                            <div class="avatar-top">
-                                <img class="img-fluid w-25 rounded-circle " src="{% static 'images/gold_baskt.jpg' %}"
-                                     alt="">
+                    <div class="col-xl-4 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="p-4 text-center bg-warning">
+                                <h5 class="mb-60 text-white"></h5>
                             </div>
-                            <div class="card-body">
-                                <div class="clearfix">
-                                    <div class="float-left icon-box bg-warning rounded-circle">
+                            <div class="card-body text-center">
+                                <div class="avatar-top">
+                                    <img class="img-fluid w-25 rounded-circle "
+                                         src="{% static 'images/gold_baskt.jpg' %}"
+                                         alt="">
+                                </div>
+                                <div class="card-body">
+                                    <div class="clearfix">
+                                        <div class="float-left icon-box bg-warning rounded-circle">
                   <span class="text-white">
                     <i class="fa fa-lock highlight-icon" aria-hidden="true"></i>
                   </span>
-                                    </div>
-                                    <div class="float-right text-right">
-                                        <h4>لیست طلای امانی</h4>
+                                        </div>
+                                        <div class="float-right text-right">
+                                            <h4>لیست طلای امانی</h4>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <table class="table center-aligned-table mb-0">
-                                <thead>
-                                <tr class="text-dark">
-                                    <th>ردیف</th>
-                                    <th>کد حواله</th>
-                                    <th>وزن</th>
-                                    <th>تاریخ</th>
-                                    <th>توضیحات</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for a in amani %}
-                                    <tr>
-                                        <td>{{ forloop.counter }}</td>
-                                        <td>{{ a.code }}</td>
-                                        <td>{{ a.amount1|floatformat:2 }}</td>
-                                        <td>{{ a.p_date }}</td>
-                                        <td>{{ a.comment }}</td>
-
+                                <table class="table center-aligned-table mb-0">
+                                    <thead>
+                                    <tr class="text-dark">
+                                        <th>ردیف</th>
+                                        <th>کد حواله</th>
+                                        <th>وزن</th>
+                                        <th>تاریخ</th>
+                                        <th>توضیحات</th>
                                     </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                    {% for a in amani %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ a.code }}</td>
+                                            <td>{{ a.amount1|floatformat:2 }}</td>
+                                            <td>{{ a.p_date }}</td>
+                                            <td>{{ a.comment }}</td>
 
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+
+                            </div>
                         </div>
                     </div>
-                </div>
                 {% endif %}
             </div>
 
