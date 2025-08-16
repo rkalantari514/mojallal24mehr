@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import CreateReport, Home1, CreateMonthlyReport, ReportsDailySummary, ReportsDailyDetile, CreateTotalReport, \
-    CalendarTotal, YealyChart, Home2
+    CalendarTotal, YealyChart, Home2, sales_expert_select
 
 urlpatterns = [
     path('', Home1,name="home1"),
@@ -15,7 +15,9 @@ urlpatterns = [
     path('create_total_report', CreateTotalReport,name="create-total-report"),
     path('createreport', CreateReport,name="create-report"),
     path('create_monthly_report', CreateMonthlyReport,name="create-monthly-report"),
+    path('create_monthly_report', CreateMonthlyReport,name="create-monthly-report"),
 
+    path('m', sales_expert_select, name='sales_expert_select'),
 
 ]
 

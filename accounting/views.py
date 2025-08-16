@@ -1748,7 +1748,9 @@ def HesabMoshtariDetail(request, tafsili):
                         message_to_send += f'\n{message}'
 
                     # ارسال پیامک
-                    message_id = send_sms(phone_number or user.mobile_number, message_to_send)
+                    if phone_number:
+                        # message_id = send_sms(phone_number, message_to_send)
+                        message_id = send_sms(user.mobile_number, message_to_send)
 
                     if message_id:
                         try:

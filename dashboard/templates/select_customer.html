@@ -1,0 +1,68 @@
+{% extends 'shared/_MainLayout.html' %}
+{% load static %}
+{% block content %}
+
+
+
+    <div class="content-wrapper">
+
+
+<div class="container py-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5>🔍 انتخاب مشتری</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-12">
+                    {{ form.bedehi_moshtari.label_tag }}
+                    {{ form.bedehi_moshtari }}
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success w-100">مشاهده جریان مالی</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $('.selectpicker').selectpicker({
+            noneSelectedText: 'یک مشتری انتخاب کنید...',
+            liveSearch: true,
+            liveSearchPlaceholder: 'جستجو...',
+            actionsBox: false
+        });
+    });
+</script>
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+{% block date %}
+
+
+{% endblock %}
+
+

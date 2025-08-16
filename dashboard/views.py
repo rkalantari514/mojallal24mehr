@@ -9,6 +9,7 @@ from django.shortcuts import render
 from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
 from custom_login.views import page_permision
+from .forms import SalesExpertForm
 from .models import MasterInfo, MasterReport, MonthlyReport
 from khayyam import JalaliDate
 from django.db.models import OuterRef, Subquery
@@ -1646,3 +1647,17 @@ def YealyChart(request):
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
 
     return render(request, 'yearly_report_chrat.html', context)
+
+
+
+
+def sales_expert_select(request):
+    form = SalesExpertForm(request.GET or None)
+    if form.is_valid():
+        bedehi = form.cleaned_data['bedehi_moshtari']
+        tafzili = bedehi.tafzili
+        return redirect(f'acc/jariashkhas/moshtari/{tafzili}')
+
+    return render(request, 'select_customer.html', {
+        'form': form,
+    })
