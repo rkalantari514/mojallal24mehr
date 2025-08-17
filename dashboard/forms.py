@@ -33,6 +33,7 @@ class SalesExpertForm(forms.Form):
             'data-width': '100%',
             'title': 'جستجوی مشتری بر اساس نام، کد یا تفصیلی...',
             'id': 'bedehi-selector',
+
         })
     )
 
