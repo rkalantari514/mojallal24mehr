@@ -1634,6 +1634,16 @@ def HesabMoshtariDetail(request, tafsili):
         mandeh += s.curramount
         s.mandeh = mandeh
 
+    mandeh = 0
+    for s in asnad:
+        mandeh += s.curramount
+        s.mandeh = mandeh
+
+    mandeh = 0
+    for s in asnad_table:
+        mandeh += s.curramount
+        s.asnad_table = mandeh
+
     # جمع‌بندی داده‌ها بر اساس سال و تاریخ (برای نمودار)
     from collections import defaultdict
     yearly_data = defaultdict(lambda: defaultdict(float))
