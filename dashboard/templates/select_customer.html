@@ -8,7 +8,7 @@
     <div class="container py-5">
         <div class="card shadow">
             <div class="card-header bg-primary text-white">
-                <h5>🔍 انتخاب مشتری</h5>
+                <h5>🔍 انتخاب مشتری - کارشناس فروش</h5>
             </div>
             <div class="card-body">
                 <form method="get" class="row g-3" id="customer-form">
@@ -17,7 +17,7 @@
                         {{ form.bedehi_moshtari }}
                     </div>
                     <div class="col-12">
-                        <button type="submit" class="btn btn-success w-100" id="submit-btn">
+                        <button type="submit" class="btn btn-success w-100">
                             باز کردن صفحه مشتری در تب جدید
                         </button>
                     </div>
@@ -31,7 +31,7 @@
 
 
 {% block date %}
-<!-- اطمینان از بارگذاری jQuery و Bootstrap Select -->
+<!-- وابستگی‌ها -->
 {#<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>#}
 {#<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>#}
 {#<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta2/css/bootstrap-select.min.css">#}
@@ -40,43 +40,40 @@
 <script>
     $(document).ready(function () {
         // فعال‌سازی کرکره جستجوپذیر
-        $('.selectpicker').selectpicker({
+        $('#bedehi-selector').selectpicker({
             noneSelectedText: 'یک مشتری انتخاب کنید...',
             liveSearch: true,
-            liveSearchPlaceholder: 'جستجو در نام، کد، تفصیلی...',
+            liveSearchPlaceholder: 'جستجو در کد، نام، تفصیلی...',
             actionsBox: false,
             style: 'btn-light',
             width: '100%'
         });
 
-        // ارسال فرم و باز کردن در تب جدید
+        // هنگام سابمیت فرم
         $('#customer-form').on('submit', function (e) {
-            e.preventDefault(); // جلوگیری از سابمیت عادی
+            e.preventDefault();
 
-            const selectedValue = $('#id_bedehi_moshtari').val();
+            // گرفتن مقدار انتخابی (همان tafzili)
+            const selectedTafzili = $('#bedehi-selector').selectpicker('val');
 
-            if (!selectedValue) {
+            if (!selectedTafzili) {
                 alert('لطفاً یک مشتری را انتخاب کنید.');
                 return;
             }
 
             // ساخت آدرس مقصد
-            const baseUrl = '/acc/jariashkhas/moshtari/';
-            const url = baseUrl + selectedValue + '/';
+            const url = `/acc/jariashkhas/moshtari/${selectedTafzili}/`;
 
             // باز کردن در تب جدید
             window.open(url, '_blank');
-
-            // (اختیاری) پاک کردن انتخاب بعد از باز کردن
-            // $('#id_bedehi_moshtari').selectpicker('deselectAll');
         });
     });
 </script>
 
 <style>
-    /* تنظیم عرض کرکره برای نمایش بهتر */
+    /* عرض بزرگ برای نمایش کامل اطلاعات */
     .bootstrap-select .dropdown-menu {
-        min-width: 600px;
+        min-width: 650px;
         white-space: nowrap;
         max-width: 90vw;
     }

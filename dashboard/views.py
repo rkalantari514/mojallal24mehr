@@ -1650,15 +1650,9 @@ def YealyChart(request):
 
 
 
+
 def sales_expert_select(request):
     form = SalesExpertForm(request.GET or None)
-    selected_tafzili = None
-
-    if form.is_valid():
-        bedehi = form.cleaned_data['bedehi_moshtari']
-        selected_tafzili = bedehi.tafzili
-
     return render(request, 'select_customer.html', {
         'form': form,
-        'selected_tafzili': selected_tafzili,
     })
