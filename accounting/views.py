@@ -1619,9 +1619,12 @@ def HesabMoshtariDetail(request, tafsili):
     base_year = acc_year - 1
 
     # گرفتن اسناد مشتری
-    asnad = (SanadDetail.objects
-             # .filter(kol=103, tafzili=tafsili, is_active=True)
+    asnad_table = (SanadDetail.objects
              .filter(kol=103, tafzili=tafsili)
+             .order_by('date'))
+
+    asnad = (SanadDetail.objects
+             .filter(kol=103, tafzili=tafsili, is_active=True)
              .exclude(sharh__contains='بستن حساب هاي دارائي')
              .order_by('date'))
 
@@ -1827,6 +1830,7 @@ def HesabMoshtariDetail(request, tafsili):
         'user': user,
         'today': timezone.now().date().isoformat(),
         'asnad': asnad,
+        'asnad_table': asnad_table,
         'm_name': None,
         'sms_form': sms_form,
         'call_form': call_form,
