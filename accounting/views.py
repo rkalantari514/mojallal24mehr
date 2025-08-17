@@ -1620,7 +1620,8 @@ def HesabMoshtariDetail(request, tafsili):
 
     # گرفتن اسناد مشتری
     asnad = (SanadDetail.objects
-             .filter(kol=103, tafzili=tafsili, is_active=True)
+             # .filter(kol=103, tafzili=tafsili, is_active=True)
+             .filter(kol=103, tafzili=tafsili)
              .exclude(sharh__contains='بستن حساب هاي دارائي')
              .order_by('date'))
 

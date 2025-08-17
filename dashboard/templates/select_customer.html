@@ -3,7 +3,36 @@
 {% load static %}
 
 {% block content %}
+<style>
+    /* راست‌چین کردن منوی bootstrap-select */
+    .bootstrap-select .dropdown-menu.inner {
+        text-align: right;
+        direction: rtl;
+        font-family: Tahoma, Arial, sans-serif;
+    }
 
+    /* راست‌چین کردن آیتم‌ها */
+    .bootstrap-select .dropdown-item {
+        text-align: right;
+        direction: rtl;
+        font-family: Tahoma, Arial, sans-serif;
+    }
+
+    /* تغییر جهت کل کرکره */
+    #bedehi-selector ~ .dropdown-menu,
+    .bootstrap-select .dropdown-menu.show {
+        text-align: right;
+        direction: rtl;
+        min-width: 650px !important;
+    }
+
+    /* نمایش متن انتخابی در فیلد اصلی */
+    .bootstrap-select > .dropdown-toggle {
+        text-align: right !important;
+        direction: rtl;
+        font-family: Tahoma, Arial, sans-serif;
+    }
+</style>
 <div class="content-wrapper">
     <div class="container py-5">
         <div class="card shadow">
