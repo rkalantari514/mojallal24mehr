@@ -33,15 +33,21 @@ class SalesExpertForm(forms.Form):
             'data-width': '100%',
             'title': 'جستجوی مشتری بر اساس نام، کد یا تفصیلی...',
             'id': 'bedehi-selector',
+            'style': 'direction: rtl; text-align: right; font-family: Tahoma, Arial, sans-serif; background-color: white;'
 
         })
     )
 
+    # forms.py
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        choices = [('', 'یک مشتری انتخاب کنید...')]
 
-        # فقط مشتریانی که person دارند و tafzili معتبر است
+        choices = []
+
+        # گزینه انتخاب کنید با data-content برای راست‌چین شدن
+        choices.append(('', '— یک مشتری انتخاب کنید —'))
+
+        # ... سایر گزینه‌ها
         queryset = BedehiMoshtari.objects.select_related('person').exclude(
             person__isnull=True
         ).exclude(tafzili__isnull=True).order_by('person__lname')
@@ -54,6 +60,6 @@ class SalesExpertForm(forms.Form):
             tafzili = obj.tafzili
 
             label = f"{code} | {tafzili} | {name} | {lname}"
-            choices.append((tafzili, label))  # tafzili به عنوان value
+            choices.append((tafzili, label))
 
         self.fields['bedehi_moshtari'].choices = choices
