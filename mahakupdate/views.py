@@ -3202,8 +3202,16 @@ import jdatetime
 import time
 import re
 
+from django.db import transaction
+from decimal import Decimal, InvalidOperation
+from datetime import datetime
+import jdatetime
+import time
+import re
+from django.utils import timezone
+
 #by qwen 14040528
-def UpdateSanadDetail_Qwen(request):
+def UpdateSanadDetail(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات سند ---------------------------------------------------')
 
@@ -3212,7 +3220,7 @@ def UpdateSanadDetail_Qwen(request):
     cursor = conn.cursor()
     t1 = time.time()
 
-    # دریافت داده‌های محک (فقط سال جاری یا محدوده منطقی)
+    # دریافت داده‌های محک
     cursor.execute("""
         SELECT code, radif, kol, moin, tafzili, sharh, bed, bes, Sanad_Code, Sanad_Type, 
                Meghdar, SysComment, CurrAmount, UserCreated, VoucherDate 
@@ -3220,8 +3228,10 @@ def UpdateSanadDetail_Qwen(request):
     """)
     mahakt_data = cursor.fetchall()
 
-    # تبدیل به مجموعه برای بررسی سریع
+    # تبدیل به مجموعه: (code, radif)
     existing_in_mahak = {(int(row[0]), int(row[1])) for row in mahakt_data}
+    existing_codes = {int(row[0]) for row in mahakt_data}  # فقط کدها
+
     print(f'تعداد رکوردهای موجود در Mahak: {len(existing_in_mahak):,}')
     send_to_admin(f'sanad detail: {len(existing_in_mahak):,} رکورد')
 
@@ -3230,39 +3240,32 @@ def UpdateSanadDetail_Qwen(request):
 
     BATCH_SIZE = 1000
 
-    # --- مرحله 1: حذف رکوردهای اضافی (غیرفعال در دیتابیس خارجی) ---
-    # این کار با یک دستور SQL ساده و سریع انجام می‌شه
-    # deleted_count = SanadDetail.objects.filter(acc_year=acc_year).exclude(
-    #     code__in=[k[0] for k in existing_in_mahak if k[0] is not None]
-    # ).delete()[0]
-    # print(f"حذف {deleted_count} رکورد اضافی")
-
-    # --- حذف رکوردهای اضافی در بچ‌های کوچک ---
-    existing_codes = {k[0] for k in existing_in_mahak if k[0] is not None}
-
-    # فقط IDهایی که کدشون در existing_codes نیست
-    ids_to_delete = SanadDetail.objects.filter(acc_year=acc_year) \
-        .exclude(code__in=existing_codes) \
-        .values_list('id', flat=True)
-
+    # --- مرحله 1: حذف رکوردهای اضافی به صورت ایمن (بدون too many SQL variables) ---
     deleted_count = 0
-    BATCH_SIZE_DELETE = 900
+    offset = 0
+    DELETE_BATCH = 500  # تعداد رکوردهای خوانده شده در هر مرحله
 
-    # تبدیل به لیست و پردازش در بچ‌ها
-    id_list = list(ids_to_delete)  # SQLite نمی‌تونه iterator بزرگ رو پردازش کنه
+    while True:
+        # خواندن بچ کوچک از دیتابیس (فقط id و code)
+        batch = list(
+            SanadDetail.objects
+            .filter(acc_year=acc_year)
+            .order_by('id')
+            .values_list('id', 'code')[offset:offset + DELETE_BATCH]
+        )
+        if not batch:
+            break
 
-    for i in range(0, len(id_list), BATCH_SIZE_DELETE):
-        batch_ids = id_list[i:i + BATCH_SIZE_DELETE]
-        count = SanadDetail.objects.filter(id__in=batch_ids).delete()[0]
-        deleted_count += count
+        # تشخیص رکوردهایی که کدشون در existing_codes نیست
+        ids_to_delete = [record_id for record_id, code in batch if code not in existing_codes]
 
-    print(f"حذف {deleted_count} رکورد اضافی با بچ‌های 900تایی")
+        if ids_to_delete:
+            count, _ = SanadDetail.objects.filter(id__in=ids_to_delete).delete()
+            deleted_count += count
 
+        offset += DELETE_BATCH
 
-
-
-
-
+    print(f"حذف {deleted_count} رکورد اضافی با روش ایمن")
 
     # --- مرحله 2: جمع‌آوری کلیدهای موجود در دیتابیس فعلی (فقط code, radif) ---
     current_keys = set(
@@ -3278,9 +3281,6 @@ def UpdateSanadDetail_Qwen(request):
             code = int(row[0])
             radif = int(row[1])
             key = (code, radif)
-
-            # فقط رکوردهای سال جاری رو پردازش کن
-            # اگر نیاز باشه، فیلتر اضافه کن (مثلاً براساس tarikh)
 
             kol = int(row[2]) if row[2] is not None else 0
             moin = int(row[3]) if row[3] is not None else 0
@@ -3301,7 +3301,7 @@ def UpdateSanadDetail_Qwen(request):
             if kol == 103:
                 person = Person.objects.filter(per_taf=tafzili).last()
 
-            # تبدیل تاریخ شمسی به میلادی (فقط برای ذخیره)
+            # تبدیل تاریخ شمسی به میلادی
             miladi_date = None
             if voucher_date and '/' in voucher_date:
                 try:
@@ -3310,9 +3310,8 @@ def UpdateSanadDetail_Qwen(request):
                 except:
                     miladi_date = None
 
-            # تعیین عمل: create یا update
+            # تعیین: create یا update
             if key in current_keys:
-                # آپدیت: فقط فیلدهای مهم رو چک کن
                 to_update.append(SanadDetail(
                     code=code, radif=radif,
                     kol=kol, moin=moin, tafzili=tafzili, sharh=sharh,
@@ -3356,12 +3355,11 @@ def UpdateSanadDetail_Qwen(request):
                 batch_size=BATCH_SIZE
             )
 
-    # --- مرحله 5: پردازش is_analiz و cheque_id (بدون حلقه) ---
-    # الگوی چک دریافتی
+    # --- مرحله 5: پردازش is_analiz و cheque_id ---
+    # الگوهای چک
     cheque_pattern_in = r'(چک\s*دريافتي|چک\s*درجريان\s*وصول).*?\(([\d/]+)\)'
     cheque_pattern_out = r'(چک\s*|چک\s*پرداختي).*?\((\d+)\)'
 
-    # پردازش چک‌های دریافتی (kol=101)
     for pattern, kol in [(cheque_pattern_in, 101), (cheque_pattern_out, 200)]:
         records = SanadDetail.objects.filter(kol=kol, is_analiz=False, syscomment__isnull=False)
         updates = []
@@ -3382,12 +3380,14 @@ def UpdateSanadDetail_Qwen(request):
     # آمار از دیتابیس محک
     cursor.execute("SELECT COUNT(*) FROM Sanad_detail")
     row_count = cursor.fetchone()[0]
-
     cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Sanad_detail'")
     column_count = cursor.fetchone()[0]
 
     # به‌روزرسانی Mtables
-    table, created = Mtables.objects.get_or_create(name='Sanad_detail', defaults={'schema_name': 'dbo'})
+    table, created = Mtables.objects.get_or_create(
+        name='Sanad_detail',
+        defaults={'schema_name': 'dbo', 'description': 'جزئیات اسناد'}
+    )
     table.last_update_time = timezone.now()
     table.update_duration = update_time
     table.row_count = row_count
@@ -3396,14 +3396,20 @@ def UpdateSanadDetail_Qwen(request):
 
     print(f"زمان کل: {total_time:.2f} ثانیه")
     print(f"زمان آپدیت: {update_time:.2f} ثانیه")
-    send_to_admin(f"✅ SanadDetail به‌روزرسانی شد: {len(to_create):,} جدید، {len(to_update):,} آپدیت، {deleted_count} حذف")
+
+    send_to_admin(
+        f"✅ SanadDetail به‌روزرسانی شد\n"
+        f"🔹 جدید: {len(to_create):,}\n"
+        f"🔹 آپدیت: {len(to_update):,}\n"
+        f"🔹 حذف: {deleted_count}\n"
+        f"⏱️ زمان: {total_time:.1f} ثانیه"
+    )
 
     conn.close()
     return redirect('/updatedb')
 
 
-
-def UpdateSanadDetail(request):
+def UpdateSanadDetail0528(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات سند---------------------------------------------------')
     conn, db_name = connect_to_mahak()
