@@ -3188,6 +3188,11 @@ def UpdateSanad(request):
     return redirect('/updatedb')
 
 
+def chunked(iterable, n):
+    """یک ایترابل رو به بچ‌های nتایی تقسیم می‌کنه."""
+    for i in range(0, len(iterable), n):
+        yield iterable[i:i + n]
+
 
 from django.db import transaction
 from django.db.models import Q
@@ -3198,7 +3203,7 @@ import time
 import re
 
 #by qwen 14040528
-def UpdateSanadDetailqwen(request):
+def UpdateSanadDetail_Qwen(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات سند ---------------------------------------------------')
 
@@ -3227,10 +3232,37 @@ def UpdateSanadDetailqwen(request):
 
     # --- مرحله 1: حذف رکوردهای اضافی (غیرفعال در دیتابیس خارجی) ---
     # این کار با یک دستور SQL ساده و سریع انجام می‌شه
-    deleted_count = SanadDetail.objects.filter(acc_year=acc_year).exclude(
-        code__in=[k[0] for k in existing_in_mahak if k[0] is not None]
-    ).delete()[0]
-    print(f"حذف {deleted_count} رکورد اضافی")
+    # deleted_count = SanadDetail.objects.filter(acc_year=acc_year).exclude(
+    #     code__in=[k[0] for k in existing_in_mahak if k[0] is not None]
+    # ).delete()[0]
+    # print(f"حذف {deleted_count} رکورد اضافی")
+
+    # --- حذف رکوردهای اضافی در بچ‌های کوچک ---
+    existing_codes = {k[0] for k in existing_in_mahak if k[0] is not None}
+
+    # فقط IDهایی که کدشون در existing_codes نیست
+    ids_to_delete = SanadDetail.objects.filter(acc_year=acc_year) \
+        .exclude(code__in=existing_codes) \
+        .values_list('id', flat=True)
+
+    deleted_count = 0
+    BATCH_SIZE_DELETE = 900
+
+    # تبدیل به لیست و پردازش در بچ‌ها
+    id_list = list(ids_to_delete)  # SQLite نمی‌تونه iterator بزرگ رو پردازش کنه
+
+    for i in range(0, len(id_list), BATCH_SIZE_DELETE):
+        batch_ids = id_list[i:i + BATCH_SIZE_DELETE]
+        count = SanadDetail.objects.filter(id__in=batch_ids).delete()[0]
+        deleted_count += count
+
+    print(f"حذف {deleted_count} رکورد اضافی با بچ‌های 900تایی")
+
+
+
+
+
+
 
     # --- مرحله 2: جمع‌آوری کلیدهای موجود در دیتابیس فعلی (فقط code, radif) ---
     current_keys = set(
