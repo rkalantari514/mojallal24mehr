@@ -3191,22 +3191,6 @@ def UpdateSanad(request):
 def UpdateSanadDetail(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات سند---------------------------------------------------')
-    # BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
-
-    # # حذف رکوردها به صورت دسته‌ای
-    # while True:
-    #     # دریافت دسته‌ای از رکوردها
-    #     queryset = SanadDetail.objects.filter(acc_year=1404)[:BATCH_SIZE]
-    #
-    #     # اگر هیچ رکوردی موجود نباشد، حلقه را ترک کنید
-    #     if not queryset:
-    #         break
-    #
-    #         # حذف رکوردها
-    #     for sanad in queryset[:BATCH_SIZE]:
-    #         sanad.delete()
-    # return redirect('/updatedb')
-
     conn, db_name = connect_to_mahak()
     cursor = conn.cursor()
     t1 = time.time()
