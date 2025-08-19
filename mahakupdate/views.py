@@ -343,7 +343,7 @@ import json
 @login_required(login_url='/login')
 def Updateall(request):
     now = datetime.now()
-    work_time = [8, 9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 21]
+    work_time = [8, 9, 10, 11, 12, 13, 16, 17, 18, 19, 20]
 
     print(f'ساعت جاری: {now.hour}')
     if now.hour in work_time:
