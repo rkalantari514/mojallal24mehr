@@ -5016,14 +5016,14 @@ def UpdateBedehiMoshtari(request):
 
         # دریافت tafzili‌های مورد نیاز به همراه تاریخ آخرین دریافت
         latest_dates = SanadDetail.objects.filter(
-            moin=1, kol=103, is_active=True, sharh__icontains='دريافت', curramount__gt=0
+            kol=103, is_active=True, sharh__icontains='دريافت', curramount__gt=0
         ).values('tafzili').annotate(last_date=Max('date'))
 
         # ایجاد یک دیکشنری برای نگه‌داری آخرین تاریخ‌ها
         last_date_dict = {item['tafzili']: item['last_date'] for item in latest_dates}
 
         # دریافت تمامی ورودی‌های BedehiMoshtari
-        bedehi_entries = BedehiMoshtari.objects.filter(moin=1).prefetch_related('loans')
+        bedehi_entries = BedehiMoshtari.objects.prefetch_related('loans')
 
         # به‌روزرسانی داده‌ها
         for entry in bedehi_entries:
