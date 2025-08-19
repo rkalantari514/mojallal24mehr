@@ -73,176 +73,75 @@
                 </div>
             </div>
         </div>
-        <div class="col-xl-6 mb-30">
-            <div class="card card-statistics h-100">
-                <div class="card-body">
-                    <h5 class="card-title pb-0 border-0">به روز رسانی سایر موارد </h5>
-                    <!-- action group -->
-                    <div class="btn-group info-drop">
-                        <button type="button" class="dropdown-toggle-split text-muted" data-toggle="dropdown"
-                                aria-haspopup="true" aria-expanded="false"><i class="ti-more"></i></button>
-                        <div class="dropdown-menu">
-                            {#                  <a class="dropdown-item" href="#"><i class="text-success ti-files"></i> Approved</a>#}
-                            {#                  <a class="dropdown-item" href="#"><i class="text-warning ti-pencil-alt"></i> Pending</a>#}
-                            {#                  <a class="dropdown-item" href="#"><i class="text-danger ti-user"></i> Rejected</a>#}
-                            <a class="dropdown-item" href="/updateall"><i class="text-secondary ti-reload"></i> آپدیت
-                                جداول ضروری</a>
-                        </div>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table center-aligned-table mb-0 text-center">
-                            <thead>
-                            <tr class="text-dark">
-                                <th>ردیف</th>
-                                <th>نام جدول</th>
-                                <th>آپدیت</th>
-                                <th></th>
-                                <th></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>حذف دیتای تکراری</td>
-                                <td><a href="update/delete_dublicate_data">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-                            <tr>
-                                <td>1</td>
-                                <td>شروط گروه بندی کالا</td>
-                                <td><a href="update/updatekalagroupinfo">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-
-                            <tr>
-                                <td>2</td>
-                                <td>ساخت گروه بندی کالا</td>
-                                <td><a href="update/createkalagroup">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-
-
-                            <tr>
-                                <td>3</td>
-                                <td>آپدیت گروه بندی کالا ها</td>
-                                <td><a href="update/updatekalagroup">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-
-                            <tr>
-                                <td>4</td>
-                                <td>آپدیت جدول موجودی از روی کارکس</td>
-                                <td><a href="update/mojodi">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-
-
-                            <tr>
-                                <td>5</td>
-                                <td>آپدیت نسبت فروش به موجودی</td>
-                                <td><a href="update/updatsmratio">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-
-
-                            <tr>
-                                <td>6</td>
-                                <td>ساخت گزارش کل</td>
-                                <td><a href="/create_total_report">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-                            <tr>
-                                <td>7</td>
-                                <td>ساخت گزارش روزانه</td>
-                                <td><a href="/createreport">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-                            <tr>
-                                <td>8</td>
-                                <td>ساخت گزارش ماهانه</td>
-                                <td><a href="/create_monthly_report">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-
-                            <tr>
-                                <td>9</td>
-                                <td>آپدیت شرایط استثنا</td>
-                                <td><a href="update/updatemycondition">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-
-                            <tr>
-                                <td>10</td>
-                                <td>آپدیت اسناد برابر شرایط استثنا</td>
-                                <td><a href="update/updatesanadconditions">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-
-                            <tr>
-                                <td>11</td>
-                                <td>آپدیت بدهی مشتریان</td>
-                                <td><a href="update/bedehimoshtari">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-
-                            <tr>
-                                <td>12</td>
-                                <td>آپدیت اقساط پرداخت شده</td>
-                                <td><a href="update/compleloan">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-                            <tr>
-                                <td>13</td>
-                                <td>آپدیت امتیازات جشنواره</td>
-                                <td><a href="update/calculate_award">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-
-                            <tr>
-                                <td>14</td>
-                                <td>محاسبه تخفیف پای فاکتور</td>
-                                <td><a href="update/after_takhfif_kol">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-
-                            <tr>
-                                <td>15</td>
-                                <td>آپدیت خواب سرمایه</td>
-                                <td><a href="update/sleepinvestment">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-
-
-                            <tr>
-                                <td>16</td>
-                                <td>آپدیت قسط بدهی مشتریان</td>
-                                <td><a href="update/loan_bedehi_moshtari">
-                                    <button type="button" class="btn btn-primary">بروز رسانی</button>
-                                </a></td>
-                            </tr>
-
-
-                            </tbody>
-                        </table>
-                    </div>
+<div class="col-xl-6 mb-30">
+    <div class="card card-statistics h-100">
+        <div class="card-body">
+            <h5 class="card-title pb-0 border-0">به‌روزرسانی سایر موارد</h5>
+            <!-- action group -->
+            <div class="btn-group info-drop">
+                <button type="button" class="dropdown-toggle-split text-muted" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false"><i class="ti-more"></i></button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="/updateall"><i class="text-secondary ti-reload"></i> آپدیت جداول ضروری</a>
                 </div>
             </div>
+            <div class="table-responsive">
+                <table class="table center-aligned-table mb-0 text-center">
+                    <thead>
+                    <tr class="text-dark">
+                        <th>ردیف</th>
+                        <th>نام عملیات</th>
+                        <th>آخرین آپدیت</th>
+                        <th>مدت آپدیت</th>
+                        <th>وضعیت</th>
+                        <th>آپدیت</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for task in static_tasks %}
+                        <tr>
+                            <td>{{ task.update_priority }}</td>
+                            <td>{{ task.name }}</td>
+                            <td>
+                                {% if task.last_update_time %}
+                                    {{ task.last_update_time|timesince }} پیش
+                                {% else %}
+                                    هرگز
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if task.update_duration %}
+                                    {{ task.update_duration|floatformat:2 }} ثانیه
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="progress progress-small mt-2">
+                                    <div class="skill2-bar {{ task.progress_class }}"
+                                         role="progressbar"
+                                         style="width: {{ task.progress_bar_width }}%"
+                                         aria-valuenow="{{ task.progress_bar_width }}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <a href="/{{ task.url }}">
+                                    <button type="button" class="btn btn-primary btn-sm">بروزرسانی</button>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6">هیچ وظیفه استاتیکی یافت نشد.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
+    </div>
+</div>
     </div>
 {% endblock %}
