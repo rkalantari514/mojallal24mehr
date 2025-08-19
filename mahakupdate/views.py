@@ -3211,7 +3211,7 @@ import re
 from django.utils import timezone
 
 #by qwen 14040528
-def UpdateSanadDetail(request):
+def UpdateSanadDetail_qwen(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات سند ---------------------------------------------------')
 
@@ -3409,7 +3409,7 @@ def UpdateSanadDetail(request):
     return redirect('/updatedb')
 
 
-def UpdateSanadDetail0528(request):
+def UpdateSanadDetail(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات سند---------------------------------------------------')
     conn, db_name = connect_to_mahak()
