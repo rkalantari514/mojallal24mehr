@@ -4,7 +4,7 @@ from django.contrib.admin import SimpleListFilter
 from accounting.models import BedehiMoshtari
 from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo, \
     Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve, MyCondition, ChequesPay, Bank, Loan, LoanDetil, \
-    BackFactor, BackFactorDetail, GoodConsign
+    BackFactor, BackFactorDetail, GoodConsign, StaticUpdateTask
 
 
 # Register your models here.
@@ -326,6 +326,25 @@ class GoodConsignAdmin(admin.ModelAdmin):
 
 
 
+@admin.register(StaticUpdateTask)
+class StaticUpdateTaskAdmin(admin.ModelAdmin):
+    list_display = [
+        'name',
+        'url',
+        'update_priority',
+        'last_update_time',
+        'update_duration_pretty',
+    ]
+    list_filter = ['update_priority', 'last_update_time']
+    search_fields = ['name', 'url']
+    ordering = ['update_priority']
+    readonly_fields = ['last_update_time', 'update_duration']
+
+    def update_duration_pretty(self, obj):
+        if obj.update_duration is not None:
+            return f"{obj.update_duration:.2f} ثانیه"
+        return "-"
+    update_duration_pretty.short_description = 'مدت زمان آپدیت'
 
 
 

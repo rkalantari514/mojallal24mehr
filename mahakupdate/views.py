@@ -7,7 +7,7 @@ from dashboard.views import CreateReport, CreateMonthlyReport, CreateTotalReport
 from festival.models import CustomerPoints
 from festival.views import Calculate_and_award_points
 from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category, Sanad, SanadDetail, AccCoding, ChequesPay, \
-    Bank, Loan, LoanDetil, BackFactor, BackFactorDetail
+    Bank, Loan, LoanDetil, BackFactor, BackFactorDetail, StaticUpdateTask
 from .models import FactorDetaile
 from django.contrib.auth.decorators import login_required
 from .models import Kala, Storagek
@@ -222,8 +222,74 @@ def BackupFromMahak(request, dbname):
         return JsonResponse({'error': str(e)}, status=500)
 
 
+
 @login_required(login_url='/login')
 def Updatedb(request):
+    # جداول اصلی از Mtables
+    tables = Mtables.objects.filter(in_use=True).order_by('update_priority')
+
+    # وظایف استاتیک از مدل جدید
+    static_tasks = StaticUpdateTask.objects.all().order_by('update_priority')
+
+    url_mapping = {
+        'Fact_Fo': 'update/factor',
+        'GoodInf': 'update/kala',
+        'Fact_Fo_Detail': 'update/factor-detail',
+        'Kardex': 'update/kardex',
+        'PerInf': 'update/person',
+        'Stores': 'update/storage',
+        'Sanad': 'update/sanad',
+        'Sanad_detail': 'update/sanaddetail',
+        'AccTotals': 'update/acccoding',
+        'Cheques_Recieve': 'update/chequesrecieve',
+        'Cheque_Pay': 'update/chequepay',
+        'Bank': 'update/bank',
+        'Loan': 'update/loan',
+        'LoanDetail': 'update/loandetail',
+        'BackForosh': 'update/backfactor',
+        'BackFact_Detail': 'update/back-factor-detail',
+        'GoodConsign': 'update/good_consign',
+    }
+
+    # محاسبه پیشرفت برای جداول اصلی
+    for t in tables:
+        tsinse = (timezone.now() - t.last_update_time).total_seconds() / 60
+        ratio = tsinse / t.update_period
+        t.progress_bar_width = min(ratio, 1) * 100
+        t.progress_class = (
+            'skill2-bar bg-success' if ratio < 0.4 else
+            'skill2-bar bg-warning' if ratio < 0.9 else
+            'skill2-bar bg-danger'
+        )
+        t.url1 = url_mapping.get(t.name, '')
+
+    # محاسبه پیشرفت برای وظایف استاتیک (اختیاری — می‌تونیم زمان نسبت به دوره فرضی بگیریم)
+    # اما چون دوره آپدیت مشخص نیست، فقط آخرین زمان و دکمه آپدیت نمایش می‌دهیم
+    for task in static_tasks:
+        if task.last_update_time:
+            tsinse = (timezone.now() - task.last_update_time).total_seconds() / 60
+            # فرض می‌کنیم دوره پیش‌فرض 60 دقیقه
+            ratio = tsinse / 60
+            task.progress_bar_width = min(ratio, 1) * 100
+            task.progress_class = (
+                'skill2-bar bg-success' if ratio < 0.4 else
+                'skill2-bar bg-warning' if ratio < 0.9 else
+                'skill2-bar bg-danger'
+            )
+        else:
+            task.progress_bar_width = 100
+            task.progress_class = 'skill2-bar bg-secondary'
+
+    context = {
+        'title': 'صفحه آپدیت جداول',
+        'tables': tables,
+        'static_tasks': static_tasks,  # ارسال وظایف استاتیک به تمپلیت
+    }
+
+    return render(request, 'updatepage.html', context)
+
+@login_required(login_url='/login')
+def Updatedb0528(request):
     tables = Mtables.objects.filter(in_use=True)
     url_mapping = {
         'Fact_Fo': 'update/factor',
@@ -265,7 +331,221 @@ def Updatedb(request):
     return render(request, 'updatepage.html', context)
 
 
+from django.utils import timezone
+from django.shortcuts import redirect
+from django.http import HttpResponse
+import time
+from datetime import datetime
+import json
+
+# فرض می‌کنیم send_to_admin تابعی است که پیام به تلگرام می‌فرستد
+# مثلاً: def send_to_admin(message): ...
+@login_required(login_url='/login')
 def Updateall(request):
+    now = datetime.now()
+    work_time = [8, 9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 21]
+
+    print(f'ساعت جاری: {now.hour}')
+    if now.hour in work_time:
+        print(f'ساعت کاری: {now.hour}')
+        send_to_admin(f'❌ آپدیت کل لغو شد — ساعت کاری است ({now.hour}:00)')
+        return redirect('/updatedb')
+
+    print(f'ساعت غیرکاری: {now.hour}')
+    send_to_admin(f'✅ شروع آپدیت کل در ساعت {now.hour}:00')
+
+    # --- بررسی Sanad_detail در محک ---
+    try:
+        conn, db_name = connect_to_mahak()
+        cursor = conn.cursor()
+        cursor.execute("SELECT code, radif FROM Sanad_detail")
+        mahakt_data = cursor.fetchall()
+        existing_in_mahak = {(int(row[0]), int(row[1])) for row in mahakt_data}
+        print('تعداد رکوردهای موجود در Mahak:', len(existing_in_mahak))
+        send_to_admin(f'📊 تعداد Sanad_detail در محک: {len(existing_in_mahak):,}')
+
+        if len(existing_in_mahak) < 135000:
+            send_to_admin('⚠️ تعداد Sanad_detail کمتر از حد مجاز است! آپدیت لغو شد.')
+            conn.close()
+            return redirect('/updatedb')
+
+        conn.close()
+    except Exception as e:
+        send_to_admin(f'❌ خطای اتصال به محک: {str(e)}')
+        return redirect('/updatedb')
+
+    # --- ریست کاردکس در صورت نیاز ---
+    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
+    if now.hour in [1, 2]:  # فقط 1 و 2 بامداد
+        send_to_admin('🔄 ریست وضعیت sync_mojodi در Kardex برای سال مالی جاری')
+        Kardex.objects.filter(acc_year=acc_year).update(sync_mojodi=False)
+
+    # --- شروع زمان کلی ---
+    t0 = time.time()
+    send_to_admin('🚀 شروع فرآیند آپدیت کل...')
+
+    # --- آماده‌سازی لیست جداول اصلی ---
+    tables = Mtables.objects.filter(in_use=True).order_by('update_priority')
+    view_map = {
+        'Fact_Fo': UpdateFactor,
+        'GoodInf': UpdateKala,
+        'Fact_Fo_Detail': UpdateFactorDetail,
+        'Kardex': UpdateKardex,
+        'PerInf': UpdatePerson,
+        'Stores': UpdateStorage,
+        'Sanad': UpdateSanad,
+        'Sanad_detail': UpdateSanadDetail,
+        'AccTotals': UpdateAccCoding,
+        'Cheques_Recieve': Cheques_Recieve,
+        'Cheque_Pay': Cheque_Pay,
+        'Bank': UpdateBank,
+        'Loan': UpdateLoan,
+        'LoanDetail': UpdateLoanDetail,
+        'BackForosh': UpdateBackFactor,
+        'BackFact_Detail': UpdateBackFactorDetail,
+        'GoodConsign': UpdateGoodConsign,
+    }
+
+    # --- تعریف وظایف استاتیک + اولویت از طریق شماره ردیف ---
+    static_tasks_config = [
+        {'url': 'update/delete_dublicate_data', 'name': 'حذف دیتای تکراری', 'priority': 1},
+        {'url': 'update/updatekalagroupinfo', 'name': 'شروط گروه‌بندی کالا', 'priority': 2},
+        {'url': 'update/createkalagroup', 'name': 'ساخت گروه‌بندی کالا', 'priority': 3},
+        {'url': 'update/updatekalagroup', 'name': 'آپدیت گروه‌بندی کالا', 'priority': 4},
+        {'url': 'update/mojodi', 'name': 'آپدیت جدول موجودی از کارکس', 'priority': 5},
+        {'url': 'update/updatsmratio', 'name': 'نسبت فروش به موجودی', 'priority': 6},
+        {'url': '/createreport', 'name': 'ساخت گزارش روزانه', 'priority': 7},
+        {'url': '/create_total_report', 'name': 'ساخت گزارش کل', 'priority': 8},
+        {'url': '/create_monthly_report', 'name': 'ساخت گزارش ماهانه', 'priority': 9},
+        {'url': 'update/updatemycondition', 'name': 'آپدیت شرایط استثنا', 'priority': 10},
+        {'url': 'update/updatesanadconditions', 'name': 'اسناد برابر شرایط استثنا', 'priority': 11},
+        {'url': 'update/bedehimoshtari', 'name': 'آپدیت بدهی مشتریان', 'priority': 12},
+        {'url': 'update/compleloan', 'name': 'آپدیت اقساط پرداخت شده', 'priority': 13},
+        {'url': 'update/calculate_award', 'name': 'محاسبه امتیازات جشنواره', 'priority': 14},
+        {'url': 'update/after_takhfif_kol', 'name': 'محاسبه تخفیف پای فاکتور', 'priority': 15},
+        {'url': 'update/sleepinvestment', 'name': 'آپدیت خواب سرمایه', 'priority': 16},
+        {'url': 'update/loan_bedehi_moshtari', 'name': 'قسط بدهی مشتریان', 'priority': 17},
+    ]
+
+    # --- نگاشت URL به تابع ---
+    static_view_map = {
+        'update/delete_dublicate_data': DeleteDublicateData,
+        'update/updatekalagroupinfo': UpdateKalaGroupinfo,
+        'update/createkalagroup': CreateKalaGroup,
+        'update/updatekalagroup': UpdateKalaGroup,
+        'update/mojodi': UpdateMojodi,
+        'update/updatsmratio': Update_Sales_Mojodi_Ratio,
+        'update/updatemycondition': UpdateMyCondition,
+        'update/updatesanadconditions': UpdateSanadConditions,
+        '/createreport': CreateReport,
+        '/create_total_report': CreateTotalReport,
+        '/create_monthly_report': CreateMonthlyReport,
+        'update/bedehimoshtari': UpdateBedehiMoshtari,
+        'update/compleloan': CompleLoan,
+        'update/calculate_award': Calculate_and_award_points,
+        'update/after_takhfif_kol': AfterTakhfifKol,
+        'update/sleepinvestment': UpdateSleepInvestment,
+        'update/loan_bedehi_moshtari': LoanBedehiMoshtari,
+    }
+
+    # --- به‌روزرسانی یا ایجاد StaticUpdateTask ---
+    existing_urls = [task['url'] for task in static_tasks_config]
+    StaticUpdateTask.objects.exclude(url__in=existing_urls).delete()  # حذف آیتم‌های اضافی
+
+    for config in static_tasks_config:
+        task, created = StaticUpdateTask.objects.get_or_create(url=config['url'])
+        task.name = config['name']
+        task.update_priority = config['priority']
+        if created:
+            task.last_update_time = timezone.now()
+        task.save()
+
+    # --- ذخیره نتایج آپدیت ---
+    update_results = []
+
+    # --- آپدیت جداول اصلی ---
+    for t in tables:
+        start_time = time.time()
+        if (timezone.now() - t.last_update_time).total_seconds() / 60 / t.update_period > 0.0005:
+            try:
+                view_func = view_map.get(t.name)
+                if view_func:
+                    response = view_func(request)
+                    duration = time.time() - start_time
+                    t.update_duration = duration
+                    t.last_update_time = timezone.now()
+                    t.save()
+                    update_results.append({
+                        'type': 'جدول',
+                        'name': t.description or t.name,
+                        'duration': round(duration, 2),
+                        'rows': t.row_count,
+                    })
+                    print(f"آپدیت شد: {t.name} — {duration:.2f}s")
+            except Exception as e:
+                send_to_admin(f"❌ خطا در آپدیت {t.name}: {str(e)}")
+
+    # --- آپدیت وظایف استاتیک ---
+    for config in static_tasks_config:
+        url = config['url']
+        start_time = time.time()
+        try:
+            view_func = static_view_map.get(url)
+            if view_func:
+                response = view_func(request)
+                duration = time.time() - start_time
+                task = StaticUpdateTask.objects.get(url=url)
+                task.update_duration = duration
+                task.last_update_time = timezone.now()
+                task.save()
+                update_results.append({
+                    'type': 'استاتیک',
+                    'name': task.name,
+                    'duration': round(duration, 2),
+                })
+        except Exception as e:
+            send_to_admin(f"❌ خطا در اجرای {url}: {str(e)}")
+
+    # --- محاسبه نتایج نهایی ---
+    total_time = time.time() - t0
+    userlogcount = UserLog.objects.all().count()
+
+    # --- ارسال پیام حرفه‌ای ---
+    summary_lines = [
+        "✅ **آپدیت کل با موفقیت انجام شد**",
+        f"📅 زمان: {timezone.now().strftime('%Y-%م%d %H:%M')}",
+        f"⏱️ **زمان کل:** {total_time:.1f} ثانیه",
+        f"👥 **تعداد کاربران (بازدیدها):** {userlogcount:,}",
+        f"📊 **تعداد وظایف انجام‌شده:** {len(update_results)}",
+        "",
+        "**📝 جزئیات آپدیت‌ها:**"
+    ]
+
+    # افزودن لیست جداول به پیام
+    for res in sorted(update_results, key=lambda x: x['duration'], reverse=True):
+        line = f"🔹 {res['name']} ({res['type']}) — {res['duration']}s"
+        if 'rows' in res:
+            line += f", {res['rows']:,} ردیف"
+        summary_lines.append(line)
+
+    summary_lines.append("")
+    summary_lines.append("🔚 پایان آپدیت کل")
+
+    final_message = "\n".join(summary_lines)
+    send_to_admin(final_message)
+
+    # --- به‌روزرسانی MasterInfo ---
+    masterinfo = MasterInfo.objects.filter(is_active=True).last()
+    if masterinfo:
+        masterinfo.last_update_time = timezone.now()
+        masterinfo.save()
+
+    return redirect('/updatedb')
+
+
+
+
+def Updateall0528(request):
     now = datetime.now()
     work_time = [8, 9, 10, 11, 12, 13, 16, 17, 18, 19, 20, 21]
 
