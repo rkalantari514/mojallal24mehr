@@ -5016,6 +5016,7 @@ def UpdateBedehiMoshtari(request):
 
         # دریافت tafzili‌های مورد نیاز به همراه تاریخ آخرین دریافت
         latest_dates = SanadDetail.objects.filter(
+            #حذف moein=1
             kol=103, is_active=True, sharh__icontains='دريافت', curramount__gt=0
         ).values('tafzili').annotate(last_date=Max('date'))
 
