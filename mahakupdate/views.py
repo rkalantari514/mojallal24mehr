@@ -3082,7 +3082,6 @@ def Update_Sales_Mojodi_Ratio(request):
 
     return redirect('/updatedb')
 
-
 def UpdateSanad(request):
     t0 = time.time()
     print('شروع آپدیت سند---------------------------------------------------')
@@ -3187,10 +3186,6 @@ def UpdateSanad(request):
     return redirect('/updatedb')
 
 
-def chunked(iterable, n):
-    """یک ایترابل رو به بچ‌های nتایی تقسیم می‌کنه."""
-    for i in range(0, len(iterable), n):
-        yield iterable[i:i + n]
 
 
 from django.db import transaction
@@ -3209,206 +3204,10 @@ import time
 import re
 from django.utils import timezone
 
-#by qwen 14040528
+
+
+
 def UpdateSanadDetail(request):
-    t0 = time.time()
-    print('شروع آپدیت جزئیات سند ---------------------------------------------------')
-
-    # اتصال به دیتابیس خارجی
-    conn, db_name = connect_to_mahak()
-    cursor = conn.cursor()
-    t1 = time.time()
-
-    # دریافت داده‌های محک
-    cursor.execute("""
-        SELECT code, radif, kol, moin, tafzili, sharh, bed, bes, Sanad_Code, Sanad_Type, 
-               Meghdar, SysComment, CurrAmount, UserCreated, VoucherDate 
-        FROM Sanad_detail
-    """)
-    mahakt_data = cursor.fetchall()
-
-    # تبدیل به مجموعه: (code, radif)
-    existing_in_mahak = {(int(row[0]), int(row[1])) for row in mahakt_data}
-    existing_codes = {int(row[0]) for row in mahakt_data}  # فقط کدها
-
-    print(f'تعداد رکوردهای موجود در Mahak: {len(existing_in_mahak):,}')
-    send_to_admin(f'sanad detail: {len(existing_in_mahak):,} رکورد')
-
-    # دریافت سال مالی جاری
-    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
-
-    BATCH_SIZE = 1000
-
-    # --- مرحله 1: حذف رکوردهای اضافی به صورت ایمن (بدون too many SQL variables) ---
-    deleted_count = 0
-    offset = 0
-    DELETE_BATCH = 500  # تعداد رکوردهای خوانده شده در هر مرحله
-
-    while True:
-        # خواندن بچ کوچک از دیتابیس (فقط id و code)
-        batch = list(
-            SanadDetail.objects
-            .filter(acc_year=acc_year)
-            .order_by('id')
-            .values_list('id', 'code')[offset:offset + DELETE_BATCH]
-        )
-        if not batch:
-            break
-
-        # تشخیص رکوردهایی که کدشون در existing_codes نیست
-        ids_to_delete = [record_id for record_id, code in batch if code not in existing_codes]
-
-        if ids_to_delete:
-            count, _ = SanadDetail.objects.filter(id__in=ids_to_delete).delete()
-            deleted_count += count
-
-        offset += DELETE_BATCH
-
-    print(f"حذف {deleted_count} رکورد اضافی با روش ایمن")
-
-    # --- مرحله 2: جمع‌آوری کلیدهای موجود در دیتابیس فعلی (فقط code, radif) ---
-    current_keys = set(
-        SanadDetail.objects.filter(acc_year=acc_year).values_list('code', 'radif')
-    )
-
-    # --- مرحله 3: تفکیک insert و update ---
-    to_create = []
-    to_update = []
-
-    for row in mahakt_data:
-        try:
-            code = int(row[0])
-            radif = int(row[1])
-            key = (code, radif)
-
-            kol = int(row[2]) if row[2] is not None else 0
-            moin = int(row[3]) if row[3] is not None else 0
-            tafzili = int(row[4]) if row[4] is not None else 0
-            sharh = str(row[5] or '')
-            bed = Decimal(str(row[6] or '0'))
-            bes = Decimal(str(row[7] or '0'))
-            sanad_code = int(row[8]) if row[8] is not None else None
-            sanad_type = int(row[9]) if row[9] is not None else None
-            meghdar = Decimal(str(row[10] or '0'))
-            syscomment = str(row[11] or '')
-            curramount = Decimal(str(row[12] or '0'))
-            usercreated = str(row[13] or '')
-            voucher_date = str(row[14] or '')
-
-            # person فقط وقتی نیازه که kol == 103
-            person = None
-            if kol == 103:
-                person = Person.objects.filter(per_taf=tafzili).last()
-
-            # تبدیل تاریخ شمسی به میلادی
-            miladi_date = None
-            if voucher_date and '/' in voucher_date:
-                try:
-                    y, m, d = map(int, voucher_date.split('/'))
-                    miladi_date = jdatetime.date(y, m, d).togregorian().strftime('%Y-%m-%d')
-                except:
-                    miladi_date = None
-
-            # تعیین: create یا update
-            if key in current_keys:
-                to_update.append(SanadDetail(
-                    code=code, radif=radif,
-                    kol=kol, moin=moin, tafzili=tafzili, sharh=sharh,
-                    bed=bed, bes=bes, sanad_code=sanad_code, sanad_type=sanad_type,
-                    meghdar=meghdar, person=person, syscomment=syscomment,
-                    curramount=curramount, usercreated=usercreated,
-                    tarikh=voucher_date, date=miladi_date,
-                    is_analiz=False, acc_year=acc_year
-                ))
-            else:
-                to_create.append(SanadDetail(
-                    code=code, radif=radif,
-                    kol=kol, moin=moin, tafzili=tafzili, sharh=sharh,
-                    bed=bed, bes=bes, sanad_code=sanad_code, sanad_type=sanad_type,
-                    meghdar=meghdar, person=person, syscomment=syscomment,
-                    curramount=curramount, usercreated=usercreated,
-                    tarikh=voucher_date, date=miladi_date,
-                    is_analiz=False, acc_year=acc_year
-                ))
-
-        except (ValueError, InvalidOperation, TypeError) as e:
-            print(f"خطا در پردازش رکورد {row}: {e}")
-            continue
-
-    # --- مرحله 4: ایجاد و آپدیت دسته‌ای ---
-    with transaction.atomic():
-        if to_create:
-            print(f'شروع ایجاد {len(to_create):,} رکورد')
-            SanadDetail.objects.bulk_create(to_create, batch_size=BATCH_SIZE)
-
-        if to_update:
-            print(f'شروع آپدیت {len(to_update):,} رکورد')
-            SanadDetail.objects.bulk_update(
-                to_update,
-                fields=[
-                    'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
-                    'sanad_code', 'sanad_type', 'meghdar', 'person',
-                    'syscomment', 'curramount', 'usercreated', 'tarikh',
-                    'date', 'is_analiz'
-                ],
-                batch_size=BATCH_SIZE
-            )
-
-    # --- مرحله 5: پردازش is_analiz و cheque_id ---
-    # الگوهای چک
-    cheque_pattern_in = r'(چک\s*دريافتي|چک\s*درجريان\s*وصول).*?\(([\d/]+)\)'
-    cheque_pattern_out = r'(چک\s*|چک\s*پرداختي).*?\((\d+)\)'
-
-    for pattern, kol in [(cheque_pattern_in, 101), (cheque_pattern_out, 200)]:
-        records = SanadDetail.objects.filter(kol=kol, is_analiz=False, syscomment__isnull=False)
-        updates = []
-        for rec in records:
-            match = re.search(pattern, rec.syscomment)
-            if match:
-                rec.cheque_id = match.group(2)
-                rec.is_analiz = True
-                updates.append(rec)
-        if updates:
-            SanadDetail.objects.bulk_update(updates, ['cheque_id', 'is_analiz'], batch_size=BATCH_SIZE)
-
-    # --- مرحله 6: آمار و به‌روزرسانی Mtables ---
-    tend = time.time()
-    total_time = tend - t0
-    update_time = tend - t1
-
-    # آمار از دیتابیس محک
-    cursor.execute("SELECT COUNT(*) FROM Sanad_detail")
-    row_count = cursor.fetchone()[0]
-    cursor.execute("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Sanad_detail'")
-    column_count = cursor.fetchone()[0]
-
-    # به‌روزرسانی Mtables
-    table, created = Mtables.objects.get_or_create(
-        name='Sanad_detail',
-        defaults={'schema_name': 'dbo', 'description': 'جزئیات اسناد'}
-    )
-    table.last_update_time = timezone.now()
-    table.update_duration = update_time
-    table.row_count = row_count
-    table.cloumn_count = column_count
-    table.save()
-
-    print(f"زمان کل: {total_time:.2f} ثانیه")
-    print(f"زمان آپدیت: {update_time:.2f} ثانیه")
-
-    send_to_admin(
-        f"✅ SanadDetail به‌روزرسانی شد\n"
-        f"🔹 جدید: {len(to_create):,}\n"
-        f"🔹 آپدیت: {len(to_update):,}\n"
-        f"🔹 حذف: {deleted_count}\n"
-        f"⏱️ زمان: {total_time:.1f} ثانیه"
-    )
-
-    conn.close()
-    return redirect('/updatedb')
-
-
-def UpdateSanadDetail0529(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات سند---------------------------------------------------')
     conn, db_name = connect_to_mahak()
