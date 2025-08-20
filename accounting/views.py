@@ -1830,6 +1830,15 @@ def HesabMoshtariDetail(request, tafsili):
     except:
         bar_mali = 0
 
+
+    chequ_recive=ChequesRecieve.objects.filter(per_code=hesabmoshtari.person.code)
+
+    for c in chequ_recive:
+        print(c.bank_name,c.cheque_tarik)
+
+
+
+
     # context نهایی
     context = {
         'title': 'حساب مشتری',
@@ -1851,6 +1860,7 @@ def HesabMoshtariDetail(request, tafsili):
         'chart_date': chart_date,
         'year_list': year_list,
         'amani': amani,
+        'chequ_recive': chequ_recive,
     }
 
     print(f"زمان اجرا: {time.time() - start_time:.2f} ثانیه")

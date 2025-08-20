@@ -283,14 +283,14 @@
                 <div class="col-md-5 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="card-body col-12">
-                            <h5 class="card-title pb-0 border-0 ">خلاصه وام ها</h5>
+                            <h5 class="card-title pb-0 border-0 ">خلاصه اقساط</h5>
                             <div class="table-responsive">
                                 <table class="table center-aligned-table mb-10 text-center ">
                                     <thead>
                                     <tr class="text-dark">
                                         <th>ردیف</th>
-                                        <th>کد وام</th>
-                                        <th>تاریخ وام</th>
+                                        <th>کد اقساط</th>
+                                        <th>تاریخ اقساط</th>
                                         <th>تعداد اقساط</th>
                                         <th>مبلغ اولیه</th>
                                         <th>باقیمانده</th>
@@ -320,14 +320,14 @@
                 <div class="col-md-7 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="card-body">
-                            <h5 class="card-title pb-0 border-0 ">جزئیات وام ها</h5>
+                            <h5 class="card-title pb-0 border-0 ">جزئیات اقساط</h5>
                             <div class="table-responsive scrollbar max-h-380">
                                 {% for loan in hesabmoshtari.loans.all %}
                                     <div class="table-responsive">
                                         <table class="table center-aligned-table mb-10 text-center ">
                                             <thead>
                                             <tr class="text-dark">
-                                                <th>کد وام</th>
+                                                <th>کد قسط</th>
                                                 <th>شماره قسط</th>
                                                 <th>تاریخ</th>
                                                 <th> تاریخ دریافت</th>
@@ -373,6 +373,50 @@
 
                 </div>
             </div>
+
+            <!-- ردیف چکهای دریافتی  -->
+            <div class="row">
+                <div class="col-md-5 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body col-12">
+                            <h5 class="card-title pb-0 border-0 ">چکهای دریافتنی</h5>
+                            <div class="table-responsive">
+                                <table class="table center-aligned-table mb-10 text-center ">
+                                    <thead>
+                                    <tr class="text-dark">
+                                        <th>ردیف</th>
+                                        <th>کد اقساط</th>
+                                        <th>تاریخ اقساط</th>
+                                        <th>تعداد اقساط</th>
+                                        <th>مبلغ اولیه</th>
+                                        <th>باقیمانده</th>
+                                        <th>معوق</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for cheque in chequ_recive %}
+                                        <tr>
+                                            <td><h6>{{ cheque.cheque_id }}</h6></td>
+                                            <td><h6>{{ cheque.cheque_tarik }}</h6></td>
+                                            <td><h6>{{ cheque.bank_name }}</h6></td>
+                                            <td><h6>{{ cheque.bank_branch }}</h6></td>
+                                            <td><h6>{{ cheque.cost|floatformat:0|intcomma:False }}</h6></td>
+                                            <td><h6>{{ cheque.total_mandeh|floatformat:0|intcomma:False }}</h6></td>
+                                            <td><h6>{{ cheque.delayed_loan|floatformat:0|intcomma:False }}</h6></td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+
 
 
             <!-- ردیف پیگیری پیگیری -->
