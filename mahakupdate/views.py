@@ -340,7 +340,6 @@ import json
 
 # فرض می‌کنیم send_to_admin تابعی است که پیام به تلگرام می‌فرستد
 # مثلاً: def send_to_admin(message): ...
-@login_required(login_url='/login')
 def Updateall(request):
     now = datetime.now()
     work_time = [8, 9, 10, 11, 12, 13, 16, 17, 18, 19, 20,21]
@@ -3211,7 +3210,7 @@ import re
 from django.utils import timezone
 
 #by qwen 14040528
-def UpdateSanadDetail_qwen(request):
+def UpdateSanadDetail(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات سند ---------------------------------------------------')
 
@@ -3409,7 +3408,7 @@ def UpdateSanadDetail_qwen(request):
     return redirect('/updatedb')
 
 
-def UpdateSanadDetail(request):
+def UpdateSanadDetail0529(request):
     t0 = time.time()
     print('شروع آپدیت جزئیات سند---------------------------------------------------')
     conn, db_name = connect_to_mahak()
