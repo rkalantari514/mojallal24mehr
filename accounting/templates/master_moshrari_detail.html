@@ -384,13 +384,13 @@
                                 <table class="table center-aligned-table mb-10 text-center ">
                                     <thead>
                                     <tr class="text-dark">
-                                        <th>ردیف</th>
-                                        <th>کد اقساط</th>
-                                        <th>تاریخ اقساط</th>
-                                        <th>تعداد اقساط</th>
-                                        <th>مبلغ اولیه</th>
-                                        <th>باقیمانده</th>
-                                        <th>معوق</th>
+                                        <th>شناسه چک</th>
+                                        <th>سر رسید</th>
+                                        <th>بانک</th>
+                                        <th>شعبه</th>
+                                        <th>مبلغ</th>
+                                        <th>مانده</th>
+                                        <th>روز تا سررسید</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -402,7 +402,18 @@
                                             <td><h6>{{ cheque.bank_branch }}</h6></td>
                                             <td><h6>{{ cheque.cost|floatformat:0|intcomma:False }}</h6></td>
                                             <td><h6 style="direction: ltr">{{ cheque.total_mandeh|floatformat:0|intcomma:False }}</h6></td>
-                                            <td><h6>{{ cheque.delayed_loan|floatformat:0|intcomma:False }}</h6></td>
+                                            <td>
+                                                {% if cheque.cheque_date > today  %}
+                                                <h6 class="text-success">{{ cheque.cheque_date|timeuntil }}</h6>
+                                                {% else %}
+                                                <h6 class="text-danger">{{ cheque.cheque_date|timesince }}</h6>
+                                                    <i class="fas fa-exclamation-triangle blink"></i>
+                                                {% endif %}
+
+
+
+
+                                            </td>
                                         </tr>
                                     {% endfor %}
                                     </tbody>
