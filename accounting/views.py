@@ -1845,6 +1845,7 @@ def HesabMoshtariDetail(request, tafsili):
         'hesabmoshtari': hesabmoshtari,
         'user': user,
         'today': timezone.now().date().isoformat(),
+        'today2': timezone.now().date(),
         'asnad': asnad,
         'asnad_table': asnad_table,
         'm_name': None,
