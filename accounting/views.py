@@ -1831,7 +1831,7 @@ def HesabMoshtariDetail(request, tafsili):
         bar_mali = 0
 
 
-    chequ_recive=ChequesRecieve.objects.filter(per_code=hesabmoshtari.person.code)
+    chequ_recive=ChequesRecieve.objects.filter(per_code=hesabmoshtari.person.code,total_mandeh__lt=0)
 
     for c in chequ_recive:
         print(c.bank_name,c.cheque_tarik)
