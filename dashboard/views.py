@@ -787,7 +787,7 @@ def Home1(request, *args, **kwargs):
     return render(request, 'home1.html', context)
 
 @login_required(login_url='/login')
-def Home2(request, *args, **kwargs):
+def Home2_0602(request, *args, **kwargs):
     name = 'داشبورد 2'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
@@ -828,7 +828,121 @@ def Home2(request, *args, **kwargs):
 
 
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from datetime import date, timedelta
+import time
+from jdatetime import date as jdate
 
+
+@login_required(login_url='/login')
+def Home2(request, *args, **kwargs):
+    name = 'داشبورد 2'
+    result = page_permision(request, name)  # بررسی دسترسی
+    if result:  # اگر هدایت انجام شده است
+        return result
+
+    minfo = MasterInfo.objects.filter(is_active=True).last()
+    user = request.user
+
+    if user.mobile_number != '09151006447':
+        UserLog.objects.create(user=user, page='داشبورد 2')
+
+    start_time = time.time()
+    today = date.today()
+    yesterday = today - timedelta(days=1)
+
+    # سال مالی
+    acc_year = minfo.acc_year if minfo else jdate.today().year
+    start_date_jalali = jdate(acc_year, 1, 1)
+    start_date_gregorian = start_date_jalali.togregorian()
+
+    # آخرین زمان آپدیت
+    last_update_time = Mtables.objects.filter(name='Sanad_detail').last().last_update_time if Mtables.objects.filter(name='Sanad_detail').exists() else timezone.now()
+
+    # داده‌های امروز و دیروز
+    today_data = TarazCalFromReport(today)
+    yesterday_data = TarazCalFromReport(yesterday)
+
+    # چک‌های دریافتی
+    chequesr = ChequesRecieve.objects.aggregate(total_mandeh_sum=Sum('total_mandeh'))
+    past_chequesr = ChequesRecieve.objects.filter(cheque_date__lte=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
+    post_chequesr = ChequesRecieve.objects.filter(cheque_date__gt=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
+
+    r_chequ_data = {
+        'total': (chequesr['total_mandeh_sum'] or 0) / 10_000_000,
+        'past': (past_chequesr['total_mandeh_sum'] or 0) / 10_000_000,
+        'post': (post_chequesr['total_mandeh_sum'] or 0) / 10_000_000,
+    }
+
+    # چک‌های پرداختی
+    chequesp = ChequesPay.objects.aggregate(total_mandeh_sum=Sum('total_mandeh'))
+    past_chequesp = ChequesPay.objects.filter(cheque_date__lte=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
+    post_chequesp = ChequesPay.objects.filter(cheque_date__gt=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
+
+    p_chequ_data = {
+        'total': (chequesp['total_mandeh_sum'] or 0) / 10_000_000,
+        'past': (past_chequesp['total_mandeh_sum'] or 0) / 10_000_000,
+        'post': (post_chequesp['total_mandeh_sum'] or 0) / 10_000_000,
+    }
+
+    # گزارش‌های روزانه (7 روز اخیر)
+    daily_reports = MasterReport.objects.filter(day__lte=today).order_by('-day')[:7][::-1]
+    day_names = ['دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه', 'شنبه', 'یکشنبه']
+    chart1_data = {
+        'labels': [day_names[r.day.weekday()] for r in daily_reports],
+        'khales_forosh': [r.khales_forosh for r in daily_reports],
+        'baha_tamam_forosh': [r.baha_tamam_forosh for r in daily_reports],
+        'sood_navizhe': [r.sood_navizhe for r in daily_reports],
+    }
+
+    # گزارش‌های ماهانه (12 ماه اخیر)
+    monthly_reports = MonthlyReport.objects.order_by('-year', '-month')[:12][::-1]
+    chart2_data = {
+        'labels': [f"{r.month_name}" for r in monthly_reports],
+        'khales_forosh': [r.khales_forosh for r in monthly_reports],
+        'baha_tamam_forosh': [r.baha_tamam_forosh for r in monthly_reports],
+        'sood_navizhe': [r.sood_navizhe for r in monthly_reports],
+    }
+
+    # نمودار سود ویژه روزانه و ماهانه
+    chart4_data = {
+        'labels': [day_names[r.day.weekday()] for r in daily_reports],
+        'total_daramad': [r.khales_forosh + r.sayer_daramad for r in daily_reports],
+        'total_hazineh': [r.baha_tamam_forosh + r.sayer_hazine for r in daily_reports],
+        'sood_vizhe': [r.sood_vizhe for r in daily_reports],
+    }
+
+    chart5_data = {
+        'labels': [f"{r.month_name}" for r in monthly_reports],
+        'total_daramad': [r.khales_forosh + r.sayer_daramad for r in monthly_reports],
+        'total_hazineh': [r.baha_tamam_forosh + r.sayer_hazine for r in monthly_reports],
+        'sood_vizhe': [r.sood_vizhe for r in monthly_reports],
+    }
+
+    context = {
+        'title': 'داشبورد مدیریتی',
+        'user': user,
+        'minfo': minfo,
+        'today_data': today_data,
+        'yesterday_data': yesterday_data,
+        'r_chequ_data': r_chequ_data,
+        'p_chequ_data': p_chequ_data,
+        'last_update_time': last_update_time,
+
+        'chart1_data': chart1_data,
+        'chart2_data': chart2_data,
+        'chart4_data': chart4_data,
+        'chart5_data': chart5_data,
+
+        'force_dark': True,  # اگر تمایل به تم تیره داری
+    }
+
+    total_time = time.time() - start_time
+    print(f"زمان کل اجرای Home2: {total_time:.2f} ثانیه")
+
+    return render(request, 'home2.html', context)
 
 
 

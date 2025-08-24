@@ -123,3 +123,15 @@ def custom_intword(value):
 
     # اگر هیچکدام از شرط‌ها برقرار نشد، عدد اولیه را برمی‌گردانیم
     return str(value)
+
+
+@register.filter
+def divide(value, arg):
+    """
+    تقسیم یک عدد بر عدد دیگر
+    مثال: {{ value|divide:1000000 }}
+    """
+    try:
+        return float(value) / float(arg)
+    except (ValueError, TypeError, ZeroDivisionError):
+        return None
