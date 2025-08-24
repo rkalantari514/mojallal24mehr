@@ -1831,12 +1831,15 @@ def HesabMoshtariDetail(request, tafsili):
         bar_mali = 0
 
 
-    chequ_recive=ChequesRecieve.objects.filter(per_code=hesabmoshtari.person.code,total_mandeh__lt=0)
+    cheque_recive=ChequesRecieve.objects.filter(per_code=hesabmoshtari.person.code,total_mandeh__lt=0).order_by('cheque_date')
+    cheque_pay=ChequesPay.objects.filter(per_code=hesabmoshtari.person.code,total_mandeh__gt=0).order_by('cheque_date')
+    # محاسبه مجموع مانده چک‌های دریافتی
+    result_receive = cheque_recive.aggregate(mandeh=Sum('total_mandeh'))
+    cheque_receive_summary = abs(result_receive['mandeh']) if result_receive['mandeh'] is not None else None
 
-    for c in chequ_recive:
-        print(c.bank_name,c.cheque_tarik)
-
-
+    # محاسبه مجموع مانده چک‌های پرداختی
+    result_pay = cheque_pay.aggregate(mandeh=Sum('total_mandeh'))
+    cheque_pay_summary = abs(result_pay['mandeh']) if result_pay['mandeh'] is not None else None
 
 
     # context نهایی
@@ -1861,7 +1864,10 @@ def HesabMoshtariDetail(request, tafsili):
         'chart_date': chart_date,
         'year_list': year_list,
         'amani': amani,
-        'chequ_recive': chequ_recive,
+        'cheque_recive': cheque_recive,
+        'cheque_pay': cheque_pay,
+        'cheque_receive_summary': cheque_receive_summary,
+        'cheque_pay_summary': cheque_pay_summary,
     }
 
     print(f"زمان اجرا: {time.time() - start_time:.2f} ثانیه")

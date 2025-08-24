@@ -4,7 +4,12 @@
 {% block content %}
     {% load jalali_tags %}
     {% load custom_filters %}
-
+    <style>
+        .small-logo {
+            width: 20px; /* تنظیم اندازه کوچک لوگو */
+            height: auto;
+        }
+    </style>
     <div class="content-wrapper">
         <div class="page-title">
             <div class="row">
@@ -253,8 +258,45 @@
                         </div>
                     </div>
                 </div>
+            {% if cheque_receive_summary %}
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-facebook  rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-money highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                        <p class="card-text text-dark"> چکهای دریافتی </p>
+                                    <h4> {{ cheque_receive_summary|intword }} ريال</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
 
-
+            {% if cheque_pay_summary %}
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-facebook  rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-money highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                        <p class="card-text text-dark"> چکهای پرداختی </p>
+                                    <h4> {{ cheque_pay_summary|intword }} ريال</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
             </div>
             <!-- ردیف نمودار -->
 
@@ -279,6 +321,7 @@
 
 
             <!-- ردیف خلاصه و جزئیات وام ها -->
+        {% if hesabmoshtari.loans.all %}
             <div class="row">
                 <div class="col-md-5 mb-30">
                     <div class="card card-statistics h-100">
@@ -373,9 +416,10 @@
 
                 </div>
             </div>
-
-            <!-- ردیف چکهای دریافتی  -->
+{% endif %}
+            <!-- ردیف چکها  -->
             <div class="row">
+            {% if cheque_recive %}
                 <div class="col-md-5 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="card-body col-12">
@@ -386,6 +430,7 @@
                                     <tr class="text-dark">
                                         <th>شناسه چک</th>
                                         <th>سر رسید</th>
+                                        <th></th>
                                         <th>بانک</th>
                                         <th>شعبه</th>
                                         <th>مبلغ</th>
@@ -394,10 +439,13 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {% for cheque in chequ_recive %}
+                                    {% for cheque in cheque_recive %}
+                                        {% with 'images/bank/'|add:cheque.bank_logo as logo_path %}
                                         <tr>
                                             <td><h6>{{ cheque.cheque_id }}</h6></td>
                                             <td><h6>{{ cheque.cheque_tarik }}</h6></td>
+                                           <td><img src='{% static logo_path %}' class='small-logo'></td>
+
                                             <td><h6>{{ cheque.bank_name }}</h6></td>
                                             <td><h6>{{ cheque.bank_branch }}</h6></td>
                                             <td><h6>{{ cheque.cost|floatformat:0|intcomma:False }}</h6></td>
@@ -405,11 +453,8 @@
                                             <td>
                                                 {% if cheque.cheque_date > today2  %}
                                                 <h6 class="text-success">{{ cheque.cheque_date|timeuntil }}</h6>
-                                            <i class="fas fa-exclamation-triangle blink"></i>
-
                                                 {% else %}
                                                 <h6 class="text-danger">{{ cheque.cheque_date|timesince }}</h6>
-                                                    <i class="fas fa-exclamation-triangle blink"></i>
                                                 {% endif %}
 
 
@@ -417,6 +462,7 @@
 
                                             </td>
                                         </tr>
+                                        {% endwith %}
                                     {% endfor %}
                                     </tbody>
                                 </table>
@@ -424,7 +470,59 @@
                         </div>
                     </div>
                 </div>
+            {% endif %}
+            {% if cheque_pay %}
+                <div class="col-md-7 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body col-12">
+                            <h5 class="card-title pb-0 border-0 ">چکهای پرداختی</h5>
+                            <div class="table-responsive">
+                                <table class="table center-aligned-table mb-10 text-center ">
+                                    <thead>
+                                    <tr class="text-dark">
+                                        <th>شناسه چک</th>
+                                        <th>سر رسید</th>
+                                        <th></th>
+                                        <th>بانک</th>
+                                        <th>شعبه</th>
+                                        <th>مبلغ</th>
+                                        <th>مانده</th>
+                                        <th>روز تا سررسید</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for cheque in cheque_pay %}
+                                        {% with 'images/bank/'|add:cheque.bank.bank_logo as logo_path %}
+                                        <tr>
+                                            <td><h6>{{ cheque.cheque_id }}</h6></td>
+                                            <td><h6>{{ cheque.cheque_tarik }}</h6></td>
+                                           <td><img src='{% static logo_path %}' class='small-logo'></td>
 
+                                            <td><h6>{{ cheque.bank.name }}</h6></td>
+                                            <td><h6>{{ cheque.bank.shobe }}</h6></td>
+                                            <td><h6>{{ cheque.cost|floatformat:0|intcomma:False }}</h6></td>
+                                            <td><h6 style="direction: ltr">{{ cheque.total_mandeh|floatformat:0|intcomma:False }}</h6></td>
+                                            <td>
+                                                {% if cheque.cheque_date > today2  %}
+                                                <h6 class="text-success">{{ cheque.cheque_date|timeuntil }}</h6>
+                                                {% else %}
+                                                <h6 class="text-danger">{{ cheque.cheque_date|timesince }}</h6>
+                                                {% endif %}
+
+
+
+
+                                            </td>
+                                        </tr>
+                                        {% endwith %}
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
 
             </div>
 
