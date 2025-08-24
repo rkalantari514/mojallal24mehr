@@ -403,6 +403,7 @@
                                             <td><h6>{{ cheque.cost|floatformat:0|intcomma:False }}</h6></td>
                                             <td><h6 style="direction: ltr">{{ cheque.total_mandeh|floatformat:0|intcomma:False }}</h6></td>
                                             <td>
+                                            {{ cheque.cheque_date }} , {{ today }}
                                                 {% if cheque.cheque_date > today  %}
                                                 <h6 class="text-success">{{ cheque.cheque_date|timeuntil }}</h6>
                                                 {% else %}
