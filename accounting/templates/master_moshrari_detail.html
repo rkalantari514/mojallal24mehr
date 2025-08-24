@@ -403,9 +403,10 @@
                                             <td><h6>{{ cheque.cost|floatformat:0|intcomma:False }}</h6></td>
                                             <td><h6 style="direction: ltr">{{ cheque.total_mandeh|floatformat:0|intcomma:False }}</h6></td>
                                             <td>
-                                            {{ cheque.cheque_date }} , {{ today2 }}
                                                 {% if cheque.cheque_date > today2  %}
                                                 <h6 class="text-success">{{ cheque.cheque_date|timeuntil }}</h6>
+                                            <i class="fas fa-exclamation-triangle blink"></i>
+
                                                 {% else %}
                                                 <h6 class="text-danger">{{ cheque.cheque_date|timesince }}</h6>
                                                     <i class="fas fa-exclamation-triangle blink"></i>
