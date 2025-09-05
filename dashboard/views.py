@@ -1153,9 +1153,9 @@ def CreateTotalReport(request):
             [Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 200]) / Decimal(
             10000000)
 
-        repo.bedehkaran_total=sum(
-            [Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 103]) / Decimal(
-            10000000)
+        # repo.bedehkaran_total=sum(
+        #     [Decimal(sanad.curramount) for sanad in sanad_details if sanad.kol == 103]) / Decimal(
+        #     10000000)
 
         repo.sayer_hazine_ave = sayer_hazine_total / active_day * -1 if active_day else 0
         repo.sayer_daramad_ave = sayer_daramad_total / active_day if active_day else 0
