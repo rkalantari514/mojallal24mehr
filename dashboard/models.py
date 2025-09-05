@@ -52,9 +52,9 @@ class MasterInfo(models.Model):
     sood_vizhe_ave = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='سود ویژه میانگین')
     sood_vizhe_total = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='سود ویژه کل')
 
-
-    bedehkaran_total = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='جمع بدهی بدهکاران')
-    bestankaran_total = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='جمع طلب طلبکاران')
+    #
+    # bedehkaran_total = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='جمع بدهی بدهکاران')
+    # bestankaran_total = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='جمع طلب طلبکاران')
 
 
 
