@@ -53,6 +53,12 @@ class MasterInfo(models.Model):
     sood_vizhe_total = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='سود ویژه کل')
 
 
+    bedehkaran_total = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='جمع بدهی بدهکاران')
+    bestankaran_total = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='جمع طلب طلبکاران')
+
+
+
+
 
     asnad_daryaftani = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='اسناد دریافتنی')
     asnad_pardakhtani = models.DecimalField(max_digits=15, decimal_places=2, default=0, verbose_name='اسناد پرداختنی')

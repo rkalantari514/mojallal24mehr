@@ -37,25 +37,24 @@
                 <div class="card-body">
                     <h3 class="d-inline">خلاصه عملکرد مالی</h3>
                     <span id="datetime" class="datetime-small">در حال بارگذاری...</span>
-
                     <div class="tab round nav-center mt-4">
                         <ul class="nav nav-tabs" role="tablist">
                             <li class="nav-item">
-                                <a class="nav-link active show" data-toggle="tab" href="#overall" role="tab"> <i class="fa fa-dashboard"></i> کلی</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" data-toggle="tab" href="#daily" role="tab"> <i class="fa fa-calendar-check-o"></i> روزانه</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" data-toggle="tab" href="#weekly" role="tab"> <i class="fa fa-calendar"></i> هفتگی</a>
+                                <a class="nav-link active show" data-toggle="tab" href="#overall" role="tab"> <i class="fa fa-dashboard"></i>سال</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" data-toggle="tab" href="#monthly" role="tab"> <i class="fa fa-calendar-plus-o"></i> ماهانه</a>
                             </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#weekly" role="tab"> <i class="fa fa-calendar"></i> هفتگی</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#daily" role="tab"> <i class="fa fa-calendar-check-o"></i> روزانه</a>
+                            </li>
+
                         </ul>
-
                         <div class="tab-content">
-
                             <!-- تب کلی -->
                             <div class="tab-pane fade active show" id="overall" role="tabpanel">
                                 <div class="row mt-4">
@@ -64,14 +63,14 @@
                                             <div class="card-body text-white">
                                                 <div class="clearfix">
                                                     <div class="float-left">
-                                                        <span><i class="fa fa-line-chart text-white highlight-icon"></i></span>
+                                                        <span><i class="fa fa-line-chart text-primary highlight-icon"></i></span>
                                                     </div>
                                                     <div class="float-right text-right">
-                                                        <p>خالص فروش</p>
-                                                        <h4>{{ minfo.khales_daramad_forosh|divide:1000000|floatformat:0|intcomma }} میلیون</h4>
+                                                        <h5>خالص فروش</h5>
+                                                        <h4>{{ minfo.khales_daramad_forosh|floatformat:0|intcomma:False }} میلیون تومان </h4>
                                                     </div>
                                                 </div>
-                                                <p class="mt-3 mb-0"><small>از ابتدای سال</small></p>
+                                                <h5 class="mt-3 mb-0"><small>از ابتدای سال</small></h5>
                                             </div>
                                         </div>
                                     </div>
@@ -81,14 +80,14 @@
                                             <div class="card-body text-white">
                                                 <div class="clearfix">
                                                     <div class="float-left">
-                                                        <span><i class="fa fa-money text-white highlight-icon"></i></span>
+                                                        <span><i class="fa fa-money text-success highlight-icon"></i></span>
                                                     </div>
                                                     <div class="float-right text-right">
-                                                        <p>سود ناویژه</p>
-                                                        <h4>{{ minfo.sood_navizhe_total|divide:1000000|floatformat:0|intcomma }} میلیون</h4>
+                                                        <h5>سود ویژه</h5>
+                                                        <h4>{{ minfo.sood_vizhe_total|floatformat:0|intcomma:False }} میلیون تومان</h4>
                                                     </div>
                                                 </div>
-                                                <p class="mt-3 mb-0"><small>نسبت: {{ minfo.navizheh_ratio|floatformat:2 }}%</small></p>
+                                                <h5 class="mt-3 mb-0">نسبت: {{ minfo.vizheh_ratio|percentage}}%</h5>
                                             </div>
                                         </div>
                                     </div>
