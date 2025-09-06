@@ -1,22 +1,122 @@
+
 {% extends 'events/base_events.html' %}
+{% load jalali_tags %}
+{% load static %}
+    {% load humanize %}
 
 {% block events_content %}
+    <div class="col-xl-4 md-mt-30 mb-30">
+    <div class="card card-statistics mb-30">
+    <div class="card-body">
 <h2 class="mb-4">{% if form.instance.pk %}ویرایش رویداد{% else %}افزودن رویداد جدید{% endif %}</h2>
 
-<form method="post">
+<form method="post" class="needs-validation" novalidate>
     {% csrf_token %}
-    {% for field in form %}
-        <div class="mb-3">
-            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-            {{ field }}
-            {% if field.help_text %}
-                <div class="form-text">{{ field.help_text }}</div>
+
+    <!-- فیلد دسته‌بندی (Select) -->
+    <div class="form-group row mb-3">
+        <label for="{{ form.category.id_for_label }}" class="col-sm-3 col-form-label">{{ form.category.label }}</label>
+        <div class="col-sm-9">
+            {{ form.category }}
+            {% if form.category.help_text %}
+                <small class="form-text text-muted">{{ form.category.help_text }}</small>
             {% endif %}
-            {% for error in field.errors %}
+            {% for error in form.category.errors %}
                 <div class="invalid-feedback d-block">{{ error }}</div>
             {% endfor %}
         </div>
-    {% endfor %}
+    </div>
+
+    <!-- فیلد نام رویداد (TextInput) -->
+    <div class="form-group row mb-3">
+        <label for="{{ form.name.id_for_label }}" class="col-sm-3 col-form-label">{{ form.name.label }}</label>
+        <div class="col-sm-9">
+            {{ form.name }}
+            {% if form.name.help_text %}
+                <small class="form-text text-muted">{{ form.name.help_text }}</small>
+            {% endif %}
+            {% for error in form.name.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- فیلد فاصله تکرار (Select) -->
+    <div class="form-group row mb-3">
+        <label for="{{ form.repeat_interval.id_for_label }}" class="col-sm-3 col-form-label">{{ form.repeat_interval.label }}</label>
+        <div class="col-sm-9">
+            {{ form.repeat_interval }}
+            {% if form.repeat_interval.help_text %}
+                <small class="form-text text-muted">{{ form.repeat_interval.help_text }}</small>
+            {% endif %}
+            {% for error in form.repeat_interval.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- فیلد زمان اولین رویداد (DateInput) -->
+    <div class="form-group row mb-3">
+        <label for="{{ form.first_occurrence.id_for_label }}" class="col-sm-3 col-form-label">{{ form.first_occurrence.label }}</label>
+        <div class="col-sm-9">
+            {{ form.first_occurrence }}
+            {% if form.first_occurrence.help_text %}
+                <small class="form-text text-muted">{{ form.first_occurrence.help_text }}</small>
+            {% endif %}
+            {% for error in form.first_occurrence.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- فیلد زمان آخرین رویداد (اختیاری) (DateInput) -->
+    <div class="form-group row mb-3">
+        <label for="{{ form.last_occurrence.id_for_label }}" class="col-sm-3 col-form-label">{{ form.last_occurrence.label }}</label>
+        <div class="col-sm-9">
+            {{ form.last_occurrence }}
+            {% if form.last_occurrence.help_text %}
+                <small class="form-text text-muted">{{ form.last_occurrence.help_text }}</small>
+            {% endif %}
+            {% for error in form.last_occurrence.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- فیلد فاصله یادآوری (Select) -->
+    <div class="form-group row mb-3">
+        <label for="{{ form.reminder_interval.id_for_label }}" class="col-sm-3 col-form-label">{{ form.reminder_interval.label }}</label>
+        <div class="col-sm-9">
+            {{ form.reminder_interval }}
+            {% if form.reminder_interval.help_text %}
+                <small class="form-text text-muted">{{ form.reminder_interval.help_text }}</small>
+            {% endif %}
+            {% for error in form.reminder_interval.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- فیلد وضعیت فعال (Checkbox) -->
+    <div class="form-group row mb-3">
+        <div class="col-sm-3"></div> <!-- فضای خالی برای همترازی با برچسب‌ها -->
+        <div class="col-sm-9">
+            <div class="form-check">
+                {{ form.is_active }}
+                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                    {{ form.is_active.label }}
+                </label>
+            </div>
+            {% if form.is_active.help_text %}
+                <small class="form-text text-muted">{{ form.is_active.help_text }}</small>
+            {% endif %}
+            {% for error in form.is_active.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- نمایش خطاهای غیرمرتبط با فیلدها (non-field errors) -->
     {% if form.non_field_errors %}
         <div class="alert alert-danger">
             {% for error in form.non_field_errors %}
@@ -24,7 +124,31 @@
             {% endfor %}
         </div>
     {% endif %}
-    <button type="submit" class="btn btn-success">ذخیره</button>
-    <a href="{% url 'events:event_list' %}" class="btn btn-secondary">بازگشت</a>
+
+    <!-- دکمه‌های ارسال و بازگشت -->
+    <div class="form-group row">
+        <div class="col-sm-9 offset-sm-3">
+            <button type="submit" class="btn btn-success">ذخیره</button>
+            <a href="{% url 'events:event_list' %}" class="btn btn-secondary">بازگشت</a>
+        </div>
+    </div>
 </form>
+
+
+    </div>
+    </div>
+    </div>
+{% endblock %}
+
+
+
+{% block date %}
+    <link rel="stylesheet" href="{% static 'admin/jquery.ui.datepicker.jalali/themes/base/jquery-ui.min.css' %}">
+    <script src="{% static 'admin/js/django_jalali.min.js' %}"></script>
+    <script>
+        $('.time-picker').timepicker({
+            showMeridian: false
+        });
+
+    </script>
 {% endblock %}

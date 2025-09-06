@@ -4,6 +4,12 @@ from django import forms
 from .models import EventCategory, Event, EventDetail, Resolution, EventImage
 from django.forms import inlineformset_factory
 
+
+
+from jalali_date.fields import JalaliDateField, SplitJalaliDateTimeField
+from jalali_date.widgets import AdminJalaliDateWidget, AdminSplitJalaliDateTime
+
+
 # -----------------------------------------------------------
 # 1. فرم برای EventCategory
 # -----------------------------------------------------------
@@ -21,19 +27,41 @@ class EventCategoryForm(forms.ModelForm):
 # -----------------------------------------------------------
 class EventForm(forms.ModelForm):
     # استفاده از DateInput استاندارد جنگو برای فیلدهای تاریخ
-    first_occurrence = forms.DateField(label='زمان اولین رویداد',
-                                       widget=forms.DateInput(attrs={'class': 'form-control datepicker', 'type': 'date'}))
-    last_occurrence = forms.DateField(label='زمان آخرین رویداد (اختیاری)', required=False,
-                                      widget=forms.DateInput(attrs={'class': 'form-control datepicker', 'type': 'date'}))
+    # first_occurrence = forms.DateField(label='زمان اولین رویداد',
+    #                                    widget=forms.DateInput(attrs={'class': 'form-control datepicker', 'type': 'date'}))
+
+    first_occurrence = forms.DateField(
+        widget=forms.DateInput(),
+    )
+
+    last_occurrence = forms.DateField(
+        widget=forms.DateInput(),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(EventForm, self).__init__(*args, **kwargs)
+        self.fields['first_occurrence'] = JalaliDateField(
+            label=('تاریخ اولین رویداد'),
+            widget=AdminJalaliDateWidget
+        )
+
+        self.fields['last_occurrence'] = JalaliDateField(
+            label=('تاریخ آخرین رویداد'),
+            widget=AdminJalaliDateWidget
+        )
+
+
+
+
 
     class Meta:
         model = Event
         fields = ['category', 'name', 'repeat_interval', 'first_occurrence', 'last_occurrence', 'reminder_interval', 'is_active']
         widgets = {
-            'category': forms.Select(attrs={'class': 'form-control'}),
+            'category': forms.Select(attrs={'placeholder': 'دسته بندی', 'class': 'selectpicker text-left','data-live-search' : "true",}),
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'نام رویداد'}),
-            'repeat_interval': forms.Select(attrs={'class': 'form-control'}),
-            'reminder_interval': forms.Select(attrs={'class': 'form-control'}),
+            'repeat_interval': forms.Select(attrs={'placeholder': 'بازه تکرار', 'class': 'selectpicker','data-live-search' : "true",}),
+            'reminder_interval': forms.Select(attrs={'placeholder': 'یاد آوری', 'class': 'selectpicker','data-live-search' : "true",}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
