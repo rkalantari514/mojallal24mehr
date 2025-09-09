@@ -74,47 +74,52 @@ class EventForm(forms.ModelForm):
 # -----------------------------------------------------------
 # 3. فرم برای EventDetail
 # -----------------------------------------------------------
+# events/forms.py
+
+from django import forms
+from django.forms import inlineformset_factory
+from .models import EventDetail, Resolution, EventImage
+
+# -----------------------------------------------------------
+# EventDetail form (دیگه فیلد event داخل فرم نیست - در ویو ست میشه)
+# -----------------------------------------------------------
 class EventDetailForm(forms.ModelForm):
-    occurrence_date = forms.DateField(label='تاریخ برگزاری',
-                                      widget=forms.DateInput(attrs={'class': 'form-control datepicker', 'type': 'date'}))
+    occurrence_date = forms.DateField(
+        label='تاریخ برگزاری',
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+    )
 
     class Meta:
         model = EventDetail
-        fields = ['event', 'occurrence_date', 'status_relative_to_schedule', 'report']
+        # توجه: 'event' حذف شده — در ویو خودش ست میشه
+        fields = ['occurrence_date', 'status_relative_to_schedule', 'report']
         widgets = {
-            'event': forms.Select(attrs={'class': 'form-control'}),
             'status_relative_to_schedule': forms.Select(attrs={'class': 'form-control'}),
-            'report': forms.Textarea(attrs={'class': 'form-control', 'rows': 5, 'placeholder': 'گزارش برگزاری رویداد'}),
+            'report': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
         }
-    # متد __init__ دیگر برای تبدیل تاریخ شمسی لازم نیست
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
 
 
 # -----------------------------------------------------------
-# 4. فرم برای Resolution
+# Resolution form
 # -----------------------------------------------------------
 class ResolutionForm(forms.ModelForm):
     due_date = forms.DateField(label='مهلت انجام', required=False,
-                               widget=forms.DateInput(attrs={'class': 'form-control datepicker', 'type': 'date'}))
+                               widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}))
     completed_date = forms.DateField(label='تاریخ انجام', required=False,
-                                     widget=forms.DateInput(attrs={'class': 'form-control datepicker', 'type': 'date'}))
+                                     widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}))
 
     class Meta:
         model = Resolution
         fields = ['text', 'responsible_person', 'status', 'due_date', 'completed_date']
         widgets = {
-            'text': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'متن مصوبه'}),
+            'text': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'responsible_person': forms.Select(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
         }
-    # متد __init__ دیگر برای تبدیل تاریخ شمسی لازم نیست
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
 
 
 # -----------------------------------------------------------
-# 5. فرم برای EventImage
+# EventImage form
 # -----------------------------------------------------------
 class EventImageForm(forms.ModelForm):
     class Meta:
@@ -122,15 +127,17 @@ class EventImageForm(forms.ModelForm):
         fields = ['image', 'caption']
         widgets = {
             'image': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
-            'caption': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'توضیح تصویر (اختیاری)'}),
+            'caption': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
+
 # -----------------------------------------------------------
-# Formsets برای EventDetail
+# Inline formsets (برای EventDetail)
 # -----------------------------------------------------------
 ResolutionFormSet = inlineformset_factory(
     EventDetail, Resolution, form=ResolutionForm, extra=1, can_delete=True
 )
+
 EventImageFormSet = inlineformset_factory(
     EventDetail, EventImage, form=EventImageForm, extra=1, can_delete=True
 )

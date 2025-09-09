@@ -120,7 +120,7 @@ class EventDetail(models.Model):
         verbose_name_plural = 'جزئیات رویدادها'
         ordering = ['occurrence_date']
         # اطمینان از یکتا بودن یک تاریخ برگزاری برای یک رویداد خاص
-        unique_together = ('event', 'occurrence_date',)
+        # unique_together = ('event', 'occurrence_date',)
 
 
     def __str__(self):

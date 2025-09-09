@@ -72,6 +72,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         self.password_expiry_date = timezone.now() + timedelta(days=30)
         self.save()
 
+    def get_full_name(self):
+        full_name = f'{self.first_name} {self.last_name}'.strip()
+        return full_name if full_name else self.mobile_number
+
 @receiver(post_save, sender=CustomUser)
 def resize_avatar(sender, instance, **kwargs):
     if instance.avatar and hasattr(instance.avatar, 'path'):

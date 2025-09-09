@@ -1,6 +1,11 @@
 {% extends 'events/base_events.html' %}
 
 {% block events_content %}
+
+        <div class="row">
+        <div class="col-xl-6 mb-30">
+          <div class="card card-statistics h-100">
+           <div class="card-body">
 <h2 class="mb-4">{% if form.instance.pk %}ویرایش دسته بندی{% else %}افزودن دسته بندی جدید{% endif %}</h2>
 
 <form method="post">
@@ -27,4 +32,11 @@
     <button type="submit" class="btn btn-success">ذخیره</button>
     <a href="{% url 'events:category_list' %}" class="btn btn-secondary">بازگشت</a>
 </form>
+
+           </div>
+           </div>
+           </div>
+           </div>
+
+
 {% endblock %}

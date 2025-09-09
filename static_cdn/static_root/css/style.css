@@ -24950,7 +24950,10 @@ body.dark-mode-active .bg-white {
 body.dark-mode-active .text-capitalize{
   color:#ffffff;
 }
-
+body.dark-mode-active .text-dark,
+body.dark-mode-active .text-muted{
+  color:#ffffff !important;
+}
 
 body.dark-mode-active footer {
     background-color: #1f1f1f !important; /* رنگ پس‌زمینه footer */
@@ -25005,18 +25008,35 @@ body.dark-mode-active card.bg-light {
 	}
 
 
-body.dark-mode-active .popover
 
-body.dark-mode-active .popover-header{
-		color: #0c1624;
-		.card-title {
-			color: #141515;
-		}
-		.card-subtitle {
-			color: #141515;
-		}
-		.card-header {
-			color: #000;
-			border-bottom-color: #E1E1E1;
-		}
-	}
+
+
+
+
+/* برجسته‌تر کردن هدر پاپ‌آپ */
+.popover-header {
+  padding: .5rem .75rem;
+  margin-bottom: 0;
+  /*font-size: 1.2rem; !* افزایش اندازه فونت *!*/
+  font-weight: bold; /* افزایش ضخامت فونت */
+  color: #333; /* تغییر رنگ متن به تیره‌تر */
+  background-color: #e9ecef; /* تغییر رنگ پس‌زمینه برای تضاد بیشتر */
+  border-bottom: 1px solid #dee2e6;
+  border-top-right-radius: calc(.3rem - 1px);
+  border-top-left-radius: calc(.3rem - 1px);
+}
+
+/* تنظیمات برای دارک مود */
+body.dark-mode-active .popover-header,
+body.dark-mode-active .popover-body {
+  color: #fff; /* تغییر رنگ متن به سفید */
+  background-color: #1c5083; /* تغییر رنگ پس‌زمینه به تیره */
+}
+
+body.dark-mode-active .table,
+body.dark-mode-active .card-title,
+body.dark-mode-active .popover-body {
+  color: #f8f9fa; /* تغییر رنگ متن به روشن‌تر */
+}
+
+

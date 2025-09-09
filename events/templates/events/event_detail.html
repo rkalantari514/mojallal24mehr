@@ -4,6 +4,7 @@
 {% block events_content %}
     <h2 class="mb-4">جزئیات رویداد: {{ event.name }}</h2>
 
+    <!-- خلاصه رویداد -->
     <div class="row">
         <div class="col-xl-4 mb-30">
             <div class="card card-statistics h-100">
@@ -11,61 +12,88 @@
                     <h5 class="card-title">اطلاعات کلی رویداد</h5>
                     <div class="row">
                         <div class="col-sm-12">
-<ul class="list-unstyled mb-0">
-    <!-- نام رویداد -->
-    <li class="d-flex align-items-center justify-content-between py-2 border-bottom">
-        <div class="d-flex align-items-center">
-            <i class="fa fa-flag-checkered fa-2x text-primary mr-2"></i>
-            <span class="font-weight-bold text-primary">نام رویداد:</span>
-        </div>
-        <span class="ml-2">{{ event.name }}</span>
-    </li>
+                            <ul class="list-unstyled mb-0">
+                                <!-- نام رویداد -->
+                                <li class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa fa-flag-checkered fa-2x text-primary mr-2"></i>
+                                        <span class="font-weight-bold text-primary">نام رویداد:</span>
+                                    </div>
+                                    <span class="ml-2"><h5>{{ event.name }}</h5></span>
+                                </li>
 
-    <!-- دسته‌بندی -->
-    <li class="d-flex align-items-center justify-content-between py-2 border-bottom">
-        <div class="d-flex align-items-center">
-            <i class="fa fa-folder-open fa-2x text-info mr-2"></i>
-            <span class="font-weight-bold text-info">دسته‌بندی:</span>
-        </div>
-        <span class="ml-2">{{ event.category.name|default:"-" }}</span>
-    </li>
+                                <!-- دسته‌بندی -->
+                                <li class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa fa-folder-open fa-2x text-info mr-2"></i>
+                                        <span class="font-weight-bold text-info">دسته‌بندی:</span>
+                                    </div>
+                                    <span class="ml-2"><h5>{{ event.category.name|default:"-" }}</h5></span>
+                                </li>
 
-    <!-- بازه تکرار -->
-    <li class="d-flex align-items-center justify-content-between py-2 border-bottom">
-        <div class="d-flex align-items-center">
-            <i class="fa fa-refresh fa-2x text-success mr-2"></i>
-            <span class="font-weight-bold text-success">بازه تکرار:</span>
-        </div>
-        <span class="ml-2">{{ event.get_repeat_interval_display }}</span>
-    </li>
+                                <!-- بازه تکرار -->
+                                <li class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa fa-refresh fa-2x text-success mr-2"></i>
+                                        <span class="font-weight-bold text-success">بازه تکرار:</span>
+                                    </div>
+                                    <span class="ml-2"><h5>{{ event.get_repeat_interval_display }}</h5></span>
+                                </li>
 
-    <!-- اولین رویداد -->
-    <li class="d-flex align-items-center justify-content-between py-2 border-bottom">
-        <div class="d-flex align-items-center">
-            <i class="fa fa-calendar-plus-o fa-2x text-warning mr-2"></i>
-            <span class="font-weight-bold text-warning">اولین رویداد:</span>
-        </div>
-        <span class="ml-2">{{ event.first_occurrence|to_jalali:'%Y/%m/%d' }}</span>
-    </li>
+                                <!-- اولین رویداد -->
+                                <li class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa fa-calendar-plus-o fa-2x text-warning mr-2"></i>
+                                        <span class="font-weight-bold text-warning">اولین رویداد:</span>
+                                    </div>
+                                    <span class="ml-2"><h5>{{ event.first_occurrence|to_jalali:'%Y/%m/%d' }}</h5></span>
+                                </li>
 
-    <!-- آخرین رویداد -->
-    <li class="d-flex align-items-center justify-content-between py-2 border-bottom">
-        <div class="d-flex align-items-center">
-            <i class="fa fa-calendar-times-o fa-2x text-danger mr-2"></i>
-            <span class="font-weight-bold text-danger">آخرین رویداد:</span>
-        </div>
-        <span class="ml-2">{{ event.last_occurrence|to_jalali:'%Y/%m/%d'|default:"-" }}</span>
-    </li>
+                                <!-- آخرین رویداد -->
+                                <li class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa fa-calendar-times-o fa-2x text-danger mr-2"></i>
+                                        <span class="font-weight-bold text-danger">آخرین رویداد:</span>
+                                    </div>
+                                    <span class="ml-2"><h5>{{ event.last_occurrence|to_jalali:'%Y/%m/%d'|default:"-" }}</h5></span>
+                                </li>
 
-    <!-- فاصله یادآور -->
-    <li class="d-flex align-items-center justify-content-between py-2">
-        <div class="d-flex align-items-center">
-            <i class="fa fa-bell text-primary fa-2x mr-2"></i>
-            <span class="font-weight-bold text-primary">فاصله یادآور:</span>
-        </div>
-        <span class="ml-2">{{ event.get_reminder_interval_display }}</span>
-    </li>
-</ul>
+                                <!-- فاصله یادآور -->
+                                <li class="d-flex align-items-center justify-content-between py-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa fa-bell text-primary fa-2x mr-2"></i>
+                                        <span class="font-weight-bold text-primary">فاصله یادآور:</span>
+                                    </div>
+                                    <span class="ml-2"><h5>{{ event.get_reminder_interval_display }}</h5></span>
+                                </li>
+                                <!-- وضعیت -->
+                                <li class="d-flex align-items-center justify-content-between py-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa fa-check text-info fa-2x mr-2"></i>
+                                        <span class="font-weight-bold text-info">وضعیت:</span>
+                                    </div>
+                                    {% if event.is_active %}
+                                        <span class="btn btn-sm btn-success">فعال</span>
+                                    {% else %}
+                                        <span class="btn btn-sm btn-warning">غیر فعال</span>
+                                    {% endif %}
+
+
+                                </li>
+
+
+                            </ul>
+
+                            <div class="card-footer text-center nav-center">
+                                <a href="{% url 'events:event_edit' event.pk %}" class="btn btn-warning btn-sm">ویرایش
+                                    رویداد</a>
+                                <a href="{% url 'events:event_delete' event.pk %}" class="btn btn-danger btn-sm">حذف
+                                    رویداد</a>
+                                <a href="{% url 'events:event_list' %}" class="btn btn-secondary btn-sm">بازگشت به
+                                    لیست</a>
+                            </div>
+
+
                         </div>
 
                     </div>
@@ -75,63 +103,49 @@
     </div>
 
 
-
-
-
-
-
-
-    <div class="card mb-4">
-        <div class="card-header">اطلاعات اصلی</div>
-        <div class="card-body">
-            <p><strong>نام رویداد:</strong> {{ event.name }}</p>
-            <p><strong>دسته بندی:</strong> {{ event.category.name|default:"-" }}</p>
-            <p><strong>بازه تکرار:</strong> {{ event.get_repeat_interval_display }}</p>
-            <p><strong>اولین رویداد:</strong> {{ event.first_occurrence }}</p>
-            <p><strong>آخرین رویداد:</strong> {{ event.last_occurrence|default:"-" }}</p>
-            <p><strong>فاصله یادآور:</strong> {{ event.get_reminder_interval_display }}</p>
-            <p><strong>فعال:</strong> {% if event.is_active %}<span class="badge bg-success">بله</span>{% else %}
-                <span class="badge bg-danger">خیر</span>{% endif %}</p>
-        </div>
-        <div class="card-footer">
-            <a href="{% url 'events:event_edit' event.pk %}" class="btn btn-warning btn-sm">ویرایش رویداد</a>
-            <a href="{% url 'events:event_delete' event.pk %}" class="btn btn-danger btn-sm">حذف رویداد</a>
-            <a href="{% url 'events:event_list' %}" class="btn btn-secondary btn-sm">بازگشت به لیست</a>
-        </div>
-    </div>
-
     <h3 class="mb-3">جزئیات برگزاری</h3>
     <a href="{% url 'events:event_detail_add' event_pk=event.pk %}" class="btn btn-success mb-3">افزودن جزئیات برگزاری
         جدید</a>
 
     {% if event.details.all %}
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead>
-                <tr>
-                    <th>تاریخ برگزاری</th>
-                    <th>وضعیت</th>
-                    <th>گزارش</th>
-                    <th>عملیات</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for detail in event.details.all %}
-                    <tr>
-                        <td><a href="{% url 'events:event_detail_detail' detail.pk %}">{{ detail.occurrence_date }}</a>
-                        </td>
-                        <td>{{ detail.get_status_relative_to_schedule_display }}</td>
-                        <td>{{ detail.report|truncatechars:100 }}</td>
-                        <td>
-                            <a href="{% url 'events:event_detail_detail' detail.pk %}" class="btn btn-sm btn-info">جزئیات</a>
-                            <a href="{% url 'events:event_detail_edit' detail.pk %}" class="btn btn-sm btn-warning">ویرایش</a>
-                            <a href="{% url 'events:event_detail_delete' detail.pk %}"
-                               class="btn btn-sm btn-danger">حذف</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+        <div class="row">
+            <div class="col-xl-8 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover center-aligned-table mb-10 text-center">
+                                <thead>
+                                <tr>
+                                    <th>تاریخ برگزاری</th>
+                                    <th>وضعیت</th>
+                                    <th>گزارش</th>
+                                    <th>عملیات</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for detail in event.details.all %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'events:event_detail_detail' detail.pk %}">{{ detail.occurrence_date|to_jalali:'%Y/%m/%d' }}</a>
+                                        </td>
+                                        <td>{{ detail.get_status_relative_to_schedule_display }}</td>
+                                        <td>{{ detail.report|truncatechars:100 }}</td>
+                                        <td>
+                                            <a href="{% url 'events:event_detail_detail' detail.pk %}"
+                                               class="btn btn-sm btn-info">جزئیات</a>
+                                            <a href="{% url 'events:event_detail_edit' detail.pk %}"
+                                               class="btn btn-sm btn-warning">ویرایش</a>
+                                            <a href="{% url 'events:event_detail_delete' detail.pk %}"
+                                               class="btn btn-sm btn-danger">حذف</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     {% else %}
         <div class="alert alert-info" role="alert">

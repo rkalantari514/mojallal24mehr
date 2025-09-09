@@ -71,47 +71,127 @@ class EventDeleteView(DeleteView):
 # -----------------------------------------------------------
 # EventDetail Views (با Formsets برای Resolution و EventImage)
 # -----------------------------------------------------------
+# events/views.py
+
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.db import transaction
+
+from .models import Event, EventDetail
+from .forms import EventDetailForm, ResolutionFormSet, EventImageFormSet
+
+# --- (باقی Event / EventCategory views اینجا باشند اگر لازم داری) ---
+# برای کوتاهی اینجا فقط EventDetail views را می‌آورم
+
+
 class EventDetailCreateView(CreateView):
     model = EventDetail
     form_class = EventDetailForm
     template_name = 'events/eventdetail_form.html'
-    # success_url به صورت داینامیک در get_success_url تعیین می شود
 
-    def get_initial(self):
-        initial = super().get_initial()
-        # اگر event_pk در URL باشد، آن را به عنوان مقدار اولیه برای فیلد event تنظیم می کند
-        event_pk = self.kwargs.get('event_pk')
-        if event_pk:
-            initial['event'] = get_object_or_404(Event, pk=event_pk)
-        return initial
+    def dispatch(self, request, *args, **kwargs):
+        # والد (Event) را اینجا نگه می‌داریم
+        self.parent_event = get_object_or_404(Event, pk=kwargs.get('event_pk'))
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
+        # اگر فرم از قبل در kwargs پاس شده، از آن استفاده کن تا ارورها نشان داده شوند
+        form = kwargs.get('form', data.get('form', self.get_form()))
+        data['form'] = form
+
         if self.request.POST:
             data['resolutions'] = ResolutionFormSet(self.request.POST, prefix='resolutions')
             data['images'] = EventImageFormSet(self.request.POST, self.request.FILES, prefix='images')
         else:
-            data['resolutions'] = ResolutionFormSet(prefix='resolutions')
-            data['images'] = EventImageFormSet(prefix='images')
+            # در ایجاد، کوئری‌ست خالی باشه
+            data['resolutions'] = ResolutionFormSet(prefix='resolutions', queryset=Resolution.objects.none())
+            data['images'] = EventImageFormSet(prefix='images', queryset=EventImage.objects.none())
+
+        # برای قالب راحتتر باشه که object برای create None باشه
+        data['object'] = None
         return data
 
     def form_valid(self, form):
-        context = self.get_context_data()
-        resolutions = context['resolutions']
-        images = context['images']
-        with transaction.atomic():
-            self.object = form.save() # ابتدا EventDetail را ذخیره می کنیم
-            if resolutions.is_valid():
+        # بازسازی فرم‌ست‌ها از POST تا دقیقاً bound باشند
+        resolutions = ResolutionFormSet(self.request.POST, prefix='resolutions')
+        images = EventImageFormSet(self.request.POST, self.request.FILES, prefix='images')
+
+        # ست کردن event روی instance قبل از ذخیره
+        form.instance.event = self.parent_event
+
+        if form.is_valid() and resolutions.is_valid() and images.is_valid():
+            with transaction.atomic():
+                self.object = form.save()
                 resolutions.instance = self.object
                 resolutions.save()
-            if images.is_valid():
                 images.instance = self.object
                 images.save()
-        return super().form_valid(form)
+            return redirect(self.get_success_url())
+        # اگر اعتبارسنجی شکست، فرم و فرم‌ست‌ها را دوباره render کن تا ارورها نمایش داده شوند
+        return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        # get_context_data در حالت POST فرم‌ست‌های bound را می‌سازد (پس کافی است)
+        context = self.get_context_data(form=form)
+        return self.render_to_response(context)
 
     def get_success_url(self):
-        # پس از ایجاد موفقیت آمیز، به صفحه جزئیات رویداد اصلی برگرد
+        # بعد از ذخیره به صفحه‌ی جزئیات رویداد اصلی هدایت می‌کنیم
+        return reverse_lazy('events:event_detail', kwargs={'pk': self.parent_event.pk})
+
+
+class EventDetailUpdateView(UpdateView):
+    model = EventDetail
+    form_class = EventDetailForm
+    template_name = 'events/eventdetail_form.html'
+    context_object_name = 'event_detail'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        form = kwargs.get('form', data.get('form', self.get_form()))
+        data['form'] = form
+
+        if self.request.POST:
+            data['resolutions'] = ResolutionFormSet(self.request.POST, prefix='resolutions', instance=self.object)
+            data['images'] = EventImageFormSet(self.request.POST, self.request.FILES, prefix='images', instance=self.object)
+        else:
+            data['resolutions'] = ResolutionFormSet(prefix='resolutions', instance=self.object)
+            data['images'] = EventImageFormSet(prefix='images', instance=self.object)
+
+        # برای قالب
+        data['object'] = self.object
+        return data
+
+    def form_valid(self, form):
+        resolutions = ResolutionFormSet(self.request.POST, prefix='resolutions', instance=self.object)
+        images = EventImageFormSet(self.request.POST, self.request.FILES, prefix='images', instance=self.object)
+
+        if form.is_valid() and resolutions.is_valid() and images.is_valid():
+            with transaction.atomic():
+                self.object = form.save()
+                resolutions.instance = self.object
+                resolutions.save()
+                images.instance = self.object
+                images.save()
+            return redirect(self.get_success_url())
+        return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        context = self.get_context_data(form=form)
+        return self.render_to_response(context)
+
+    def get_success_url(self):
+        # بعد از ویرایش به صفحه رویداد اصلی برمی‌گردیم
         return reverse_lazy('events:event_detail', kwargs={'pk': self.object.event.pk})
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.db import transaction
+from .models import Event, EventDetail, Resolution, EventImage
+from .forms import EventDetailForm, ResolutionFormSet, EventImageFormSet
+
 
 
 class EventDetailDetailView(DetailView):
@@ -119,40 +199,6 @@ class EventDetailDetailView(DetailView):
     template_name = 'events/eventdetail_detail.html'
     context_object_name = 'event_detail'
 
-class EventDetailUpdateView(UpdateView):
-    model = EventDetail
-    form_class = EventDetailForm
-    template_name = 'events/eventdetail_form.html'
-    context_object_name = 'event_detail'
-    # success_url به صورت داینامیک در get_success_url تعیین می شود
-
-    def get_context_data(self, **kwargs):
-        data = super().get_context_data(**kwargs)
-        if self.request.POST:
-            data['resolutions'] = ResolutionFormSet(self.request.POST, prefix='resolutions', instance=self.object)
-            data['images'] = EventImageFormSet(self.request.POST, self.request.FILES, prefix='images', instance=self.object)
-        else:
-            data['resolutions'] = ResolutionFormSet(prefix='resolutions', instance=self.object)
-            data['images'] = EventImageFormSet(prefix='images', instance=self.object)
-        return data
-
-    def form_valid(self, form):
-        context = self.get_context_data()
-        resolutions = context['resolutions']
-        images = context['images']
-        with transaction.atomic():
-            self.object = form.save()
-            if resolutions.is_valid():
-                resolutions.instance = self.object
-                resolutions.save()
-            if images.is_valid():
-                images.instance = self.object
-                images.save()
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        # پس از ویرایش موفقیت آمیز، به صفحه جزئیات رویداد اصلی برگرد
-        return reverse_lazy('events:event_detail', kwargs={'pk': self.object.event.pk})
 
 
 class EventDetailDeleteView(DeleteView):

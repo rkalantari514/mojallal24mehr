@@ -36,7 +36,13 @@
             {% for resolution in event_detail.resolutions.all %}
             <tr>
                 <td>{{ resolution.text }}</td>
-                <td>{{ resolution.responsible_person.get_full_name|default:resolution.responsible_person.username|default:"-" }}</td>
+<td>
+    {% if resolution.responsible_person %}
+        {{ resolution.responsible_person.get_full_name|default:"-" }}
+    {% else %}
+        -
+    {% endif %}
+</td>
                 <td>{{ resolution.get_status_display }}</td>
                 <td>{{ resolution.due_date|default:"-" }}</td>
                 <td>{{ resolution.completed_date|default:"-" }}</td>

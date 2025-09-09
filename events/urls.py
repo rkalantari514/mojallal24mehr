@@ -22,10 +22,15 @@ urlpatterns = [
     # EventDetail URLs (جزئیات برگزاری یک رویداد خاص)
     # اینها معمولا از طریق صفحه EventDetail یا EventEdit مدیریت می شوند
     # اما برای دسترسی مستقیم هم می توانیم تعریف کنیم
-    path('<int:event_pk>/details/add/', views.EventDetailCreateView.as_view(), name='event_detail_add'),
+
     path('details/<int:pk>/', views.EventDetailDetailView.as_view(), name='event_detail_detail'),
-    path('details/<int:pk>/edit/', views.EventDetailUpdateView.as_view(), name='event_detail_edit'),
     path('details/<int:pk>/delete/', views.EventDetailDeleteView.as_view(), name='event_detail_delete'),
+
+
+    path('<int:event_pk>/details/add/', views.EventDetailCreateView.as_view(), name='event_detail_add'),
+    path('details/<int:pk>/edit/', views.EventDetailUpdateView.as_view(), name='event_detail_edit'),
+
+
 
     # Resolution URLs (مصوبات) - معمولا به صورت Inline مدیریت می شوند
     # اما اگر نیاز به مدیریت جداگانه دارید، می توانید اضافه کنید.

@@ -1,158 +1,249 @@
 {% extends 'events/base_events.html' %}
-
+{% load static %}
 {% block events_content %}
-<h2 class="mb-4">{% if event_detail %}ویرایش جزئیات برگزاری{% else %}افزودن جزئیات برگزاری جدید{% endif %}</h2>
+<h2 class="mb-4">
+    {% if object %}
+        ویرایش جزئیات برگزاری برای {{ object.event.name }}
+    {% else %}
+        افزودن جزئیات برگزاری
+    {% endif %}
+</h2>
 
-<form method="post" enctype="multipart/form-data"> {# enctype برای آپلود فایل لازم است #}
+<form method="post" enctype="multipart/form-data" novalidate>
     {% csrf_token %}
 
-    {# EventDetail Form #}
-    <div class="card mb-4">
-        <div class="card-header">اطلاعات اصلی جزئیات برگزاری</div>
-        <div class="card-body">
-            {% for field in form %}
-                <div class="mb-3">
-                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.help_text %}
-                        <div class="form-text">{{ field.help_text }}</div>
-                    {% endif %}
-                    {% for error in field.errors %}
-                        <div class="invalid-feedback d-block">{{ error }}</div>
-                    {% endfor %}
-                </div>
+    {# نمایش خطاهای کلی فرم اصلی #}
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for e in form.non_field_errors %}<div>{{ e }}</div>{% endfor %}
+        </div>
+    {% endif %}
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>خطاهای فرم:</strong>
+            <ul class="mb-0">
+            {% for field, errs in form.errors.items %}
+                <li>{{ field }}: {{ errs|join:", " }}</li>
             {% endfor %}
-            {% if form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {% for error in form.non_field_errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- ستون 1: فرم اصلی EventDetail -->
+        <div class="col-xl-4 mb-30">
+            <div class="card card-statistics h-100">
+                <div class="card-header">اطلاعات اصلی</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="{{ form.occurrence_date.id_for_label }}" class="form-label">تاریخ برگزاری</label>
+                        {{ form.occurrence_date }}
+                        {% for error in form.occurrence_date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.status_relative_to_schedule.id_for_label }}" class="form-label">وضعیت برگزاری</label>
+                        {{ form.status_relative_to_schedule }}
+                        {% for error in form.status_relative_to_schedule.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.report.id_for_label }}" class="form-label">گزارش</label>
+                        {{ form.report }}
+                        {% for error in form.report.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
                 </div>
-            {% endif %}
-        </div>
-    </div>
-
-    {# Resolution Formset #}
-    <div class="card mb-4">
-        <div class="card-header">مصوبات</div>
-        <div class="card-body">
-            {{ resolutions.management_form }}
-            <div id="resolutions-formset-container">
-                {% for res_form in resolutions %}
-                    <div class="formset-row border p-3 mb-3 rounded">
-                        {% for hidden_field in res_form.hidden_fields %}
-                            {{ hidden_field }}
-                        {% endfor %}
-                        {% for field in res_form.visible_fields %}
-                            <div class="mb-3">
-                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                {{ field }}
-                                {% for error in field.errors %}
-                                    <div class="invalid-feedback d-block">{{ error }}</div>
-                                {% endfor %}
-                            </div>
-                        {% endfor %}
-                        {% if resolutions.can_delete %}
-                            <div class="form-check mb-3">
-                                {{ res_form.DELETE }}
-                                <label class="form-check-label" for="{{ res_form.DELETE.id_for_label }}">حذف این مصوبه</label>
-                            </div>
-                        {% endif %}
-                        {% if res_form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                {% for error in res_form.non_field_errors %}
-                                    <p>{{ error }}</p>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                {% endfor %}
             </div>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="addForm('resolutions', document.getElementById('empty-resolution-form').innerHTML)">افزودن مصوبه</button>
         </div>
-    </div>
 
-    {# EventImage Formset #}
-    <div class="card mb-4">
-        <div class="card-header">تصاویر</div>
-        <div class="card-body">
-            {{ images.management_form }}
-            <div id="images-formset-container">
-                {% for img_form in images %}
-                    <div class="formset-row border p-3 mb-3 rounded">
-                        {% for hidden_field in img_form.hidden_fields %}
-                            {{ hidden_field }}
-                        {% endfor %}
-                        {% for field in img_form.visible_fields %}
-                            <div class="mb-3">
-                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                {{ field }}
-                                {% for error in field.errors %}
-                                    <div class="invalid-feedback d-block">{{ error }}</div>
+        <!-- ستون 2: فرم‌ست مصوبات -->
+        <div class="col-xl-4 mb-30">
+            <div class="card card-statistics h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>مصوبات</span>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="add-resolution">+ افزودن مصوبه</button>
+                </div>
+                <div class="card-body">
+                    {{ resolutions.management_form }}
+                    <div id="resolutions-formset">
+                        {% for res_form in resolutions.forms %}
+                            <div class="resolution-form mb-3 p-3 border rounded">
+                                {# hidden fields (مثل id و DELETE) ضروری است #}
+                                {% for hidden in res_form.hidden_fields %}
+                                    {{ hidden }}
                                 {% endfor %}
+                                {{ res_form.non_field_errors }}
+                                <div class="mb-3">
+                                    <label>متن مصوبه</label>
+                                    {{ res_form.text }}
+                                    {% for error in res_form.text.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="mb-3">
+                                    <label>مسئول اجرا</label>
+                                    {{ res_form.responsible_person }}
+                                    {% for error in res_form.responsible_person.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="mb-3">
+                                    <label>مهلت انجام</label>
+                                    {{ res_form.due_date }}
+                                    {% for error in res_form.due_date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="mb-3">
+                                    <label>وضعیت انجام</label>
+                                    {{ res_form.status }}
+                                    {% for error in res_form.status.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="mb-3">
+                                    <label>تاریخ انجام</label>
+                                    {{ res_form.completed_date }}
+                                    {% for error in res_form.completed_date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-sm btn-danger remove-resolution">حذف</button>
+                                </div>
                             </div>
                         {% endfor %}
-                        {% if images.can_delete %}
-                            <div class="form-check mb-3">
-                                {{ img_form.DELETE }}
-                                <label class="form-check-label" for="{{ img_form.DELETE.id_for_label }}">حذف این تصویر</label>
-                            </div>
-                        {% endif %}
-                        {% if img_form.non_field_errors %}
-                            <div class="alert alert-danger">
-                                {% for error in img_form.non_field_errors %}
-                                    <p>{{ error }}</p>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
                     </div>
-                {% endfor %}
+
+                    {# قالب خالی برای جاوااسکریپت - از empty_form استفاده میکنیم #}
+                    <div id="empty-resolution-form" style="display:none;">
+                        <div class="resolution-form mb-3 p-3 border rounded">
+                            {% for hidden in resolutions.empty_form.hidden_fields %}{{ hidden }}{% endfor %}
+                            {% for field in resolutions.empty_form.visible_fields %}
+                                <div class="mb-3">
+                                    <label>{{ field.label }}</label>
+                                    {{ field }}
+                                </div>
+                            {% endfor %}
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-sm btn-danger remove-resolution">حذف</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="addForm('images', document.getElementById('empty-image-form').innerHTML)">افزودن تصویر</button>
+        </div>
+
+        <!-- ستون 3: فرم‌ست تصاویر -->
+        <div class="col-xl-4 mb-30">
+            <div class="card card-statistics h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>تصاویر</span>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="add-image">+ افزودن تصویر</button>
+                </div>
+                <div class="card-body">
+                    {{ images.management_form }}
+                    <div id="images-formset">
+                        {% for img_form in images.forms %}
+                            <div class="image-form mb-3 p-3 border rounded">
+                                {% for hidden in img_form.hidden_fields %}{{ hidden }}{% endfor %}
+                                {{ img_form.non_field_errors }}
+                                <div class="mb-3">
+                                    <label>تصویر</label>
+                                    {{ img_form.image }}
+                                    {% for error in img_form.image.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="mb-3">
+                                    <label>توضیحات</label>
+                                    {{ img_form.caption }}
+                                    {% for error in img_form.caption.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-sm btn-danger remove-image">حذف</button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div id="empty-image-form" style="display:none;">
+                        <div class="image-form mb-3 p-3 border rounded">
+                            {% for hidden in images.empty_form.hidden_fields %}{{ hidden }}{% endfor %}
+                            {% for field in images.empty_form.visible_fields %}
+                                <div class="mb-3">
+                                    <label>{{ field.label }}</label>
+                                    {{ field }}
+                                </div>
+                            {% endfor %}
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-sm btn-danger remove-image">حذف</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         </div>
     </div>
 
-    <button type="submit" class="btn btn-success mt-3">ذخیره</button>
-    <a href="{% if event_detail %}{% url 'events:event_detail' event_detail.event.pk %}{% else %}{% url 'events:event_list' %}{% endif %}" class="btn btn-secondary mt-3">بازگشت</a>
+    <!-- دکمه‌ها -->
+    <div class="d-flex justify-content-between mt-3">
+        <button type="submit" class="btn btn-success">ذخیره</button>
+        <a href="{% if object %}{% url 'events:event_detail' object.event.pk %}{% else %}{% url 'events:event_list' %}{% endif %}" class="btn btn-secondary">بازگشت</a>
+    </div>
 </form>
 
-{# Hidden templates for adding new formset forms via JavaScript #}
-<div id="empty-resolution-form" style="display: none;">
-    <div class="formset-row border p-3 mb-3 rounded">
-        {% for hidden_field in resolutions.empty_form.hidden_fields %}
-            {{ hidden_field }}
-        {% endfor %}
-        {% for field in resolutions.empty_form.visible_fields %}
-            <div class="mb-3">
-                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                {{ field }}
-            </div>
-        {% endfor %}
-        <div class="form-check mb-3">
-            {{ resolutions.empty_form.DELETE }}
-            <label class="form-check-label" for="{{ resolutions.empty_form.DELETE.id_for_label }}">حذف این مصوبه</label>
-        </div>
-        <button type="button" class="btn btn-sm btn-danger" onclick="deleteForm('resolutions', this)">حذف</button>
-    </div>
-</div>
+<!-- اسکریپت‌ها: افزودن/حذف فرم‌ها (با مدیریت TOTAL_FORMS و DELETE) -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // ----- افزودن مصوبه -----
+    document.getElementById('add-resolution').addEventListener('click', function () {
+        let formset = document.getElementById('resolutions-formset');
+        let totalForms = document.getElementById('id_resolutions-TOTAL_FORMS');
+        let formNum = parseInt(totalForms.value);
+        let template = document.getElementById('empty-resolution-form').innerHTML;
+        // جایگزینی __prefix__ که Django در empty_form می‌گذارد
+        let newHtml = template.replace(/__prefix__/g, formNum);
+        formset.insertAdjacentHTML('beforeend', newHtml);
+        totalForms.value = formNum + 1;
+    });
 
-<div id="empty-image-form" style="display: none;">
-    <div class="formset-row border p-3 mb-3 rounded">
-        {% for hidden_field in images.empty_form.hidden_fields %}
-            {{ hidden_field }}
-        {% endfor %}
-        {% for field in images.empty_form.visible_fields %}
-            <div class="mb-3">
-                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                {{ field }}
-            </div>
-        {% endfor %}
-        <div class="form-check mb-3">
-            {{ images.empty_form.DELETE }}
-            <label class="form-check-label" for="{{ images.empty_form.DELETE.id_for_label }}">حذف این تصویر</label>
-        </div>
-        <button type="button" class="btn btn-sm btn-danger" onclick="deleteForm('images', this)">حذف</button>
-    </div>
-</div>
+    // ----- افزودن تصویر -----
+    document.getElementById('add-image').addEventListener('click', function () {
+        let formset = document.getElementById('images-formset');
+        let totalForms = document.getElementById('id_images-TOTAL_FORMS');
+        let formNum = parseInt(totalForms.value);
+        let template = document.getElementById('empty-image-form').innerHTML;
+        let newHtml = template.replace(/__prefix__/g, formNum);
+        formset.insertAdjacentHTML('beforeend', newHtml);
+        totalForms.value = formNum + 1;
+    });
 
+    // ----- حذف فرم‌ها -----
+    document.addEventListener('click', function (e) {
+        // حذف مصوبه
+        if (e.target.classList.contains('remove-resolution')) {
+            let formNode = e.target.closest('.resolution-form');
+            let deleteInput = formNode.querySelector('input[name$="-DELETE"]');
+            let totalForms = document.getElementById('id_resolutions-TOTAL_FORMS');
+
+            if (deleteInput) {
+                // اگر فرم از قبل در دیتابیس هست: علامت DELETE بزن و پنهان کن
+                deleteInput.checked = true;
+                formNode.style.display = 'none';
+            } else {
+                // فرم جدید: حذف از DOM و کم کردن TOTAL_FORMS
+                formNode.remove();
+                totalForms.value = parseInt(totalForms.value) - 1;
+                // بعد از حذف ممکنه ایندکس‌ها ناپیوسته شوند — برای ساده نگه داشتن، بهتر است از empty_form و جایگزینی استفاده کنیم.
+            }
+        }
+
+        // حذف تصویر
+        if (e.target.classList.contains('remove-image')) {
+            let formNode = e.target.closest('.image-form');
+            let deleteInput = formNode.querySelector('input[name$="-DELETE"]');
+            let totalForms = document.getElementById('id_images-TOTAL_FORMS');
+
+            if (deleteInput) {
+                deleteInput.checked = true;
+                formNode.style.display = 'none';
+            } else {
+                formNode.remove();
+                totalForms.value = parseInt(totalForms.value) - 1;
+            }
+        }
+    });
+});
+</script>
 {% endblock %}
