@@ -1,6 +1,8 @@
 # events/admin.py
 
 from django.contrib import admin
+from django.utils.safestring import mark_safe
+
 from .models import EventCategory, Event, EventDetail, Resolution, EventImage
 
 # -----------------------------------------------------------
@@ -62,7 +64,10 @@ class EventDetailAdmin(admin.ModelAdmin):
 
     # برای نمایش بخشی از گزارش در لیست
     def report_snippet(self, obj):
-        return obj.report[:50] + '...' if len(obj.report) > 50 else obj.report
+        try:
+            return obj.report[:50] + '...' if len(obj.report) > 50 else obj.report
+        except:
+            return '-'
     report_snippet.short_description = 'خلاصه گزارش'
 
 # -----------------------------------------------------------

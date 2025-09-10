@@ -116,6 +116,7 @@
                             <table class="table table-hover center-aligned-table mb-10 text-center">
                                 <thead>
                                 <tr>
+                                    <th>تاریخ برنامه ای</th>
                                     <th>تاریخ برگزاری</th>
                                     <th>وضعیت</th>
                                     <th>گزارش</th>
@@ -125,6 +126,9 @@
                                 <tbody>
                                 {% for detail in event.details.all %}
                                     <tr>
+                                        <td>
+                                            <a href="{% url 'events:event_detail_detail' detail.pk %}">{{ detail.scheduled_date|to_jalali:'%Y/%m/%d' }}</a>
+                                        </td>
                                         <td>
                                             <a href="{% url 'events:event_detail_detail' detail.pk %}">{{ detail.occurrence_date|to_jalali:'%Y/%m/%d' }}</a>
                                         </td>

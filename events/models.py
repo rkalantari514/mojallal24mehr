@@ -102,51 +102,66 @@ class Resolution(models.Model):
 # -----------------------------------------------------------
 class EventDetail(models.Model):
     STATUS_CHOICES = [
+        ('not_held', 'برگزار نشده'),
         ('on_time', 'به موقع'),
         ('early', 'تعجیل'),
         ('late', 'تاخیر'),
     ]
 
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='details', verbose_name='رویداد')
-    occurrence_date = models.DateField(verbose_name='تاریخ برگزاری')
-    status_relative_to_schedule = models.CharField(max_length=10, choices=STATUS_CHOICES,
-                                                   default='on_time', verbose_name='وضعیت برگزاری')
-    report = models.TextField(blank=True, verbose_name='گزارش برگزاری')
-    # images: ما برای تصاویر یک مدل جداگانه می سازیم و به آن فارنکی می دهیم
-    # resolutions: از طریق related_name در مدل Resolution به اینجا متصل است
+    event = models.ForeignKey(
+        Event, on_delete=models.CASCADE,
+        related_name='details', verbose_name='رویداد'
+    )
+
+    # تاریخ برنامه‌ای
+    scheduled_date = models.DateField(
+        verbose_name='تاریخ برنامه‌ای', null=True, blank=True, default=None
+    )
+
+    # تاریخ واقعی برگزاری (وقتی اتفاق افتاد)
+    occurrence_date = models.DateField(
+        verbose_name='تاریخ واقعی برگزاری', null=True, blank=True, default=None
+    )
+
+    # وضعیت (بر اساس occurrence_date در مقایسه با scheduled_date)
+    status_relative_to_schedule = models.CharField(
+        max_length=15,
+        choices=STATUS_CHOICES,
+        default='not_held',
+        verbose_name='وضعیت برگزاری'
+    )
+
+    # شماره جزئیات (برای هر event از 1 شروع می‌شود)
+    sequence_number = models.PositiveIntegerField(
+        null=True, blank=True, default=None,
+        verbose_name='شماره جزئیات'
+    )
+
+    report = models.TextField(
+        blank=True, null=True, default=None,
+        verbose_name='گزارش برگزاری'
+    )
 
     class Meta:
         verbose_name = 'جزئیات رویداد'
         verbose_name_plural = 'جزئیات رویدادها'
-        ordering = ['occurrence_date']
-        # اطمینان از یکتا بودن یک تاریخ برگزاری برای یک رویداد خاص
-        # unique_together = ('event', 'occurrence_date',)
-
+        ordering = ['scheduled_date']
+        unique_together = ('event', 'sequence_number')  # یک شماره یکتا در هر event
 
     def __str__(self):
-        return f'{self.event.name} در {self.occurrence_date}'
+        return f'{self.event.name} - نوبت {self.sequence_number} ({self.scheduled_date})'
 
-    # متدی برای محاسبه وضعیت تاریخ برگزاری (تعجیل/به موقع/تاخیر)
     def save(self, *args, **kwargs):
-        # این منطق را می توان در سیگنال ها یا ویو ها نیز پیاده سازی کرد.
-        # اینجا فقط برای نمونه آورده شده است.
-        if self.event.first_occurrence and self.occurrence_date:
-            days_diff = (self.occurrence_date - self.event.first_occurrence).days
-            # فرض بر این است که repeat_interval در event یک بازه زمانی معین دارد
-            # برای دقیق بودن، نیاز به منطق پیچیده‌تری بر اساس repeat_interval و تعداد تکرارهاست.
-            # اینجا یک نمونه ساده بر اساس تاریخ اولین رویداد آورده شده است.
-            # اگر رویداد تکرار شونده باشد و شما بخواهید بر اساس زمان تکرار بعدی بسنجید،
-            # باید آن را محاسبه کنید.
-
-            # مثال ساده: اگر تاریخ برگزاری قبل از اولین رویداد باشد، تعجیل. بعد باشد، تاخیر.
-            if self.occurrence_date < self.event.first_occurrence:
+        # اگر occurrence_date پر شد، وضعیت را محاسبه کن
+        if self.occurrence_date and self.scheduled_date:
+            if self.occurrence_date < self.scheduled_date:
                 self.status_relative_to_schedule = 'early'
-            elif self.occurrence_date > self.event.first_occurrence:
-                # برای رویدادهای تکراری، این منطق باید دقیق تر باشد.
-                # مثلاً بررسی کنیم که آیا تاریخ برگزاری از تاریخ تکرار بعدی (بر اساس repeat_interval) گذشته است؟
+            elif self.occurrence_date > self.scheduled_date:
                 self.status_relative_to_schedule = 'late'
             else:
                 self.status_relative_to_schedule = 'on_time'
+        elif not self.occurrence_date:
+            self.status_relative_to_schedule = 'not_held'
 
         super().save(*args, **kwargs)
 
