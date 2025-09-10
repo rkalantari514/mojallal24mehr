@@ -2,7 +2,7 @@
 {% load jalali_tags %}
 
 {% block events_content %}
-    <h2 class="mb-4">جزئیات رویداد: {{ event.name }}</h2>
+    <h2 class="mb-4"> رویداد: {{ event.name }}</h2>
 
     <!-- خلاصه رویداد -->
     <div class="row">
@@ -109,13 +109,14 @@
 
     {% if event.details.all %}
         <div class="row">
-            <div class="col-xl-8 mb-30">
+            <div class="col-xl-12 mb-30">
                 <div class="card card-statistics h-100">
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-hover center-aligned-table mb-10 text-center">
                                 <thead>
                                 <tr>
+                                    <th>ردیف</th>
                                     <th>تاریخ برنامه ای</th>
                                     <th>تاریخ برگزاری</th>
                                     <th>وضعیت</th>
@@ -126,6 +127,10 @@
                                 <tbody>
                                 {% for detail in event.details.all %}
                                     <tr>
+
+                                        <td>
+                                            <a href="{% url 'events:event_detail_detail' detail.pk %}">{{ detail.sequence_number }}</a>
+                                        </td>
                                         <td>
                                             <a href="{% url 'events:event_detail_detail' detail.pk %}">{{ detail.scheduled_date|to_jalali:'%Y/%m/%d' }}</a>
                                         </td>
@@ -133,7 +138,7 @@
                                             <a href="{% url 'events:event_detail_detail' detail.pk %}">{{ detail.occurrence_date|to_jalali:'%Y/%m/%d' }}</a>
                                         </td>
                                         <td>{{ detail.get_status_relative_to_schedule_display }}</td>
-                                        <td>{{ detail.report|truncatechars:100 }}</td>
+                                        <td>{{ detail.report|truncatechars:100|default:'-' }}</td>
                                         <td>
                                             <a href="{% url 'events:event_detail_detail' detail.pk %}"
                                                class="btn btn-sm btn-info">جزئیات</a>
