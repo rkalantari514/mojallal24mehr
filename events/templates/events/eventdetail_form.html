@@ -247,3 +247,13 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 {% endblock %}
+{% block date %}
+    <link rel="stylesheet" href="{% static 'admin/jquery.ui.datepicker.jalali/themes/base/jquery-ui.min.css' %}">
+    <script src="{% static 'admin/js/django_jalali.min.js' %}"></script>
+    <script>
+        $('.time-picker').timepicker({
+            showMeridian: false
+        });
+
+    </script>
+{% endblock %}

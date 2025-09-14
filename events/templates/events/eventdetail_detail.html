@@ -27,7 +27,7 @@
                                         <i class="fa fa-calendar fa-2x text-success mr-2"></i>
                                         <span class="font-weight-bold text-success">تاریخ برگزاری:</span>
                                     </div>
-                                    <span class="ml-2"><h5>{{ event_detail.occurrence_date|to_jalali:'%Y/%m/%d'|default:'-' }}</h5></span>
+                                    <span class="ml-2"><h5>{{ event_detail.occurrence_date|to_jalali:'%Y/%m/%d'|default:'-'}}</h5></span>
                                 </li>
 
                                 <!-- وضعیت -->
@@ -64,9 +64,9 @@
                             </ul>
 
                             <div class="card-footer text-center nav-center">
-                                <a href="{% url 'events:event_edit' event_detail.pk %}" class="btn btn-warning btn-sm">ویرایش
+                                <a href="{% url 'events:event_detail_edit' event_detail.pk %}" class="btn btn-warning btn-sm">ویرایش
                                     رویداد</a>
-                                <a href="{% url 'events:event_delete' event_detail.pk %}" class="btn btn-danger btn-sm">حذف
+                                <a href="{% url 'events:event_detail_delete' event_detail.pk %}" class="btn btn-danger btn-sm">حذف
                                     رویداد</a>
                                 <a href="{% url 'events:event_list' %}" class="btn btn-secondary btn-sm">بازگشت به
                                     لیست</a>
@@ -108,14 +108,16 @@
                 <td>{{ resolution.text }}</td>
 <td>
     {% if resolution.responsible_person %}
+        <img class="img-fluid avatar-small"
+                                                     src="{{ resolution.responsible_person.avatar.url }}" alt="">
         {{ resolution.responsible_person.get_full_name|default:"-" }}
     {% else %}
         -
     {% endif %}
 </td>
                 <td>{{ resolution.get_status_display }}</td>
-                <td>{{ resolution.due_date|default:"-" }}</td>
-                <td>{{ resolution.completed_date|default:"-" }}</td>
+                <td>{{ resolution.due_date|to_jalali:'%Y/%m/%d'|default:"-" }}</td>
+                <td>{{ resolution.completed_date|to_jalali:'%Y/%m/%d'|default:"-" }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -136,7 +138,7 @@
             <img src="{{ image.image.url }}" class="card-img-top" alt="{{ image.caption }}" style="height: 200px; object-fit: cover;">
             <div class="card-body">
                 <p class="card-text">{{ image.caption|default:"بدون توضیح" }}</p>
-                <small class="text-muted">آپلود شده در: {{ image.uploaded_at|date:"Y/m/d H:i" }}</small>
+                <small class="text-muted">آپلود شده در: {{ image.uploaded_at|to_jalali:'%Y/%m/%d' }} - {{ image.uploaded_at|date:"H:i" }}</small>
             </div>
         </div>
     </div>

@@ -1,0 +1,91 @@
+{% extends 'events/base_events.html' %}
+{% load jalali_tags %}
+{% load custom_filters %}
+{% block events_content %}
+    <div class="container mt-4">
+        <h2>📋 جزئیات رویدادهای آتی</h2>
+        <p class="text-muted">فقط رویدادهایی که هنوز برگزار نشده‌اند و تاریخ برنامه‌ریزی شده در آینده است.</p>
+        <div class="row">
+            <div class="col-xl-12 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+
+
+                        {% if upcoming_details %}
+                            <div class="table-responsive">
+                                <table class="table table-hover center-aligned-table mb-10 text-center">
+                                    <thead>
+                                    <tr class="text-dark">
+                                        <th>رویداد</th>
+                                        <th>تاریخ برنامه‌ای</th>
+                                        <th>تعداد روزهای باقیمانده</th>
+                                        <th>وضعیت</th>
+                                        <th>دسته‌بندی</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for detail in upcoming_details %}
+                                        <tr>
+                                            <td>
+                                                <a href="{% url 'events:event_detail' detail.event.pk %}">
+                                                    {{ detail.event.name }}
+                                                </a>
+                                            </td>
+                                            <td>{{ detail.scheduled_date|to_jalali:'%Y/%m/%d'}}</td>
+                                            <td>
+                                                {% with days_left=detail.scheduled_date|sub:today %}
+                                                    {% if days_left == 0 %}
+                                                        <span class="btn btn-primary">امروز</span>
+                                                    {% elif days_left > 0 %}
+                                                        <span class="btn btn-success">{{ days_left }} روز</span>
+                                                    {% else %}
+                                                        <span class="btn btn-danger">{{ days_left }} روز تأخیر</span>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            </td>
+                                            <td>
+                                                {% if detail.status_relative_to_schedule == 'not_held' %}
+                                                    <span class="btn btn-secondary">برگزار نشده</span>
+                                                {% elif detail.status_relative_to_schedule == 'early' %}
+                                                    <span class="btn btn-warning">تعجیل</span>
+                                                {% elif detail.status_relative_to_schedule == 'late' %}
+                                                    <span class="btn btn-danger">تاخیر</span>
+                                                {% else %}
+                                                    <span class="btn btn-success">به موقع</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ detail.event.category.name|default:"بدون دسته" }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Pagination -->
+                            {% if is_paginated %}
+                                <nav aria-label="Page navigation">
+                                    <ul class="pagination">
+                                        {% if page_obj.has_previous %}
+                                            <li class="page-item"><a class="page-link"
+                                                                     href="?page={{ page_obj.previous_page_number }}">قبلی</a>
+                                            </li>
+                                        {% endif %}
+                                        <li class="page-item active"><span
+                                                class="page-link">{{ page_obj.number }} از {{ page_obj.paginator.num_pages }}</span>
+                                        </li>
+                                        {% if page_obj.has_next %}
+                                            <li class="page-item"><a class="page-link"
+                                                                     href="?page={{ page_obj.next_page_number }}">بعدی</a>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                            {% endif %}
+                        {% else %}
+                            <div class="alert alert-info">هیچ جزئیات رویداد آتی وجود ندارد.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

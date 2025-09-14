@@ -1,3 +1,5 @@
+import sys
+
 from django.shortcuts import render
 
 from custom_login.models import MyPage
@@ -20,6 +22,7 @@ def get_category_tree(parent=None):
 
 # for render partial
 def header(request, *args, **kwargs):
+    sys.stdout.reconfigure(encoding='utf-8')  # اضافه کنید قبل از print
     user=request.user
     last_update_time = MasterInfo.objects.filter(is_active=True).last().last_update_time
     context = {

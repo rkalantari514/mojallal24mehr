@@ -1,0 +1,272 @@
+{% extends 'events/base_events.html' %}
+{% load jalali_tags %}
+
+{% block events_content %}
+    <div class="container mt-4">
+        <h2>📋 مصوبات و وظایف</h2>
+        <p class="text-muted">مدیریت و فیلتر کردن مصوبات بر اساس وضعیت، مهلت و مسئول.</p>
+
+        <!-- فیلترهای دینامیک JS -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">🔍 فیلترهای پیشرفته</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+
+                    <!-- فیلتر وضعیت -->
+                    <div class="col-md-3">
+                        <label for="status-filter" class="form-label">وضعیت:</label>
+                        <select id="status-filter" class="form-select">
+                            <option value="">همه</option>
+                            {% for code, name in status_choices %}
+                                <option value="{{ code }}"
+                                        {% if selected_status == code %}selected{% endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- فیلتر مهلت -->
+                    <div class="col-md-3">
+                        <label for="date-filter" class="form-label">مهلت:</label>
+                        <select id="date-filter" class="form-select">
+                            <option value="">همه</option>
+                            <option value="today" {% if selected_date_filter == 'today' %}selected{% endif %}>امروز
+                            </option>
+                            <option value="tomorrow" {% if selected_date_filter == 'tomorrow' %}selected{% endif %}>
+                                فردا
+                            </option>
+                            <option value="next_week" {% if selected_date_filter == 'next_week' %}selected{% endif %}>
+                                هفته آینده
+                            </option>
+                            <option value="overdue" {% if selected_date_filter == 'overdue' %}selected{% endif %}>تأخیر
+                                دار
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- فیلتر وظایف من -->
+                    <div class="col-md-2">
+                        <label for="assigned-to-me" class="form-label">وظایف من:</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="assigned-to-me"
+                                   {% if assigned_to_me == 'true' %}checked{% endif %}>
+                            <label class="form-check-label" for="assigned-to-me">فقط من</label>
+                        </div>
+                    </div>
+
+                    <!-- فیلتر وظایف دیگران -->
+                    <div class="col-md-2">
+                        <label for="assigned-to-others" class="form-label">وظایف دیگران:</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="assigned-to-others"
+                                   {% if assigned_to_others == 'true' %}checked{% endif %}>
+                            <label class="form-check-label" for="assigned-to-others">غیر من</label>
+                        </div>
+                    </div>
+
+                    <!-- دکمه ریست -->
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" id="reset-filters" class="btn btn-outline-secondary w-100">حذف فیلترها</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- جدول مصوبات -->
+        <div class="row">
+            <div class="col-xl-12 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+
+                        <div class="table-responsive">
+                            <table class="table  table-hover center-aligned-table mb-10 text-center"
+                                   id="resolutions-table">
+                                <thead>
+                                <tr class="text-dark">
+                                    <th>متن مصوبه</th>
+                                    <th>رویداد</th>
+                                    <th>مهلت</th>
+                                    <th>مسئول</th>
+                                    <th>وضعیت</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for resolution in resolutions %}
+                                    <tr data-status="{{ resolution.status }}"
+                                        data-due-date="{{ resolution.due_date|default:'' }}"
+                                        data-responsible="{{ resolution.responsible_person.id|default:'' }}"
+                                        data-responsible-name="
+                                                {{ resolution.responsible_person.get_full_name|default:'بدون مسئول' }}">
+                                        <td>
+                                            {{ resolution.text|truncatechars:80 }}
+                                            {% if resolution.due_date and resolution.due_date < today and resolution.status == 'pending' %}
+                                                <span class="btn btn-danger mx-1">تاخیر</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'events:event_detail' resolution.event_detail.event.pk %}">
+                                                {{ resolution.event_detail.event.name }}
+                                            </a>
+                                            <br>
+                                            <small class="text-muted">
+                                                {{ resolution.event_detail.scheduled_date|to_jalali:'%Y/%m/%d' }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            {% if resolution.due_date %}
+                                                {{ resolution.due_date|to_jalali:'%Y/%m/%d' }}
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if resolution.responsible_person %}
+                                                {{ resolution.responsible_person.get_full_name }}
+                                                <img class="img-fluid avatar-small"
+                                                     src="{{ resolution.responsible_person.avatar.url }}" alt="">
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if resolution.status == 'pending' %}
+                                                <span class="btn btn-warning">انجام نشده</span>
+                                            {% elif resolution.status == 'completed' %}
+                                                <span class="btn btn-success">انجام شده</span>
+                                            {% elif resolution.status == 'cancelled' %}
+                                                <span class="btn btn-secondary">منتفی</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">هیچ مصوبه‌ای یافت نشد.</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+
+                            <!-- Pagination -->
+                            {% if is_paginated %}
+                                <nav aria-label="Page navigation">
+                                    <ul class="pagination">
+                                        {% if page_obj.has_previous %}
+                                            <li class="page-item"><a class="page-link" href="?page=
+
+                                                    {{ page_obj.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">قبلی</a>
+                                            </li>
+                                        {% endif %}
+                                        <li class="page-item active"><span
+                                                class="page-link">{{ page_obj.number }} از {{ page_obj.paginator.num_pages }}</span>
+                                        </li>
+                                        {% if page_obj.has_next %}
+                                            <li class="page-item"><a class="page-link" href="?page=
+
+                                                    {{ page_obj.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">بعدی</a>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS فیلترهای دینامیک -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const table = document.getElementById('resolutions-table');
+            const rows = Array.from(table.querySelectorAll('tbody tr'));
+
+            // تابع فیلتر کردن
+            function applyFilters() {
+                const statusFilter = document.getElementById('status-filter').value;
+                const dateFilter = document.getElementById('date-filter').value;
+                const assignedToMe = document.getElementById('assigned-to-me').checked;
+                const assignedToOthers = document.getElementById('assigned-to-others').checked;
+
+                const today = new Date();
+                const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+                const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+                rows.forEach(row => {
+                    const status = row.dataset.status;
+                    const dueDateStr = row.dataset.dueDate;
+                    const responsibleId = row.dataset.responsible;
+                    const responsibleName = row.dataset.responsibleName;
+
+                    let showRow = true;
+
+                    // فیلتر وضعیت
+                    if (statusFilter && status !== statusFilter) {
+                        showRow = false;
+                    }
+
+                    // فیلتر مهلت
+                    if (dueDateStr) {
+                        const dueDate = new Date(dueDateStr);
+                        if (dateFilter === 'today' && dueDate.toDateString() !== today.toDateString()) {
+                            showRow = false;
+                        } else if (dateFilter === 'tomorrow' && dueDate.toDateString() !== tomorrow.toDateString()) {
+                            showRow = false;
+                        } else if (dateFilter === 'next_week' && (dueDate < today || dueDate > nextWeek)) {
+                            showRow = false;
+                        } else if (dateFilter === 'overdue' && (dueDate >= today || status !== 'pending')) {
+                            showRow = false;
+                        }
+                    } else if (dateFilter === 'today' || dateFilter === 'tomorrow' || dateFilter === 'next_week' || dateFilter === 'overdue') {
+                        showRow = false; // اگر مهلت ندارد و فیلتر مهلت فعال است، نمایش نده
+                    }
+
+                    // فیلتر وظایف من
+                    if (assignedToMe && responsibleId !== '{{ request.user.id }}') {
+                        showRow = false;
+                    }
+
+                    // فیلتر وظایف دیگران
+                    if (assignedToOthers && (responsibleId === '{{ request.user.id }}' || !responsibleId)) {
+                        showRow = false;
+                    }
+
+                    row.style.display = showRow ? '' : 'none';
+                });
+
+                // به‌روزرسانی پیغام خالی
+                const emptyMessage = table.querySelector('tbody tr td[colspan="5"]');
+                if (emptyMessage) {
+                    emptyMessage.closest('tr').style.display = Array.from(rows).some(r => r.style.display !== 'none') ? 'none' : '';
+                }
+            }
+
+            // اتصال رویدادها
+            document.getElementById('status-filter').addEventListener('change', applyFilters);
+            document.getElementById('date-filter').addEventListener('change', applyFilters);
+            document.getElementById('assigned-to-me').addEventListener('change', applyFilters);
+            document.getElementById('assigned-to-others').addEventListener('change', applyFilters);
+
+            // ریست فیلترها
+            document.getElementById('reset-filters').addEventListener('click', function () {
+                document.getElementById('status-filter').value = '';
+                document.getElementById('date-filter').value = '';
+                document.getElementById('assigned-to-me').checked = false;
+                document.getElementById('assigned-to-others').checked = false;
+                applyFilters();
+
+                // به‌روزرسانی URL بدون پارامترهای فیلتر
+                const url = new URL(window.location);
+                url.search = ''; // پاک کردن تمام پارامترها
+                window.history.pushState({}, '', url);
+            });
+
+            // اولین بار فیلتر کن
+            applyFilters();
+        });
+    </script>
+
+{% endblock %}

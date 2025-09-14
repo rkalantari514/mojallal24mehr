@@ -250,10 +250,8 @@ def check_sms_status(message_id):
 
 
 
-import serial
 from django.http import JsonResponse
 
-import serial
 from django.http import JsonResponse
 #
 # import serial

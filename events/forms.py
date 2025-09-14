@@ -84,10 +84,25 @@ from .models import EventDetail, Resolution, EventImage
 # EventDetail form (دیگه فیلد event داخل فرم نیست - در ویو ست میشه)
 # -----------------------------------------------------------
 class EventDetailForm(forms.ModelForm):
+    # occurrence_date = forms.DateField(
+    #     label='تاریخ برگزاری',
+    #     widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+    # )
     occurrence_date = forms.DateField(
-        label='تاریخ برگزاری',
-        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+        widget=forms.DateInput(),
     )
+
+    def __init__(self, *args, **kwargs):
+        super(EventDetailForm, self).__init__(*args, **kwargs)
+        self.fields['occurrence_date'] = JalaliDateField(
+            label=('تاریخ  برگزاری'),
+            widget=AdminJalaliDateWidget
+        )
+
+
+
+
+
 
     class Meta:
         model = EventDetail
@@ -103,10 +118,20 @@ class EventDetailForm(forms.ModelForm):
 # Resolution form
 # -----------------------------------------------------------
 class ResolutionForm(forms.ModelForm):
-    due_date = forms.DateField(label='مهلت انجام', required=False,
-                               widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}))
-    completed_date = forms.DateField(label='تاریخ انجام', required=False,
-                                     widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}))
+    # due_date = forms.DateField(label='مهلت انجام', required=False,
+    #                            widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}))
+    # completed_date = forms.DateField(label='تاریخ انجام', required=False,
+    #                                  widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}))
+
+
+    due_date = forms.DateField(
+        widget=forms.DateInput(),
+    )
+
+    completed_date = forms.DateField(
+        widget=forms.DateInput(),
+    )
+
 
     class Meta:
         model = Resolution
@@ -116,6 +141,18 @@ class ResolutionForm(forms.ModelForm):
             'responsible_person': forms.Select(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(ResolutionForm, self).__init__(*args, **kwargs)
+        self.fields['due_date'] = JalaliDateField(
+            label=('مهلت انجام'),
+            widget=AdminJalaliDateWidget
+        )
+
+        self.fields['completed_date'] = JalaliDateField(
+            label=('تاریخ انجام'),
+            widget=AdminJalaliDateWidget
+        )
 
 
 # -----------------------------------------------------------

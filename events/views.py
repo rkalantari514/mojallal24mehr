@@ -5,6 +5,8 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.db import transaction # برای مدیریت Formset ها
 
+from custom_login.models import UserLog
+from custom_login.views import page_permision
 from .models import EventCategory, Event, EventDetail, Resolution, EventImage
 from .forms import (
     EventCategoryForm, EventForm, EventDetailForm, ResolutionForm, EventImageForm,
@@ -14,10 +16,42 @@ from .forms import (
 # -----------------------------------------------------------
 # EventCategory Views
 # -----------------------------------------------------------
+# class EventCategoryListView(ListView):
+#     model = EventCategory
+#     template_name = 'events/category_list.html'
+#     context_object_name = 'categories'
+
 class EventCategoryListView(ListView):
     model = EventCategory
     template_name = 'events/category_list.html'
     context_object_name = 'categories'
+
+    def dispatch(self, request, *args, **kwargs):
+        # 1. بررسی مجوز (page_permission)
+        name = 'دسته بندی رویدادها'
+        result = page_permision(request, name)  # ← فرض می‌کنیم این تابع در همان فایل یا یک فایل دیگر تعریف شده
+        if result:
+            return result  # مثلاً یک Redirect یا HttpResponseForbidden
+
+        # 2. ثبت لاگ کاربر
+        user = request.user
+        if user.is_authenticated and user.mobile_number != '09151006447':
+            UserLog.objects.create(user=user, page='دسته بندی رویدادها', code=0)
+
+        # 3. اجرای dispatch اصلی
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # 4. افزودن user به context
+        context['user'] = self.request.user
+
+        # 5. افزودن title به context
+        context['title'] = 'دسته بندی رویدادها'
+
+        return context
+
 
 class EventCategoryCreateView(CreateView):
     model = EventCategory
@@ -44,11 +78,62 @@ class EventListView(ListView):
     template_name = 'events/event_list.html'
     context_object_name = 'events'
     paginate_by = 10 # اختیاری: برای صفحه بندی
+    def dispatch(self, request, *args, **kwargs):
+        # 1. بررسی مجوز (page_permission)
+        name = 'لیست رویدادها'
+        result = page_permision(request, name)  # ← فرض می‌کنیم این تابع در همان فایل یا یک فایل دیگر تعریف شده
+        if result:
+            return result  # مثلاً یک Redirect یا HttpResponseForbidden
+
+        # 2. ثبت لاگ کاربر
+        user = request.user
+        if user.is_authenticated and user.mobile_number != '09151006447':
+            UserLog.objects.create(user=user, page='لیست رویدادها', code=0)
+
+        # 3. اجرای dispatch اصلی
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # 4. افزودن user به context
+        context['user'] = self.request.user
+
+        # 5. افزودن title به context
+        context['title'] = 'لیست رویدادها'
+
+        return context
 
 class EventDetailView(DetailView):
     model = Event
     template_name = 'events/event_detail.html'
     context_object_name = 'event'
+    def dispatch(self, request, *args, **kwargs):
+        # 1. بررسی مجوز (page_permission)
+        name = 'جزئیات رویداد'
+        result = page_permision(request, name)  # ← فرض می‌کنیم این تابع در همان فایل یا یک فایل دیگر تعریف شده
+        if result:
+            return result  # مثلاً یک Redirect یا HttpResponseForbidden
+
+        # 2. ثبت لاگ کاربر
+        user = request.user
+        if user.is_authenticated and user.mobile_number != '09151006447':
+            UserLog.objects.create(user=user, page='جزئیات رویداد', code=0)
+
+        # 3. اجرای dispatch اصلی
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # 4. افزودن user به context
+        context['user'] = self.request.user
+
+        # 5. افزودن title به context
+        context['title'] = 'جزئیات رویداد'
+
+        return context
+
 
 class EventCreateView(CreateView):
     model = Event
@@ -216,3 +301,112 @@ class EventDetailDeleteView(DeleteView):
 # سایر Views (اگر نیاز به مدیریت جداگانه Resolution و EventImage دارید)
 # فعلاً برای اینها View جداگانه ای تعریف نمی کنیم چون از Formset استفاده می کنیم.
 # -----------------------------------------------------------
+
+
+
+from django.utils import timezone
+from django.views.generic import ListView
+from .models import EventDetail
+
+class UpcomingEventDetailsListView(ListView):
+    model = EventDetail
+    template_name = 'events/upcoming_event_details.html'
+    context_object_name = 'upcoming_details'
+    paginate_by = 20  # اختیاری
+
+    def get_queryset(self):
+        today = timezone.now().date()
+        # فقط جزئیاتی که هنوز برگزار نشده و تاریخ آنها در آینده است
+        return EventDetail.objects.filter(
+            occurrence_date__isnull=True,
+            scheduled_date__gte=today
+        ).select_related('event', 'event__category').order_by('scheduled_date')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['today'] = timezone.now().date()
+        return context
+
+
+# events/views.py - ادامه کد
+
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils import timezone
+from django.views.generic import ListView
+from .models import Resolution
+
+class ResolutionListView(LoginRequiredMixin, ListView):
+    model = Resolution
+    template_name = 'events/resolutions.html'
+    context_object_name = 'resolutions'
+    paginate_by = 25
+
+    def dispatch(self, request, *args, **kwargs):
+        # 1. بررسی مجوز (page_permission)
+        name = 'لیست برگزاری'
+        result = page_permision(request, name)  # ← فرض می‌کنیم این تابع در همان فایل یا یک فایل دیگر تعریف شده
+        if result:
+            return result  # مثلاً یک Redirect یا HttpResponseForbidden
+
+        # 2. ثبت لاگ کاربر
+        user = request.user
+        if user.is_authenticated and user.mobile_number != '09151006447':
+            UserLog.objects.create(user=user, page='لیست برگزاری', code=0)
+
+        # 3. اجرای dispatch اصلی
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # 4. افزودن user به context
+        context['user'] = self.request.user
+
+        # 5. افزودن title به context
+        context['title'] = 'لیست برگزاری'
+
+        return context
+
+
+    def get_queryset(self):
+        qs = super().get_queryset().select_related(
+            'event_detail__event',
+            'responsible_person'
+        ).order_by('due_date', 'status')
+
+        # فیلترهای دستی (از URL)
+        status = self.request.GET.get('status')
+        if status:
+            qs = qs.filter(status=status)
+
+        # فیلتر مسئول
+        if self.request.GET.get('assigned_to_me') == 'true':
+            qs = qs.filter(responsible_person=self.request.user)
+        elif self.request.GET.get('assigned_to_others') == 'true':
+            qs = qs.exclude(responsible_person=self.request.user).filter(responsible_person__isnull=False)
+
+        # فیلتر زمانی (due_date)
+        date_filter = self.request.GET.get('date_filter')
+        today = timezone.now().date()
+
+        if date_filter == 'today':
+            qs = qs.filter(due_date=today)
+        elif date_filter == 'tomorrow':
+            qs = qs.filter(due_date=today + timezone.timedelta(days=1))
+        elif date_filter == 'next_week':
+            end_of_week = today + timezone.timedelta(days=7)
+            qs = qs.filter(due_date__range=[today, end_of_week])
+        elif date_filter == 'overdue':
+            qs = qs.filter(due_date__lt=today, status='pending')
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['today'] = timezone.now().date()
+        context['status_choices'] = Resolution.STATUS_CHOICES
+        context['selected_status'] = self.request.GET.get('status', '')
+        context['selected_date_filter'] = self.request.GET.get('date_filter', '')
+        context['assigned_to_me'] = self.request.GET.get('assigned_to_me', '')
+        context['assigned_to_others'] = self.request.GET.get('assigned_to_others', '')
+        return context

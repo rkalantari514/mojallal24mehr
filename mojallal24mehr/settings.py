@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import sys
 from pathlib import Path
 import os
 
@@ -250,5 +250,9 @@ BEHPARDAKHT_PASSWORD = "123890"
 BEHPARDAKHT_MERCHANT_ID = "MERCHANT_ID"
 
 
+
 # شماره پذیرنده: 2964432
 # شماره ترمینال: 7031741
+
+
+sys.stdout.reconfigure(encoding='utf-8')  # اضافه کنید قبل از print

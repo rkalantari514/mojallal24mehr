@@ -5,3 +5,8 @@ db.sqlite3
 **/migrations/*
 */migrations/
  */migrations/*
+
+# Ignore Django static files
+static_cdn/static_root/
+# Or if you have a top-level staticfiles directory
+# staticfiles/

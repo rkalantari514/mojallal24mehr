@@ -3,12 +3,12 @@ from unicodedata import category
 from custom_login.models import UserLog
 from custom_login.views import page_permision
 from dashboard.models import MasterInfo
+from events.models import EventCategory
 from mahakupdate.models import SanadDetail, AccCoding, FactorDetaile, Category, Kala, Factor, BackFactorDetail
 from datetime import date
 from decimal import Decimal
 
 from mahakupdate.views import jalali_to_gregorian
-
 
 def BudgetCostTotal(request, *args, **kwargs):
     start_time = time.time()
@@ -289,6 +289,7 @@ def BudgetCostTotal(request, *args, **kwargs):
     print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
     return render(request, 'budget_cost_total.html', context)
 
+import time
 import time
 from django.db.models import Sum
 from django.shortcuts import render

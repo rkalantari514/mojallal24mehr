@@ -30,7 +30,10 @@ urlpatterns = [
     path('<int:event_pk>/details/add/', views.EventDetailCreateView.as_view(), name='event_detail_add'),
     path('details/<int:pk>/edit/', views.EventDetailUpdateView.as_view(), name='event_detail_edit'),
 
-
+# اضافه کردن این خط در لیست urlpatterns
+    path('upcoming/', views.UpcomingEventDetailsListView.as_view(), name='upcoming_event_details'),
+# events/urls.py
+    path('resolutions/', views.ResolutionListView.as_view(), name='resolutions'),
 
     # Resolution URLs (مصوبات) - معمولا به صورت Inline مدیریت می شوند
     # اما اگر نیاز به مدیریت جداگانه دارید، می توانید اضافه کنید.

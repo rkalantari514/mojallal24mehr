@@ -4,7 +4,8 @@ from django import template
 from django.contrib import humanize
 from django.utils import timezone
 import locale
-
+from django import template
+from datetime import date
 
 register = template.Library()
 
@@ -135,3 +136,14 @@ def divide(value, arg):
         return float(value) / float(arg)
     except (ValueError, TypeError, ZeroDivisionError):
         return None
+
+
+@register.filter
+def sub(value, arg):
+    """
+    Subtract two date objects and return the difference in days as an integer.
+    Usage: {{ date1|sub:date2 }}
+    """
+    if not isinstance(value, date) or not isinstance(arg, date):
+        return 0
+    return (value - arg).days
