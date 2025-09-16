@@ -146,12 +146,15 @@ class ResolutionForm(forms.ModelForm):
         super(ResolutionForm, self).__init__(*args, **kwargs)
         self.fields['due_date'] = JalaliDateField(
             label=('مهلت انجام'),
-            widget=AdminJalaliDateWidget
+            widget=AdminJalaliDateWidget,
+            required=False  # 👈 این خط را اضافه کنید
+
         )
 
         self.fields['completed_date'] = JalaliDateField(
             label=('تاریخ انجام'),
-            widget=AdminJalaliDateWidget
+            widget=AdminJalaliDateWidget,
+            required=False
         )
 
 
