@@ -170,8 +170,10 @@ class EventDetail(models.Model):
 # 5. مدل تصاویر (EventImage)
 # -----------------------------------------------------------
 def event_image_upload_path(instance, filename):
-    # فایل های تصاویر را در مسیری سازماندهی شده ذخیره می کند
-    return f'event_images/{instance.event_detail.event.name}/{instance.event_detail.occurrence_date}/{filename}'
+    # استفاده از ID جزئیات رویداد برای ایجاد مسیر منحصر به فرد و ایمن
+    return f'event_images/detail_{instance.event_detail.id}/{filename}'
+
+
 
 class EventImage(models.Model):
     event_detail = models.ForeignKey(EventDetail, on_delete=models.CASCADE, related_name='images', verbose_name='جزء رویداد')
