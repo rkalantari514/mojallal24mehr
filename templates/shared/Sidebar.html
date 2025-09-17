@@ -205,7 +205,10 @@
                 </ul>
             </li>
                     <!-- منوی رویدادها-->
-        {% if is_superuser %}
+{#        {% if is_superuser %}#}
+                            {% if "events:category_list" in allowed_view %}
+
+        
             <li>
                 <a href="javascript:void(0);" data-toggle="collapse" data-target="#events">
                     <div class="pull-left"><i class="ti-calendar"></i><span class="right-nav-text">تقویم هیئت مدیره</span>

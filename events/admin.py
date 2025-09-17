@@ -106,3 +106,63 @@ class EventImageAdmin(admin.ModelAdmin):
             return mark_safe(f'<img src="{obj.image.url}" style="width: 100px; height: auto;" />')
         return "بدون تصویر"
     image_tag.short_description = 'تصویر'
+
+
+
+
+# events/admin.py
+
+from django.contrib import admin
+from .models import Reminder
+
+@admin.register(Reminder)
+class ReminderAdmin(admin.ModelAdmin):
+    list_display = [
+        'content_object',
+        'reminder_type',
+        'scheduled_send_date',
+        'is_sent',
+        'sent_at',
+        'created_at',
+    ]
+
+    list_filter = [
+        'reminder_type',
+        'is_sent',
+        'scheduled_send_date',
+    ]
+
+    search_fields = [
+        'content_type__model',  # جستجو بر اساس نوع مدل (eventdetail, resolution)
+    ]
+
+    readonly_fields = [
+        'created_at',
+        'sent_at',
+        'content_object',
+    ]
+
+    fieldsets = (
+        ('اطلاعات مربوط به شیء', {
+            'fields': ('content_type', 'object_id', 'content_object')
+        }),
+        ('جزئیات یادآور', {
+            'fields': ('reminder_type', 'scheduled_send_date', 'is_sent', 'sent_at')
+        }),
+        ('اطلاعات سیستمی', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)  # بخش قابل جمع شدن
+        }),
+    )
+
+    def get_readonly_fields(self, request, obj=None):
+        # اگر رکورد قبلاً ایجاد شده، content_type و object_id فقط خواندنی باشند
+        if obj:
+            return self.readonly_fields + ['content_type', 'object_id']
+        return self.readonly_fields
+
+    # اختیاری: نمایش بهتر نام شیء مرتبط در لیست
+    def content_object(self, obj):
+        return str(obj.content_object)
+    content_object.short_description = 'شیء مرتبط'
+    content_object.admin_order_field = 'object_id'

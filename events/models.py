@@ -5,6 +5,43 @@ from django.utils import timezone # برای فیلدهای تاریخ و زما
 
 from custom_login.models import CustomUser
 
+# events/models.py
+
+from django.db import models
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
+
+class Reminder(models.Model):
+    # ارتباط با هر مدلی — EventDetail یا Resolution
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    REMINDER_TYPE_CHOICES = [
+        ('event', 'یادآور رویداد'),
+        ('resolution', 'یادآور مصوبه'),
+    ]
+
+    reminder_type = models.CharField(max_length=20, choices=REMINDER_TYPE_CHOICES, verbose_name='نوع یادآور')
+    scheduled_send_date = models.DateField(verbose_name='تاریخ برنامه‌ریزی شده برای ارسال')
+    sent_at = models.DateTimeField(null=True, blank=True, verbose_name='تاریخ ارسال واقعی')
+    is_sent = models.BooleanField(default=False, verbose_name='ارسال شده؟')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='تاریخ ایجاد رکورد')
+
+    class Meta:
+        verbose_name = 'یادآور'
+        verbose_name_plural = 'یادآورها'
+        unique_together = ('content_type', 'object_id', 'scheduled_send_date')  # جلوی تکرار
+        ordering = ['scheduled_send_date']
+
+    def __str__(self):
+        return f'یادآور برای {self.content_object} - {self.scheduled_send_date} ({self.get_is_sent_display()})'
+
+    def get_is_sent_display(self):
+        return "ارسال شده" if self.is_sent else "ارسال نشده"
+
+
 
 # -----------------------------------------------------------
 # 1. مدل انواع رویدادها (EventCategory)
