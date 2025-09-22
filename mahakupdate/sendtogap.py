@@ -212,7 +212,6 @@ def send_sms(phone_number, message):
         return None
 
 
-
 import requests
 
 

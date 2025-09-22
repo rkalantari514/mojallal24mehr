@@ -4,6 +4,7 @@ from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
 from dashboard.models import MasterInfo
 from dashboard.views import CreateReport, CreateMonthlyReport, CreateTotalReport
+from events.views import SendScheduledReminders
 from festival.models import CustomerPoints
 from festival.views import Calculate_and_award_points
 from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category, Sanad, SanadDetail, AccCoding, ChequesPay, \
@@ -424,6 +425,7 @@ def Updateall(request):
         {'url': 'update/after_takhfif_kol', 'name': 'محاسبه تخفیف پای فاکتور', 'priority': 15},
         {'url': 'update/sleepinvestment', 'name': 'آپدیت خواب سرمایه', 'priority': 16},
         {'url': 'update/loan_bedehi_moshtari', 'name': 'قسط بدهی مشتریان', 'priority': 17},
+        {'url': 'events/send-reminders', 'name': 'ارسال یاد آور رویدادها', 'priority': 17},
     ]
 
     # --- نگاشت URL به تابع ---
@@ -445,6 +447,7 @@ def Updateall(request):
         'update/after_takhfif_kol': AfterTakhfifKol,
         'update/sleepinvestment': UpdateSleepInvestment,
         'update/loan_bedehi_moshtari': LoanBedehiMoshtari,
+        'events/send-reminders': SendScheduledReminders,
     }
 
     # --- به‌روزرسانی یا ایجاد StaticUpdateTask ---

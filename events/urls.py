@@ -5,6 +5,7 @@ from . import views
 
 app_name = 'events' # نام اپلیکیشن برای استفاده در تگ url
 
+
 urlpatterns = [
     # EventCategory URLs
     path('categories/', views.EventCategoryListView.as_view(), name='category_list'),
@@ -35,10 +36,6 @@ urlpatterns = [
 # events/urls.py
     path('resolutions/', views.ResolutionListView.as_view(), name='resolutions'),
 
-    # Resolution URLs (مصوبات) - معمولا به صورت Inline مدیریت می شوند
-    # اما اگر نیاز به مدیریت جداگانه دارید، می توانید اضافه کنید.
-    # فعلاً به صورت جداگانه تعریف نمی کنیم چون Inline Formset ها را داریم.
+    path('send-reminders/', views.SendScheduledReminders, name='send_reminders'),
 
-    # EventImage URLs (تصاویر) - معمولا به صورت Inline مدیریت می شوند
-    # فعلاً به صورت جداگانه تعریف نمی کنیم چون Inline Formset ها را داریم.
 ]
