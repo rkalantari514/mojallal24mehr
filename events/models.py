@@ -11,7 +11,7 @@ from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
-
+from django.contrib.contenttypes.fields import GenericRelation
 class Reminder(models.Model):
     # ارتباط با هر مدلی — EventDetail یا Resolution
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
@@ -125,6 +125,8 @@ class Resolution(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending', verbose_name='وضعیت انجام')
     due_date = models.DateField(blank=True, null=True, verbose_name='مهلت انجام (تاریخ)')
     completed_date = models.DateField(blank=True, null=True, verbose_name='تاریخ انجام')
+    # افزودن GenericRelation برای حذف خودکار ریمایندرها
+    reminders = GenericRelation(Reminder, content_type_field='content_type', object_id_field='object_id')
 
     class Meta:
         verbose_name = 'مصوبه'
@@ -178,6 +180,9 @@ class EventDetail(models.Model):
         blank=True, null=True, default=None,
         verbose_name='گزارش برگزاری'
     )
+
+    # افزودن GenericRelation برای حذف خودکار ریمایندرها
+    reminders = GenericRelation(Reminder, content_type_field='content_type', object_id_field='object_id')
 
     class Meta:
         verbose_name = 'جزئیات رویداد'

@@ -827,7 +827,6 @@ def SendScheduledReminders(request):
         #     'failure_count': failure_count,
         #     'message': 'Scheduled reminders processed successfully.'
         # })
-
     except Exception as e:
         # در صورت بروز خطای کلی در فرآیند
         critical_error_msg = f"❌ خطای بحرانی در اجرای SendScheduledReminders: {e}"
@@ -836,3 +835,4 @@ def SendScheduledReminders(request):
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
     return redirect('/updatedb')
+
