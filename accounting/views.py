@@ -34,7 +34,7 @@ from khayyam import JalaliDate, JalaliDatetime
 from django.db.models import F
 
 from mahakupdate.sendtogap import send_to_admin1, send_sms, check_sms_status
-
+from django.http import JsonResponse
 
 def fix_persian_characters(value):
     return standardize(value)
@@ -2486,13 +2486,18 @@ def SaleTotal(request, year=None, month=None, day=None):
     return render(request, 'sale_total.html', context)
 
 
-def SaleTotalData(request, year, month, day):
+from django.http import JsonResponse  # اگر قبلاً ایمپورت نکرده‌اید، حتماً اضافه کنید
+
+
+from datetime import datetime
+
+def SaleTotalData(request, date_str):
     try:
-        day_filter_gregorian = datetime.date(int(year), int(month), int(day))
+        day_filter_gregorian = datetime.strptime(date_str, '%Y-%m-%d').date()
     except (ValueError, TypeError):
         return JsonResponse({'error': 'Invalid date format'}, status=400)
 
-    kind1 = ['خريدار در برگشت از فروش', 'خريدار در فاکتور فروش','تخفيف فاکتور فروش']
+    kind1 = ['خريدار در برگشت از فروش', 'خريدار در فاکتور فروش', 'تخفيف فاکتور فروش']
     q_objects = Q()
     for item in kind1:
         q_objects |= Q(sharh__startswith=item)
@@ -2507,40 +2512,35 @@ def SaleTotalData(request, year, month, day):
     total_mandah = 0
     for s in asnadp:
         sharh_display = s.syscomment if s.syscomment else s.sharh
-
         jalali_tarikh_str = s.tarikh
-
         try:
             jalali_year = s.tarikh.split('/')[0]
             jalali_month = s.tarikh.split('/')[1]
         except IndexError:
             jalali_year = ''
             jalali_month = ''
-            print(f"Warning: s.tarikh format invalid for split: {s.tarikh}")
         try:
-            current_amount_numeric = float(s.curramount)  # یا int() اگر همیشه صحیح است
+            current_amount_numeric = float(s.curramount)
             negative_curramount = current_amount_numeric * -1
         except (ValueError, TypeError):
-            negative_curramount = 0  # اگر نتوانست به عدد تبدیل شود، 0 در نظر گرفته شود
+            negative_curramount = 0
 
         data.append({
             'person_name': f"{s.person.name} {s.person.lname}",
-            'person_id': s.person.per_taf,  # <--- این خط جدید: اضافه کردن per_taf
+            'person_id': s.person.per_taf,
             'sanad_code': s.sanad_code,
             'radif': s.radif,
             'tarikh': jalali_tarikh_str,
             'year': jalali_year,
             'month': jalali_month,
             'sharh': sharh_display,
-            'mablagh': negative_curramount,  # این حتما باید یک عدد باشد
+            'mablagh': negative_curramount,
             'is_negative': negative_curramount < 0
         })
-        total_mandah += negative_curramount  # جمع نیز باید روی اعداد انجام شود
+        total_mandah += negative_curramount
 
     display_date_jalali = jdate.fromgregorian(date=day_filter_gregorian)
     display_date_str = display_date_jalali.strftime('%Y/%m/%d')
-
-    # --- اضافه کردن روز هفته برای پاسخ AJAX ---
     jalali_weekday_names = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"]
     day_of_week_jalali = jalali_weekday_names[display_date_jalali.weekday()]
 
@@ -2548,6 +2548,5 @@ def SaleTotalData(request, year, month, day):
         'data': data,
         'total_mandah': total_mandah,
         'display_date': display_date_str,
-        'day_of_week': day_of_week_jalali,  # اضافه کردن روز هفته به پاسخ JSON
-
+        'day_of_week': day_of_week_jalali,
     })

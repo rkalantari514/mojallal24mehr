@@ -12,7 +12,7 @@
                     <div class="card card-statistics h-100">
                         <div class="card-body">
 
-<canvas id="Chart3" height="250"></canvas>
+                            <canvas id="Chart3" height="250"></canvas>
 
 
                         </div>
@@ -21,13 +21,12 @@
                 <div class="col-xl-6 mb-30">
                     <div class="card card-statistics h-100 admin-followers">
                         <div class="card-body">
-                                        <canvas id="Chart4" height="250"></canvas>
+                            <canvas id="Chart4" height="250"></canvas>
 
                         </div>
                     </div>
                 </div>
             </div>
-
 
 
             <div class="row">
@@ -282,16 +281,14 @@
 
             function navigateByDay(offset) {
                 let currentGregorianDateStr = currentGregorianDateInput.value;
-                // 'T12:00:00Z' برای جلوگیری از مشکلات منطقه زمانی و DST
                 const currentDate = new Date(currentGregorianDateStr + 'T12:00:00Z');
                 currentDate.setDate(currentDate.getDate() + offset);
 
                 const newYear = currentDate.getFullYear();
-                const newMonth = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-                const newDay = currentDate.getDate().toString().padStart(2, '0');
+                const newMonth = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // می‌تواند "09" باشد
+                const newDay = currentDate.getDate().toString().padStart(2, '0');         // می‌تواند "06" باشد
 
-                // فراخوانی تابع بارگذاری داده با تاریخ جدید
-                loadTableData(newYear, newMonth, newDay);
+                loadTableData(newYear, newMonth, newDay); // حالا مشکلی ندارد
             }
 
             if (prevDayBtn) {
@@ -309,10 +306,10 @@
     </script>
 
 
-<script>
+    <script>
         // ... (توابع drawChart و بقیه کدهای موجود شما برای Chart2 و Chart3) ...
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // ... (کدهای مربوط به ناوبری روزانه - Chart2 و Chart3 موجود شما) ...
 
             // --- کد جدید برای نمودار خالص فروش هفتگی (Chart4) ---
@@ -358,10 +355,10 @@
                     tooltip: {
                         rtl: true,
                         callbacks: {
-                            title: function(tooltipItems) {
+                            title: function (tooltipItems) {
                                 return tooltipItems[0].label; // روز هفته (مثلاً "شنبه")
                             },
-                            label: function(tooltipItem) {
+                            label: function (tooltipItem) {
                                 let label = tooltipItem.dataset.label || '';
                                 if (label) {
                                     label += ': ';
@@ -395,7 +392,7 @@
                         beginAtZero: true,
                         stacked: false,
                         ticks: {
-                            callback: function(value, index, values) {
+                            callback: function (value, index, values) {
                                 return value.toLocaleString('fa-IR');
                             },
                             font: {
@@ -430,6 +427,7 @@
 
     <script>
         var myCharts = {};
+
         function drawChart(canvasId, type, data, options) {
             var ctx = document.getElementById(canvasId);
             if (!ctx) {
@@ -448,7 +446,7 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // --------------------------------------------------------------------------------
             var chart3_labels_data_raw = document.getElementById('chart-labels-khales-forosh-by-year-data').textContent;
             var chart3_datasets_data_raw = document.getElementById('chart-datasets-khales-forosh-by-year-data').textContent;
@@ -492,10 +490,10 @@
                     tooltip: {
                         rtl: true,
                         callbacks: {
-                            title: function(tooltipItems) {
+                            title: function (tooltipItems) {
                                 return tooltipItems[0].label; // ماه (مثلاً "فروردین")
                             },
-                            label: function(tooltipItem) {
+                            label: function (tooltipItem) {
                                 let label = tooltipItem.dataset.label || ''; // لیبل سال (مثلاً "خالص فروش سال 1402")
                                 if (label) {
                                     label = label.replace('خالص فروش سال ', ''); // فقط سال را نگه دار (مثلاً "1402")
@@ -530,7 +528,7 @@
                         beginAtZero: true,
                         stacked: false, // برای نمودار میله ای گروهی (کنار هم)
                         ticks: {
-                            callback: function(value, index, values) {
+                            callback: function (value, index, values) {
                                 return value.toLocaleString('fa-IR');
                             },
                             font: {

@@ -12,7 +12,13 @@ from mahakupdate.sendtogap import run_dial_script, stop_dialer
 urlpatterns = [
     path('sale/total/', SaleTotal, name='sale-total'),
     path('sale/total/<int:year>-<int:month>-<int:day>/', SaleTotal, name='sale-total-date'),
-    path('sale/total/data/<int:year>-<int:month>-<int:day>/', SaleTotalData, name='sale-total-data'),
+
+
+    # path('sale/total/data/<int:year>-<int:month>-<int:day>/', SaleTotalData, name='sale-total-data'),
+    path('sale/total/data/<str:date_str>/', SaleTotalData, name='sale-total-data'),
+
+
+
 
     path('acc/loan_total/<str:status>/', LoanTotal, name='loan-total'),
     path('api/loan-summary/', loan_summary_api, name='loan_summary'),
