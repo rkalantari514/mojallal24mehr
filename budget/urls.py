@@ -1,7 +1,7 @@
 from django.urls import path
 
 from budget.views import BudgetCostTotal, BudgetCostDetail, BudgetSaleTotal, BudgetSaleDetail, BudgetSaleFactorDetail, \
-    BudgetTotal
+    BudgetTotal, BudgetSaleQtyTotal, BudgetSaleQtyDetail, BudgetSaleBackFactorDetail
 
 urlpatterns = [
 
@@ -16,5 +16,12 @@ urlpatterns = [
 
 
     path('budget/sale/factor/<year>/<level>/<code>', BudgetSaleFactorDetail, name='budget_sale_factor_detail'),
+
+
+# --- Quantity-based budget views ---
+    path('budget/sale/qty/total', BudgetSaleQtyTotal, name='budget_sale_qty_total'),
+    path('budget/sale/qty/detail/<level>/<code>', BudgetSaleQtyDetail, name='budget_sale_qty_detail'),
+    path('budget/sale/backfactor/<year>/<level>/<code>', BudgetSaleBackFactorDetail, name='budget_sale_back_factor_detail'),
+
 
 ]

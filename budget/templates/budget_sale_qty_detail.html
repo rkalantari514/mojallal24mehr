@@ -1,0 +1,134 @@
+{% extends 'shared/_MainLayout.html' %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+    <style>
+        .category-btn {
+            width: 300px;
+            margin-bottom: 10px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 450px;
+            margin-bottom: 30px;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        body {
+            font-family: 'IRANSans', Tahoma, sans-serif;
+        }
+        h5.card-title, h6.card-title {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+        #chartdiv {
+            width: 100%;
+            height: 500px;
+        }
+    </style>
+    <div class="content-wrapper">
+        <div class="page-title">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="d-block">
+                        <h4 class="card-title text-facebook pb-0 border-0">جزئیات بودجه فروش مقداری
+                            سال {{ acc_year }} - {{ detail_name }}</h4>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
+                        <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
+                        <li class="breadcrumb-item active">جزئیات بودجه فروش مقداری سال {{ acc_year }}</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- نمودار -->
+            <div class="row">
+                <div class="col-md-12 mb-30">
+                    <div class="col-xl-12 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="qtyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block myjs %}
+    <script>
+        var chartLabels = {{ chart_labels|safe }};
+        var chart1Data = {{ chart1_data|safe }}; // عملکرد سال گذشته (تعداد)
+        var chart2Data = {{ chart2_data|safe }}; // عملکرد سال جاری (تعداد)
+        var chart3Data = {{ chart3_data|safe }}; // بودجه با آهنگ پارسال (تعداد)
+        var chart4Data = {{ chart4_data|safe }}; // بودجه خطی (تعداد)
+
+        var ctx = document.getElementById('qtyChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: [
+                    {
+                        label: "عملکرد سال گذشته (تعداد)",
+                        data: chart1Data,
+                        borderColor: "blue",
+                        fill: false,
+                        pointRadius: 0
+                    },
+                    {
+                        label: "عملکرد سال جاری (تعداد)",
+                        data: chart2Data,
+                        borderColor: "green",
+                        fill: false,
+                        pointRadius: 0
+                    },
+                    {
+                        label: "بودجه با آهنگ سال گذشته (تعداد)",
+                        data: chart3Data,
+                        borderColor: "red",
+                        fill: false,
+                        pointRadius: 0
+                    },
+                    {
+                        label: "بودجه بر اساس زمان (تعداد)",
+                        data: chart4Data,
+                        borderColor: "teal",
+                        fill: false,
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { title: { display: true, text: "تاریخ" } },
+                    y: { title: { display: true, text: "تعداد تجمعی" } }
+                },
+                plugins: {
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y.toFixed(0);
+                            },
+                            title: function(tooltipItems) {
+                                return 'تاریخ: ' + tooltipItems[0].label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %}
