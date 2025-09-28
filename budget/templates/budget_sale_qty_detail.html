@@ -3,29 +3,63 @@
 {% load humanize %}
 {% block content %}
 <style>
-    .chart-container { width: 100%; height: 500px; margin-bottom: 30px; }
+    /* این استایل ها فقط برای این صفحه اعمال می شوند */
+    .category-btn {
+        width: 300px;
+        margin-bottom: 10px;
+    }
+    .chart-container {
+        position: relative;
+        width: 100%;
+        height: 450px;
+        margin-bottom: 30px;
+        background-color: #fff;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+    }
+    body {
+        font-family: 'IRANSans', Tahoma, sans-serif;
+    }
+    h5.card-title, h6.card-title {
+        text-align: right;
+        margin-bottom: 10px;
+    }
+    #chartdiv {
+        width: 100%;
+        height: 500px;
+    }
 </style>
 <div class="content-wrapper">
     <div class="page-title">
         <div class="row">
             <div class="col-sm-6">
-                <h4 class="card-title text-facebook pb-0 border-0">
-                    جزئیات بودجه فروش مقداری سال {{ acc_year }} - {{ detail_name }}
-                </h4>
+                <div class="d-block">
+                    <h4 class="card-title text-facebook pb-0 border-0">جزئیات بودجه فروش مقداری
+                        سال {{ acc_year }} - {{ detail_name }}</h4>
+                </div>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
-                    <li class="breadcrumb-item"><a href="/">خانه</a></li>
-                    <li class="breadcrumb-item active">جزئیات بودجه فروش مقداری</li>
+                    <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
+                    <li class="breadcrumb-item active">جزئیات بودجه فروش مقداری سال {{ acc_year }}</li>
                 </ol>
             </div>
         </div>
+
+        <!-- نمودار خطی -->
         <div class="row">
             <div class="col-md-12 mb-30">
-                <div class="card card-statistics h-100">
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="qtyChart"></canvas>
+                <div class="col-xl-12 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="table-responsive mt-15 ">
+                                <h5 class="card-title pb-0 border-0">عملکرد بودجه فروش مقداری
+                                    برای: {{ detail_name }}</h5>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="qtyChart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -39,14 +73,38 @@
 <script>
     const ctx = document.getElementById('qtyChart').getContext('2d');
     new Chart(ctx, {
-        type: 'line',
-        data: {
+        type: `line`,
+         {
             labels: {{ chart_labels|safe }},
             datasets: [
-                { label: "عملکرد سال گذشته (تعداد)", data: {{ chart1_data|safe }}, borderColor: "blue", fill: false },
-                { label: "عملکرد سال جاری (تعداد)", data: {{ chart2_data|safe }}, borderColor: "green", fill: false },
-                { label: "بودجه با آهنگ پارسال (تعداد)", data: {{ chart3_data|safe }}, borderColor: "red", fill: false },
-                { label: "بودجه خطی (تعداد)", data: {{ chart4_data|safe }}, borderColor: "teal", fill: false }
+                {
+                    label: "عملکرد سال گذشته (تعداد)",
+                     {{ chart1_data|safe }},
+                    borderColor: "blue",
+                    fill: false,
+                    pointRadius: 0
+                },
+                {
+                    label: "عملکرد سال جاری (تعداد)",
+                     {{ chart2_data|safe }},
+                    borderColor: "green",
+                    fill: false,
+                    pointRadius: 0
+                },
+                {
+                    label: "بودجه با آهنگ پارسال (تعداد)",
+                     {{ chart3_data|safe }},
+                    borderColor: "red",
+                    fill: false,
+                    pointRadius: 0
+                },
+                {
+                    label: "بودجه بر اساس زمان (تعداد)",
+                     {{ chart4_data|safe }},
+                    borderColor: "teal",
+                    fill: false,
+                    pointRadius: 0
+                }
             ]
         },
         options: {
@@ -58,9 +116,15 @@
             },
             plugins: {
                 tooltip: {
+                    mode: 'index',
+                    intersect: false,
                     callbacks: {
-                        label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(0)}`,
-                        title: items => `تاریخ: ${items[0].label}`
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.parsed.y.toFixed(0);
+                        },
+                        title: function(tooltipItems) {
+                            return 'تاریخ: ' + tooltipItems[0].label;
+                        }
                     }
                 }
             }
