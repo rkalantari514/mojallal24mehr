@@ -1,0 +1,16 @@
+{% extends 'shared/_MainLayout.html' %}
+{% block content %}
+<div class="content-wrapper">
+    <div class="page-title">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="alert alert-danger text-center">
+                    <h4>خطا!</h4>
+                    <p>{{ message }}</p>
+                    <a href="javascript:history.back()" class="btn btn-primary">بازگشت</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
