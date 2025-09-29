@@ -2,63 +2,295 @@
 {% load static %}
 {% load humanize %}
 {% block content %}
-<style>
-    /* این استایل ها فقط برای این صفحه اعمال می شوند */
-    .category-btn {
-        width: 300px;
-        margin-bottom: 10px;
-    }
-    .chart-container {
-        position: relative;
-        width: 100%;
-        height: 450px;
-        margin-bottom: 30px;
-        background-color: #fff;
-        padding: 20px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-    }
-    body {
-        font-family: 'IRANSans', Tahoma, sans-serif;
-    }
-    h5.card-title, h6.card-title {
-        text-align: right;
-        margin-bottom: 10px;
-    }
-    #chartdiv {
-        width: 100%;
-        height: 500px;
-    }
-</style>
-<div class="content-wrapper">
-    <div class="page-title">
-        <div class="row">
-            <div class="col-sm-6">
-                <div class="d-block">
-                    <h4 class="card-title text-facebook pb-0 border-0">جزئیات بودجه فروش مقداری
-                        سال {{ acc_year }} - {{ detail_name }}</h4>
+    <style>
+        /* این استایل ها فقط برای این صفحه اعمال می شوند */
+        .category-btn {
+            width: 300px; /* عرض دکمه‌ها را تنظیم می‌کند */
+            margin-bottom: 10px; /* فاصله بین خطوط را تنظیم می‌کند */
+        }
+        /* CSS برای کنترل اندازه نمودار */
+        .chart-container {
+            position: relative;
+            width: 100%; /* می تواند عرض ثابتی هم باشد */
+            height: 450px; /* ارتفاع دلخواه برای نمودار ترکیبی */
+            margin-bottom: 30px;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        /* اگر فونت IRANSans را سراسری در _MainLayout تنظیم نکرده‌اید، اینجا اضافه کنید */
+        body {
+            font-family: 'IRANSans', Tahoma, sans-serif;
+            /* direction: rtl;  این احتمالا در _MainLayout تنظیم شده است */
+            /* text-align: right; این احتمالا در _MainLayout تنظیم شده است */
+        }
+        h5.card-title, h6.card-title {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+        #chartdiv {
+            width: 100%;
+            height: 500px;
+        }
+    </style>
+    <div class="content-wrapper">
+        <div class="page-title">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="d-block">
+                        <h4 class="card-title text-facebook pb-0 border-0">گزارش جزئیات فروش مقداری
+                            سال {{ acc_year }} - {{ detail_name }}</h4>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
+                        <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
+                        <li class="breadcrumb-item active">گزارش جزئیات فروش مقداری {{ acc_year }}</li>
+                    </ol>
                 </div>
             </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb pt-0 pr-0 float-left float-sm-right">
-                    <li class="breadcrumb-item"><a href="/" class="default-color"> خانه</a></li>
-                    <li class="breadcrumb-item active">جزئیات بودجه فروش مقداری سال {{ acc_year }}</li>
-                </ol>
+            <!-- دکمه سطوح -->
+            <div class="col-xl-12 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="text-center">
+                            {% for l in level1 %}
+                                {% if l == cat1 %}
+                                    <a href="/budget/sale/qty/detail/1/{{ l.id }}">
+                                        <button type="button"
+                                                class="btn btn-success category-btn">{{ l.name }}</button>
+                                    </a>
+                                {% else %}
+                                    <a href="/budget/sale/qty/detail/1/{{ l.id }}">
+                                        <button type="button"
+                                                class="btn btn-secondary category-btn">{{ l.name }}</button>
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <!-- نمودار خطی -->
-        <div class="row">
-            <div class="col-md-12 mb-30">
+            <div class="col-xl-12 mb-30">
+                <div class="card card-statistics h-100">
+                    <div class="card-body">
+                        <div class="text-center">
+                            {% for l in level2 %}
+                                {% if l == cat2 %}
+                                    <a href="/budget/sale/qty/detail/2/{{ l.id }}">
+                                        <button type="button"
+                                                class="btn btn-success category-btn">{{ l.name }}</button>
+                                    </a>
+                                {% else %}
+                                    <a href="/budget/sale/qty/detail/2/{{ l.id }}">
+                                        <button type="button"
+                                                class="btn btn-secondary category-btn">{{ l.name }}</button>
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% if level > 1 %}
                 <div class="col-xl-12 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="card-body">
-                            <div class="table-responsive mt-15 ">
-                                <h5 class="card-title pb-0 border-0">عملکرد بودجه فروش مقداری
-                                    برای: {{ detail_name }}</h5>
+                            <div class="text-center">
+                                {% for l in level3 %}
+                                    {% if l == cat3 %}
+                                        <a href="/budget/sale/qty/detail/3/{{ l.id }}">
+                                            <button type="button"
+                                                    class="btn btn-success category-btn">{{ l.name }}</button>
+                                        </a>
+                                    {% else %}
+                                        <a href="/budget/sale/qty/detail/3/{{ l.id }}">
+                                            <button type="button"
+                                                    class="btn btn-secondary category-btn">{{ l.name }}</button>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
                             </div>
-                            <div class="chart-container">
-                                <canvas id="qtyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+           <!-- ردیف خلاصه -->
+            <div class="row">
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-primary rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-calendar highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark">کل عملکرد سال قبل</p>
+                                    <h4>{{ master_dat.by_sanads|intword }} عدد </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-skype rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-calendar highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark"> عملکرد سال قبل تا امروز</p>
+                                    <h4>{{ master_dat.by_today_actual|intword }} عدد </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-warning rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-info highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark"> ضریب عملکرد واقعی</p>
+                                    <h4>{{ master_dat.actual_rate|floatformat:2|intcomma:False }}  </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-tumblr rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-line-chart highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark"> پیش بنی با آهنگ پارسال </p>
+                                    <h4>{{ master_dat.pishbini|intword }} عدد </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-danger rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-flag-checkered highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark">کل بودجه امسال</p>
+                                    <h4>{{ master_dat.cy_budget|intword }} عدد </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-success rounded-circle">
+    <span class="text-white">
+    <i class="fa fa- fa-spinner fa-spin highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark"> عملکرد امسال </p>
+                                    <h4>{{ master_dat.cy_sanads|intword }} عدد </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-info rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-info highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark"> ضریب بودجه </p>
+                                    <h4>{{ master_dat.budget_rate|floatformat:2|intcomma:False }} </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="clearfix">
+                                <div class="float-left icon-box bg-youtube rounded-circle">
+    <span class="text-white">
+    <i class="fa fa-line-chart highlight-icon" aria-hidden="true"></i>
+    </span>
+                                </div>
+                                <div class="float-right text-right">
+                                    <p class="card-text text-dark"> پیش بینی خطی </p>
+                                    <h4>{{ master_dat.pishbini_line|intword }} عدد </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ردیف گیج -->
+            <div class="row">
+                <div class="col-xl-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="table-responsive mt-15 ">
+                                <h5 class="card-title pb-0 border-0">عملکرد با آهنگ سال گذشته</h5>
+                            </div>
+                            <div id="chartdiv" style="width: 100%; height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-6 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <div class="table-responsive mt-15 ">
+                                <h5 class="card-title pb-0 border-0">عملکرد به تناسب زمان</h5>
+                            </div>
+                            <div id="chartdiv2" style="width: 100%; height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ردیف نمودار -->
+            <div class="row">
+                <div class="col-md-12 mb-30">
+                    <div class="col-xl-12 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="card-body">
+                                <div class="table-responsive mt-15 ">
+                                    <h5 class="card-title pb-0 border-0">عملکرد بودجه فروش مقداری
+                                        برای: {{ detail_name }}</h5>
+                                </div>
+                                <div class="chart-container ">
+                                    <canvas id="budgetChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -66,44 +298,74 @@
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
+
+
 {% block myjs %}
-<script src="{% static 'js/chart.js/chart.umd.js' %}"></script>
 <script>
-    const ctx = document.getElementById('qtyChart').getContext('2d');
+    // تابع برای تبدیل None پایتون به null جاوااسکریپت
+    function sanitizeData(data) {
+        return data.map(item => item === 'None' || item === null ? null : item);
+    }
+
+    // دریافت داده‌ها از View
+    var chartLabels = {{ chart_labels|safe }};
+    var chart1Data = sanitizeData({{ chart1_data|safe }});
+    var chart2Data = sanitizeData({{ chart2_data|safe }});
+    var chart3Data = sanitizeData({{ chart3_data|safe }});
+    var chart4Data = sanitizeData({{ chart4_data|safe }});
+    var chart5Data = sanitizeData({{ chart5_data|safe }});
+    var chart6Data = sanitizeData({{ chart6_data|safe }});
+
+    var ctx = document.getElementById('budgetChart').getContext('2d');
     new Chart(ctx, {
-        type: `line`,
-         {
-            labels: {{ chart_labels|safe }},
+        type: 'line',
+        data: {
+            labels: chartLabels,
             datasets: [
                 {
                     label: "عملکرد سال گذشته (تعداد)",
-                     {{ chart1_data|safe }},
+                    data: chart1Data,
                     borderColor: "blue",
                     fill: false,
                     pointRadius: 0
                 },
                 {
                     label: "عملکرد سال جاری (تعداد)",
-                     {{ chart2_data|safe }},
+                    data: chart2Data,
                     borderColor: "green",
                     fill: false,
                     pointRadius: 0
                 },
                 {
-                    label: "بودجه با آهنگ پارسال (تعداد)",
-                     {{ chart3_data|safe }},
+                    label: "بودجه با آهنگ سال گذشته (تعداد)",
+                    data: chart3Data,
                     borderColor: "red",
                     fill: false,
                     pointRadius: 0
                 },
                 {
                     label: "بودجه بر اساس زمان (تعداد)",
-                     {{ chart4_data|safe }},
+                    data: chart4Data,
                     borderColor: "teal",
                     fill: false,
                     pointRadius: 0
+                },
+                {
+                    label: "پیش بینی (تعداد)",
+                    data: chart5Data,
+                    borderColor: "olive",
+                    fill: false,
+                    pointRadius: 0,
+                    borderDash: [5, 5]
+                },
+                {
+                    label: "پیش بینی خطی (تعداد)",
+                    data: chart6Data,
+                    borderColor: "navy",
+                    fill: false,
+                    pointRadius: 0,
+                    borderDash: [5, 5]
                 }
             ]
         },
@@ -111,24 +373,177 @@
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                x: { title: { display: true, text: "تاریخ" } },
-                y: { title: { display: true, text: "تعداد تجمعی" } }
+                x: {title: {display: true, text: "تاریخ"}},
+                y: {title: {display: true, text: "تعداد تجمعی"}}
             },
             plugins: {
                 tooltip: {
                     mode: 'index',
                     intersect: false,
                     callbacks: {
-                        label: function(context) {
-                            return context.dataset.label + ': ' + context.parsed.y.toFixed(0);
+                        label: function (context) {
+                            return context.dataset.label + ': ' + (context.parsed.y !== null ? context.parsed.y.toFixed(0) : 'N/A');
                         },
-                        title: function(tooltipItems) {
+                        title: function (tooltipItems) {
                             return 'تاریخ: ' + tooltipItems[0].label;
                         }
                     }
                 }
             }
         }
+    });
+</script>
+
+<script src="{% static 'js/amcharts/index.js' %}"></script>
+<script src="{% static 'js/amcharts/xy.js' %}"></script>
+<script src="{% static 'js/amcharts/radar.js' %}"></script>
+<script src="{% static 'js/amcharts/Animated.js' %}"></script>
+<script>
+    am5.settings = am5.settings || {};
+    am5.settings.rtl = true;
+    am5.ready(function () {
+        let g1_value = {{ g1|default:0 }};
+        let g2_value = {{ g2|default:0 }};
+
+        // --------- نمودار اول در #chartdiv ---------
+        var root1 = am5.Root.new("chartdiv");
+        var myCustomTheme1 = am5.Theme.new(root1);
+        myCustomTheme1.rule("Label").setAll({
+            fontFamily: "Vazirmatn, Tahoma, sans-serif",
+            direction: "rtl"
+        });
+        root1.setThemes([am5themes_Animated.new(root1), myCustomTheme1]);
+
+        var chart1 = root1.container.children.push(am5radar.RadarChart.new(root1, {
+            panX: false, panY: false, startAngle: 160, endAngle: 380
+        }));
+
+        var axisRenderer1 = am5radar.AxisRendererCircular.new(root1, { innerRadius: -40 });
+        axisRenderer1.grid.template.setAll({
+            stroke: root1.interfaceColors.get("background"),
+            visible: true,
+            strokeOpacity: 0.8
+        });
+
+        var xAxis1 = chart1.xAxes.push(am5xy.ValueAxis.new(root1, {
+            maxDeviation: 0, min: -100, max: 100, strictMinMax: true, renderer: axisRenderer1
+        }));
+
+        var axisDataItem1 = xAxis1.makeDataItem({});
+        var clockHand1 = am5radar.ClockHand.new(root1, {
+            pinRadius: am5.percent(20), radius: am5.percent(100), bottomWidth: 40
+        });
+        var bullet1 = axisDataItem1.set("bullet", am5xy.AxisBullet.new(root1, { sprite: clockHand1 }));
+        xAxis1.createAxisRange(axisDataItem1);
+
+        var label1 = chart1.radarContainer.children.push(am5.Label.new(root1, {
+            fill: am5.color(0xffffff), centerX: am5.percent(50), textAlign: "center",
+            centerY: am5.percent(50), fontSize: "3em", direction: "rtl"
+        }));
+
+        axisDataItem1.set("value", 0);
+        axisDataItem1.animate({
+            key: "value", to: g1_value, duration: 1000, easing: am5.ease.out(am5.ease.cubic)
+        });
+
+        bullet1.get("sprite").on("rotation", function () {
+            var value = axisDataItem1.get("value");
+            var fill = am5.color(0x000000);
+            xAxis1.axisRanges.each(function (axisRange) {
+                if (value >= axisRange.get("value") && value <= axisRange.get("endValue")) {
+                    fill = axisRange.get("axisFill").get("fill");
+                }
+            });
+            label1.set("text", Math.round(value).toString());
+            clockHand1.pin.animate({key: "fill", to: fill, duration: 500, easing: am5.ease.out(am5.ease.cubic)});
+            clockHand1.hand.animate({key: "fill", to: fill, duration: 500, easing: am5.ease.out(am5.ease.cubic)});
+        });
+
+        var bandsData = [
+            {title: "بسیار عالی", color: "#006400", lowScore: 75, highScore: 100},
+            {title: "عالی", color: "#228B22", lowScore: 50, highScore: 75},
+            {title: "خیلی خوب", color: "#32CD32", lowScore: 25, highScore: 50},
+            {title: "خوب", color: "#ADFF2F", lowScore: 0, highScore: 25},
+            {title: "اخطار", color: "#FFD700", lowScore: -25, highScore: 0},
+            {title: "ضعیف", color: "#FFA500", lowScore: -50, highScore: -25},
+            {title: "بحرانی", color: "#FF4500", lowScore: -75, highScore: -50},
+            {title: "فاجعه", color: "#DC143C", lowScore: -100, highScore: -75}
+        ];
+
+        am5.array.each(bandsData, function (data) {
+            var axisRange = xAxis1.createAxisRange(xAxis1.makeDataItem({}));
+            axisRange.setAll({value: data.lowScore, endValue: data.highScore});
+            axisRange.get("axisFill").setAll({ visible: true, fill: am5.color(data.color), fillOpacity: 0.8 });
+            axisRange.get("label").setAll({
+                text: data.title, inside: true, radius: 15, fontSize: "0.9em",
+                fill: root1.interfaceColors.get("background"), direction: "rtl"
+            });
+        });
+
+        chart1.appear(1000, 100);
+
+        // --------- نمودار دوم در #chartdiv2 ---------
+        var root2 = am5.Root.new("chartdiv2");
+        var myCustomTheme2 = am5.Theme.new(root2);
+        myCustomTheme2.rule("Label").setAll({
+            fontFamily: "Vazirmatn, Tahoma, sans-serif", direction: "rtl"
+        });
+        root2.setThemes([am5themes_Animated.new(root2), myCustomTheme2]);
+
+        var chart2 = root2.container.children.push(am5radar.RadarChart.new(root2, {
+            panX: false, panY: false, startAngle: 160, endAngle: 380
+        }));
+
+        var axisRenderer2 = am5radar.AxisRendererCircular.new(root2, { innerRadius: -40 });
+        axisRenderer2.grid.template.setAll({
+            stroke: root2.interfaceColors.get("background"), visible: true, strokeOpacity: 0.8
+        });
+
+        var xAxis2 = chart2.xAxes.push(am5xy.ValueAxis.new(root2, {
+            maxDeviation: 0, min: -100, max: 100, strictMinMax: true, renderer: axisRenderer2
+        }));
+
+        var axisDataItem2 = xAxis2.makeDataItem({});
+        var clockHand2 = am5radar.ClockHand.new(root2, {
+            pinRadius: am5.percent(20), radius: am5.percent(100), bottomWidth: 40
+        });
+        var bullet2 = axisDataItem2.set("bullet", am5xy.AxisBullet.new(root2, { sprite: clockHand2 }));
+        xAxis2.createAxisRange(axisDataItem2);
+
+        var label2 = chart2.radarContainer.children.push(am5.Label.new(root2, {
+            fill: am5.color(0xffffff), centerX: am5.percent(50), textAlign: "center",
+            centerY: am5.percent(50), fontSize: "3em", direction: "rtl"
+        }));
+
+        axisDataItem2.set("value", 0);
+        axisDataItem2.animate({
+            key: "value", to: g2_value, duration: 1000, easing: am5.ease.out(am5.ease.cubic)
+        });
+
+        bullet2.get("sprite").on("rotation", function () {
+            var value = axisDataItem2.get("value");
+            var fill = am5.color(0x000000);
+            xAxis2.axisRanges.each(function (axisRange) {
+                if (value >= axisRange.get("value") && value <= axisRange.get("endValue")) {
+                    fill = axisRange.get("axisFill").get("fill");
+                }
+            });
+            label2.set("text", Math.round(value).toString());
+            clockHand2.pin.animate({key: "fill", to: fill, duration: 500, easing: am5.ease.out(am5.ease.cubic)});
+            clockHand2.hand.animate({key: "fill", to: fill, duration: 500, easing: am5.ease.out(am5.ease.cubic)});
+        });
+
+        am5.array.each(bandsData, function (data) {
+            var axisRange = xAxis2.createAxisRange(xAxis2.makeDataItem({}));
+            axisRange.setAll({value: data.lowScore, endValue: data.highScore});
+            axisRange.get("axisFill").setAll({ visible: true, fill: am5.color(data.color), fillOpacity: 0.8 });
+            axisRange.get("label").setAll({
+                text: data.title, inside: true, radius: 15, fontSize: "0.9em",
+                fill: root2.interfaceColors.get("background"), direction: "rtl"
+            });
+        });
+
+        chart2.appear(1000, 100);
     });
 </script>
 {% endblock %}
