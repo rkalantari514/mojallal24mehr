@@ -129,7 +129,7 @@
                                 </div>
                                 <div class="float-right text-right">
                                     <p class="card-text text-dark">کل عملکرد سال قبل</p>
-                                    <h4>{{ master_dat.by_sanads|intword }} عدد </h4>
+                                    <h4>{{ master_dat.by_sanads|intcomma:False }} عدد </h4>
                                 </div>
                             </div>
                         </div>
@@ -146,7 +146,7 @@
                                 </div>
                                 <div class="float-right text-right">
                                     <p class="card-text text-dark"> عملکرد سال قبل تا امروز</p>
-                                    <h4>{{ master_dat.by_today_actual|intword }} عدد </h4>
+                                    <h4>{{ master_dat.by_today_actual|intcomma:False }} عدد </h4>
                                 </div>
                             </div>
                         </div>
@@ -180,7 +180,7 @@
                                 </div>
                                 <div class="float-right text-right">
                                     <p class="card-text text-dark"> پیش بنی با آهنگ پارسال </p>
-                                    <h4>{{ master_dat.pishbini|intword }} عدد </h4>
+                                    <h4>{{ master_dat.pishbini|intcomma:False }} عدد </h4>
                                 </div>
                             </div>
                         </div>
@@ -197,7 +197,7 @@
                                 </div>
                                 <div class="float-right text-right">
                                     <p class="card-text text-dark">کل بودجه امسال</p>
-                                    <h4>{{ master_dat.cy_budget|intword }} عدد </h4>
+                                    <h4>{{ master_dat.cy_budget|intcomma:False }} عدد </h4>
                                 </div>
                             </div>
                         </div>
@@ -214,7 +214,7 @@
                                 </div>
                                 <div class="float-right text-right">
                                     <p class="card-text text-dark"> عملکرد امسال </p>
-                                    <h4>{{ master_dat.cy_sanads|intword }} عدد </h4>
+                                    <h4>{{ master_dat.cy_sanads|intcomma:False }} عدد </h4>
                                 </div>
                             </div>
                         </div>
@@ -248,7 +248,7 @@
                                 </div>
                                 <div class="float-right text-right">
                                     <p class="card-text text-dark"> پیش بینی خطی </p>
-                                    <h4>{{ master_dat.pishbini_line|intword }} عدد </h4>
+                                    <h4>{{ master_dat.pishbini_line|intcomma:False }} عدد </h4>
                                 </div>
                             </div>
                         </div>

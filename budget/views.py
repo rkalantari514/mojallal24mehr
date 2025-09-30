@@ -2838,10 +2838,18 @@ def BudgetSaleQtyDetail(request, level, code, *args, **kwargs):
             chart6_data.append(today_actual if today_actual else 0)
 
     # --- محاسبه مقادیر خلاصه ---
-    last_value_chart1 = chart1_data[-1] if chart1_data else 0
-    last_value_chart2 = chart2_data[-1] if chart2_data and chart2_data[-1] is not None else 0
-    last_value_chart5 = chart5_data[-1] if chart5_data and chart5_data[-1] != '-' and chart5_data[-1] is not None else 0
-    last_value_chart6 = chart6_data[-1] if chart6_data and chart6_data[-1] != '-' and chart6_data[-1] is not None else 0
+    # --- محاسبه مقادیر خلاصه (نسخه ایمن از None) ---
+    valid_chart1 = [x for x in chart1_data if x is not None]
+    last_value_chart1 = valid_chart1[-1] if valid_chart1 else 0
+
+    valid_chart2 = [x for x in chart2_data if x is not None]
+    last_value_chart2 = valid_chart2[-1] if valid_chart2 else 0
+
+    valid_chart5 = [x for x in chart5_data if x != '-' and x is not None]
+    last_value_chart5 = valid_chart5[-1] if valid_chart5 else 0
+
+    valid_chart6 = [x for x in chart6_data if x != '-' and x is not None]
+    last_value_chart6 = valid_chart6[-1] if valid_chart6 else 0
 
     master_dat = {
         'by_sanads': int(last_value_chart1),
