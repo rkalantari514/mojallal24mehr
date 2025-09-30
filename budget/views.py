@@ -2226,6 +2226,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
             if day == today:
                 today_by_time = ch4
                 ch6 = today_actual
+
                 s6 = today_actual / 95
             if day <= today:
                 chart6_data.append('-')
@@ -2770,6 +2771,21 @@ def BudgetSaleQtyDetail(request, level, code, *args, **kwargs):
         for d in date_list
     ]
 
+    # تاریخ امروز
+    today = datetime.today().date()
+    # اولین تاریخ در acc_date_list (سال جاری)
+    first_date_str = acc_date_list[0]  # مثلاً '2025-04-01'
+    first_date = datetime.strptime(first_date_str, '%Y-%m-%d').date()
+
+    # تعداد روزهای سپری‌شده از اولین تاریخ تا امروز (شامل امروز)
+    days_passed = (today - first_date).days + 1  # +1 برای شامل کردن روز اول
+
+    # جلوگیری از تقسیم بر صفر
+    if days_passed <= 0:
+        days_passed = 1
+
+
+
     # --- ساخت برچسب‌ها شمسی ---
     month_names = {
         1: "فروردین", 2: "اردیبهشت", 3: "خرداد", 4: "تیر",
@@ -2825,6 +2841,8 @@ def BudgetSaleQtyDetail(request, level, code, *args, **kwargs):
     total_budget = cum_base * float(budget_rate)
     daily_budget = total_budget / len(acc_date_list) if acc_date_list else 0
     cum_line = 0.0
+    ch6=today_actual
+    s6=today_actual/days_passed
     for day in acc_date_list:
         cum_line += daily_budget
         chart4_data.append(cum_line)
@@ -2835,7 +2853,9 @@ def BudgetSaleQtyDetail(request, level, code, *args, **kwargs):
         if day <= today_str:
             chart6_data.append('-')
         else:
-            chart6_data.append(today_actual if today_actual else 0)
+            chart6_data.append(ch6)
+            ch6+=s6
+
 
     # --- محاسبه مقادیر خلاصه ---
     # --- محاسبه مقادیر خلاصه (نسخه ایمن از None) ---
