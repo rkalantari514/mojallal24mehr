@@ -1613,7 +1613,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
         cat2 = cat3.parent
         cat1 = cat2.parent
 
-        if category.budget_rate is not None and category.budget_rat != 0:
+        if category.budget_rate is not None and category.budget_rate != 0:
             budget_rate = category.budget_rate
         elif parent_cat.budget_rate is not None and parent_cat.budget_rate != 0:
             budget_rate = parent_cat.budget_rate
@@ -1786,7 +1786,7 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
         cat2 = category
         cat1 = cat2.parent
 
-        if category.budget_rate is not None and category.budget_rat != 0:
+        if category.budget_rate is not None and category.budget_rate != 0:
             budget_rate = category.budget_rate
         else:
             budget_rate = parent_cat.budget_rate
@@ -2670,7 +2670,7 @@ def BudgetSaleQtyDetail(request, level, code, *args, **kwargs):
     detail_name = "همه کالاها"
     g1 = 0
     g2 = 0
-    today_bay_by = 0
+    today_bay_by = 0  # این متغیر باید محاسبه شود
     today_actual = 0
     today_by_time = 0
     budget_rate = Decimal('1.5')
@@ -2678,232 +2678,221 @@ def BudgetSaleQtyDetail(request, level, code, *args, **kwargs):
     level2 = None
     level3 = None
     cat1 = cat2 = cat3 = None
-    chart5_data = []
-    chart6_data = []
 
-    try:
-        if level == '3':
-            cat_id = int(code)
-            category = Category.objects.filter(id=cat_id, level=3).last()
-            if not category:
-                return render(request, 'shared/error_page.html', {'message': 'دسته‌بندی یافت نشد.'})
-            detail_name = f'دسته - {category.name}'
-            cat3 = category
-            cat2 = cat3.parent
-            cat1 = cat2.parent
-            level3 = Category.objects.filter(level=3, parent=cat2)
-            level2 = Category.objects.filter(level=2, parent=cat1)
-            budget_rate = category.budget_rate or cat2.budget_rate or cat1.budget_rate or Decimal('1.5')
-            base_sales = FactorDetaile.objects.filter(kala__category=category, acc_year=base_year)
-            base_returns = BackFactorDetail.objects.filter(kala__category=category, acc_year=base_year)
-            current_sales = FactorDetaile.objects.filter(kala__category=category, acc_year=acc_year)
-            current_returns = BackFactorDetail.objects.filter(kala__category=category, acc_year=acc_year)
+    if level == '3':
+        cat_id = int(code)
+        category = Category.objects.filter(id=cat_id, level=3).last()
+        if not category:
+            return render(request, 'shared/error_page.html', {'message': 'دسته‌بندی یافت نشد.'})
+        detail_name = f'دسته - {category.name}'
+        cat3 = category
+        cat2 = cat3.parent
+        cat1 = cat2.parent
+        level3 = Category.objects.filter(level=3, parent=cat2)
+        level2 = Category.objects.filter(level=2, parent=cat1)
+        budget_rate = category.budget_rate or cat2.budget_rate or cat1.budget_rate or Decimal('1.5')
+        base_sales = FactorDetaile.objects.filter(kala__category=category, acc_year=base_year)
+        base_returns = BackFactorDetail.objects.filter(kala__category=category, acc_year=base_year)
+        current_sales = FactorDetaile.objects.filter(kala__category=category, acc_year=acc_year)
+        current_returns = BackFactorDetail.objects.filter(kala__category=category, acc_year=acc_year)
 
-        elif level == '2':
-            cat_id = int(code)
-            category = Category.objects.filter(id=cat_id, level=2).last()
-            if not category:
-                return render(request, 'shared/error_page.html', {'message': 'دسته‌بندی یافت نشد.'})
-            detail_name = f'دسته - {category.name}'
-            cat2 = category
-            cat1 = cat2.parent
-            level2 = Category.objects.filter(level=2, parent=cat1)
-            level3 = Category.objects.filter(level=3, parent=cat2)
-            budget_rate = category.budget_rate or cat1.budget_rate or Decimal('1.5')
-            base_sales = FactorDetaile.objects.filter(kala__category__parent=category, acc_year=base_year)
-            base_returns = BackFactorDetail.objects.filter(kala__category__parent=category, acc_year=base_year)
-            current_sales = FactorDetaile.objects.filter(kala__category__parent=category, acc_year=acc_year)
-            current_returns = BackFactorDetail.objects.filter(kala__category__parent=category, acc_year=acc_year)
+    elif level == '2':
+        cat_id = int(code)
+        category = Category.objects.filter(id=cat_id, level=2).last()
+        if not category:
+            return render(request, 'shared/error_page.html', {'message': 'دسته‌بندی یافت نشد.'})
+        detail_name = f'دسته - {category.name}'
+        cat2 = category
+        cat1 = cat2.parent
+        level2 = Category.objects.filter(level=2, parent=cat1)
+        level3 = Category.objects.filter(level=3, parent=cat2)
+        budget_rate = category.budget_rate or cat1.budget_rate or Decimal('1.5')
+        base_sales = FactorDetaile.objects.filter(kala__category__parent=category, acc_year=base_year)
+        base_returns = BackFactorDetail.objects.filter(kala__category__parent=category, acc_year=base_year)
+        current_sales = FactorDetaile.objects.filter(kala__category__parent=category, acc_year=acc_year)
+        current_returns = BackFactorDetail.objects.filter(kala__category__parent=category, acc_year=acc_year)
 
-        elif level == '1':
-            cat_id = int(code)
-            category = Category.objects.filter(id=cat_id, level=1).last()
-            if not category:
-                return render(request, 'shared/error_page.html', {'message': 'دسته‌بندی یافت نشد.'})
-            detail_name = f'دسته - {category.name}'
-            cat1 = category
-            level2 = Category.objects.filter(level=2, parent=cat1)
-            budget_rate = category.budget_rate or Decimal('1.5')
-            base_sales = FactorDetaile.objects.filter(kala__category__parent__parent=category, acc_year=base_year)
-            base_returns = BackFactorDetail.objects.filter(kala__category__parent__parent=category, acc_year=base_year)
-            current_sales = FactorDetaile.objects.filter(kala__category__parent__parent=category, acc_year=acc_year)
-            current_returns = BackFactorDetail.objects.filter(kala__category__parent__parent=category, acc_year=acc_year)
+    elif level == '1':
+        cat_id = int(code)
+        category = Category.objects.filter(id=cat_id, level=1).last()
+        if not category:
+            return render(request, 'shared/error_page.html', {'message': 'دسته‌بندی یافت نشد.'})
+        detail_name = f'دسته - {category.name}'
+        cat1 = category
+        level2 = Category.objects.filter(level=2, parent=cat1)
+        budget_rate = category.budget_rate or Decimal('1.5')
+        base_sales = FactorDetaile.objects.filter(kala__category__parent__parent=category, acc_year=base_year)
+        base_returns = BackFactorDetail.objects.filter(kala__category__parent__parent=category, acc_year=base_year)
+        current_sales = FactorDetaile.objects.filter(kala__category__parent__parent=category, acc_year=acc_year)
+        current_returns = BackFactorDetail.objects.filter(kala__category__parent__parent=category, acc_year=acc_year)
 
-        else:  # level == '0'
-            detail_name = "همه کالاها"
-            budget_rate = Decimal('1.5')
-            base_sales = FactorDetaile.objects.filter(acc_year=base_year)
-            base_returns = BackFactorDetail.objects.filter(acc_year=base_year)
-            current_sales = FactorDetaile.objects.filter(acc_year=acc_year)
-            current_returns = BackFactorDetail.objects.filter(acc_year=acc_year)
+    else:  # level == '0'
+        detail_name = "همه کالاها"
+        budget_rate = Decimal('1.5')
+        base_sales = FactorDetaile.objects.filter(acc_year=base_year)
+        base_returns = BackFactorDetail.objects.filter(acc_year=base_year)
+        current_sales = FactorDetaile.objects.filter(acc_year=acc_year)
+        current_returns = BackFactorDetail.objects.filter(acc_year=acc_year)
 
-        # --- جمع‌آوری داده‌های روزانه سال پایه ---
-        daily_base = {}
-        for item in base_sales.values('date').annotate(total=Sum('count')):
-            daily_base[str(item['date'])] = float(item['total'] or 0)
-        for item in base_returns.values('backfactor__date').annotate(total=Sum('count')):
-            date_key = str(item['backfactor__date'])
-            daily_base[date_key] = daily_base.get(date_key, 0) - float(item['total'] or 0)
+    # --- جمع‌آوری داده‌های روزانه سال پایه ---
+    daily_base = {}
+    for item in base_sales.values('date').annotate(total=Sum('count')):
+        daily_base[str(item['date'])] = float(item['total'] or 0)
+    for item in base_returns.values('backfactor__date').annotate(total=Sum('count')):
+        date_key = str(item['backfactor__date'])
+        daily_base[date_key] = daily_base.get(date_key, 0) - float(item['total'] or 0)
 
-        # --- جمع‌آوری داده‌های روزانه سال جاری ---
-        daily_current = {}
-        for item in current_sales.values('date').annotate(total=Sum('count')):
-            daily_current[str(item['date'])] = float(item['total'] or 0)
-        for item in current_returns.values('backfactor__date').annotate(total=Sum('count')):
-            date_key = str(item['backfactor__date'])
-            daily_current[date_key] = daily_current.get(date_key, 0) - float(item['total'] or 0)
+    # --- جمع‌آوری داده‌های روزانه سال جاری ---
+    daily_current = {}
+    for item in current_sales.values('date').annotate(total=Sum('count')):
+        daily_current[str(item['date'])] = float(item['total'] or 0)
+    for item in current_returns.values('backfactor__date').annotate(total=Sum('count')):
+        date_key = str(item['backfactor__date'])
+        daily_current[date_key] = daily_current.get(date_key, 0) - float(item['total'] or 0)
 
-        # --- تعیین بازه زمانی ---
-        all_dates_base = list(daily_base.keys())
-        if not all_dates_base:
-            start_date = date(acc_year - 1, 1, 1)
-            end_date = date(acc_year - 1, 12, 31)
-        else:
-            start_date = min([datetime.strptime(d, '%Y-%m-%d').date() for d in all_dates_base])
-            end_date = max([datetime.strptime(d, '%Y-%m-%d').date() for d in all_dates_base])
+    # --- تعیین بازه زمانی ---
+    all_dates_base = list(daily_base.keys())
+    if not all_dates_base:
+        start_date = date(acc_year - 1, 1, 1)
+        end_date = date(acc_year - 1, 12, 31)
+    else:
+        start_date = min([datetime.strptime(d, '%Y-%m-%d').date() for d in all_dates_base])
+        end_date = max([datetime.strptime(d, '%Y-%m-%d').date() for d in all_dates_base])
 
-        date_list = []
-        current = start_date
-        while current <= end_date:
-            date_list.append(current.strftime('%Y-%m-%d'))
-            current += timedelta(days=1)
+    date_list = []
+    current = start_date
+    while current <= end_date:
+        date_list.append(current.strftime('%Y-%m-%d'))
+        current += timedelta(days=1)
 
-        acc_date_list = [
-            (datetime.strptime(d, '%Y-%m-%d') + relativedelta(years=1)).strftime('%Y-%m-%d')
-            for d in date_list
-        ]
+    acc_date_list = [
+        (datetime.strptime(d, '%Y-%m-%d') + relativedelta(years=1)).strftime('%Y-%m-%d')
+        for d in date_list
+    ]
 
-        # --- ساخت برچسب‌ها شمسی ---
-        month_names = {
-            1: "فروردین", 2: "اردیبهشت", 3: "خرداد", 4: "تیر",
-            5: "مرداد", 6: "شهریور", 7: "مهر", 8: "آبان",
-            9: "آذر", 10: "دی", 11: "بهمن", 12: "اسفند"
-        }
-        chart_labels = []
-        for d in acc_date_list:
-            try:
-                miladi = datetime.strptime(d, '%Y-%m-%d')
-                shamsi = jdatetime.date.fromgregorian(date=miladi.date())
-                if shamsi.day == 1:
-                    label = month_names.get(shamsi.month, str(shamsi.month))
-                else:
-                    label = str(shamsi.day)
-                chart_labels.append(label)
-            except:
-                chart_labels.append(d)
-
-        # --- ساخت داده‌های نمودار ---
-        # --- ساخت داده‌های نمودار ---
-        chart1_data = []  # عملکرد سال گذشته (خالص)
-        chart2_data = []  # عملکرد سال جاری (خالص)
-        chart3_data = []  # بودجه با آهنگ پارسال
-        chart4_data = []  # بودجه خطی
-        chart5_data = []  # پیش‌بینی
-        chart6_data = []  # پیش‌بینی خطی
-
-        cum_base = 0.0
-        cum_current = 0.0
-        today_str = date.today().strftime('%Y-%m-%d')
-        actual_rate = 1.0
-        by_today_actual = 0.0
-
-        for i, day in enumerate(acc_date_list):
-            base_day = date_list[i]
-            cum_base += daily_base.get(base_day, 0.0)
-            chart1_data.append(cum_base)
-            chart3_data.append(float(cum_base * float(budget_rate)))
-
-            if day <= today_str:
-                cum_current += daily_current.get(day, 0.0)
-                chart2_data.append(cum_current)
-                chart5_data.append('-')
-                if day == today_str:
-                    today_actual = cum_current
-                    by_today_actual = cum_base
-                    actual_rate = today_actual / by_today_actual if by_today_actual > 0 else 1.0
+    # --- ساخت برچسب‌ها شمسی ---
+    month_names = {
+        1: "فروردین", 2: "اردیبهشت", 3: "خرداد", 4: "تیر",
+        5: "مرداد", 6: "شهریور", 7: "مهر", 8: "آبان",
+        9: "آذر", 10: "دی", 11: "بهمن", 12: "اسفند"
+    }
+    chart_labels = []
+    for d in acc_date_list:
+        try:
+            miladi = datetime.strptime(d, '%Y-%m-%d')
+            shamsi = jdatetime.date.fromgregorian(date=miladi.date())
+            if shamsi.day == 1:
+                label = month_names.get(shamsi.month, str(shamsi.month))
             else:
-                chart2_data.append(None)  # اینجا None اضافه می‌شود
-                chart5_data.append(cum_base * actual_rate)
+                label = str(shamsi.day)
+            chart_labels.append(label)
+        except:
+            chart_labels.append(d)
 
-        # بودجه خطی
-        total_budget = cum_base * float(budget_rate)
-        daily_budget = total_budget / len(acc_date_list) if acc_date_list else 0
-        cum_line = 0.0
-        for day in acc_date_list:
-            cum_line += daily_budget
-            chart4_data.append(cum_line)
+    # --- ساخت داده‌های نمودار ---
+    chart1_data = []  # عملکرد سال گذشته (خالص)
+    chart2_data = []  # عملکرد سال جاری (خالص)
+    chart3_data = []  # بودجه با آهنگ پارسال
+    chart4_data = []  # بودجه خطی
+    chart5_data = []  # پیش‌بینی
+    chart6_data = []  # پیش‌بینی خطی
+
+    cum_base = 0.0
+    cum_current = 0.0
+    today_str = date.today().strftime('%Y-%m-%d')
+    actual_rate = 1.0
+    by_today_actual = 0.0
+
+    for i, day in enumerate(acc_date_list):
+        base_day = date_list[i]
+        cum_base += daily_base.get(base_day, 0.0)
+        chart1_data.append(cum_base)
+        chart3_data.append(float(cum_base * float(budget_rate)))
+
+        if day <= today_str:
+            cum_current += daily_current.get(day, 0.0)
+            chart2_data.append(cum_current)
+            chart5_data.append('-')
             if day == today_str:
-                today_by_time = cum_line
-            if day <= today_str:
-                chart6_data.append('-')
-            else:
-                chart6_data.append(today_actual if today_actual else 0)
+                today_actual = cum_current
+                by_today_actual = cum_base
+                actual_rate = today_actual / by_today_actual if by_today_actual > 0 else 1.0
+        else:
+            chart2_data.append(None)
+            chart5_data.append(cum_base * actual_rate)
 
+    # بودجه خطی
+    total_budget = cum_base * float(budget_rate)
+    daily_budget = total_budget / len(acc_date_list) if acc_date_list else 0
+    cum_line = 0.0
+    for day in acc_date_list:
+        cum_line += daily_budget
+        chart4_data.append(cum_line)
+        if day == today_str:
+            today_by_time = cum_line
+            # ✅ اینجا today_bay_by را محاسبه می‌کنیم
+            today_bay_by = cum_base * float(budget_rate)  # بودجه تا امروز با آهنگ پارسال
+        if day <= today_str:
+            chart6_data.append('-')
+        else:
+            chart6_data.append(today_actual if today_actual else 0)
 
-        # --- اصلاح خطا: جایگزینی None با 0 قبل از تبدیل به int ---
-        last_value_chart1 = chart1_data[-1] if chart1_data else 0
-        last_value_chart2 = chart2_data[-1] if chart2_data else 0
-        last_value_chart5 = chart5_data[-1] if chart5_data and chart5_data[-1] != '-' else 0
-        last_value_chart6 = chart6_data[-1] if chart6_data and chart6_data[-1] != '-' else 0
+    # --- محاسبه مقادیر خلاصه ---
+    last_value_chart1 = chart1_data[-1] if chart1_data else 0
+    last_value_chart2 = chart2_data[-1] if chart2_data and chart2_data[-1] is not None else 0
+    last_value_chart5 = chart5_data[-1] if chart5_data and chart5_data[-1] != '-' and chart5_data[-1] is not None else 0
+    last_value_chart6 = chart6_data[-1] if chart6_data and chart6_data[-1] != '-' and chart6_data[-1] is not None else 0
 
-        # --- تبدیل ایمن به عدد ---
-        def safe_int(value):
-            try:
-                return int(float(value)) if value is not None else 0
-            except (ValueError, TypeError):
-                return 0
+    master_dat = {
+        'by_sanads': int(last_value_chart1),
+        'cy_budget': int(last_value_chart1 * float(budget_rate)),
+        'budget_rate': float(budget_rate),
+        'cy_sanads': int(last_value_chart2),
+        'actual_rate': actual_rate,
+        'by_today_actual': int(by_today_actual),
+        'pishbini': int(last_value_chart5),
+        'pishbini_line': int(last_value_chart6),
+    }
 
-        master_dat = {
-            'by_sanads': safe_int(last_value_chart1),
-            'cy_budget': safe_int(last_value_chart1 * float(budget_rate)),
-            'budget_rate': float(budget_rate),
-            'cy_sanads': safe_int(last_value_chart2),
-            'actual_rate': actual_rate,
-            'by_today_actual': safe_int(by_today_actual),
-            'pishbini': safe_int(last_value_chart5),
-            'pishbini_line': safe_int(last_value_chart6),
-        }
+    # --- محاسبه گیج‌ها ---
+    today_actual = float(today_actual)
+    today_bay_by = float(today_bay_by) if today_bay_by else 0.0
+    today_by_time = float(today_by_time) if today_by_time else 0.0
 
-        today_actual = Decimal(str(today_actual))
-        today_bay_by = Decimal(str(today_bay_by)) if today_bay_by else Decimal('0')
-        today_by_time = Decimal(str(today_by_time)) if today_by_time else Decimal('0')
+    g1 = ((today_actual - today_bay_by) / today_bay_by * 100) if today_bay_by != 0 else 100
+    g2 = ((today_actual - today_by_time) / today_by_time * 100) if today_by_time != 0 else 100
 
-        g1 = ((today_actual - today_bay_by) / today_bay_by * 100) if today_bay_by != 0 else 100
-        g2 = ((today_actual - today_by_time) / today_by_time * 100) if today_by_time != 0 else 100
+    g1 = max(-100, min(g1, 100))
+    g2 = max(-100, min(g2, 100))
 
-        g1 = max(-100, min(g1, 100))
-        g2 = max(-100, min(g2, 100))
+    context = {
+        'acc_year': acc_year,
+        'base_year': base_year,
+        'user': user,
+        'detail_name': detail_name,
+        'budget_rate': float(budget_rate),
+        'chart_labels': chart_labels,
+        'chart1_data': chart1_data,
+        'chart2_data': [x if x is not None else 'null' for x in chart2_data],  # تبدیل None به 'null'
+        'chart3_data': chart3_data,
+        'chart4_data': chart4_data,
+        'chart5_data': chart5_data,
+        'chart6_data': chart6_data,
+        'level': int(level),
+        'level1': level1,
+        'level2': level2,
+        'level3': level3,
+        'cat1': cat1,
+        'cat2': cat2,
+        'cat3': cat3,
+        'master_dat': master_dat,
+        'g1': g1,
+        'g2': g2,
+        'is_qty': True,
+    }
+    print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
+    return render(request, 'budget_sale_qty_detail.html', context)
 
-        context = {
-            'acc_year': acc_year,
-            'base_year': base_year,
-            'user': user,
-            'detail_name': detail_name,
-            'budget_rate': float(budget_rate),
-            'chart_labels': chart_labels,
-            'chart1_data': chart1_data,
-            'chart2_data': chart2_data,
-            'chart3_data': chart3_data,
-            'chart4_data': chart4_data,
-            'chart5_data': chart5_data,
-            'chart6_data': chart6_data,
-            'level': int(level),
-            'level1': level1,
-            'level2': level2,
-            'level3': level3,
-            'cat1': cat1,
-            'cat2': cat2,
-            'cat3': cat3,
-            'master_dat': master_dat,
-            'g1': g1,
-            'g2': g2,
-            'is_qty': True,
-        }
-        print(f"زمان کل اجرای تابع: {time.time() - start_time:.2f} ثانیه")
-        return render(request, 'budget_sale_qty_detail.html', context)
-
-    except Exception as e:
-        return render(request, 'shared/error_page.html', {'message': f'خطا: {str(e)}'})
 
 
 def BudgetSaleBackFactorDetail(request, year, level, code, *args, **kwargs):
