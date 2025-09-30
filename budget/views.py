@@ -1735,12 +1735,26 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
         ch4 = 0
         ch6 = 0
         s6=0
+        # تاریخ امروز
+        today = datetime.today().date()
+        # اولین تاریخ در acc_date_list (سال جاری)
+        first_date_str = acc_date_list[0]  # مثلاً '2025-04-01'
+        first_date = datetime.strptime(first_date_str, '%Y-%m-%d').date()
+
+        # تعداد روزهای سپری‌شده از اولین تاریخ تا امروز (شامل امروز)
+        days_passed = (today - first_date).days + 1  # +1 برای شامل کردن روز اول
+        today = datetime.today().strftime('%Y-%m-%d')  # تاریخ امروز به فرمت YYYY-MM-DD
+
+        # جلوگیری از تقسیم بر صفر
+        if days_passed <= 0:
+            days_passed = 1
+
         for day in acc_date_list:
             chart4_data.append(ch4)
             if day == today:
                 today_by_time = ch4
                 ch6=today_actual
-                s6=today_actual/95
+                s6=today_actual/days_passed
             if day <= today:
                 chart6_data.append('-')
             else:
@@ -1907,12 +1921,27 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
         ch4 = 0
         ch6 = 0
         s6 = 0
+        # تاریخ امروز
+        today = datetime.today().date()
+        # اولین تاریخ در acc_date_list (سال جاری)
+        first_date_str = acc_date_list[0]  # مثلاً '2025-04-01'
+        first_date = datetime.strptime(first_date_str, '%Y-%m-%d').date()
+
+        # تعداد روزهای سپری‌شده از اولین تاریخ تا امروز (شامل امروز)
+        days_passed = (today - first_date).days + 1  # +1 برای شامل کردن روز اول
+        today = datetime.today().strftime('%Y-%m-%d')  # تاریخ امروز به فرمت YYYY-MM-DD
+
+
+        # جلوگیری از تقسیم بر صفر
+        if days_passed <= 0:
+            days_passed = 1
+
         for day in acc_date_list:
             chart4_data.append(ch4)
             if day == today:
                 today_by_time = ch4
                 ch6 = today_actual
-                s6 = today_actual / 95
+                s6 = today_actual / days_passed
             if day <= today:
                 chart6_data.append('-')
             else:
@@ -2068,12 +2097,27 @@ def BudgetSaleDetail(request, level, code, *args, **kwargs):
         ch4 = 0
         ch6 = 0
         s6 = 0
+        # تاریخ امروز
+        today = datetime.today().date()
+        # اولین تاریخ در acc_date_list (سال جاری)
+        first_date_str = acc_date_list[0]  # مثلاً '2025-04-01'
+        first_date = datetime.strptime(first_date_str, '%Y-%m-%d').date()
+
+        # تعداد روزهای سپری‌شده از اولین تاریخ تا امروز (شامل امروز)
+        days_passed = (today - first_date).days + 1  # +1 برای شامل کردن روز اول
+        today = datetime.today().strftime('%Y-%m-%d')  # تاریخ امروز به فرمت YYYY-MM-DD
+
+
+        # جلوگیری از تقسیم بر صفر
+        if days_passed <= 0:
+            days_passed = 1
+
         for day in acc_date_list:
             chart4_data.append(ch4)
             if day == today:
                 today_by_time = ch4
                 ch6 = today_actual
-                s6 = today_actual / 95
+                s6 = today_actual / days_passed
             if day <= today:
                 chart6_data.append('-')
             else:
