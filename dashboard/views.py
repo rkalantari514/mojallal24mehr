@@ -662,6 +662,9 @@ def generate_calendar_data_chequesider2(month, year, cheque_recive_data, cheque_
 
 @login_required(login_url='/login')
 def Home1(request, *args, **kwargs):
+    import uuid
+    request_id = str(uuid.uuid4())[:8]
+    print(f"=== START Home1 - Request ID: {request_id} ===")
     name = 'داشبورد 1'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است

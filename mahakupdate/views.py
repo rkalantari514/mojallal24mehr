@@ -2789,7 +2789,7 @@ def update_kala_categories():
                 updates.append(kala)
         else:
             print(kala.code, kala.name)
-            group_infos = KalaGroupinfo.objects.order_by('-id').all()
+            group_infos = KalaGroupinfo.objects.order_by('-code').filter(code_mahak=kala.grpcode)
             category_found = False  # متغیری برای پیگیری پیدا شدن دسته‌بندی
 
             for group in group_infos:
@@ -2803,13 +2803,16 @@ def update_kala_categories():
                         updates.append(kala)
                         category_found = True
                         break
-                elif group.code_mahak == kala.grpcode:
-                    kala.category = Category.objects.filter(level=3, code_mahak=kala.grpcode).first()
-                    updates.append(kala)
-                    category_found = True
-                    break
+
 
             # اگر دسته‌بندی مناسب پیدا نشد، استفاده از دسته‌بندی پیش‌فرض
+            if not category_found:
+                for group in group_infos:
+                    if group.code_mahak == kala.grpcode:
+                        kala.category = Category.objects.filter(level=3, code_mahak=kala.grpcode).first()
+                        updates.append(kala)
+                        category_found = True
+                        break
             if not category_found:
                 kala.category = default_category
                 updates.append(kala)

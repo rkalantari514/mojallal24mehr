@@ -215,60 +215,60 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <div class="clearfix">
-                                <div class="float-left icon-box bg-info rounded-circle">
-    <span class="text-white">
-    <i class="fa fa-percent highlight-icon" aria-hidden="true"></i>
-    </span>
-                                </div>
-                                <div class="float-right text-right">
-                                    <p class="card-text text-dark"> درصد فروش به موجودی روز </p>
-                                    <h4>{{ master_data.s_m_ratio|floatformat:2 }}%</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+{#                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">#}
+{#                    <div class="card card-statistics h-100">#}
+{#                        <div class="card-body">#}
+{#                            <div class="clearfix">#}
+{#                                <div class="float-left icon-box bg-info rounded-circle">#}
+{#    <span class="text-white">#}
+{#    <i class="fa fa-percent highlight-icon" aria-hidden="true"></i>#}
+{#    </span>#}
+{#                                </div>#}
+{#                                <div class="float-right text-right">#}
+{#                                    <p class="card-text text-dark"> درصد فروش به موجودی روز </p>#}
+{#                                    <h4>{{ master_data.s_m_ratio|floatformat:2 }}%</h4>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
             </div>
             <!-- ردیف دوم خلاصه ها -->
             <div class="row">
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <div class="clearfix">
-                                <div class="float-left icon-box bg-dribbble rounded-circle">
-    <span class="text-white">
-    <i class="fa fa-calendar-check-o highlight-icon" aria-hidden="true"></i>
-    </span>
-                                </div>
-                                <div class="float-right text-right">
-                                    <p class="card-text text-dark">موجودی × روز از ابتدای دوره</p>
-                                    <h4>{{ master_data.mojodi_roz|intword }}</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <div class="clearfix">
-                                <div class="float-left icon-box bg-facebook rounded-circle">
-    <span class="text-white">
-    <i class="fa fa-bed highlight-icon" aria-hidden="true"></i>
-    </span>
-                                </div>
-                                <div class="float-right text-right">
-                                    <p class="card-text text-dark">موجودی روز ارزش میانگین</p>
-                                    <h4>{{ master_data.mojodi_roz_arzesh|intword }} ریال روز</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+{#                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">#}
+{#                    <div class="card card-statistics h-100">#}
+{#                        <div class="card-body">#}
+{#                            <div class="clearfix">#}
+{#                                <div class="float-left icon-box bg-dribbble rounded-circle">#}
+{#    <span class="text-white">#}
+{#    <i class="fa fa-calendar-check-o highlight-icon" aria-hidden="true"></i>#}
+{#    </span>#}
+{#                                </div>#}
+{#                                <div class="float-right text-right">#}
+{#                                    <p class="card-text text-dark">موجودی × روز از ابتدای دوره</p>#}
+{#                                    <h4>{{ master_data.mojodi_roz|intword }}</h4>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">#}
+{#                    <div class="card card-statistics h-100">#}
+{#                        <div class="card-body">#}
+{#                            <div class="clearfix">#}
+{#                                <div class="float-left icon-box bg-facebook rounded-circle">#}
+{#    <span class="text-white">#}
+{#    <i class="fa fa-bed highlight-icon" aria-hidden="true"></i>#}
+{#    </span>#}
+{#                                </div>#}
+{#                                <div class="float-right text-right">#}
+{#                                    <p class="card-text text-dark">موجودی روز ارزش میانگین</p>#}
+{#                                    <h4>{{ master_data.mojodi_roz_arzesh|intword }} ریال روز</h4>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
                 {#            <div class="col-xl-3 col-lg-6 col-md-6 mb-30">#}
                 {#                <div class="card card-statistics h-100">#}
                 {#                    <div class="card-body">#}
@@ -444,9 +444,9 @@
             </div>
 
 
-            <!-- ردیف موجودی انبار و تقویم -->
+            <!-- ردیف کالاها -->
             <div class="row">
-                <div class="col-md-5 mb-30">
+                <div class="col-md-12 mb-30">
                     <div class="col-xl-12 mb-30">
                         <div class="card card-statistics h-100">
                             <div class="card-body">
@@ -501,9 +501,9 @@
                                                     data-sorter="numericOnly"
                                                     data-field="sales">تعداد فروش
                                                 </th>
-                                                <th class="card-text text-center" data-sortable="true"
-                                                    data-sorter="numericOnly" data-field="smratio">بازده فروش
-                                                </th>
+{#                                                <th class="card-text text-center" data-sortable="true"#}
+{#                                                    data-sorter="numericOnly" data-field="smratio">بازده فروش#}
+{#                                                </th>#}
 
 
                                             </tr>
@@ -524,10 +524,10 @@
                                                             href="/dash/kala/detail/{{ kala.code }}"
                                                             target="_blank">
                                                         {{ kala.total_sale }}</a></td>
-                                                    <td class="card-text text-center"><a
-                                                            href="/dash/kala/detail/{{ kala.code }}"
-                                                            target="_blank">
-                                                        {{ kala.s_m_ratio|floatformat:2|intcomma:False }}</a></td>
+{#                                                    <td class="card-text text-center"><a#}
+{#                                                            href="/dash/kala/detail/{{ kala.code }}"#}
+{#                                                            target="_blank">#}
+{#                                                        {{ kala.s_m_ratio|floatformat:2|intcomma:False }}</a></td>#}
 
 
                                                 </tr>
@@ -544,8 +544,9 @@
                     </div>
                 </div>
 
-
-                <!-- تقویم -->
+            </div>
+                    <!-- ردیف  تقویم -->
+            <div class="row">
                 <div id="calendarf" class="col-md-7 mb-30">
                     <div class="card card-statistics h-100">
                         <div class="card-body">
