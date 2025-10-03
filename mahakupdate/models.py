@@ -90,6 +90,18 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+class Brand(models.Model):
+    name = models.CharField(max_length=150, verbose_name='نام برند')
+    logo_name = models.CharField(max_length=100, blank=True, null=True, verbose_name='نام فایل لوگو')
+
+    class Meta:
+        verbose_name = 'برند'
+        verbose_name_plural = 'برندها'
+
+    def __str__(self):
+        return self.name
+
+
 
 class Kala(models.Model):
     code = models.IntegerField(default=0, verbose_name='کد کالا')
@@ -101,6 +113,7 @@ class Kala(models.Model):
     last_updated_ratio = models.DateField(blank=True, null=True, verbose_name='آخرین تاریخ به‌روزرسانی')
     total_sale = models.FloatField(default=0, verbose_name='کل فروش')
     kala_taf=models.IntegerField(blank=True, null=True,default=0, verbose_name='کد تفصیلی کالا')
+    brand = models.ForeignKey(Brand,on_delete=models.SET_NULL,related_name='brand_kalas',verbose_name='برند',blank=True,null=True)
 
     # l_mojodi=models.FloatField(default=0, verbose_name='آخرین موجودی')
     # t_sales=models.FloatField(default=0, verbose_name='کل فروش')
