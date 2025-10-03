@@ -3,7 +3,8 @@ from openpyxl.styles.builtins import title
 
 from custom_login.models import UserLog
 from custom_login.views import page_permision
-from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek, Kala, SanadDetail, FactorDetaile
+from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek, Kala, SanadDetail, FactorDetaile, \
+    BackFactorDetail
 from persianutils import standardize
 from django.db.models import Max, Subquery
 from .forms import FilterForm, KalaSelectForm, Kala_Detail_Form
@@ -872,6 +873,81 @@ def CategoryDetail(request, *args, **kwargs):
             'barPercentage': 0.9
         })
 
+    # اضافه کردن فروش در بازه‌های مختلف -----------------------------------------------------
+
+    # تاریخ‌های مورد نیاز
+    today = date.today()
+    one_week_ago = today - timedelta(days=7)
+    one_month_ago = today - timedelta(days=30)
+    six_months_ago = today - timedelta(days=180)
+    one_year_ago = today - timedelta(days=365)
+
+    # Subquery برای فروش (FactorDetaile) — با استفاده از foreign key `kala`
+    def get_sales_subquery(start_date=None):
+        qs = FactorDetaile.objects.filter(
+            kala=OuterRef('pk')  # ✅ استفاده از رابطه ForeignKey
+        )
+        if start_date:
+            qs = qs.filter(date__gte=start_date)
+        return qs.values('kala').annotate(total=Sum('count')).values('total')[:1]
+
+    # Subquery برای برگشتی (BackFactorDetail) — با استفاده از foreign key `kala`
+    def get_returns_subquery(start_date=None):
+        qs = BackFactorDetail.objects.filter(
+            kala=OuterRef('pk')
+        )
+        if start_date:
+            qs = qs.filter(backfactor__date__gte=start_date)  # ✅ تغییر اینجا
+        return qs.values('kala').annotate(total=Sum('count')).values('total')[:1]
+
+    # ساخت Subqueryها
+    sales_week = get_sales_subquery(one_week_ago)
+    returns_week = get_returns_subquery(one_week_ago)
+
+    sales_month = get_sales_subquery(one_month_ago)
+    returns_month = get_returns_subquery(one_month_ago)
+
+    sales_6m = get_sales_subquery(six_months_ago)
+    returns_6m = get_returns_subquery(six_months_ago)
+
+    sales_year = get_sales_subquery(one_year_ago)
+    returns_year = get_returns_subquery(one_year_ago)
+
+    sales_total = get_sales_subquery()  # بدون تاریخ = همه
+    returns_total = get_returns_subquery()
+
+    # حالا annotate کن
+    kalas = kalas.annotate(
+        # هفته گذشته
+        sale_last_week=Coalesce(Subquery(sales_week, output_field=FloatField()), Value(0.0)),
+        return_last_week=Coalesce(Subquery(returns_week, output_field=FloatField()), Value(0.0)),
+        net_sale_last_week=Coalesce(Subquery(sales_week, output_field=FloatField()), Value(0.0)) -
+                           Coalesce(Subquery(returns_week, output_field=FloatField()), Value(0.0)),
+
+        # ماه گذشته
+        sale_last_month=Coalesce(Subquery(sales_month, output_field=FloatField()), Value(0.0)),
+        return_last_month=Coalesce(Subquery(returns_month, output_field=FloatField()), Value(0.0)),
+        net_sale_last_month=Coalesce(Subquery(sales_month, output_field=FloatField()), Value(0.0)) -
+                            Coalesce(Subquery(returns_month, output_field=FloatField()), Value(0.0)),
+
+        # 6 ماه گذشته
+        sale_last_6m=Coalesce(Subquery(sales_6m, output_field=FloatField()), Value(0.0)),
+        return_last_6m=Coalesce(Subquery(returns_6m, output_field=FloatField()), Value(0.0)),
+        net_sale_last_6m=Coalesce(Subquery(sales_6m, output_field=FloatField()), Value(0.0)) -
+                         Coalesce(Subquery(returns_6m, output_field=FloatField()), Value(0.0)),
+
+        # سال گذشته
+        sale_last_year=Coalesce(Subquery(sales_year, output_field=FloatField()), Value(0.0)),
+        return_last_year=Coalesce(Subquery(returns_year, output_field=FloatField()), Value(0.0)),
+        net_sale_last_year=Coalesce(Subquery(sales_year, output_field=FloatField()), Value(0.0)) -
+                           Coalesce(Subquery(returns_year, output_field=FloatField()), Value(0.0)),
+
+        # کل
+        sale_total=Coalesce(Subquery(sales_total, output_field=FloatField()), Value(0.0)),
+        return_total=Coalesce(Subquery(returns_total, output_field=FloatField()), Value(0.0)),
+        net_sale_total=Coalesce(Subquery(sales_total, output_field=FloatField()), Value(0.0)) -
+                       Coalesce(Subquery(returns_total, output_field=FloatField()), Value(0.0)),
+    )
 
 
 
@@ -1054,7 +1130,9 @@ def CategoryDetail(request, *args, **kwargs):
     return render(request, 'category_detail.html', context)
 
 
-
+from django.db.models import OuterRef, Subquery, Sum, Q, Value, FloatField
+from django.db.models.functions import Coalesce
+from datetime import date, timedelta
 
 
 
@@ -1246,6 +1324,83 @@ def CategoryDetail1(request, *args, **kwargs):
         cat2=Category.objects.filter(parent=par1)
         cat3=Category.objects.filter(parent=par2)
         distinct_kalas = Mojodi.objects.filter(kala__category=cat).values('kala').distinct()
+
+    # اضافه کردن فروش در بازه‌های مختلف -----------------------------------------------------
+
+    # تاریخ‌های مورد نیاز
+    today = date.today()
+    one_week_ago = today - timedelta(days=7)
+    one_month_ago = today - timedelta(days=30)
+    six_months_ago = today - timedelta(days=180)
+    one_year_ago = today - timedelta(days=365)
+
+    # Subquery برای فروش (FactorDetaile) — با استفاده از foreign key `kala`
+    def get_sales_subquery(start_date=None):
+        qs = FactorDetaile.objects.filter(
+            kala=OuterRef('pk')  # ✅ استفاده از رابطه ForeignKey
+        )
+        if start_date:
+            qs = qs.filter(date__gte=start_date)
+        return qs.values('kala').annotate(total=Sum('count')).values('total')[:1]
+
+    # Subquery برای برگشتی (BackFactorDetail) — با استفاده از foreign key `kala`
+    def get_returns_subquery(start_date=None):
+        qs = BackFactorDetail.objects.filter(
+            kala=OuterRef('pk')  # ✅ استفاده از رابطه ForeignKey
+        )
+        if start_date:
+            qs = qs.filter(date__gte=start_date)
+        return qs.values('kala').annotate(total=Sum('count')).values('total')[:1]
+
+    # ساخت Subqueryها
+    sales_week = get_sales_subquery(one_week_ago)
+    returns_week = get_returns_subquery(one_week_ago)
+
+    sales_month = get_sales_subquery(one_month_ago)
+    returns_month = get_returns_subquery(one_month_ago)
+
+    sales_6m = get_sales_subquery(six_months_ago)
+    returns_6m = get_returns_subquery(six_months_ago)
+
+    sales_year = get_sales_subquery(one_year_ago)
+    returns_year = get_returns_subquery(one_year_ago)
+
+    sales_total = get_sales_subquery()  # بدون تاریخ = همه
+    returns_total = get_returns_subquery()
+
+    # حالا annotate کن
+    kalas = kalas.annotate(
+        # هفته گذشته
+        sale_last_week=Coalesce(Subquery(sales_week, output_field=FloatField()), Value(0.0)),
+        return_last_week=Coalesce(Subquery(returns_week, output_field=FloatField()), Value(0.0)),
+        net_sale_last_week=Coalesce(Subquery(sales_week, output_field=FloatField()), Value(0.0)) -
+                           Coalesce(Subquery(returns_week, output_field=FloatField()), Value(0.0)),
+
+        # ماه گذشته
+        sale_last_month=Coalesce(Subquery(sales_month, output_field=FloatField()), Value(0.0)),
+        return_last_month=Coalesce(Subquery(returns_month, output_field=FloatField()), Value(0.0)),
+        net_sale_last_month=Coalesce(Subquery(sales_month, output_field=FloatField()), Value(0.0)) -
+                            Coalesce(Subquery(returns_month, output_field=FloatField()), Value(0.0)),
+
+        # 6 ماه گذشته
+        sale_last_6m=Coalesce(Subquery(sales_6m, output_field=FloatField()), Value(0.0)),
+        return_last_6m=Coalesce(Subquery(returns_6m, output_field=FloatField()), Value(0.0)),
+        net_sale_last_6m=Coalesce(Subquery(sales_6m, output_field=FloatField()), Value(0.0)) -
+                         Coalesce(Subquery(returns_6m, output_field=FloatField()), Value(0.0)),
+
+        # سال گذشته
+        sale_last_year=Coalesce(Subquery(sales_year, output_field=FloatField()), Value(0.0)),
+        return_last_year=Coalesce(Subquery(returns_year, output_field=FloatField()), Value(0.0)),
+        net_sale_last_year=Coalesce(Subquery(sales_year, output_field=FloatField()), Value(0.0)) -
+                           Coalesce(Subquery(returns_year, output_field=FloatField()), Value(0.0)),
+
+        # کل
+        sale_total=Coalesce(Subquery(sales_total, output_field=FloatField()), Value(0.0)),
+        return_total=Coalesce(Subquery(returns_total, output_field=FloatField()), Value(0.0)),
+        net_sale_total=Coalesce(Subquery(sales_total, output_field=FloatField()), Value(0.0)) -
+                       Coalesce(Subquery(returns_total, output_field=FloatField()), Value(0.0)),
+    )
+
 
 
 # چارت اول:-------------------------------------------------------------- فروش ماهانه تعداد
@@ -1444,7 +1599,12 @@ def CategoryDetail1(request, *args, **kwargs):
         cat_id_1='0'
     else:
         cat_id_1=f'{cat.id}'
-
+    # در view (برای تست موقت)
+    test_kala = kalas.last()
+    if test_kala:
+        print("Test kala:", test_kala.name, test_kala.pk)
+        print("Net sale total:", test_kala.net_sale_total)
+        print("Actual sales in DB:", FactorDetaile.objects.filter(kala=test_kala).aggregate(Sum('count')))
 
     context = {
         'title': f'{cat}',
