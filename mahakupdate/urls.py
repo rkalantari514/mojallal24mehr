@@ -4,7 +4,8 @@ from mahakupdate.views import Update_from_mahak, Kala_group, Updatedb, \
     CreateKalaGroup, UpdateKalaGroup, UpdateStorage, UpdateMojodi, Update_Sales_Mojodi_Ratio, UpdateSanad, \
     UpdateSanadDetail, UpdateAccCoding, Cheques_Recieve, UpdateSanadConditions, Cheque_Pay, UpdateBank, UpdateLoan, \
     UpdateLoanDetail, UpdateBedehiMoshtari, CompleLoan, UpdateMyCondition, UpdateBackFactor, UpdateBackFactorDetail, \
-    DeleteDublicateData, AfterTakhfifKol, UpdateSleepInvestment, LoanBedehiMoshtari, UpdateGoodConsign
+    DeleteDublicateData, AfterTakhfifKol, UpdateSleepInvestment, LoanBedehiMoshtari, UpdateGoodConsign, \
+    UpdateBrandGroupinfo, CreateBrandsFromRules, UpdateKalaBrands
 
 urlpatterns = [
     path('1', Update_from_mahak, name="update"),
@@ -44,11 +45,12 @@ urlpatterns = [
 
 
 
-
-
-
-
     path('kalagroup', Kala_group, name="kala_group"),
+
+    path('update/brand-rules', UpdateBrandGroupinfo, name='update_brand_rules'),
+    path('update/brands-from-role', CreateBrandsFromRules, name='update_brands'),
+    path('update/kala-brands', UpdateKalaBrands, name='update_kala_brands'),
+
 
 
 ]

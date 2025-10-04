@@ -508,6 +508,7 @@
                                     <!-- سطر اول: گزارش فروش (merged) -->
                                     <tr class="tr-class-1">
                                         <th rowspan="2" class="card-text text-center" data-sortable="true" data-field="name">نام کالا</th>
+                                        <th rowspan="2" class="card-text text-center" data-sortable="true" data-field="brand" data-filter-control="select">برند</th>
 
                                         {% if cat_level == 0 %}
                                             <th rowspan="2" class="card-text text-center" data-sortable="true" data-field="cat_kala1" data-filter-control="select">سطح 1</th>
@@ -572,6 +573,7 @@
                                     {% for kala in kalas %}
                                         <tr data-href="/dash/kala/detail/{{ kala.code }}" data-target="_blank">
                                             <td class="card-text text-center">{{ kala.name }}</td>
+                                            <td class="card-text text-center">{{ kala.brand.name }}</td>
 
                                             {% if cat_level == 0 %}
                                                 <td class="card-text text-center">{{ kala.category.parent.parent.name }}</td>

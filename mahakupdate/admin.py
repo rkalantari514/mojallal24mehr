@@ -4,7 +4,7 @@ from django.contrib.admin import SimpleListFilter
 from accounting.models import BedehiMoshtari
 from mahakupdate.models import Mtables, Kala, Factor, FactorDetaile, WordCount, Category, Kardex, Person, KalaGroupinfo, \
     Storagek, Mojodi, Sanad, SanadDetail, AccCoding, ChequesRecieve, MyCondition, ChequesPay, Bank, Loan, LoanDetil, \
-    BackFactor, BackFactorDetail, GoodConsign, StaticUpdateTask
+    BackFactor, BackFactorDetail, GoodConsign, StaticUpdateTask, Brand, BrandGroupinfo
 
 
 # Register your models here.
@@ -48,8 +48,8 @@ class MtablesAdmin(admin.ModelAdmin):
     )
 
 class KalaAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'name', 'code','kala_taf', 'grpcode','category', 's_m_ratio', 'total_sale']
-    list_filter = ['category']
+    list_display = ['__str__', 'name', 'code','kala_taf', 'grpcode','category', 'brand', 'total_sale']
+    list_filter = ['category','brand']
     list_editable = ['category']
     search_fields = ['name', 'code']
 
@@ -346,9 +346,24 @@ class StaticUpdateTaskAdmin(admin.ModelAdmin):
         return "-"
     update_duration_pretty.short_description = 'مدت زمان آپدیت'
 
+# ---------- مدیریت برند ----------
+@admin.register(Brand)
+class BrandAdmin(admin.ModelAdmin):
+    list_display = ('__str__','name', 'logo_name')
+    search_fields = ('name',)
+    list_filter = ('name',)
+    ordering = ('name',)
+    list_editable =('name', 'logo_name')
 
 
 
+@admin.register(BrandGroupinfo)
+class BrandGroupinfoAdmin(admin.ModelAdmin):
+    list_display = ('__str__','code','brand_name','brand_img','contain','not_contain',)
+    list_filter = ('brand_name',)
+    search_fields = ('brand_name', 'contain', 'not_contain')
+    ordering = ('code', 'brand_name')
+    list_editable =('code','brand_name','brand_img','contain','not_contain',)
 
 
 admin.site.register(Kala, KalaAdmin)

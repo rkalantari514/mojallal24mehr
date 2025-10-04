@@ -8,7 +8,7 @@ from events.views import SendScheduledReminders
 from festival.models import CustomerPoints
 from festival.views import Calculate_and_award_points
 from mahakupdate.models import WordCount, Person, KalaGroupinfo, Category, Sanad, SanadDetail, AccCoding, ChequesPay, \
-    Bank, Loan, LoanDetil, BackFactor, BackFactorDetail, StaticUpdateTask
+    Bank, Loan, LoanDetil, BackFactor, BackFactorDetail, StaticUpdateTask, BrandGroupinfo, Brand
 from .models import FactorDetaile
 from django.contrib.auth.decorators import login_required
 from .models import Kala, Storagek
@@ -425,7 +425,10 @@ def Updateall(request):
         {'url': 'update/after_takhfif_kol', 'name': 'محاسبه تخفیف پای فاکتور', 'priority': 15},
         {'url': 'update/sleepinvestment', 'name': 'آپدیت خواب سرمایه', 'priority': 16},
         {'url': 'update/loan_bedehi_moshtari', 'name': 'قسط بدهی مشتریان', 'priority': 17},
-        {'url': 'events/send-reminders', 'name': 'ارسال یاد آور رویدادها', 'priority': 17},
+        {'url': 'events/send-reminders', 'name': 'ارسال یاد آور رویدادها', 'priority': 18},
+        {'url': 'update/brand-rules', 'name': 'آپدیت شرایط برند یابی', 'priority': 19},
+        {'url': 'update/brands-from-role', 'name': 'ساخت برند ها', 'priority': 20},
+        {'url': 'update/kala-brands', 'name': 'آپدیت برند کالاها', 'priority': 21},
     ]
 
     # --- نگاشت URL به تابع ---
@@ -448,6 +451,9 @@ def Updateall(request):
         'update/sleepinvestment': UpdateSleepInvestment,
         'update/loan_bedehi_moshtari': LoanBedehiMoshtari,
         'events/send-reminders': SendScheduledReminders,
+        'update/brand-rules': UpdateBrandGroupinfo,
+        'update/brands-from-role': CreateBrandsFromRules,
+        'update/kala-brands': UpdateKalaBrands,
     }
 
     # --- به‌روزرسانی یا ایجاد StaticUpdateTask ---
@@ -6216,4 +6222,186 @@ def UpdateGoodConsign(request):
     print('len(to_update)',len(to_update))
     print('len(to_create)',len(to_create))
     print(f"زمان کل: {total_time:.2f} ثانیه")
+    return redirect('/updatedb')
+
+
+
+def UpdateBrandGroupinfo(request):
+    print('شروع آپدیت شروط برندیابی کالا ---------------------------------------------------')
+
+    file_path = os.path.join(settings.BASE_DIR, 'temp', 'brand_rules.xlsx')
+
+    # بررسی وجود فایل
+    if not os.path.exists(file_path):
+        print(f"خطا: فایل {file_path} یافت نشد.")
+        return redirect('/updatedb')  # یا هر مسیر مدیریتی که دارید
+
+    # خواندن فایل اکسل
+    df = pd.read_excel(file_path)
+
+    # مدیریت ستون‌های NaN
+    df['code'] = df['code'].apply(lambda x: int(x) if not pd.isna(x) else 0)
+    df['brand_name'] = df['brand_name'].fillna('').astype(str)
+    df['brand_img'] = df['brand_img'].fillna('').astype(str)
+    df['contain'] = df['contain'].fillna('').astype(str)
+    df['not_contain'] = df['not_contain'].fillna('').astype(str)
+
+    # استخراج لیست کدهای موجود در فایل اکسل (برای حذف ردیف‌های اضافی از دیتابیس)
+    code_list_in_excel = set(df['code'])
+
+    # حذف ردیف‌هایی که در فایل اکسل وجود ندارند
+    deleted_count, _ = BrandGroupinfo.objects.exclude(code__in=code_list_in_excel).delete()
+    print(f"{deleted_count} ردیف از مدل BrandGroupinfo حذف شد.")
+
+    # بروزرسانی یا ایجاد رکوردها
+    for _, row in df.iterrows():
+        BrandGroupinfo.objects.update_or_create(
+            code=row['code'],
+            defaults={
+                'brand_name': row['brand_name'],
+                'brand_img': row['brand_img'],
+                'contain': row['contain'],
+                'not_contain': row['not_contain'],
+            }
+        )
+
+    print(f"فایل {file_path} با موفقیت پردازش و {len(df)} رکورد در دیتابیس ذخیره شد.")
+    return redirect('/updatedb')  # مسیر بازگشت شما
+
+
+
+def CreateBrandsFromRules(request):
+    print('def CreateBrandsFromRules: شروع ایجاد/به‌روزرسانی برندها از BrandGroupinfo ==========================')
+
+    # 1. جمع‌آوری داده‌های یکتا از BrandGroupinfo
+    brand_entries = BrandGroupinfo.objects.filter(brand_name__isnull=False).exclude(brand_name='').only('brand_name',
+                                                                                                        'brand_img')
+
+    brand_dict = {}
+    for entry in brand_entries:
+        name = entry.brand_name.strip()
+        img = entry.brand_img.strip() if entry.brand_img else ''
+        if name:
+            brand_dict[name] = img  # آخرین مقدار لوگو را نگه می‌دارد
+
+    new_brand_names = list(brand_dict.keys())
+
+    # 2. حذف و ایجاد/به‌روزرسانی برندها
+    with transaction.atomic():
+        deleted_count, _ = Brand.objects.exclude(name__in=new_brand_names).delete()
+        created = updated = 0
+
+        for name, logo_name in brand_dict.items():
+            brand, is_created = Brand.objects.update_or_create(
+                name=name,
+                defaults={'logo_name': logo_name or None}
+            )
+            if is_created:
+                created += 1
+            else:
+                updated += 1
+
+    print(f"{deleted_count} برند قدیمی حذف شد.")
+    print(f"{created} برند جدید ایجاد شد، {updated} برند به‌روزرسانی شد.")
+
+    return redirect('/updatedb')
+
+
+
+
+
+def UpdateKalaBrands(request):
+    print('\n' + '=' * 80)
+    print('=== شروع فرآیند به‌روزرسانی برند کالاها ===')
+    print('=' * 80)
+
+    # 1. برند پیش‌فرض "بدون برند" را پیدا یا ایجاد کن
+    default_brand, created = Brand.objects.get_or_create(
+        name="بدون برند",
+        defaults={'logo_name': 'nobrand.jpg'}
+    )
+
+
+    # 2. بررسی: آیا اصلاً قانونی وجود دارد؟
+    total_rules = BrandGroupinfo.objects.filter(brand_name__isnull=False).exclude(brand_name='').count()
+
+
+    # 3. لیست تمام کالاها
+    all_kalas = Kala.objects.all()
+    total_kalas = all_kalas.count()
+    print(f"\n📦 تعداد کل کالاها برای پردازش: {total_kalas}")
+
+    updates = []
+    matched_by_rule = 0
+    assigned_default = 0
+
+    # 4. پردازش هر کالا
+    for idx, kala in enumerate(all_kalas, 1):
+
+        current_brand_name = kala.brand.name if kala.brand else "هیچ"
+
+        assigned_brand = None
+        kala_name_search = kala.name.lower().strip()
+
+        # پیمایش قوانین (اولویت با کد بالاتر)
+        rules = BrandGroupinfo.objects.order_by('-code').filter(
+            brand_name__isnull=False
+        ).exclude(brand_name='')
+
+        rule_matched = False
+        for rule in rules:
+            # پردازش contain
+            contains_list = [kw.strip().lower() for kw in rule.contain.split(',') if kw.strip()] if rule.contain else []
+            # پردازش not_contain
+            not_contains_list = [kw.strip().lower() for kw in rule.not_contain.split(',') if
+                                 kw.strip()] if rule.not_contain else []
+
+            # بررسی contain
+            contains_ok = True
+            if contains_list:
+                contains_ok = any(kw in kala_name_search for kw in contains_list)
+            # بررسی not_contain
+            not_contains_ok = True
+            if not_contains_list:
+                not_contains_ok = not any(kw in kala_name_search for kw in not_contains_list)
+
+            if contains_ok and not_contains_ok:
+                brand = Brand.objects.filter(name=rule.brand_name).first()
+                if brand:
+                    assigned_brand = brand
+                    rule_matched = True
+                    matched_by_rule += 1
+                break  # اولین قانون مطابق
+
+        # اگر هیچ قانونی مطابق نبود یا برند پیدا نشد
+        if assigned_brand is None:
+            print("   ⚠️ هیچ قانون معتبری اعمال نشد → استفاده از برند پیش‌فرض 'بدون برند'")
+            assigned_brand = default_brand
+            assigned_default += 1
+
+        # ذخیره اگر تغییر کرده
+        if kala.brand != assigned_brand:
+            kala.brand = assigned_brand
+            updates.append(kala)
+            print(f"   💾 تغییر برند: '{current_brand_name}' → '{assigned_brand.name}'")
+        else:
+            print(f"   ➖ برند بدون تغییر ماند: '{assigned_brand.name}'")
+
+    # 5. ذخیره تغییرات
+    print('\n' + '-' * 80)
+    print(f"جمع‌بندی:")
+    print(f"  - کالاهای مطابق با قوانین: {matched_by_rule}")
+    print(f"  - کالاهای دریافت‌کننده برند پیش‌فرض: {assigned_default}")
+    print(f"  - کل کالاهای نیازمند به‌روزرسانی: {len(updates)}")
+
+    if updates:
+        with transaction.atomic():
+            Kala.objects.bulk_update(updates, ['brand'])
+        print(f"\n✅ {len(updates)} کالا با موفقیت به‌روزرسانی شدند.")
+    else:
+        print("\nℹ️ هیچ کالایی نیاز به به‌روزرسانی نداشت.")
+
+    print('=' * 80)
+    print('=== پایان فرآیند به‌روزرسانی برند کالاها ===')
+    print('=' * 80)
     return redirect('/updatedb')

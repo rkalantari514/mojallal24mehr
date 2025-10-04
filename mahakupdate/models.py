@@ -90,6 +90,29 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+
+class BrandGroupinfo(models.Model):
+    code = models.IntegerField(default=0, verbose_name='کد اطلاعات برند یابی')
+    brand_name = models.CharField(max_length=150, blank=True, null=True, default="", verbose_name='نام برند')
+    brand_img = models.CharField(max_length=150, blank=True, null=True, default="", verbose_name='لوگو برند')
+    contain = models.CharField(max_length=300, blank=True, verbose_name='شامل باشد')
+    not_contain = models.CharField(max_length=300, blank=True, verbose_name='شامل نباشد')
+
+    class Meta:
+        verbose_name = 'شرط برند یابی کالا'
+        verbose_name_plural = 'شروط گروه برند یابی کالا'
+
+    def __str__(self):
+        return self.contain
+
+
+
+
+
+
+
+
+
 class Brand(models.Model):
     name = models.CharField(max_length=150, verbose_name='نام برند')
     logo_name = models.CharField(max_length=100, blank=True, null=True, verbose_name='نام فایل لوگو')
