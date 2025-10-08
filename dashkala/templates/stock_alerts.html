@@ -1,0 +1,131 @@
+{% extends 'shared/_MainLayout.html' %}
+{% load static %}
+{% block content %}
+    <div class="content-wrapper">
+        <div class="page-title">
+            <div class="row">
+                <div class="col-xl-12 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <h6 class="card-title pb-0 border-0">هشدارهای رسوب کالا (۵۰ کالای برتر)</h6>
+                            <div class="table-responsive mt-15">
+                                <table
+                                    id="table"
+                                    class="table-striped table-hover"
+                                    data-toggle="table"
+                                    data-locale="fa-IR"
+                                    data-search="true"
+                                    data-show-columns="true"
+                                    data-show-export="true"
+                                    data-show-refresh="true"
+                                    data-show-columns-toggle-all="true"
+                                    data-show-pagination-switch="true"
+                                    data-show-toggle="true"
+                                    data-show-fullscreen="true"
+                                    data-buttons-class="primary"
+                                    data-pagination="true"
+                                    data-page-size="10"
+                                    data-show-footer="false"
+                                    data-search-align="left"
+                                    data-buttons="buttons"
+                                    data-sortable="true"
+                                    data-show-search-clear-button="true"
+                                    data-sort-name="sedimentation_score"
+                                    data-sort-order="desc"
+                                    data-filter-control="true"
+                                    data-show-print="true"
+                                    data-export-data-type="all"
+                                    data-export-types='["excel"]'
+                                >
+                                    <thead>
+                                        <tr>
+                                            <th data-field="name" data-sortable="true" data-formatter="linkFormatter">نام کالا</th>
+                                            <th data-field="current_stock" data-sortable="true" data-formatter="numberFormatter" class="text-center">موجودی</th>
+                                            <th data-field="avg_price" data-sortable="true" data-formatter="priceFormatter" class="text-center">قیمت میانگین</th>
+                                            <th data-field="days_since_purchase" data-sortable="true" class="text-center">روز از آخرین خرید</th>
+                                            <th data-field="days_since_sale_display" data-sortable="false" class="text-center">روز از آخرین فروش</th>
+                                            <th data-field="sedimentation_score" data-sortable="true" data-formatter="numberFormatter" class="text-center">ضریب رسوب</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for kala in kalas %}
+                                            <tr>
+                                                <td data-code="{{ kala.code }}">{{ kala.name }}</td>
+                                                <td>{{ kala.current_stock|floatformat:2 }}</td>
+                                                <td>{{ kala.avg_price|floatformat:0 }}</td>
+                                                <td>{{ kala.days_since_purchase }}</td>
+                                                <td>
+                                                    {% if kala.sale_date %}
+                                                        {{ kala.days_since_sale }}
+                                                    {% else %}
+                                                        بدون فروش!
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ kala.sedimentation_score|floatformat:0 }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block date %}
+<script src="{% static 'js/table1/tableExport.min.js' %}"></script>
+<script src="{% static 'js/table1/bootstrap-table.min.js' %}"></script>
+<script src="{% static 'js/table1/bootstrap-table-locale-all.min.js' %}"></script>
+<script src="{% static 'js/table1/bootstrap-table-export.min.js' %}"></script>
+<script src="{% static 'js/table1/natural-sorting.js' %}"></script>
+<script src="{% static 'js/table1/bootstrap-table-filter-control.min.js' %}"></script>
+<script src="{% static 'js/table1/bootstrap-table-print.min.js' %}"></script>
+<script src="{% static 'js/table1/jspdf.min.js' %}"></script>
+<script src="{% static 'js/table1/jspdf.plugin.autotable.js' %}"></script>
+
+<script>
+// تابع استخراج عدد (همانند تمپلیت اصلی)
+function extractNumberFromValue(val) {
+    if (typeof val === 'string' && val.includes('<')) {
+        var temp = document.createElement('div');
+        temp.innerHTML = val;
+        val = temp.textContent || temp.innerText || '';
+    }
+    var num = parseFloat(val);
+    return isNaN(num) ? 0 : num;
+}
+
+// فرمت‌دهنده اعداد
+numberFormatter = function(value, row, index) {
+    var num = extractNumberFromValue(value);
+    return num.toLocaleString('fa-IR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+};
+
+// فرمت‌دهنده قیمت (همانند numberFormatter ولی برای خوانایی بیشتر)
+priceFormatter = numberFormatter;
+
+// فرمت‌دهنده لینک برای نام کالا
+linkFormatter = function(value, row, index) {
+    var code = $(row).find('td').first().data('code');
+    if (code) {
+        return `<a href="/dash/kala/detail/${code}" target="_blank">${value}</a>`;
+    }
+    return value;
+};
+
+$(function () {
+    $('#table').bootstrapTable();
+
+    // کلیک روی سطر → باز کردن لینک (روش جایگزین اگر data-href نداشت)
+    $('#table tbody').on('click', 'tr', function() {
+        var code = $(this).find('td').first().data('code');
+        if (code) {
+            window.open(`/dash/kala/detail/${code}`, '_blank');
+        }
+    });
+});
+</script>
+{% endblock %}

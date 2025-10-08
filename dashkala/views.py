@@ -873,7 +873,7 @@ def CategoryDetail(request, *args, **kwargs):
             'barPercentage': 0.9
         })
 
-    # اضافه کردن فروش در بازه‌های مختلف -----------------------------------------------------
+    # اضافه کردن فروش در بازه‌های مختلف --------------------------
 
     # تاریخ‌های مورد نیاز
     today = date.today()
@@ -1784,3 +1784,97 @@ def CategorySale(request, *args, **kwargs):
 
 
     return render(request, 'category_sale_report.html', context)
+
+
+
+
+from django.db.models import (
+    OuterRef, Subquery, Value, FloatField, DateField, F, Case, When, IntegerField
+)
+from django.db.models.functions import Coalesce
+from datetime import date, timedelta
+from django.shortcuts import render
+from django.db.models import (
+    OuterRef, Subquery, Value, FloatField, DateField, F, Case, When
+)
+from django.db.models.functions import Coalesce
+from datetime import date, timedelta
+from django.shortcuts import render
+
+@login_required(login_url='/login')
+def StockAlerts(request, *args, **kwargs):
+    today = date.today()
+
+    # فقط تاریخ‌ها را استخراج می‌کنیم
+    last_purchase_date = Kardex.objects.filter(
+        kala=OuterRef('pk'),
+        ktype=2
+    ).order_by('-date').values('date')[:1]
+
+    first_initial_stock_date = Kardex.objects.filter(
+        kala=OuterRef('pk'),
+        ktype=3
+    ).order_by('date').values('date')[:1]
+
+    last_sale_date = Kardex.objects.filter(
+        kala=OuterRef('pk'),
+        ktype=1
+    ).order_by('-date').values('date')[:1]
+
+    latest_mojodi = Mojodi.objects.filter(
+        kala=OuterRef('pk')
+    ).order_by('-id')[:1]
+
+    kalas = Kala.objects.annotate(
+        current_stock=Coalesce(Subquery(latest_mojodi.values('total_stock')), Value(0.0)),
+        avg_price=Coalesce(Subquery(latest_mojodi.values('averageprice')), Value(0.0)),
+        purchase_date=Case(
+            When(
+                pk__in=Subquery(Kardex.objects.filter(kala=OuterRef('pk'), ktype=2).values('kala')),
+                then=Subquery(last_purchase_date)
+            ),
+            default=Subquery(first_initial_stock_date),
+            output_field=DateField()
+        ),
+        sale_date=Subquery(last_sale_date, output_field=DateField())
+    ).filter(
+        current_stock__gt=0
+    )
+
+    # حالا محاسبه ضریب رسوب در پایتون (روی لیست)
+    enriched_kalas = []
+    for kala in kalas:
+        # --- روز از خرید ---
+        if kala.purchase_date:
+            days_since_purchase = (today - kala.purchase_date).days
+        else:
+            days_since_purchase = 0
+
+        # --- روز از فروش ---
+        if kala.sale_date:
+            days_since_sale = (today - kala.sale_date).days
+        else:
+            days_since_sale = 1000  # بدون فروش!
+
+        # --- ضریب رسوب ---
+        if kala.current_stock > 0 and kala.avg_price > 0:
+            sedimentation_score = days_since_purchase * days_since_sale * kala.current_stock * kala.avg_price
+        else:
+            sedimentation_score = 0
+
+        # اضافه کردن فیلدهای جدید به شیء (برای استفاده در تمپلیت)
+        kala.days_since_purchase = days_since_purchase
+        kala.days_since_sale = days_since_sale
+        kala.sedimentation_score = sedimentation_score
+        enriched_kalas.append(kala)
+
+    # مرتب‌سازی بر اساس ضریب رسوب
+    enriched_kalas.sort(key=lambda x: x.sedimentation_score, reverse=True)
+    top_50 = enriched_kalas[:5000]
+
+    # برای دیباگ
+    for k in top_50:
+        print(f"{k.name} | خرید: {k.purchase_date} → {k.days_since_purchase} روز | "
+              f"فروش: {k.sale_date} → {k.days_since_sale} روز | ضریب: {k.sedimentation_score}")
+
+    return render(request, 'stock_alerts.html', {'kalas': top_50})
