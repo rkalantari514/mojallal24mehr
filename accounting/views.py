@@ -1659,6 +1659,48 @@ def HesabMoshtariDetail(request, tafsili):
     chart_date = []
     year_list = []
 
+    # محاسبه «تعداد روزها» به‌صورت مستقل و دقیق: از اولین سند مشتری تا امروز
+    today_date = timezone.now().date()
+    first_sanad_date = asnad_table.aggregate(min_date=Min('date'))['min_date']
+    acc_days = (today_date - first_sanad_date).days if first_sanad_date else 0
+
+    # محاسبه میانگین زمان‌وزن مانده حساب (روش مستطیل‌ها): از اولین تاریخ تا امروز
+    from collections import defaultdict as _df
+    daily_changes = _df(float)
+    for _s in asnad_table:
+        if _s.date:
+            try:
+                daily_changes[_s.date] += float(_s.curramount or 0)
+            except Exception:
+                # در صورت بروز مشکل در تبدیل مقدار، از آن عبور می‌کنیم
+                pass
+
+    if daily_changes:
+        _sorted_dates = sorted(daily_changes.keys())
+        _first_date = _sorted_dates[0]
+        _total_days = (today_date - _first_date).days
+        if _total_days <= 0:
+            ave = 0
+        else:
+            _bal = 0.0
+            _area = 0.0
+            _prev_date = _first_date
+            # قبل از اعمال تغییرات روز جاری، مانده بین _prev_date تا تاریخ جاری ثابت است
+            for _d in _sorted_dates:
+                _delta_days = (_d - _prev_date).days
+                if _delta_days > 0:
+                    _area += _bal * _delta_days
+                    _prev_date = _d
+                # اعمال تغییرات روز جاری
+                _bal += float(daily_changes[_d])
+            # از آخرین تغییر تا امروز
+            _remaining_days = (today_date - _prev_date).days
+            if _remaining_days > 0:
+                _area += _bal * _remaining_days
+            ave = _area / _total_days
+    else:
+        ave = 0
+
     if start_date and end_date:
         # ساخت لیست تاریخ‌های سال پایه
         current = start_date
@@ -1678,7 +1720,6 @@ def HesabMoshtariDetail(request, tafsili):
 
         # ساخت خطوط نمودار برای هر سال
         year_list = sorted(yearly_data.keys())
-        acc_days = 0
 
         for year in year_list:
             delta = year - acc_year
@@ -1708,22 +1749,17 @@ def HesabMoshtariDetail(request, tafsili):
                 # اضافه کردن مقدار یا خط تیره
                 if l_start and not l_finish:
                     chart_y.append(cumulative)
-                    if year == acc_year:
-                        acc_days += 1
                 else:
                     chart_y.append('-')
 
             chart_date.append(chart_y)
 
-        # محاسبه میانگین
-        all_vals = [v for line in chart_date for v in line if v != '-']
-        ave = sum(all_vals) / len(all_vals) if all_vals else 0
+        # محاسبه میانگین (استفاده از میانگین زمان‌وزن محاسبه‌شده)
         average_line = [ave] * len(chart_labels)
         chart_date.insert(0, average_line)
         year_list.insert(0, 'میانگین')
     else:
-        acc_days = 0
-        ave = 0
+        pass
 
     # گرفتن اطلاعات مشتری
     hesabmoshtari = (BedehiMoshtari.objects
@@ -1822,23 +1858,24 @@ def HesabMoshtariDetail(request, tafsili):
     # محاسبات مالی
     monthly_rate = master_info.monthly_rate
     khab = True
-    if hesabmoshtari.sleep_investment and hesabmoshtari.sleep_investment > 0:
+    if hesabmoshtari and getattr(hesabmoshtari, 'sleep_investment', 0) and getattr(hesabmoshtari, 'sleep_investment', 0) > 0:
         khab = False
 
     try:
-        bar_mali = (hesabmoshtari.sleep_investment or 0) / 30 * monthly_rate / 100
-    except:
+        sleep_inv = (getattr(hesabmoshtari, 'sleep_investment', 0) or 0)
+        bar_mali = sleep_inv / 30 * monthly_rate / 100
+    except Exception:
         bar_mali = 0
 
 
-    cheque_recive=ChequesRecieve.objects.filter(per_code=hesabmoshtari.person.code,total_mandeh__lt=0).order_by('cheque_date')
-    cheque_pay=ChequesPay.objects.filter(per_code=hesabmoshtari.person.code,total_mandeh__gt=0).order_by('cheque_date')
+    cheque_recive = ChequesRecieve.objects.filter(per_code=person.code, total_mandeh__lt=0).order_by('cheque_date') if person else ChequesRecieve.objects.none()
+    cheque_pay = ChequesPay.objects.filter(per_code=person.code, total_mandeh__gt=0).order_by('cheque_date') if person else ChequesPay.objects.none()
     # محاسبه مجموع مانده چک‌های دریافتی
-    result_receive = cheque_recive.aggregate(mandeh=Sum('total_mandeh'))
+    result_receive = cheque_recive.aggregate(mandeh=Sum('total_mandeh')) if cheque_recive.exists() else {'mandeh': None}
     cheque_receive_summary = abs(result_receive['mandeh']) if result_receive['mandeh'] is not None else None
 
     # محاسبه مجموع مانده چک‌های پرداختی
-    result_pay = cheque_pay.aggregate(mandeh=Sum('total_mandeh'))
+    result_pay = cheque_pay.aggregate(mandeh=Sum('total_mandeh')) if cheque_pay.exists() else {'mandeh': None}
     cheque_pay_summary = abs(result_pay['mandeh']) if result_pay['mandeh'] is not None else None
 
 

@@ -575,6 +575,49 @@ def DetailKala(request, *args, **kwargs):
     kardex_data2 = Kardex.objects.filter(code_kala=code_kala,ktype__in=(1,2))
     days_in_month = generate_calendar_data(current_month, current_year, kardex_data2)
 
+    fac_fo = FactorDetaile.objects.filter(kala=kala).select_related('factor__person')
+    fac_back = BackFactorDetail.objects.filter(kala=kala).select_related('backfactor__person')
+
+    # ترکیب فروش و برگشتی‌ها در یک لیست واحد و مرتب‌سازی بر اساس تاریخ
+    movements = []
+    for d in fac_fo:
+        # تاریخ را از detail.date یا factor.date می‌گیریم (هرکدام موجود بود)
+        mdate = d.date or (d.factor.date if d.factor else None)
+        pdate = (d.factor.pdate if d.factor and d.factor.pdate else (jdatetime.date.fromgregorian(date=mdate).strftime('%Y/%m/%d') if mdate else ''))
+        code = d.code_factor or (d.factor.code if d.factor else None)
+        person_name = d.factor.person.full_name() if d.factor and d.factor.person else ''
+        person_tafsili = d.factor.person.per_taf if (d.factor and d.factor.person and d.factor.person.per_taf) else None
+        movements.append({
+            'type': 'sale',
+            'icon': 'fa fa-shopping-basket text-success',
+            'date': mdate,
+            'pdate': pdate,
+            'code': code,
+            'person': person_name,
+            'taf': person_tafsili,
+            'count': d.count or 0,
+        })
+
+    for b in fac_back:
+        mdate = b.backfactor.date if b.backfactor else None
+        pdate = b.backfactor.pdate if b.backfactor and b.backfactor.pdate else (jdatetime.date.fromgregorian(date=mdate).strftime('%Y/%m/%d') if mdate else '')
+        code = b.code_factor or (b.backfactor.code if b.backfactor else None)
+        person_name = b.backfactor.person.full_name() if b.backfactor and b.backfactor.person else ''
+        person_tafsili = b.backfactor.person.per_taf if (b.backfactor and b.backfactor.person and b.backfactor.person.per_taf) else None
+        movements.append({
+            'type': 'return',
+            'icon': 'fa fa-shopping-basket text-danger',
+            'date': mdate,
+            'pdate': pdate,
+            'code': code,
+            'person': person_name,
+            'taf': person_tafsili,
+            'count': b.count or 0,
+        })
+
+    # مرتب‌سازی بر اساس تاریخ (صعودی)
+    movements.sort(key=lambda x: (x['date'] or timezone.make_aware(timezone.datetime.min).date()))
+
     context = {
         'title': f'{kala.name}',
         'user': user,
@@ -593,6 +636,7 @@ def DetailKala(request, *args, **kwargs):
         'year': current_year,
         'month': current_month,
         'code_kala': code_kala,
+                'kala_movements': movements, 
     }
 
     total_time = time.time() - start_time  # محاسبه زمان اجرا
