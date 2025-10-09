@@ -2,11 +2,9 @@
 db.sqlite3
 
 # Ignore all migrations folders in any subdirectories
-**/migrations/*
-*/migrations/
- */migrations/*
+**/migrations/**
 
-# Ignore Django static files
-static_cdn/static_root/
+# Ignore Django static files (entire static_cdn directory)
+static_cdn/
 # Or if you have a top-level staticfiles directory
 # staticfiles/
