@@ -1880,6 +1880,56 @@ def HesabMoshtariDetail(request, tafsili):
 
 
     # context نهایی
+    # گردآوری فاکتورهای فروش و برگشت برای این مشتری (بر اساس tafsili)
+    from mahakupdate.models import FactorDetaile, BackFactorDetail
+    customer_movements = []
+    if person:
+        fac_details = (FactorDetaile.objects
+                       .filter(factor__person__per_taf=tafsili)
+                       .select_related('factor__person', 'kala'))
+        back_details = (BackFactorDetail.objects
+                        .filter(backfactor__person__per_taf=tafsili)
+                        .select_related('backfactor__person', 'kala'))
+
+        for d in fac_details:
+            mdate = d.date or (d.factor.date if d.factor else None)
+            pdate = (d.factor.pdate if d.factor and d.factor.pdate else (jdatetime.date.fromgregorian(date=mdate).strftime('%Y/%m/%d') if mdate else ''))
+            code = d.code_factor or (d.factor.code if d.factor else None)
+            kala_name = d.kala.name if d.kala else ''
+            kala_code = d.kala.code if d.kala else None
+            amount = d.mablagh_after_takhfif_kol or d.mablagh_nahaee or ((d.mablagh_vahed or 0) * (d.count or 0))
+            customer_movements.append({
+                'type': 'sale',
+                'code': code,
+                'pdate': pdate,
+                'date': mdate,
+                'kala_name': kala_name,
+                'kala_code': kala_code,
+                'count': d.count or 0,
+                'amount': amount or 0,
+            })
+
+        for b in back_details:
+            mdate = b.backfactor.date if b.backfactor else None
+            pdate = b.backfactor.pdate if b.backfactor and b.backfactor.pdate else (jdatetime.date.fromgregorian(date=mdate).strftime('%Y/%m/%d') if mdate else '')
+            code = b.code_factor or (b.backfactor.code if b.backfactor else None)
+            kala_name = b.kala.name if b.kala else ''
+            kala_code = b.kala.code if b.kala else None
+            amount = b.naghdi or 0
+            customer_movements.append({
+                'type': 'return',
+                'code': code,
+                'pdate': pdate,
+                'date': mdate,
+                'kala_name': kala_name,
+                'kala_code': kala_code,
+                'count': b.count or 0,
+                'amount': amount or 0,
+            })
+
+        # مرتب‌سازی بر اساس تاریخ
+        customer_movements.sort(key=lambda x: (x['date'] or timezone.make_aware(timezone.datetime.min).date()))
+
     context = {
         'title': 'حساب مشتری',
         'hesabmoshtari': hesabmoshtari,
@@ -1905,6 +1955,7 @@ def HesabMoshtariDetail(request, tafsili):
         'cheque_pay': cheque_pay,
         'cheque_receive_summary': cheque_receive_summary,
         'cheque_pay_summary': cheque_pay_summary,
+        'customer_movements': customer_movements,
     }
 
     print(f"زمان اجرا: {time.time() - start_time:.2f} ثانیه")

@@ -300,6 +300,59 @@
             </div>
             <!-- ردیف نمودار -->
 
+            <!-- ردیف جدید: فاکتورها و برگشت‌ها -->
+            <div class="row">
+                <div class="col-md-12 mb-30">
+                    <div class="card card-statistics h-100">
+                        <div class="card-body">
+                            <h5 class="card-title pb-0 border-0">فاکتورها و برگشت‌ها</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered text-center">
+                                    <thead class="thead-light">
+                                    <tr>
+                                        <th>نوع</th>
+                                        <th>شماره فاکتور/برگشتی</th>
+                                        <th>تاریخ</th>
+                                        <th>نام کالا</th>
+                                        <th>تعداد</th>
+                                        <th>مبلغ فاکتور</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for m in customer_movements %}
+                                        <tr>
+                                            <td>
+                                                {% if m.type == 'return' %}
+                                                    <i class="fa fa-shopping-basket text-danger" aria-hidden="true"></i>
+                                                {% else %}
+                                                    <i class="fa fa-shopping-basket text-success" aria-hidden="true"></i>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ m.code }}</td>
+                                            <td>{{ m.pdate }}</td>
+                                            <td>
+                                                {% if m.kala_code %}
+                                                    <a href="{% url 'detail_kala' m.kala_code %}">{{ m.kala_name }}</a>
+                                                {% else %}
+                                                    {{ m.kala_name }}
+                                                {% endif %}
+                                            </td>
+                                            <td>{% if m.type == 'return' %}<span class="text-danger">{{ m.count|floatformat:0 }}</span>{% else %}<span class="text-success">{{ m.count|floatformat:0 }}</span>{% endif %}</td>
+                                            <td style="direction: ltr">{{ m.amount|floatformat:0|intcomma:False }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="6">رکوردی یافت نشد.</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col-md-12 mb-30">
                     <div class="col-xl-12 mb-30">
