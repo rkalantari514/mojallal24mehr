@@ -258,100 +258,49 @@
                         </div>
                     </div>
                 </div>
-            {% if cheque_receive_summary %}
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <div class="clearfix">
-                                <div class="float-left icon-box bg-facebook  rounded-circle">
+                {% if cheque_receive_summary %}
+                    <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="card-body">
+                                <div class="clearfix">
+                                    <div class="float-left icon-box bg-facebook  rounded-circle">
     <span class="text-white">
     <i class="fa fa-money highlight-icon" aria-hidden="true"></i>
     </span>
-                                </div>
-                                <div class="float-right text-right">
+                                    </div>
+                                    <div class="float-right text-right">
                                         <p class="card-text text-dark"> چکهای دریافتی </p>
-                                    <h4> {{ cheque_receive_summary|intword }} ريال</h4>
+                                        <h4> {{ cheque_receive_summary|intword }} ريال</h4>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            {% endif %}
+                {% endif %}
 
-            {% if cheque_pay_summary %}
-                <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <div class="clearfix">
-                                <div class="float-left icon-box bg-facebook  rounded-circle">
+                {% if cheque_pay_summary %}
+                    <div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="card-body">
+                                <div class="clearfix">
+                                    <div class="float-left icon-box bg-facebook  rounded-circle">
     <span class="text-white">
     <i class="fa fa-money highlight-icon" aria-hidden="true"></i>
     </span>
-                                </div>
-                                <div class="float-right text-right">
+                                    </div>
+                                    <div class="float-right text-right">
                                         <p class="card-text text-dark"> چکهای پرداختی </p>
-                                    <h4> {{ cheque_pay_summary|intword }} ريال</h4>
+                                        <h4> {{ cheque_pay_summary|intword }} ريال</h4>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            {% endif %}
+                {% endif %}
             </div>
             <!-- ردیف نمودار -->
 
-            <!-- ردیف جدید: فاکتورها و برگشت‌ها -->
-            <div class="row">
-                <div class="col-md-12 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <h5 class="card-title pb-0 border-0">فاکتورها و برگشت‌ها</h5>
-                            <div class="table-responsive">
-                                <table class="table table-striped table-bordered text-center">
-                                    <thead class="thead-light">
-                                    <tr>
-                                        <th>نوع</th>
-                                        <th>شماره فاکتور/برگشتی</th>
-                                        <th>تاریخ</th>
-                                        <th>نام کالا</th>
-                                        <th>تعداد</th>
-                                        <th>مبلغ فاکتور</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for m in customer_movements %}
-                                        <tr>
-                                            <td>
-                                                {% if m.type == 'return' %}
-                                                    <i class="fa fa-shopping-basket text-danger" aria-hidden="true"></i>
-                                                {% else %}
-                                                    <i class="fa fa-shopping-basket text-success" aria-hidden="true"></i>
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ m.code }}</td>
-                                            <td>{{ m.pdate }}</td>
-                                            <td>
-                                                {% if m.kala_code %}
-                                                    <a href="{% url 'detail_kala' m.kala_code %}">{{ m.kala_name }}</a>
-                                                {% else %}
-                                                    {{ m.kala_name }}
-                                                {% endif %}
-                                            </td>
-                                            <td>{% if m.type == 'return' %}<span class="text-danger">{{ m.count|floatformat:0 }}</span>{% else %}<span class="text-success">{{ m.count|floatformat:0 }}</span>{% endif %}</td>
-                                            <td style="direction: ltr">{{ m.amount|floatformat:0|intcomma:False }}</td>
-                                        </tr>
-                                    {% empty %}
-                                        <tr>
-                                            <td colspan="6">رکوردی یافت نشد.</td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
 
             <div class="row">
                 <div class="col-md-12 mb-30">
@@ -374,213 +323,215 @@
 
 
             <!-- ردیف خلاصه و جزئیات وام ها -->
-        {% if hesabmoshtari.loans.all %}
-            <div class="row">
-                <div class="col-md-5 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body col-12">
-                            <h5 class="card-title pb-0 border-0 ">خلاصه اقساط</h5>
-                            <div class="table-responsive">
-                                <table class="table center-aligned-table mb-10 text-center ">
-                                    <thead>
-                                    <tr class="text-dark">
-                                        <th>ردیف</th>
-                                        <th>کد اقساط</th>
-                                        <th>تاریخ اقساط</th>
-                                        <th>تعداد اقساط</th>
-                                        <th>مبلغ اولیه</th>
-                                        <th>باقیمانده</th>
-                                        <th>معوق</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for loan in hesabmoshtari.loans.all %}
-                                        <tr>
-                                            <td><h6>{{ forloop.counter }}</h6></td>
-                                            <td><h6>{{ loan.code }}</h6></td>
-                                            <td><h6>{{ loan.tarikh }}</h6></td>
-                                            <td><h6>{{ loan.number }}</h6></td>
-                                            <td><h6>{{ loan.cost|floatformat:0|intcomma:False }}</h6></td>
-                                            <td><h6>{{ loan.actual_loan_mandeh|floatformat:0|intcomma:False }}</h6></td>
-                                            <td><h6>{{ loan.delayed_loan|floatformat:0|intcomma:False }}</h6></td>
+            {% if hesabmoshtari.loans.all %}
+                <div class="row">
+                    <div class="col-md-5 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="card-body col-12">
+                                <h5 class="card-title pb-0 border-0 ">خلاصه اقساط</h5>
+                                <div class="table-responsive">
+                                    <table class="table center-aligned-table mb-10 text-center ">
+                                        <thead>
+                                        <tr class="text-dark">
+                                            <th>ردیف</th>
+                                            <th>کد اقساط</th>
+                                            <th>تاریخ اقساط</th>
+                                            <th>تعداد اقساط</th>
+                                            <th>مبلغ اولیه</th>
+                                            <th>باقیمانده</th>
+                                            <th>معوق</th>
                                         </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-                <div class="col-md-7 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body">
-                            <h5 class="card-title pb-0 border-0 ">جزئیات اقساط</h5>
-                            <div class="table-responsive scrollbar max-h-380">
-                                {% for loan in hesabmoshtari.loans.all %}
-                                    <div class="table-responsive">
-                                        <table class="table center-aligned-table mb-10 text-center ">
-                                            <thead>
-                                            <tr class="text-dark">
-                                                <th>کد قسط</th>
-                                                <th>شماره قسط</th>
-                                                <th>تاریخ</th>
-                                                <th> تاریخ دریافت</th>
-                                                <th>مبلغ</th>
-                                                <th>درصد پرداخت</th>
-                                                <th>وضعیت</th>
+                                        </thead>
+                                        <tbody>
+                                        {% for loan in hesabmoshtari.loans.all %}
+                                            <tr>
+                                                <td><h6>{{ forloop.counter }}</h6></td>
+                                                <td><h6>{{ loan.code }}</h6></td>
+                                                <td><h6>{{ loan.tarikh }}</h6></td>
+                                                <td><h6>{{ loan.number }}</h6></td>
+                                                <td><h6>{{ loan.cost|floatformat:0|intcomma:False }}</h6></td>
+                                                <td><h6>{{ loan.actual_loan_mandeh|floatformat:0|intcomma:False }}</h6>
+                                                </td>
+                                                <td><h6>{{ loan.delayed_loan|floatformat:0|intcomma:False }}</h6></td>
                                             </tr>
-                                            </thead>
-                                            <tbody>
-                                            {% for lo in loan.loandetil_set.all %}
-                                                <tr>
-                                                    <td>{{ loan.code }}</td>
-                                                    <td>{{ lo.row }}</td>
-                                                    <td>{{ lo.tarikh }}</td>
-                                                    <td>{{ lo.recive_tarikh }}</td>
-                                                    <td>{{ lo.cost|floatformat:0|intcomma:False }}</td>
-                                                    <td>{{ lo.complete_percent|percentage }}%</td>
-                                                    <td>
-                                                        {% if lo.complete_percent == 1 %}
-                                                            {% if lo.date < today %}
-                                                                <span class="btn btn-sm btn-success">پاس</span>
-                                                            {% else %}
-                                                                <span class="btn btn-sm btn-info">تعجیل</span>
-                                                            {% endif %}
-                                                        {% elif lo.date < today %}
-                                                            <span class="btn btn-sm btn-danger">معوق</span>
-                                                        {% else %}
-                                                            <span class="btn btn-sm btn-primary">عادی</span>
-                                                        {% endif %}
-                                                    </td>
-
-                                                </tr>
-                                            {% endfor %}
-
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                {% endfor %}
-
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
 
+
+                    <div class="col-md-7 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="card-body">
+                                <h5 class="card-title pb-0 border-0 ">جزئیات اقساط</h5>
+                                <div class="table-responsive scrollbar max-h-380">
+                                    {% for loan in hesabmoshtari.loans.all %}
+                                        <div class="table-responsive">
+                                            <table class="table center-aligned-table mb-10 text-center ">
+                                                <thead>
+                                                <tr class="text-dark">
+                                                    <th>کد قسط</th>
+                                                    <th>شماره قسط</th>
+                                                    <th>تاریخ</th>
+                                                    <th> تاریخ دریافت</th>
+                                                    <th>مبلغ</th>
+                                                    <th>درصد پرداخت</th>
+                                                    <th>وضعیت</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for lo in loan.loandetil_set.all %}
+                                                    <tr>
+                                                        <td>{{ loan.code }}</td>
+                                                        <td>{{ lo.row }}</td>
+                                                        <td>{{ lo.tarikh }}</td>
+                                                        <td>{{ lo.recive_tarikh }}</td>
+                                                        <td>{{ lo.cost|floatformat:0|intcomma:False }}</td>
+                                                        <td>{{ lo.complete_percent|percentage }}%</td>
+                                                        <td>
+                                                            {% if lo.complete_percent == 1 %}
+                                                                {% if lo.date < today %}
+                                                                    <span class="btn btn-sm btn-success">پاس</span>
+                                                                {% else %}
+                                                                    <span class="btn btn-sm btn-info">تعجیل</span>
+                                                                {% endif %}
+                                                            {% elif lo.date < today %}
+                                                                <span class="btn btn-sm btn-danger">معوق</span>
+                                                            {% else %}
+                                                                <span class="btn btn-sm btn-primary">عادی</span>
+                                                            {% endif %}
+                                                        </td>
+
+                                                    </tr>
+                                                {% endfor %}
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-            </div>
-{% endif %}
+            {% endif %}
             <!-- ردیف چکها  -->
             <div class="row">
-            {% if cheque_recive %}
-                <div class="col-md-5 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body col-12">
-                            <h5 class="card-title pb-0 border-0 ">چکهای دریافتنی</h5>
-                            <div class="table-responsive">
-                                <table class="table center-aligned-table mb-10 text-center ">
-                                    <thead>
-                                    <tr class="text-dark">
-                                        <th>شناسه چک</th>
-                                        <th>سر رسید</th>
-                                        <th></th>
-                                        <th>بانک</th>
-                                        <th>شعبه</th>
-                                        <th>مبلغ</th>
-                                        <th>مانده</th>
-                                        <th>روز تا سررسید</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for cheque in cheque_recive %}
-                                        {% with 'images/bank/'|add:cheque.bank_logo as logo_path %}
-                                        <tr>
-                                            <td><h6>{{ cheque.cheque_id }}</h6></td>
-                                            <td><h6>{{ cheque.cheque_tarik }}</h6></td>
-                                           <td><img src='{% static logo_path %}' class='small-logo'></td>
-
-                                            <td><h6>{{ cheque.bank_name }}</h6></td>
-                                            <td><h6>{{ cheque.bank_branch }}</h6></td>
-                                            <td><h6>{{ cheque.cost|floatformat:0|intcomma:False }}</h6></td>
-                                            <td><h6 style="direction: ltr">{{ cheque.total_mandeh|floatformat:0|intcomma:False }}</h6></td>
-                                            <td>
-                                                {% if cheque.cheque_date > today2  %}
-                                                <h6 class="text-success">{{ cheque.cheque_date|timeuntil }} دیگر </h6>
-                                                {% else %}
-                                                <h6 class="text-danger">{{ cheque.cheque_date|timesince }} گذشته </h6>
-                                                {% endif %}
-
-
-
-
-                                            </td>
+                {% if cheque_recive %}
+                    <div class="col-md-5 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="card-body col-12">
+                                <h5 class="card-title pb-0 border-0 ">چکهای دریافتنی</h5>
+                                <div class="table-responsive">
+                                    <table class="table center-aligned-table mb-10 text-center ">
+                                        <thead>
+                                        <tr class="text-dark">
+                                            <th>شناسه چک</th>
+                                            <th>سر رسید</th>
+                                            <th></th>
+                                            <th>بانک</th>
+                                            <th>شعبه</th>
+                                            <th>مبلغ</th>
+                                            <th>مانده</th>
+                                            <th>روز تا سررسید</th>
                                         </tr>
-                                        {% endwith %}
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                        {% for cheque in cheque_recive %}
+                                            {% with 'images/bank/'|add:cheque.bank_logo as logo_path %}
+                                                <tr>
+                                                    <td><h6>{{ cheque.cheque_id }}</h6></td>
+                                                    <td><h6>{{ cheque.cheque_tarik }}</h6></td>
+                                                    <td><img src='{% static logo_path %}' class='small-logo'></td>
+
+                                                    <td><h6>{{ cheque.bank_name }}</h6></td>
+                                                    <td><h6>{{ cheque.bank_branch }}</h6></td>
+                                                    <td><h6>{{ cheque.cost|floatformat:0|intcomma:False }}</h6></td>
+                                                    <td>
+                                                        <h6 style="direction: ltr">{{ cheque.total_mandeh|floatformat:0|intcomma:False }}</h6>
+                                                    </td>
+                                                    <td>
+                                                        {% if cheque.cheque_date > today2 %}
+                                                            <h6 class="text-success">{{ cheque.cheque_date|timeuntil }}
+                                                                دیگر </h6>
+                                                        {% else %}
+                                                            <h6 class="text-danger">{{ cheque.cheque_date|timesince }}
+                                                                گذشته </h6>
+                                                        {% endif %}
+
+
+                                                    </td>
+                                                </tr>
+                                            {% endwith %}
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            {% endif %}
-            {% if cheque_pay %}
-                <div class="col-md-7 mb-30">
-                    <div class="card card-statistics h-100">
-                        <div class="card-body col-12">
-                            <h5 class="card-title pb-0 border-0 ">چکهای پرداختی</h5>
-                            <div class="table-responsive">
-                                <table class="table center-aligned-table mb-10 text-center ">
-                                    <thead>
-                                    <tr class="text-dark">
-                                        <th>شناسه چک</th>
-                                        <th>سر رسید</th>
-                                        <th></th>
-                                        <th>بانک</th>
-                                        <th>شعبه</th>
-                                        <th>مبلغ</th>
-                                        <th>مانده</th>
-                                        <th>روز تا سررسید</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for cheque in cheque_pay %}
-                                        {% with 'images/bank/'|add:cheque.bank.bank_logo as logo_path %}
-                                        <tr>
-                                            <td><h6>{{ cheque.cheque_id }}</h6></td>
-                                            <td><h6>{{ cheque.cheque_tarik }}</h6></td>
-                                           <td><img src='{% static logo_path %}' class='small-logo'></td>
-
-                                            <td><h6>{{ cheque.bank.name }}</h6></td>
-                                            <td><h6>{{ cheque.bank.shobe }}</h6></td>
-                                            <td><h6>{{ cheque.cost|floatformat:0|intcomma:False }}</h6></td>
-                                            <td><h6 style="direction: ltr">{{ cheque.total_mandeh|floatformat:0|intcomma:False }}</h6></td>
-                                            <td>
-                                                {% if cheque.cheque_date > today2  %}
-                                                <h6 class="text-success">{{ cheque.cheque_date|timeuntil }} دیگر </h6>
-                                                {% else %}
-                                                <h6 class="text-danger">{{ cheque.cheque_date|timesince }} گذشته </h6>
-                                                {% endif %}
-
-
-
-
-                                            </td>
+                {% endif %}
+                {% if cheque_pay %}
+                    <div class="col-md-7 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="card-body col-12">
+                                <h5 class="card-title pb-0 border-0 ">چکهای پرداختی</h5>
+                                <div class="table-responsive">
+                                    <table class="table center-aligned-table mb-10 text-center ">
+                                        <thead>
+                                        <tr class="text-dark">
+                                            <th>شناسه چک</th>
+                                            <th>سر رسید</th>
+                                            <th></th>
+                                            <th>بانک</th>
+                                            <th>شعبه</th>
+                                            <th>مبلغ</th>
+                                            <th>مانده</th>
+                                            <th>روز تا سررسید</th>
                                         </tr>
-                                        {% endwith %}
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                        {% for cheque in cheque_pay %}
+                                            {% with 'images/bank/'|add:cheque.bank.bank_logo as logo_path %}
+                                                <tr>
+                                                    <td><h6>{{ cheque.cheque_id }}</h6></td>
+                                                    <td><h6>{{ cheque.cheque_tarik }}</h6></td>
+                                                    <td><img src='{% static logo_path %}' class='small-logo'></td>
+
+                                                    <td><h6>{{ cheque.bank.name }}</h6></td>
+                                                    <td><h6>{{ cheque.bank.shobe }}</h6></td>
+                                                    <td><h6>{{ cheque.cost|floatformat:0|intcomma:False }}</h6></td>
+                                                    <td>
+                                                        <h6 style="direction: ltr">{{ cheque.total_mandeh|floatformat:0|intcomma:False }}</h6>
+                                                    </td>
+                                                    <td>
+                                                        {% if cheque.cheque_date > today2 %}
+                                                            <h6 class="text-success">{{ cheque.cheque_date|timeuntil }}
+                                                                دیگر </h6>
+                                                        {% else %}
+                                                            <h6 class="text-danger">{{ cheque.cheque_date|timesince }}
+                                                                گذشته </h6>
+                                                        {% endif %}
+
+
+                                                    </td>
+                                                </tr>
+                                            {% endwith %}
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            {% endif %}
+                {% endif %}
 
             </div>
-
-
-
 
 
             <!-- ردیف پیگیری پیگیری -->
@@ -977,7 +928,69 @@
                     </div>
                 </div>
             </div>
+            <!-- ردیف جدید: فاکتورها و برگشت‌ها -->
+            <div class="row">
+                <div class="crollbar max-h-600 col-md-5 mb-30">
+                    <div class="col-xl-12 mb-30">
+                        <div class="card card-statistics h-100">
+                            <div class="card-body">
+                                <div class="table-responsive mt-15 ">
+                                    <h6 class="card-title pb-0 border-0">فاکتور های فروش و برگشت</h6>
+                                    <div class="scrollbar max-h-600" tabindex="2"
+                                         style="overflow-y: hidden; outline: none; touch-action: none;">
 
+                                        <table class="table center-aligned-table mb-0">
+                                            <thead class="thead-light">
+                                            <tr>
+                                                <th>نوع</th>
+                                                <th>شماره فاکتور/برگشتی</th>
+                                                <th>تاریخ</th>
+                                                <th>نام کالا</th>
+                                                <th>تعداد</th>
+                                                <th>مبلغ فاکتور</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for m in customer_movements %}
+                                                <tr>
+                                                    <td>
+                                                        {% if m.type == 'return' %}
+                                                            <i class="fa fa-shopping-basket text-danger"
+                                                               aria-hidden="true"></i>
+                                                        {% else %}
+                                                            <i class="fa fa-shopping-basket text-success"
+                                                               aria-hidden="true"></i>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{ m.code }}</td>
+                                                    <td>{{ m.pdate }}</td>
+                                                    <td>
+                                                        {% if m.kala_code %}
+                                                            <a href="{% url 'detail_kala' m.kala_code %}">{{ m.kala_name }}</a>
+                                                        {% else %}
+                                                            {{ m.kala_name }}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{% if m.type == 'return' %}
+                                                        <span class="text-danger">{{ m.count|floatformat:0 }}</span>{% else %}
+                                                        <span class="text-success">{{ m.count|floatformat:0 }}</span>{% endif %}
+                                                    </td>
+                                                    <td style="direction: ltr">{{ m.amount|floatformat:0|intcomma:False }}</td>
+                                                </tr>
+                                            {% empty %}
+                                                <tr>
+                                                    <td colspan="6">رکوردی یافت نشد.</td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         </div>
 

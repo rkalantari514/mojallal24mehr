@@ -852,10 +852,10 @@ def Home2(request, *args, **kwargs):
     if result:  # اگر هدایت انجام شده است
         return result
 
-    minfo = MasterInfo.objects.filter(is_active=True).last()
+    minfo = MasterInfo.objects.filter(is_active=True).only('acc_year','khales_daramad_forosh','sood_vizhe_total').last()
     user = request.user
 
-    if user.mobile_number != '09151006447':
+    if getattr(user, 'mobile_number', None) != '09151006447':
         UserLog.objects.create(user=user, page='داشبورد 2')
 
     start_time = time.time()
@@ -864,40 +864,56 @@ def Home2(request, *args, **kwargs):
 
     # سال مالی
     acc_year = minfo.acc_year if minfo else jdate.today().year
-    start_date_jalali = jdate(acc_year, 1, 1)
-    start_date_gregorian = start_date_jalali.togregorian()
+    # تاریخ شروع سال مالی (ممکن است در آینده نیاز شود)
+    # start_date_jalali = jdate(acc_year, 1, 1)
+    # start_date_gregorian = start_date_jalali.togregorian()
 
-    # آخرین زمان آپدیت
-    last_update_time = Mtables.objects.filter(name='Sanad_detail').last().last_update_time if Mtables.objects.filter(name='Sanad_detail').exists() else timezone.now()
+    # آخرین زمان آپدیت (ایمن در برابر نبود رکورد)
+    last_update_qs = Mtables.objects.filter(name='Sanad_detail')
+    last_update_time = last_update_qs.last().last_update_time if last_update_qs.exists() else timezone.now()
 
-    # داده‌های امروز و دیروز
+    # داده‌های امروز و دیروز (از گزارش‌های از پیش محاسبه شده برای سرعت)
     today_data = TarazCalFromReport(today)
     yesterday_data = TarazCalFromReport(yesterday)
 
-    # چک‌های دریافتی
+    # چک‌های دریافتی و پرداختی (مقیاس میلیون برای سبک بودن نمایش)
     chequesr = ChequesRecieve.objects.aggregate(total_mandeh_sum=Sum('total_mandeh'))
     past_chequesr = ChequesRecieve.objects.filter(cheque_date__lte=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
     post_chequesr = ChequesRecieve.objects.filter(cheque_date__gt=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
 
+    r_total = (chequesr['total_mandeh_sum'] or 0)
+    r_past = (past_chequesr['total_mandeh_sum'] or 0)
+    r_post = (post_chequesr['total_mandeh_sum'] or 0)
+
     r_chequ_data = {
-        'total': (chequesr['total_mandeh_sum'] or 0) / 10_000_000,
-        'past': (past_chequesr['total_mandeh_sum'] or 0) / 10_000_000,
-        'post': (post_chequesr['total_mandeh_sum'] or 0) / 10_000_000,
+        'total': r_total / 10_000_000,
+        'past': r_past / 10_000_000,
+        'post': r_post / 10_000_000,
+        'past_ratio': float(r_past) / float(r_total) * 100 if r_total else 0,
+        'post_ratio': float(r_post) / float(r_total) * 100 if r_total else 0,
     }
 
-    # چک‌های پرداختی
     chequesp = ChequesPay.objects.aggregate(total_mandeh_sum=Sum('total_mandeh'))
     past_chequesp = ChequesPay.objects.filter(cheque_date__lte=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
     post_chequesp = ChequesPay.objects.filter(cheque_date__gt=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
 
+    p_total = (chequesp['total_mandeh_sum'] or 0)
+    p_past = (past_chequesp['total_mandeh_sum'] or 0)
+    p_post = (post_chequesp['total_mandeh_sum'] or 0)
+
     p_chequ_data = {
-        'total': (chequesp['total_mandeh_sum'] or 0) / 10_000_000,
-        'past': (past_chequesp['total_mandeh_sum'] or 0) / 10_000_000,
-        'post': (post_chequesp['total_mandeh_sum'] or 0) / 10_000_000,
+        'total': p_total / 10_000_000,
+        'past': p_past / 10_000_000,
+        'post': p_post / 10_000_000,
+        'past_ratio': float(p_past) / float(p_total) * 100 if p_total else 0,
+        'post_ratio': float(p_post) / float(p_total) * 100 if p_total else 0,
     }
 
-    # گزارش‌های روزانه (7 روز اخیر)
-    daily_reports = MasterReport.objects.filter(day__lte=today).order_by('-day')[:7][::-1]
+    # گزارش‌های روزانه (7 روز اخیر) - فقط فیلدهای مورد نیاز برای سرعت
+    daily_reports = list(MasterReport.objects.filter(day__lte=today)
+                         .order_by('-day')
+                         .only('day','khales_forosh','baha_tamam_forosh','sayer_hazine','sayer_daramad','sood_vizhe','sood_navizhe')
+                         [:7])[::-1]
     day_names = ['دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه', 'شنبه', 'یکشنبه']
     chart1_data = {
         'labels': [day_names[r.day.weekday()] for r in daily_reports],
@@ -906,8 +922,10 @@ def Home2(request, *args, **kwargs):
         'sood_navizhe': [r.sood_navizhe for r in daily_reports],
     }
 
-    # گزارش‌های ماهانه (12 ماه اخیر)
-    monthly_reports = MonthlyReport.objects.order_by('-year', '-month')[:12][::-1]
+    # گزارش‌های ماهانه (12 ماه اخیر) - فقط فیلدهای مورد نیاز
+    monthly_reports = list(MonthlyReport.objects.order_by('-year', '-month')
+                           .only('month_name','khales_forosh','baha_tamam_forosh','sayer_hazine','sayer_daramad','sood_vizhe','sood_navizhe')
+                           [:12])[::-1]
     chart2_data = {
         'labels': [f"{r.month_name}" for r in monthly_reports],
         'khales_forosh': [r.khales_forosh for r in monthly_reports],
@@ -930,6 +948,65 @@ def Home2(request, *args, **kwargs):
         'sood_vizhe': [r.sood_vizhe for r in monthly_reports],
     }
 
+    # هفتگی: تجمیع 8 هفته اخیر از روی گزارش‌های روزانه (سریع و کم‌هزینه)
+    last_56 = today - timedelta(days=56)
+    weekly_qs = list(MasterReport.objects.filter(day__gte=last_56, day__lte=today)
+                     .only('day','khales_forosh','baha_tamam_forosh','sayer_hazine','sayer_daramad','sood_vizhe'))
+    weeks = {}
+    for r in weekly_qs:
+        iso = r.day.isocalendar()
+        key = (iso[0], iso[1])  # (year, week)
+        w = weeks.setdefault(key, {'khales_forosh':0,'baha_tamam_forosh':0,'sayer_hazine':0,'sayer_daramad':0,'sood_vizhe':0})
+        w['khales_forosh'] += r.khales_forosh
+        w['baha_tamam_forosh'] += r.baha_tamam_forosh
+        w['sayer_hazine'] += r.sayer_hazine
+        w['sayer_daramad'] += r.sayer_daramad
+        w['sood_vizhe'] += r.sood_vizhe
+    # مرتب‌سازی و انتخاب 8 هفته آخر
+    sorted_weeks = sorted(weeks.items(), key=lambda x: (x[0][0], x[0][1]))[-8:]
+    chartW_data = {
+        'labels': [f"هفته {wk}" for (_, wk), _ in sorted_weeks],
+        'khales_forosh': [d['khales_forosh'] for _, d in sorted_weeks],
+        'baha_tamam_forosh': [d['baha_tamam_forosh'] for _, d in sorted_weeks],
+        'total_daramad': [d['khales_forosh'] + d['sayer_daramad'] for _, d in sorted_weeks],
+        'total_hazineh': [d['baha_tamam_forosh'] + d['sayer_hazine'] for _, d in sorted_weeks],
+        'sood_vizhe': [d['sood_vizhe'] for _, d in sorted_weeks],
+    }
+    # مقایسه هفته اخیر با هفته قبل
+    last_week_data = sorted_weeks[-1][1] if len(sorted_weeks) >= 1 else {'sood_vizhe':0}
+    prev_week_data = sorted_weeks[-2][1] if len(sorted_weeks) >= 2 else {'sood_vizhe':0}
+
+    # ماه جاری از MonthlyReport
+    try:
+        j_today = jdate.today()
+        current_month_report = MonthlyReport.objects.filter(year=acc_year, month=j_today.month)
+        current_month_report = current_month_report.only('khales_forosh','baha_tamam_forosh','sayer_hazine','sayer_daramad','sood_vizhe').last()
+    except Exception:
+        current_month_report = None
+
+    # جمع سال جاری از MonthlyReport
+    year_sum_raw = MonthlyReport.objects.filter(year=acc_year).aggregate(
+        khales_forosh=Sum('khales_forosh'),
+        baha_tamam_forosh=Sum('baha_tamam_forosh'),
+        sayer_hazine=Sum('sayer_hazine'),
+        sayer_daramad=Sum('sayer_daramad'),
+        sood_vizhe=Sum('sood_vizhe'),
+    )
+    year_sum = {k: (v or 0) for k, v in year_sum_raw.items()}
+    year_cards = {
+        'total_daramad': year_sum['khales_forosh'] + year_sum['sayer_daramad'],
+        'total_hazineh': year_sum['baha_tamam_forosh'] + year_sum['sayer_hazine'],
+        'sood_vizhe': year_sum['sood_vizhe'] or 0,
+    }
+
+    # نسبت‌ها برای نمایش گیج‌ها
+    vizhe_ratio = 0
+    try:
+        if minfo and getattr(minfo, 'khales_daramad_forosh', 0):
+            vizhe_ratio = float(getattr(minfo, 'sood_vizhe_total', 0)) / float(minfo.khales_daramad_forosh) * 100
+    except Exception:
+        vizhe_ratio = 0
+
     context = {
         'title': 'داشبورد مدیریتی',
         'user': user,
@@ -945,7 +1022,13 @@ def Home2(request, *args, **kwargs):
         'chart4_data': chart4_data,
         'chart5_data': chart5_data,
 
-        'force_dark': False,  # اگر تمایل به تم تیره داری
+        'vizhe_ratio': vizhe_ratio,
+        'chartW_data': chartW_data,
+        'last_week_data': last_week_data,
+        'prev_week_data': prev_week_data,
+        'current_month_report': current_month_report,
+        'year_cards': year_cards,
+        'force_dark': False,
     }
 
     total_time = time.time() - start_time
