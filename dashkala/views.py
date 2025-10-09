@@ -1,21 +1,33 @@
+import time
+from collections import defaultdict
+from datetime import date, timedelta
+from decimal import Decimal, InvalidOperation
+
+import jdatetime
 from django.contrib.auth.decorators import login_required
-from openpyxl.styles.builtins import title
+
+from django.db.models import (
+    Avg, Case, DateField, F, FloatField, Func, IntegerField, Max, OuterRef, Q,
+    Subquery, Sum, Value, When
+)
+
+from django.db.models.functions import Coalesce
+from django.shortcuts import redirect, render
+from django.utils import timezone
+from khayyam import JalaliDate, JalaliDatetime
+from persianutils import standardize
 
 from custom_login.models import UserLog
 from custom_login.views import page_permision
-from mahakupdate.models import Kardex, Mtables, Category, Mojodi, Storagek, Kala, SanadDetail, FactorDetaile, \
-    BackFactorDetail
-from persianutils import standardize
-from django.db.models import Max, Subquery
-from .forms import FilterForm, KalaSelectForm, Kala_Detail_Form
-import time
-from django.db.models import Sum, F, FloatField
-from django.db.models.functions import Coalesce
-from django.utils import timezone
-from khayyam import JalaliDate, JalaliDatetime
-from datetime import date
-from django.shortcuts import render, redirect
-import jdatetime
+from mahakupdate.models import (
+    BackFactorDetail, Category, FactorDetaile, Kardex, Kala, Mojodi, Mtables,
+    SanadDetail, Storagek
+)
+from .forms import FilterForm, Kala_Detail_Form, KalaSelectForm
+
+
+
+
 
 def fix_persian_characters(value):
     return standardize(value)
@@ -368,10 +380,7 @@ def generate_calendar_data2(month, year, kardex_data):
     print(f"5.14 {time.time() - start_time:.2f} ثانیه")
     return days_in_month
 
-from django.db.models import Sum
-from collections import defaultdict
-import jdatetime
-import time
+
 
 def generate_calendar_data(month, year, kardex_queryset): # تغییر نام پارامتر برای وضوح
     aggregated_data = kardex_queryset.values('date', 'ktype').annotate(total_count=Sum('count'))
@@ -593,19 +602,7 @@ def DetailKala(request, *args, **kwargs):
         return render(request, 'partial_kala.html', context)
     return render(request, 'detail_kala.html', context)
 
-from decimal import Decimal, InvalidOperation
-from collections import defaultdict
-from django.db.models import Sum, Avg
-import time
-import jdatetime
-import time
-from collections import defaultdict
-from django.db.models import Sum, Avg
-from decimal import Decimal
-import time
-from collections import defaultdict
-from django.db.models import Sum, Func, F
-from decimal import Decimal, InvalidOperation
+
 @login_required(login_url='/login')
 def CategoryDetail(request, *args, **kwargs):
     name = 'دسته بندی کالاها'
@@ -1130,9 +1127,6 @@ def CategoryDetail(request, *args, **kwargs):
     return render(request, 'category_detail.html', context)
 
 
-from django.db.models import OuterRef, Subquery, Sum, Q, Value, FloatField
-from django.db.models.functions import Coalesce
-from datetime import date, timedelta
 
 
 
@@ -1787,20 +1781,6 @@ def CategorySale(request, *args, **kwargs):
 
 
 
-
-from django.db.models import (
-    OuterRef, Subquery, Value, FloatField, DateField, F, Case, When, IntegerField
-)
-from django.db.models.functions import Coalesce
-from datetime import date, timedelta
-from django.shortcuts import render
-from django.db.models import (
-    OuterRef, Subquery, Value, FloatField, DateField, F, Case, When
-)
-from django.db.models.functions import Coalesce
-from datetime import date, timedelta
-from django.shortcuts import render
-
 @login_required(login_url='/login')
 def StockAlerts(request, *args, **kwargs):
     today = date.today()
@@ -1811,9 +1791,8 @@ def StockAlerts(request, *args, **kwargs):
         ktype=2
     ).order_by('-date').values('date')[:1]
 
-    first_initial_stock_date = Kardex.objects.filter(
-        kala=OuterRef('pk'),
-        ktype=3
+    first_kardex_date = Kardex.objects.filter(
+        kala=OuterRef('pk')
     ).order_by('date').values('date')[:1]
 
     last_sale_date = Kardex.objects.filter(
@@ -1833,7 +1812,7 @@ def StockAlerts(request, *args, **kwargs):
                 pk__in=Subquery(Kardex.objects.filter(kala=OuterRef('pk'), ktype=2).values('kala')),
                 then=Subquery(last_purchase_date)
             ),
-            default=Subquery(first_initial_stock_date),
+            default=Subquery(first_kardex_date),
             output_field=DateField()
         ),
         sale_date=Subquery(last_sale_date, output_field=DateField())
@@ -1853,8 +1832,10 @@ def StockAlerts(request, *args, **kwargs):
         # --- روز از فروش ---
         if kala.sale_date:
             days_since_sale = (today - kala.sale_date).days
+        elif kala.purchase_date:
+            days_since_sale = (today - kala.purchase_date).days  # بدون فروش، آخرین خرید به‌عنوان مرجع
         else:
-            days_since_sale = 1000  # بدون فروش!
+            days_since_sale = 0  # اگر هیچ رکوردی نباشد
 
         # --- ضریب رسوب ---
         if kala.current_stock > 0 and kala.avg_price > 0:

@@ -664,7 +664,13 @@ def generate_calendar_data_chequesider2(month, year, cheque_recive_data, cheque_
 def Home1(request, *args, **kwargs):
     import uuid
     request_id = str(uuid.uuid4())[:8]
-    print(f"=== START Home1 - Request ID: {request_id} ===")
+    ref = request.META.get('HTTP_REFERER', '-')
+    ua = request.META.get('HTTP_USER_AGENT', '-')
+    if 'service-worker.js' in str(ref):
+        from django.http import HttpResponse
+        return HttpResponse('', status=204)  # جلوگیری از اجرای اضافی وقتی مبدأ SW است
+    if 'service-worker.js' not in str(ref):
+        print(f"=== START Home1 - Request ID: {request_id} === path=/ referer={ref} ua={ua}")
     name = 'داشبورد 1'
     result = page_permision(request, name)  # بررسی دسترسی
     if result:  # اگر هدایت انجام شده است
