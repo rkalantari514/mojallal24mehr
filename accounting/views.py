@@ -1621,11 +1621,13 @@ def HesabMoshtariDetail(request, tafsili):
     # گرفتن اسناد مشتری
     asnad_table = (SanadDetail.objects
              .filter(kol=103, tafzili=tafsili)
+             .defer('backfactor')
              .order_by('date'))
 
     asnad = (SanadDetail.objects
              .filter(kol=103, tafzili=tafsili, is_active=True)
              .exclude(sharh__contains='بستن حساب هاي دارائي')
+             .defer('backfactor')
              .order_by('date'))
 
     # محاسبه مانده تجمعی
@@ -1934,7 +1936,7 @@ def HesabMoshtariDetail(request, tafsili):
     # نکته: برای جلوگیری از شمارش اسناد نامرتبط، اقلام را به فاکتورهای همین مشتری و شخص خودش محدود می‌کنیم.
     try:
         from django.db.models import Q
-        cogs_qs = SanadDetail.objects.filter(kol__in=[500, 403], is_active=True)
+        cogs_qs = SanadDetail.objects.filter(kol__in=[500, 403], is_active=True).defer('backfactor')
 
         link_filter = Q()
         factor_ids = set()
