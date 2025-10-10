@@ -3248,13 +3248,19 @@ def UpdateSanadDetail(request):
     # فقط رکوردهای سال مالی جاری را دریافت کنید
     current_sanads = {(sanad.code, sanad.radif): sanad for sanad in SanadDetail.objects.filter(acc_year=acc_year)}
 
+    # Preload related entities to avoid per-row queries (major speedup)
+    from .models import Factor as _F, Kala as _K, Person as _P
+    factor_by_code = {f.code: f.id for f in _F.objects.filter(acc_year=acc_year).only('id', 'code')}
+    kala_by_taf = {k.kala_taf: k.id for k in _K.objects.all().only('id', 'kala_taf')}
+    person_by_taf = {p.per_taf: p.id for p in _P.objects.all().only('id', 'per_taf')}
+
+    # Compile regex once
+    re_factor = re.compile(r'\((\d+)\)')
+
     BATCH_SIZE = 1000  # تعیین اندازه دسته‌ها
 
     # پردازش داده‌های جدید
-    counter = 1
     for row in mahakt_data:
-        print(counter)
-        counter += 1
         code = int(row[0])
         radif = int(row[1])
         try:
@@ -3271,9 +3277,10 @@ def UpdateSanadDetail(request):
             curramount = Decimal(row[12]) if row[12] is not None else Decimal('0.0000000000')
             usercreated = row[13] if row[13] is not None else ''
             voucher_date = row[14]  # تاریخ وچر از دیتابیس
-            person = None
-            if kol == 103:
-                person = Person.objects.filter(per_taf=tafzili).last()
+            # Fast person lookup (avoid per-row ORM queries)
+            person_id = None
+            if kol == 103 and tafzili:
+                person_id = person_by_taf.get(tafzili)
         except (ValueError, InvalidOperation) as e:
             print(f"خطا در پردازش رکورد {row}: {e}. گذر از این رکورد.")
             continue  # این رکورد را بگذرانید
@@ -3314,38 +3321,34 @@ def UpdateSanadDetail(request):
             #     print(f'tarikh mismatch: {sanad.tarikh} != {voucher_date}')
 
             # حالا شرط اصلی
-            # ابتدا مقادیر هدف برای factor/kala را محاسبه کنیم تا در شرط تغییرات لحاظ شوند
-            factor_obj = None
-            kala_obj = None
+            # ابتدا مقادیر هدف برای factor/kala را محاسبه کنیم تا در شرط تغییرات لحاظ شوند (بدون ORM per-row)
+            target_factor_id = None
+            target_kala_id = None
             try:
                 if kol == 500:
                     # فاکتور از شرح: «... (12345)»
                     if sharh:
-                        m = re.search(r'\((\d+)\)', str(sharh))
+                        m = re_factor.search(str(sharh))
                         if m:
                             fcode = int(m.group(1))
-                            print(f"[UpdateSanadDetail][existing] kol=500 code={code} radif={radif} parsed_factor={fcode} sharh={sharh}")
-                            factor_obj = Factor.objects.filter(acc_year=acc_year, code=fcode).last()
-                        else:
-                            print(f"[UpdateSanadDetail][existing] kol=500 code={code} radif={radif} NO_FACTOR_IN_SHARH sharh={sharh}")
+                            target_factor_id = factor_by_code.get(fcode)
                     # کالا از tafzili -> Kala.kala_taf
                     if tafzili:
-                        from .models import Kala
-                        kala_obj = Kala.objects.filter(kala_taf=tafzili).last()
+                        target_kala_id = kala_by_taf.get(tafzili)
             except Exception:
-                factor_obj = factor_obj or None
-                kala_obj = kala_obj or None
+                target_factor_id = target_factor_id or None
+                target_kala_id = target_kala_id or None
 
             # بررسی و بروزرسانی فیلدها (همراه با factor/kala)
             if (sanad.kol != kol or sanad.moin != moin or
                     # sanad.tafzili != tafzili or
                     sanad.sharh != sharh or sanad.bed != bed or sanad.bes != bes or
                     sanad.sanad_code != sanad_code or sanad.sanad_type != sanad_type or
-                    sanad.meghdar != meghdar or sanad.person != person or sanad.syscomment != syscomment or
+                    sanad.meghdar != meghdar or (sanad.person_id or None) != (person_id or None) or sanad.syscomment != syscomment or
                     sanad.curramount != curramount or sanad.usercreated != usercreated or
                     sanad.tarikh != voucher_date or
-                    (sanad.factor_id or None) != (getattr(factor_obj, 'id', None)) or
-                    (sanad.kala_id or None) != (getattr(kala_obj, 'id', None))
+                    (sanad.factor_id or None) != (target_factor_id or None) or
+                    (sanad.kala_id or None) != (target_kala_id or None)
                 ):
                 sanad.kol = kol
                 sanad.moin = moin
@@ -3356,50 +3359,44 @@ def UpdateSanadDetail(request):
                 sanad.sanad_code = sanad_code
                 sanad.sanad_type = sanad_type
                 sanad.meghdar = meghdar
-                sanad.person = person
+                sanad.person_id = person_id
                 sanad.syscomment = syscomment
                 sanad.curramount = curramount
                 sanad.usercreated = usercreated
                 sanad.tarikh = voucher_date  # بروزرسانی تاریخ شمسی
                 # ست کردن factor/kala (ممکن است None باشند)
-                sanad.factor = factor_obj
-                sanad.kala = kala_obj
+                sanad.factor_id = target_factor_id
+                sanad.kala_id = target_kala_id
                 sanad.is_analiz = False  # تنظیم is_analiz به False
                 sanads_to_update.append(sanad)
         else:
-            # اتصال به فاکتور برای ایجاد اولیه
-            factor_obj = None
+            # مقداردهی شناسه‌های مرتبط برای ایجاد اولیه (بدون کوئری در هر ردیف)
+            target_factor_id = None
+            target_kala_id = None
             try:
-                if kol == 500 and sharh:
-                    m = re.search(r'\((\d+)\)', str(sharh))
-                    if m:
-                        fcode = int(m.group(1))
-                        print(f"[UpdateSanadDetail][create] kol=500 code={code} radif={radif} parsed_factor={fcode} sharh={sharh}")
-                        factor_obj = Factor.objects.filter(acc_year=acc_year, code=fcode).last()
-                    else:
-                        print(f"[UpdateSanadDetail][create] kol=500 code={code} radif={radif} NO_FACTOR_IN_SHARH sharh={sharh}")
+                if kol == 500:
+                    if sharh:
+                        m = re_factor.search(str(sharh))
+                        if m:
+                            fcode = int(m.group(1))
+                            target_factor_id = factor_by_code.get(fcode)
+                    if tafzili:
+                        target_kala_id = kala_by_taf.get(tafzili)
             except Exception:
-                factor_obj = None
-
-            # اتصال کالا برای ایجاد اولیه بر اساس tafزili
-            kala_obj = None
-            try:
-                if kol == 500 and tafzili:
-                    from .models import Kala
-                    kala_obj = Kala.objects.filter(kala_taf=tafzili).last()
-            except Exception:
-                kala_obj = None
+                target_factor_id = target_factor_id or None
+                target_kala_id = target_kala_id or None
 
             sanads_to_create.append(SanadDetail(
                 code=code, radif=radif, kol=kol, moin=moin, tafzili=tafzili,
                 sharh=sharh, bed=bed, bes=bes, sanad_code=sanad_code,
-                sanad_type=sanad_type, meghdar=meghdar, person=person, syscomment=syscomment,
+                sanad_type=sanad_type, meghdar=meghdar, syscomment=syscomment,
                 curramount=curramount, usercreated=usercreated,
                 tarikh=voucher_date,  # ذخیره تاریخ شمسی
                 is_analiz=False,  # تنظیم is_analiz به False
                 acc_year=acc_year,  # اضافه کردن سال مالی
-                factor=factor_obj,
-                kala=kala_obj
+                factor_id=target_factor_id,
+                kala_id=target_kala_id,
+                person_id=person_id
             ))
 
             # Bulk create new sanad details
