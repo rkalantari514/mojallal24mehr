@@ -218,7 +218,7 @@ class SanadAdmin(admin.ModelAdmin):
 
 class SanadDetailAdmin(admin.ModelAdmin):
     list_display = ['acc_year','__str__', 'code', 'tarikh', 'date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount',
-                    'is_active', 'is_analiz', 'cheque_id', 'syscomment','person']
+                    'is_active', 'is_analiz', 'cheque_id', 'syscomment','person','factor','kala']
     list_filter = ['acc_year','is_active', 'kol', 'moin', 'tafzili']
     list_editable = ['is_analiz']
     search_fields = ['tarikh', 'date', 'kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes', 'curramount', 'cheque_id']

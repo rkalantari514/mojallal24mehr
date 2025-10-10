@@ -645,6 +645,7 @@ class SanadDetail(models.Model):
     person = models.ForeignKey('Person', on_delete=models.SET_NULL, blank=True, null=True)
     # ارتباط اختیاری با فاکتور برای ردیف‌های بهای تمام‌شده (مثلاً kol=500)
     factor = models.ForeignKey('Factor', on_delete=models.SET_NULL, related_name='sanad_details', blank=True, null=True)
+    kala = models.ForeignKey('Kala', on_delete=models.SET_NULL, blank=True, null=True, verbose_name='کالا')
 
     class Meta:
         unique_together = (('acc_year','code', 'radif'),)  # تعریف کلید یگانه

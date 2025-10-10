@@ -3345,6 +3345,15 @@ def UpdateSanadDetail(request):
                     sanad.factor = factor_obj
                 except Exception:
                     pass
+                # اتصال کالا بر اساس کد تفصیلی کالا (kala_taf) فقط برای kol=500
+                try:
+                    kala_obj = None
+                    if kol == 500 and tafzili:
+                        from .models import Kala
+                        kala_obj = Kala.objects.filter(kala_taf=tafzili).last()
+                    sanad.kala = kala_obj
+                except Exception:
+                    pass
                 sanad.is_analiz = False  # تنظیم is_analiz به False
                 sanads_to_update.append(sanad)
         else:
@@ -3359,6 +3368,15 @@ def UpdateSanadDetail(request):
             except Exception:
                 factor_obj = None
 
+            # اتصال کالا برای ایجاد اولیه بر اساس tafzili
+            kala_obj = None
+            try:
+                if kol == 500 and tafzili:
+                    from .models import Kala
+                    kala_obj = Kala.objects.filter(kala_taf=tafzili).last()
+            except Exception:
+                kala_obj = None
+
             sanads_to_create.append(SanadDetail(
                 code=code, radif=radif, kol=kol, moin=moin, tafzili=tafzili,
                 sharh=sharh, bed=bed, bes=bes, sanad_code=sanad_code,
@@ -3367,7 +3385,8 @@ def UpdateSanadDetail(request):
                 tarikh=voucher_date,  # ذخیره تاریخ شمسی
                 is_analiz=False,  # تنظیم is_analiz به False
                 acc_year=acc_year,  # اضافه کردن سال مالی
-                factor=factor_obj
+                factor=factor_obj,
+                kala=kala_obj
             ))
 
             # Bulk create new sanad details
