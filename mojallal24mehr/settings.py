@@ -258,4 +258,12 @@ BEHPARDAKHT_MERCHANT_ID = "MERCHANT_ID"
 # شماره ترمینال: 7031741
 
 
-sys.stdout.reconfigure(encoding='utf-8')  # اضافه کنید قبل از print
+# Ensure UTF-8 stdout/stderr where supported, but never crash under IIS/wfastcgi
+try:
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+    if hasattr(sys.stderr, 'reconfigure'):
+        sys.stderr.reconfigure(encoding='utf-8')
+except Exception:
+    # In some hosts (e.g., IIS wfastcgi) stdout is a special stream without reconfigure
+    pass
