@@ -26,7 +26,12 @@ def get_category_tree(parent=None):
 
 # for render partial
 def header(request, *args, **kwargs):
-    sys.stdout.reconfigure(encoding='utf-8')  # اضافه کنید قبل از print
+    # Ensure stdout is UTF-8 where supported, but don’t crash if not (e.g., IIS wfastcgi)
+    try:
+        if hasattr(sys.stdout, 'reconfigure'):
+            sys.stdout.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
     user = request.user
     last_info = MasterInfo.objects.filter(is_active=True).last()
     last_update_time = getattr(last_info, 'last_update_time', None)
