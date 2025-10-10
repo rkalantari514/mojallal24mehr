@@ -677,16 +677,38 @@ def Home1(request, *args, **kwargs):
         return result
     minfo = MasterInfo.objects.filter(is_active=True).last()
     user = request.user
-    if user.mobile_number != '09151006447':
-        UserLog.objects.create(user=user, page='داشبورد 1')
+    if getattr(user, 'mobile_number', None) != '09151006447':
+        try:
+            UserLog.objects.create(user=user, page='داشبورد 1')
+        except Exception:
+            pass
 
     start_time = time.time()  # زمان شروع تابع
     today = date.today()
     yesterday = today - timedelta(days=1)
-    acc_year = MasterInfo.objects.filter(is_active=True).last().acc_year
-    start_date_jalali = jdatetime.date(acc_year, 1, 1)  # ۱ فروردین سال مالی
-    start_date_gregorian = start_date_jalali.togregorian()  # تبدیل به میلادی
-    last_update_time = Mtables.objects.filter(name='Sanad_detail').last().last_update_time
+
+    # Determine accounting year safely
+    acc_year = None
+    if minfo and getattr(minfo, 'acc_year', None):
+        acc_year = minfo.acc_year
+    else:
+        # fallback to current Jalali year
+        try:
+            acc_year = jdatetime.date.today().year
+        except Exception:
+            acc_year = today.year  # as last resort
+
+    # Calculate start of financial year (not used elsewhere currently, kept for compatibility)
+    try:
+        start_date_jalali = jdatetime.date(acc_year, 1, 1)  # ۱ فروردین سال مالی
+        start_date_gregorian = start_date_jalali.togregorian()  # تبدیل به میلادی
+    except Exception:
+        start_date_jalali = None
+        start_date_gregorian = None
+
+    # Last update time safe fetch
+    mt_last = Mtables.objects.filter(name='Sanad_detail').last()
+    last_update_time = getattr(mt_last, 'last_update_time', None)
 
     # محاسبه داده‌ها
     today_data = TarazCalFromReport(today)
@@ -703,9 +725,9 @@ def Home1(request, *args, **kwargs):
     print(f"3: {time.time() - start_time:.2f} ثانیه")
 
     r_chequ_data = {
-        'tmandeh': (chequesr['total_mandeh_sum'] / 10000000) * -1,
-        'pastmandeh': (pastchequesr['total_mandeh_sum'] / 10000000) * -1,
-        'postmandeh': (postchequesr['total_mandeh_sum'] / 10000000) * -1,
+        'tmandeh': ((chequesr.get('total_mandeh_sum') or 0) / 10000000) * -1,
+        'pastmandeh': ((pastchequesr.get('total_mandeh_sum') or 0) / 10000000) * -1,
+        'postmandeh': ((postchequesr.get('total_mandeh_sum') or 0) / 10000000) * -1,
     }
     print(f"4: {time.time() - start_time:.2f} ثانیه")
 
@@ -715,9 +737,9 @@ def Home1(request, *args, **kwargs):
     pastchequesr = ChequesPay.objects.filter(cheque_date__lte=today).aggregate(total_mandeh_sum=Sum('total_mandeh'))
 
     p_chequ_data = {
-        'tmandeh': (chequesr['total_mandeh_sum'] / 10000000),
-        'pastmandeh': (pastchequesr['total_mandeh_sum'] / 10000000),
-        'postmandeh': (postchequesr['total_mandeh_sum'] / 10000000),
+        'tmandeh': ((chequesr.get('total_mandeh_sum') or 0) / 10000000),
+        'pastmandeh': ((pastchequesr.get('total_mandeh_sum') or 0) / 10000000),
+        'postmandeh': ((postchequesr.get('total_mandeh_sum') or 0) / 10000000),
     }
     print(f"5: {time.time() - start_time:.2f} ثانیه")
 

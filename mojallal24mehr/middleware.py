@@ -23,9 +23,15 @@ def _get_debug_mode_from_db():
     if _DEBUG_CACHE['value'] is not None and (now - _DEBUG_CACHE['ts'] < _CACHE_TTL):
         return _DEBUG_CACHE['value']
 
-    from dashboard.models import MasterInfo  # imported lazily to avoid app registry issues
-    last_info = MasterInfo.objects.filter(is_active=True).only('debug_mode').last()
-    mode = getattr(last_info, 'debug_mode', 3)  # default to OFF if missing
+    try:
+        from dashboard.models import MasterInfo  # imported lazily to avoid app registry issues
+        qs = MasterInfo.objects.filter(is_active=True)
+        mode = qs.values_list('debug_mode', flat=True).last()
+        if mode is None:
+            mode = 3
+    except Exception:
+        # Any DB/app errors -> default OFF
+        mode = 3
     _DEBUG_CACHE['value'] = mode
     _DEBUG_CACHE['ts'] = now
     return mode
