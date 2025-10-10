@@ -16,15 +16,36 @@ Including another URLconf
 """
 from mahakupdate.views import Updateall
 from mojallal24mehr import settings
-from mojallal24mehr.views import header, sidebar, footer, update_dark_mode
+from mojallal24mehr.views import header, sidebar, footer, update_dark_mode, dev_static
 
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf.urls.static import static
+from django.views.static import serve
+import django
+import os
+# Static and media must come first to avoid being shadowed by greedy app URL patterns
+_admin_static_root = os.path.join(os.path.dirname(django.__file__), 'contrib', 'admin', 'static')
+static_urlpatterns = [
+    # Django admin static (serve even without collectstatic)
+    re_path(r'^%s(?P<path>admin/.*)$' % settings.STATIC_URL.lstrip('/'), dev_static, {
+        'root': _admin_static_root,
+    }),
+    # assets first (project assets)
+    re_path(r'^%s(?P<path>.*)$' % settings.STATIC_URL.lstrip('/'), dev_static, {
+        'root': os.path.join(str(settings.BASE_DIR), 'assets'),
+    }),
+    # then STATIC_ROOT (if collected)
+    re_path(r'^%s(?P<path>.*)$' % settings.STATIC_URL.lstrip('/'), dev_static, {
+        'root': settings.STATIC_ROOT,
+    }),
+    # media
+    re_path(r'^%s(?P<path>.*)$' % settings.MEDIA_URL.lstrip('/'), dev_static, {
+        'root': settings.MEDIA_ROOT,
+    }),
+]
 
-
-
-urlpatterns = [
+urlpatterns = static_urlpatterns + [
     path('admin/', admin.site.urls),
     path('', include('dashboard.urls')),
     path('', include('mahaktables.urls')),
@@ -35,7 +56,7 @@ urlpatterns = [
     path('', include('payment.urls')),
     path('', include('festival.urls')),
     path('', include('budget.urls')),
-    path('events/', include('events.urls')),  
+    path('events/', include('events.urls')),
     path('jariashkhas/', include('jariashkhas.urls')),
 
     path('update-dark-mode/', update_dark_mode, name='update_dark_mode'),
@@ -45,18 +66,10 @@ urlpatterns = [
     path('footer', footer, name="footer"),
 
     path('fake-path/', Updateall, name='update_all'),  # مسیر را به درستی تنظیم کنید
-
 ]
 
+# Custom error handlers
+handler404 = 'mojallal24mehr.views.handle_404_error'
+handler500 = 'mojallal24mehr.views.handle_500_error'
 
 
-
-
-
-
-# برای فایل های استاتیک
-if settings.DEBUG:
-    # add root static files
-    urlpatterns = urlpatterns + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    # add media static files
-    urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

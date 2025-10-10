@@ -28,6 +28,14 @@ class MasterInfo(models.Model):
     last_report_time=models.DateTimeField(blank=True, null=True,verbose_name='زمان آخرین ارسال گزاش')
     last_update_time = models.DateTimeField(default=timezone.now, verbose_name='زمان آخرین آپدیت')
 
+    # Debug mode control: 1=On, 2=Admins only, 3=Off
+    DEBUG_MODE_CHOICES = (
+        (1, 'دیباگ روشن'),
+        (2, 'دیباگ برای ادمین روشن'),
+        (3, 'دیباگ خاموش'),
+    )
+    debug_mode = models.PositiveSmallIntegerField(choices=DEBUG_MODE_CHOICES, default=2, verbose_name='حالت دیباگ')
+
     active_day=models.IntegerField(default=0,blank=True, null=True,verbose_name='روز فعال')
     monthly_rate = models.DecimalField(max_digits=8, decimal_places=4, default=5.0, verbose_name='نرخ بهره ماهانه')
 

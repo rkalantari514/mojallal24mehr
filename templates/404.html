@@ -1,17 +1,25 @@
 {% extends 'shared/_MainLayout.html' %}
 {% load static %}
 {% block content %}
-    
-<div class="card card-statistics mb-30"> 
-        <div class="card-body position-relative">
-          <div class="error">
-           <h1>404</h1>
-           <h2>ارور</h2>
+
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+      <div class="card card-statistics mb-30">
+        <div class="card-body position-relative text-center">
+          <div class="error mb-3">
+            <h1 class="display-3">404</h1>
+            <h2 class="h4">صفحه مورد نظر یافت نشد</h2>
+          </div>
+          <img class="img-fluid error-image my-3" src="{% static 'images/error.png' %}" alt="خطای ۴۰۴">
+          <p class="mt-3">لطفاً آدرس را بررسی کنید یا به صفحه اصلی بازگردید.</p>
+          <a href="/" class="btn btn-primary mt-2">بازگشت به صفحه اصلی</a>
         </div>
-      </div>  
-     <img class="img-fluid error-image" src="{% static 'images/error.png' %}" alt="">
+      </div>
     </div>
-    
+  </div>
+</div>
+
 {% endblock %}
 
 

@@ -36,7 +36,7 @@ SECRET_KEY = 'django-insecure--o*rtwaxd%_%yz7t2505stw(r_l$ftjl^7l$c_nr5k4#hcjgj*
 # else:
 #     print('DEBUG=False')
 
-DEBUG = True
+DEBUG = False
 
 
 ALLOWED_HOSTS = ['localhost','172.16.1.14','rp-mahak.ymv.ir','192.168.1.102','127.0.0.1','217.219.245.178']
@@ -76,6 +76,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'mojallal24mehr.middleware.DebugModeMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]

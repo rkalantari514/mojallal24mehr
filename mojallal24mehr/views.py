@@ -1,6 +1,10 @@
 import sys
 
 from django.shortcuts import render
+from django.http import FileResponse, Http404
+import mimetypes
+import os
+from django.utils._os import safe_join
 
 from custom_login.models import MyPage
 from dashboard.models import MasterInfo
@@ -23,11 +27,12 @@ def get_category_tree(parent=None):
 # for render partial
 def header(request, *args, **kwargs):
     sys.stdout.reconfigure(encoding='utf-8')  # اضافه کنید قبل از print
-    user=request.user
-    last_update_time = MasterInfo.objects.filter(is_active=True).last().last_update_time
+    user = request.user
+    last_info = MasterInfo.objects.filter(is_active=True).last()
+    last_update_time = getattr(last_info, 'last_update_time', None)
     context = {
-        'user':user,
-        'last_update_time':last_update_time,
+        'user': user,
+        'last_update_time': last_update_time,
     }
     return render(request, 'shared/Header.html', context)
 
@@ -101,12 +106,38 @@ def footer(request, *args, **kwargs):
     return render(request, 'shared/Footer.html', context)
 
 def handle_404_error(request, exception):
+    return render(request, '404.html', status=404)
 
-    return render(request, '404.html', {})
+def handle_500_error(request):
+    # You can create a dedicated 500.html template; for now reuse 404 layout textually
+    return render(request, '404.html', status=500)
 
-def handle_500_error(request, exception):
 
-    return render(request, '404.html', {})
+def dev_static(request, path, root):
+    """
+    Lightweight static file server for local DEBUG=False testing.
+    Serves files from the given root safely, returns 404 if not found.
+    """
+    try:
+        fullpath = safe_join(root, path)
+    except Exception:
+        raise Http404
+
+    if not os.path.exists(fullpath) or not os.path.isfile(fullpath):
+        raise Http404
+
+    content_type, _ = mimetypes.guess_type(fullpath)
+    # Fallback MIME types on Windows if not detected
+    if not content_type:
+        if fullpath.endswith('.css'):
+            content_type = 'text/css'
+        elif fullpath.endswith('.js'):
+            content_type = 'application/javascript'
+    try:
+        return FileResponse(open(fullpath, 'rb'), content_type=content_type or 'application/octet-stream')
+    except Exception:
+        # Avoid leaking server errors via static requests; treat as not found
+        raise Http404
 
 
 
