@@ -1,5 +1,6 @@
 import time
 import sys
+import os
 from typing import Optional
 
 from django.views import debug as django_debug
@@ -8,6 +9,9 @@ try:
     from django.utils.deprecation import MiddlewareMixin  # for compatibility
 except Exception:  # pragma: no cover
     MiddlewareMixin = object
+
+# Force debug pages regardless of settings and DB (can be disabled by setting FORCE_DEBUG=0)
+_FORCE_DEBUG = os.getenv('FORCE_DEBUG', '1').lower() in ('1', 'true', 'yes', 'on')
 
 # Lightweight in-process cache to avoid DB hit every request
 _DEBUG_CACHE = {
@@ -51,6 +55,14 @@ class DebugModeMiddleware(MiddlewareMixin):
     """
 
     def process_exception(self, request, exception):
+        # If force flag is active, always show technical debug page
+        if _FORCE_DEBUG:
+            exc_info = sys.exc_info()
+            try:
+                return django_debug.technical_500_response(request, *exc_info)
+            finally:
+                del exc_info
+
         try:
             mode = _get_debug_mode_from_db()
         except Exception:
