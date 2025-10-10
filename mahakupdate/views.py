@@ -3312,14 +3312,36 @@ def UpdateSanadDetail(request):
             #     print(f'tarikh mismatch: {sanad.tarikh} != {voucher_date}')
 
             # حالا شرط اصلی
-            # بررسی و بروزرسانی فیلدها
+            # ابتدا مقادیر هدف برای factor/kala را محاسبه کنیم تا در شرط تغییرات لحاظ شوند
+            factor_obj = None
+            kala_obj = None
+            try:
+                if kol == 500:
+                    # فاکتور از شرح: «... (12345)»
+                    if sharh:
+                        m = re.search(r'\((\d+)\)', str(sharh))
+                        if m:
+                            fcode = int(m.group(1))
+                            factor_obj = Factor.objects.filter(acc_year=acc_year, code=fcode).last()
+                    # کالا از tafzili -> Kala.kala_taf
+                    if tafzili:
+                        from .models import Kala
+                        kala_obj = Kala.objects.filter(kala_taf=tafzili).last()
+            except Exception:
+                factor_obj = factor_obj or None
+                kala_obj = kala_obj or None
+
+            # بررسی و بروزرسانی فیلدها (همراه با factor/kala)
             if (sanad.kol != kol or sanad.moin != moin or
                     # sanad.tafzili != tafzili or
                     sanad.sharh != sharh or sanad.bed != bed or sanad.bes != bes or
                     sanad.sanad_code != sanad_code or sanad.sanad_type != sanad_type or
                     sanad.meghdar != meghdar or sanad.person != person or sanad.syscomment != syscomment or
                     sanad.curramount != curramount or sanad.usercreated != usercreated or
-                    sanad.tarikh != voucher_date):
+                    sanad.tarikh != voucher_date or
+                    (sanad.factor_id or None) != (getattr(factor_obj, 'id', None)) or
+                    (sanad.kala_id or None) != (getattr(kala_obj, 'id', None))
+                ):
                 sanad.kol = kol
                 sanad.moin = moin
                 sanad.tafzili = tafzili
@@ -3334,26 +3356,9 @@ def UpdateSanadDetail(request):
                 sanad.curramount = curramount
                 sanad.usercreated = usercreated
                 sanad.tarikh = voucher_date  # بروزرسانی تاریخ شمسی
-                # اتصال به فاکتور در صورت kol==500 و وجود شماره فاکتور در شرح
-                try:
-                    factor_obj = None
-                    if kol == 500 and sharh:
-                        m = re.search(r'\((\d+)\)', str(sharh))
-                        if m:
-                            fcode = int(m.group(1))
-                            factor_obj = Factor.objects.filter(acc_year=acc_year, code=fcode).last()
-                    sanad.factor = factor_obj
-                except Exception:
-                    pass
-                # اتصال کالا بر اساس کد تفصیلی کالا (kala_taf) فقط برای kol=500
-                try:
-                    kala_obj = None
-                    if kol == 500 and tafzili:
-                        from .models import Kala
-                        kala_obj = Kala.objects.filter(kala_taf=tafzili).last()
-                    sanad.kala = kala_obj
-                except Exception:
-                    pass
+                # ست کردن factor/kala (ممکن است None باشند)
+                sanad.factor = factor_obj
+                sanad.kala = kala_obj
                 sanad.is_analiz = False  # تنظیم is_analiz به False
                 sanads_to_update.append(sanad)
         else:
