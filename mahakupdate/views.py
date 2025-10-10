@@ -34,6 +34,7 @@ import pyodbc
 from django.http import JsonResponse
 # sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
 from django.db.models import Sum, Count, F, Q
+import re
 
 
 def connect_to_mahak0523():
@@ -3333,9 +3334,31 @@ def UpdateSanadDetail(request):
                 sanad.curramount = curramount
                 sanad.usercreated = usercreated
                 sanad.tarikh = voucher_date  # بروزرسانی تاریخ شمسی
+                # اتصال به فاکتور در صورت kol==500 و وجود شماره فاکتور در شرح
+                try:
+                    factor_obj = None
+                    if kol == 500 and sharh:
+                        m = re.search(r'\((\d+)\)', str(sharh))
+                        if m:
+                            fcode = int(m.group(1))
+                            factor_obj = Factor.objects.filter(acc_year=acc_year, code=fcode).last()
+                    sanad.factor = factor_obj
+                except Exception:
+                    pass
                 sanad.is_analiz = False  # تنظیم is_analiz به False
                 sanads_to_update.append(sanad)
         else:
+            # اتصال به فاکتور برای ایجاد اولیه
+            factor_obj = None
+            try:
+                if kol == 500 and sharh:
+                    m = re.search(r'\((\d+)\)', str(sharh))
+                    if m:
+                        fcode = int(m.group(1))
+                        factor_obj = Factor.objects.filter(acc_year=acc_year, code=fcode).last()
+            except Exception:
+                factor_obj = None
+
             sanads_to_create.append(SanadDetail(
                 code=code, radif=radif, kol=kol, moin=moin, tafzili=tafzili,
                 sharh=sharh, bed=bed, bes=bes, sanad_code=sanad_code,
@@ -3343,7 +3366,8 @@ def UpdateSanadDetail(request):
                 curramount=curramount, usercreated=usercreated,
                 tarikh=voucher_date,  # ذخیره تاریخ شمسی
                 is_analiz=False,  # تنظیم is_analiz به False
-                acc_year=acc_year  # اضافه کردن سال مالی
+                acc_year=acc_year,  # اضافه کردن سال مالی
+                factor=factor_obj
             ))
 
             # Bulk create new sanad details
@@ -3359,7 +3383,7 @@ def UpdateSanadDetail(request):
         sanads_to_update,
         ['kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
          'sanad_code', 'sanad_type', 'meghdar', 'person',
-         'syscomment', 'curramount', 'usercreated', 'tarikh', 'is_analiz'],
+         'syscomment', 'curramount', 'usercreated', 'tarikh', 'factor', 'is_analiz'],
         batch_size=BATCH_SIZE
     )
 
