@@ -3253,6 +3253,9 @@ def UpdateSanadDetail(request):
     factor_by_code = {f.code: f.id for f in _F.objects.filter(acc_year=acc_year).only('id', 'code')}
     kala_by_taf = {k.kala_taf: k.id for k in _K.objects.all().only('id', 'kala_taf')}
     person_by_taf = {p.per_taf: p.id for p in _P.objects.all().only('id', 'per_taf')}
+    # نگاشت کد برگشت از فروش به شناسه شخص برای اتصال اسناد کل 403 به شخص
+    backfactor_person_by_code = {bf.code: bf.person_id for bf in BackFactor.objects.filter(acc_year=acc_year).only('code', 'person_id')}
+    backfactor_id_by_code = {bf.code: bf.id for bf in BackFactor.objects.filter(acc_year=acc_year).only('id', 'code')}
 
     # Compile regex once
     re_factor = re.compile(r'\((\d+)\)')
@@ -3281,6 +3284,18 @@ def UpdateSanadDetail(request):
             person_id = None
             if kol == 103 and tafzili:
                 person_id = person_by_taf.get(tafzili)
+            # اگر کل 403 (برگشت از فروش/تخفیفات) بود، سعی می‌کنیم از متن شرح/سیستم، کد برگشتی را استخراج و شخص مرتبط را ست کنیم
+            if person_id is None and kol == 403:
+                try:
+                    ref_text = sharh or syscomment or ''
+                    m_bf = re_factor.search(str(ref_text))
+                    if m_bf:
+                        bfcode = int(m_bf.group(1))
+                        bf_person_id = backfactor_person_by_code.get(bfcode)
+                        if bf_person_id:
+                            person_id = bf_person_id
+                except Exception:
+                    pass
         except (ValueError, InvalidOperation) as e:
             print(f"خطا در پردازش رکورد {row}: {e}. گذر از این رکورد.")
             continue  # این رکورد را بگذرانید
@@ -3323,6 +3338,7 @@ def UpdateSanadDetail(request):
             # حالا شرط اصلی
             # ابتدا مقادیر هدف برای factor/kala را محاسبه کنیم تا در شرط تغییرات لحاظ شوند (بدون ORM per-row)
             target_factor_id = None
+            target_backfactor_id = None
             target_kala_id = None
             try:
                 if kol == 500:
@@ -3335,8 +3351,15 @@ def UpdateSanadDetail(request):
                     # کالا از tafzili -> Kala.kala_taf
                     if tafzili:
                         target_kala_id = kala_by_taf.get(tafzili)
+                if kol == 403:
+                    ref_text = sharh or syscomment or ''
+                    m2 = re_factor.search(str(ref_text))
+                    if m2:
+                        bfcode = int(m2.group(1))
+                        target_backfactor_id = backfactor_id_by_code.get(bfcode)
             except Exception:
                 target_factor_id = target_factor_id or None
+                target_backfactor_id = target_backfactor_id or None
                 target_kala_id = target_kala_id or None
 
             # بررسی و بروزرسانی فیلدها (همراه با factor/kala)
@@ -3348,6 +3371,7 @@ def UpdateSanadDetail(request):
                     sanad.curramount != curramount or sanad.usercreated != usercreated or
                     sanad.tarikh != voucher_date or
                     (sanad.factor_id or None) != (target_factor_id or None) or
+                    (sanad.backfactor_id or None) != (target_backfactor_id or None) or
                     (sanad.kala_id or None) != (target_kala_id or None)
                 ):
                 sanad.kol = kol
@@ -3364,14 +3388,16 @@ def UpdateSanadDetail(request):
                 sanad.curramount = curramount
                 sanad.usercreated = usercreated
                 sanad.tarikh = voucher_date  # بروزرسانی تاریخ شمسی
-                # ست کردن factor/kala (ممکن است None باشند)
+                # ست کردن factor/kala/backfactor (ممکن است None باشند)
                 sanad.factor_id = target_factor_id
+                sanad.backfactor_id = target_backfactor_id
                 sanad.kala_id = target_kala_id
                 sanad.is_analiz = False  # تنظیم is_analiz به False
                 sanads_to_update.append(sanad)
         else:
             # مقداردهی شناسه‌های مرتبط برای ایجاد اولیه (بدون کوئری در هر ردیف)
             target_factor_id = None
+            target_backfactor_id = None
             target_kala_id = None
             try:
                 if kol == 500:
@@ -3382,8 +3408,15 @@ def UpdateSanadDetail(request):
                             target_factor_id = factor_by_code.get(fcode)
                     if tafzili:
                         target_kala_id = kala_by_taf.get(tafzili)
+                if kol == 403:
+                    ref_text = sharh or syscomment or ''
+                    m2 = re_factor.search(str(ref_text))
+                    if m2:
+                        bfcode = int(m2.group(1))
+                        target_backfactor_id = backfactor_id_by_code.get(bfcode)
             except Exception:
                 target_factor_id = target_factor_id or None
+                target_backfactor_id = target_backfactor_id or None
                 target_kala_id = target_kala_id or None
 
             sanads_to_create.append(SanadDetail(
@@ -3395,6 +3428,7 @@ def UpdateSanadDetail(request):
                 is_analiz=False,  # تنظیم is_analiz به False
                 acc_year=acc_year,  # اضافه کردن سال مالی
                 factor_id=target_factor_id,
+                backfactor_id=target_backfactor_id,
                 kala_id=target_kala_id,
                 person_id=person_id
             ))
@@ -3412,7 +3446,7 @@ def UpdateSanadDetail(request):
         sanads_to_update,
         ['kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
          'sanad_code', 'sanad_type', 'meghdar', 'person',
-         'syscomment', 'curramount', 'usercreated', 'tarikh', 'factor', 'kala', 'is_analiz'],
+         'syscomment', 'curramount', 'usercreated', 'tarikh', 'factor', 'backfactor', 'kala', 'is_analiz'],
         batch_size=BATCH_SIZE
     )
 

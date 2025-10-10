@@ -644,6 +644,7 @@ class SanadDetail(models.Model):
     is_active = models.BooleanField(default=True, verbose_name='فعال است')
     person = models.ForeignKey('Person', on_delete=models.SET_NULL, blank=True, null=True)
     factor = models.ForeignKey('Factor', on_delete=models.SET_NULL, related_name='sanad_details', blank=True, null=True)
+    backfactor = models.ForeignKey('BackFactor', on_delete=models.SET_NULL, related_name='sanad_details', blank=True, null=True)
     kala = models.ForeignKey('Kala', on_delete=models.SET_NULL, blank=True, null=True, verbose_name='کالا')
 
     class Meta:

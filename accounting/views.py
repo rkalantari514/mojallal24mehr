@@ -1930,6 +1930,78 @@ def HesabMoshtariDetail(request, tafsili):
         # مرتب‌سازی بر اساس تاریخ
         customer_movements.sort(key=lambda x: (x['date'] or timezone.make_aware(timezone.datetime.min).date()))
 
+    # هزینه تمام‌شده کالای فروش رفته (کل 500) برای این مشتری
+    # نکته: برای جلوگیری از شمارش اسناد نامرتبط، اقلام را به فاکتورهای همین مشتری و شخص خودش محدود می‌کنیم.
+    try:
+        from django.db.models import Q
+        cogs_qs = SanadDetail.objects.filter(kol__in=[500, 403], is_active=True)
+
+        link_filter = Q()
+        factor_ids = set()
+        min_date = None
+        max_date = None
+
+        if person:
+            # محدودیت به شخص (اگر در اسناد ست شده باشد)
+            link_filter |= Q(person=person)
+
+            # جمع‌آوری شناسه فاکتورهای فروش همین مشتری
+            for d in fac_details:
+                if d.factor_id:
+                    factor_ids.add(d.factor_id)
+                ddate = d.date or (d.factor.date if d.factor else None)
+                if ddate:
+                    min_date = ddate if not min_date or ddate < min_date else min_date
+                    max_date = ddate if not max_date or ddate > max_date else max_date
+
+            # تاریخ‌های برگشت از فروش
+            for b in back_details:
+                bdate = b.backfactor.date if b.backfactor else None
+                if bdate:
+                    min_date = bdate if not min_date or bdate < min_date else min_date
+                    max_date = bdate if not max_date or bdate > max_date else max_date
+
+            if factor_ids:
+                link_filter |= Q(factor_id__in=list(factor_ids))
+
+        # اگر هیچ لینک مطمئنی نداریم، خروجی خالی بدهیم تا اضافه‌شماری نشود
+        if not link_filter:
+            cogs_entries = SanadDetail.objects.none()
+        else:
+            cogs_entries = cogs_qs.filter(link_filter)
+            # در صورت وجود بازه تاریخ، به همان بازه محدود می‌کنیم تا نویز کمتر شود
+            if min_date and max_date:
+                cogs_entries = cogs_entries.filter(date__range=(min_date, max_date))
+            cogs_entries = cogs_entries.order_by('date')
+    except Exception:
+        # در صورت بروز هر خطا، از بازگرداندن نتایج خالی اطمینان حاصل می‌کنیم تا صفحه لود شود
+        cogs_entries = SanadDetail.objects.none()
+
+    # محاسبه جمع‌ها برای نمایش بالای جداول
+    # جمع مبلغ فاکتورهای فروش و برگشت (بدون اعمال علامت؛ طبق درخواست «جمع فاکتور ها»)
+    movements_total = 0
+    try:
+        for _m in customer_movements:
+            try:
+                amt = float(_m.get('amount') or 0)
+                if _m.get('type') == 'return':
+                    movements_total -= amt
+                else:
+                    movements_total += amt
+            except Exception:
+                pass
+    except Exception:
+        movements_total = 0
+
+    # جمع خالص هزینه تمام شده: مجموع بدهکار منهای بستانکار (اگر بستانکار > 0 باشد)
+    try:
+        agg = cogs_entries.aggregate(total_bed=Sum('bed'), total_bes=Sum('bes'))
+        total_bed = float(agg['total_bed'] or 0)
+        total_bes = float(agg['total_bes'] or 0)
+        cogs_total = total_bed - (total_bes if total_bes > 0 else 0)
+    except Exception:
+        cogs_total = 0
+
     context = {
         'title': 'حساب مشتری',
         'hesabmoshtari': hesabmoshtari,
@@ -1956,6 +2028,9 @@ def HesabMoshtariDetail(request, tafsili):
         'cheque_receive_summary': cheque_receive_summary,
         'cheque_pay_summary': cheque_pay_summary,
         'customer_movements': customer_movements,
+        'cogs_entries': cogs_entries,
+        'movements_total': movements_total,
+        'cogs_total': cogs_total,
     }
 
     print(f"زمان اجرا: {time.time() - start_time:.2f} ثانیه")
