@@ -3324,7 +3324,10 @@ def UpdateSanadDetail(request):
                         m = re.search(r'\((\d+)\)', str(sharh))
                         if m:
                             fcode = int(m.group(1))
+                            print(f"[UpdateSanadDetail][existing] kol=500 code={code} radif={radif} parsed_factor={fcode} sharh={sharh}")
                             factor_obj = Factor.objects.filter(acc_year=acc_year, code=fcode).last()
+                        else:
+                            print(f"[UpdateSanadDetail][existing] kol=500 code={code} radif={radif} NO_FACTOR_IN_SHARH sharh={sharh}")
                     # کالا از tafzili -> Kala.kala_taf
                     if tafzili:
                         from .models import Kala
@@ -3371,11 +3374,14 @@ def UpdateSanadDetail(request):
                     m = re.search(r'\((\d+)\)', str(sharh))
                     if m:
                         fcode = int(m.group(1))
+                        print(f"[UpdateSanadDetail][create] kol=500 code={code} radif={radif} parsed_factor={fcode} sharh={sharh}")
                         factor_obj = Factor.objects.filter(acc_year=acc_year, code=fcode).last()
+                    else:
+                        print(f"[UpdateSanadDetail][create] kol=500 code={code} radif={radif} NO_FACTOR_IN_SHARH sharh={sharh}")
             except Exception:
                 factor_obj = None
 
-            # اتصال کالا برای ایجاد اولیه بر اساس tafzili
+            # اتصال کالا برای ایجاد اولیه بر اساس tafزili
             kala_obj = None
             try:
                 if kol == 500 and tafzili:
