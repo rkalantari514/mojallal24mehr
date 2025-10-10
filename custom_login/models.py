@@ -78,18 +78,52 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 @receiver(post_save, sender=CustomUser)
 def resize_avatar(sender, instance, **kwargs):
-    if instance.avatar and hasattr(instance.avatar, 'path'):
-        temp_image = Image.open(instance.avatar.path)
-        width, height = temp_image.size
-        min_dimension = min(width, height)
-        crop_image = temp_image.crop((
-            (width - min_dimension) // 2,
-            (height - min_dimension) // 2,
-            (width + min_dimension) // 2,
-            (height + min_dimension) // 2,
-        ))
-        resized_image = crop_image.resize((200, 200), Image.LANCZOS)
-        resized_image.save(instance.avatar.path)
+    """
+    Safely crop/resize avatar to 200x200 when the avatar file is actually present.
+    - Skip on saves that don't update the avatar (e.g., last_login updates during login).
+    - Guard against missing files and any PIL errors to avoid 500 on login.
+    """
+    # If this save didn't touch the avatar field, skip processing
+    update_fields = kwargs.get('update_fields')
+    if update_fields and ('avatar' not in update_fields):
+        return
+
+    from django.core.files.storage import default_storage
+    try:
+        # Ensure there is an avatar set and the file exists in storage
+        if not instance.avatar or not getattr(instance.avatar, 'name', None):
+            return
+        avatar_name = instance.avatar.name
+        if not default_storage.exists(avatar_name):
+            return
+
+        # Resolve a filesystem path if possible
+        avatar_path = getattr(instance.avatar, 'path', None)
+        if not avatar_path:
+            try:
+                avatar_path = default_storage.path(avatar_name)
+            except Exception:
+                avatar_path = None
+        if not avatar_path or not os.path.exists(avatar_path):
+            return
+
+        # Open, center-crop to square, resize, and save back
+        with Image.open(avatar_path) as temp_image:
+            width, height = temp_image.size
+            min_dimension = min(width, height)
+            crop_image = temp_image.crop((
+                (width - min_dimension) // 2,
+                (height - min_dimension) // 2,
+                (width + min_dimension) // 2,
+                (height + min_dimension) // 2,
+            ))
+            resized_image = crop_image.resize((200, 200), Image.LANCZOS)
+            # Preserve format if possible; fallback to PNG
+            format_ = temp_image.format or 'PNG'
+            resized_image.save(avatar_path, format=format_)
+    except Exception:
+        # Never fail the request due to avatar processing
+        return
 
 
 class UserLog(models.Model):
