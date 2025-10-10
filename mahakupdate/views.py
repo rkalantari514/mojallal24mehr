@@ -1,4 +1,5 @@
 from jinja2.ext import loopcontrols
+import re
 
 from accounting.models import BedehiMoshtari
 from custom_login.models import UserLog
@@ -3407,7 +3408,7 @@ def UpdateSanadDetail(request):
         sanads_to_update,
         ['kol', 'moin', 'tafzili', 'sharh', 'bed', 'bes',
          'sanad_code', 'sanad_type', 'meghdar', 'person',
-         'syscomment', 'curramount', 'usercreated', 'tarikh', 'factor', 'is_analiz'],
+         'syscomment', 'curramount', 'usercreated', 'tarikh', 'factor', 'kala', 'is_analiz'],
         batch_size=BATCH_SIZE
     )
 
