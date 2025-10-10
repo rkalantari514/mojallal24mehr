@@ -3222,6 +3222,7 @@ from django.utils import timezone
 
 
 def UpdateSanadDetail(request):
+    import re
     t0 = time.time()
     print('شروع آپدیت جزئیات سند---------------------------------------------------')
     conn, db_name = connect_to_mahak()
