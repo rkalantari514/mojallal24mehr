@@ -37,7 +37,7 @@ SECRET_KEY = 'django-insecure--o*rtwaxd%_%yz7t2505stw(r_l$ftjl^7l$c_nr5k4#hcjgj*
 #     print('DEBUG=False')
 
 # Force global DEBUG independent of DB/middleware (can be disabled by env)
-FORCE_DEBUG_ALL = os.getenv('FORCE_DEBUG_ALL', '1').lower() in ('1', 'true', 'yes', 'on')
+FORCE_DEBUG_ALL = os.getenv('FORCE_DEBUG_ALL', '0').lower() in ('1', 'true', 'yes', 'on')
 DEBUG = True if FORCE_DEBUG_ALL else False
 
 

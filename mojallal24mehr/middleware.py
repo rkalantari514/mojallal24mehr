@@ -11,7 +11,7 @@ except Exception:  # pragma: no cover
     MiddlewareMixin = object
 
 # Force debug pages regardless of settings and DB (can be disabled by setting FORCE_DEBUG=0)
-_FORCE_DEBUG = os.getenv('FORCE_DEBUG', '1').lower() in ('1', 'true', 'yes', 'on')
+_FORCE_DEBUG = os.getenv('FORCE_DEBUG', '0').lower() in ('1', 'true', 'yes', 'on')
 
 # Lightweight in-process cache to avoid DB hit every request
 _DEBUG_CACHE = {
