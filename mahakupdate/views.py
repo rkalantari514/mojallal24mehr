@@ -3284,8 +3284,8 @@ def UpdateSanadDetail(request):
             person_id = None
             if kol == 103 and tafzili:
                 person_id = person_by_taf.get(tafzili)
-            # اگر کل 403 (برگشت از فروش/تخفیفات) بود، سعی می‌کنیم از متن شرح/سیستم، کد برگشتی را استخراج و شخص مرتبط را ست کنیم
-            if person_id is None and kol == 403:
+            # اگر کل 500 بود، سعی می‌کنیم از متن شرح/سیستم، کد فاکتور/برگشتی را استخراج و شخص مرتبط را ست کنیم
+            if person_id is None and kol == 500:
                 try:
                     ref_text = sharh or syscomment or ''
                     m_bf = re_factor.search(str(ref_text))
@@ -3351,7 +3351,7 @@ def UpdateSanadDetail(request):
                     # کالا از tafzili -> Kala.kala_taf
                     if tafzili:
                         target_kala_id = kala_by_taf.get(tafzili)
-                if kol == 403:
+                if kol == 500:
                     ref_text = sharh or syscomment or ''
                     m2 = re_factor.search(str(ref_text))
                     if m2:
@@ -3363,8 +3363,8 @@ def UpdateSanadDetail(request):
                 target_kala_id = target_kala_id or None
 
             # بررسی و بروزرسانی فیلدها (همراه با factor/kala)
-            # برای کل 403، در صورت موجود بودن تفضیلی، کالا را از tafzili هم ست می‌کنیم
-            if kol == 403 and tafzili and (target_kala_id is None):
+            # برای کل 500، در صورت موجود بودن تفضیلی، کالا را از tafzili هم ست می‌کنیم
+            if kol == 500 and tafzili and (target_kala_id is None):
                 target_kala_id = kala_by_taf.get(tafzili)
             if (sanad.kol != kol or sanad.moin != moin or
                     # sanad.tafzili != tafzili or
@@ -3411,7 +3411,7 @@ def UpdateSanadDetail(request):
                             target_factor_id = factor_by_code.get(fcode)
                     if tafzili:
                         target_kala_id = kala_by_taf.get(tafzili)
-                if kol == 403:
+                if kol == 500:
                     ref_text = sharh or syscomment or ''
                     m2 = re_factor.search(str(ref_text))
                     if m2:
@@ -3422,8 +3422,8 @@ def UpdateSanadDetail(request):
                 target_backfactor_id = target_backfactor_id or None
                 target_kala_id = target_kala_id or None
 
-            # اگر کل 403 و تفضیلی داریم، کالا را نیز لینک کنیم
-            if kol == 403 and tafzili and (target_kala_id is None):
+            # اگر کل 500 و تفضیلی داریم، کالا را نیز لینک کنیم
+            if kol == 500 and tafzili and (target_kala_id is None):
                 target_kala_id = kala_by_taf.get(tafzili)
 
             sanads_to_create.append(SanadDetail(
