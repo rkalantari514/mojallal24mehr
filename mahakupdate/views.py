@@ -3284,8 +3284,8 @@ def UpdateSanadDetail(request):
             person_id = None
             if kol == 103 and tafzili:
                 person_id = person_by_taf.get(tafzili)
-            # اگر کل 500 بود، سعی می‌کنیم از متن شرح/سیستم، کد فاکتور/برگشتی را استخراج و شخص مرتبط را ست کنیم
-            if person_id is None and kol == 500:
+            # اگر کل 500 یا 401 بود، سعی می‌کنیم از متن شرح/سیستم، کد فاکتور/برگشتی را استخراج و شخص مرتبط را ست کنیم
+            if person_id is None and (kol == 500 or kol == 401):
                 try:
                     ref_text = sharh or syscomment or ''
                     m_bf = re_factor.search(str(ref_text))
@@ -3341,22 +3341,18 @@ def UpdateSanadDetail(request):
             target_backfactor_id = None
             target_kala_id = None
             try:
-                if kol == 500:
-                    # فاکتور از شرح: «... (12345)»
+                if kol == 500 or kol == 401:
+                    # فاکتور/برگشتی از شرح: «... (12345)»
                     if sharh:
                         m = re_factor.search(str(sharh))
                         if m:
                             fcode = int(m.group(1))
                             target_factor_id = factor_by_code.get(fcode)
+                            if target_factor_id is None:
+                                target_backfactor_id = backfactor_id_by_code.get(fcode)
                     # کالا از tafzili -> Kala.kala_taf
                     if tafzili:
                         target_kala_id = kala_by_taf.get(tafzili)
-                if kol == 500:
-                    ref_text = sharh or syscomment or ''
-                    m2 = re_factor.search(str(ref_text))
-                    if m2:
-                        bfcode = int(m2.group(1))
-                        target_backfactor_id = backfactor_id_by_code.get(bfcode)
             except Exception:
                 target_factor_id = target_factor_id or None
                 target_backfactor_id = target_backfactor_id or None
@@ -3403,20 +3399,16 @@ def UpdateSanadDetail(request):
             target_backfactor_id = None
             target_kala_id = None
             try:
-                if kol == 500:
+                if kol == 500 or kol == 401:
                     if sharh:
                         m = re_factor.search(str(sharh))
                         if m:
                             fcode = int(m.group(1))
                             target_factor_id = factor_by_code.get(fcode)
+                            if target_factor_id is None:
+                                target_backfactor_id = backfactor_id_by_code.get(fcode)
                     if tafzili:
                         target_kala_id = kala_by_taf.get(tafzili)
-                if kol == 500:
-                    ref_text = sharh or syscomment or ''
-                    m2 = re_factor.search(str(ref_text))
-                    if m2:
-                        bfcode = int(m2.group(1))
-                        target_backfactor_id = backfactor_id_by_code.get(bfcode)
             except Exception:
                 target_factor_id = target_factor_id or None
                 target_backfactor_id = target_backfactor_id or None
