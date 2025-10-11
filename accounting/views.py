@@ -1936,7 +1936,7 @@ def HesabMoshtariDetail(request, tafsili):
     # نکته: برای جلوگیری از شمارش اسناد نامرتبط، اقلام را به فاکتورهای همین مشتری و شخص خودش محدود می‌کنیم.
     try:
         from django.db.models import Q
-        cogs_qs = SanadDetail.objects.filter(kol__in=[500, 403], is_active=True).defer('backfactor')
+        cogs_qs = SanadDetail.objects.filter(kol__in=[500, 401], is_active=True).defer('backfactor')
 
         link_filter = Q()
         factor_ids = set()
