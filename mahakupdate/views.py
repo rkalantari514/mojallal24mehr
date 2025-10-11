@@ -3342,9 +3342,10 @@ def UpdateSanadDetail(request):
             target_kala_id = None
             try:
                 if kol == 500 or kol == 401:
-                    # فاکتور/برگشتی از شرح: «... (12345)»
-                    if sharh:
-                        m = re_factor.search(str(sharh))
+                    # فاکتور/برگشتی از شرح یا عنوان سیستم: «... (12345)»
+                    ref_text = (sharh or '') or (syscomment or '')
+                    if ref_text:
+                        m = re_factor.search(str(ref_text))
                         if m:
                             fcode = int(m.group(1))
                             target_factor_id = factor_by_code.get(fcode)
@@ -3400,8 +3401,9 @@ def UpdateSanadDetail(request):
             target_kala_id = None
             try:
                 if kol == 500 or kol == 401:
-                    if sharh:
-                        m = re_factor.search(str(sharh))
+                    ref_text = (sharh or '') or (syscomment or '')
+                    if ref_text:
+                        m = re_factor.search(str(ref_text))
                         if m:
                             fcode = int(m.group(1))
                             target_factor_id = factor_by_code.get(fcode)
