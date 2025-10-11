@@ -3331,13 +3331,15 @@ def UpdateSanadDetail(request):
             target_kala_id = None
             try:
                 if kol == 500 or kol == 401:
-                    # فاکتور از شرح یا عنوان سیستم: «... (12345)»
                     ref_text = (sharh or '') or (syscomment or '')
                     if ref_text:
                         m = re_factor.search(str(ref_text))
                         if m:
                             fcode = int(m.group(1))
-                            target_factor_id = factor_by_code.get(fcode)
+                            if 'برگشت' in str(ref_text):
+                                target_backfactor_id = backfactor_id_by_code.get(fcode)
+                            else:
+                                target_factor_id = factor_by_code.get(fcode)
                     # کالا از tafzili -> Kala.kala_taf
                     if tafzili:
                         target_kala_id = kala_by_taf.get(tafzili)
@@ -3393,9 +3395,10 @@ def UpdateSanadDetail(request):
                         m = re_factor.search(str(ref_text))
                         if m:
                             fcode = int(m.group(1))
-                            target_factor_id = factor_by_code.get(fcode)
-                            if target_factor_id is None:
+                            if 'برگشت' in str(ref_text):
                                 target_backfactor_id = backfactor_id_by_code.get(fcode)
+                            else:
+                                target_factor_id = factor_by_code.get(fcode)
                     if tafzili:
                         target_kala_id = kala_by_taf.get(tafzili)
             except Exception:
