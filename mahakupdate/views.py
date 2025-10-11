@@ -3363,6 +3363,9 @@ def UpdateSanadDetail(request):
                 target_kala_id = target_kala_id or None
 
             # بررسی و بروزرسانی فیلدها (همراه با factor/kala)
+            # برای کل 403، در صورت موجود بودن تفضیلی، کالا را از tafzili هم ست می‌کنیم
+            if kol == 403 and tafzili and (target_kala_id is None):
+                target_kala_id = kala_by_taf.get(tafzili)
             if (sanad.kol != kol or sanad.moin != moin or
                     # sanad.tafzili != tafzili or
                     sanad.sharh != sharh or sanad.bed != bed or sanad.bes != bes or
@@ -3418,6 +3421,10 @@ def UpdateSanadDetail(request):
                 target_factor_id = target_factor_id or None
                 target_backfactor_id = target_backfactor_id or None
                 target_kala_id = target_kala_id or None
+
+            # اگر کل 403 و تفضیلی داریم، کالا را نیز لینک کنیم
+            if kol == 403 and tafzili and (target_kala_id is None):
+                target_kala_id = kala_by_taf.get(tafzili)
 
             sanads_to_create.append(SanadDetail(
                 code=code, radif=radif, kol=kol, moin=moin, tafzili=tafzili,
