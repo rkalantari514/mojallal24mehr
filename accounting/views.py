@@ -1954,8 +1954,29 @@ def HesabMoshtariDetail(request, tafsili):
                     min_date = bdate if not min_date or bdate < min_date else min_date
                     max_date = bdate if not max_date or bdate > max_date else max_date
 
-            # فقط اسنادی که مستقیم به فاکتور/برگشتی همین شخص لینک شده‌اند
-            cogs_entries = cogs_qs.filter(Q(factor__person=person) | Q(backfactor__person=person))
+            # فقط اسنادی که مستقیم به فاکتور/برگشتی همین شخص لینک شده‌اند، با منطق تمایز متن شرح:
+            # - kol=401: فقط فاکتور فروش (factor__person)
+            # - kol=403: فقط برگشت از فروش (backfactor__person)
+            # - kol=500: اگر متن شامل «برگشت از فروش» باشد => backfactor__person،
+            #            اگر متن شامل «فاکتور فروش» باشد => factor__person
+            cogs_entries = cogs_qs.filter(
+                Q(kol=401, factor__person=person)
+                |
+                Q(kol=403, backfactor__person=person)
+                |
+                (
+                    Q(kol=500)
+                    & (
+                        (
+                            Q(sharh__icontains='برگشت از فروش') | Q(syscomment__icontains='برگشت از فروش')
+                        ) & Q(backfactor__person=person)
+                        |
+                        (
+                            Q(sharh__icontains='فاکتور فروش') | Q(syscomment__icontains='فاکتور فروش')
+                        ) & Q(factor__person=person)
+                    )
+                )
+            )
             # در صورت وجود بازه تاریخ، به همان بازه محدود می‌کنیم تا نویز کمتر شود
             if min_date and max_date:
                 cogs_entries = cogs_entries.filter(date__range=(min_date, max_date))
