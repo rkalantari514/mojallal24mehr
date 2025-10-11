@@ -1938,43 +1938,30 @@ def HesabMoshtariDetail(request, tafsili):
         from django.db.models import Q
         cogs_qs = SanadDetail.objects.filter(kol__in=[500, 401], is_active=True).defer('backfactor')
 
-        link_filter = Q()
-        factor_ids = set()
         min_date = None
         max_date = None
 
         if person:
-            # محدودیت به شخص (اگر در اسناد ست شده باشد)
-            link_filter |= Q(person=person)
-
-            # جمع‌آوری شناسه فاکتورهای فروش همین مشتری
+            # جمع‌آوری بازهٔ زمانی از فاکتورهای همین مشتری و برگشت‌ها
             for d in fac_details:
-                if d.factor_id:
-                    factor_ids.add(d.factor_id)
                 ddate = d.date or (d.factor.date if d.factor else None)
                 if ddate:
                     min_date = ddate if not min_date or ddate < min_date else min_date
                     max_date = ddate if not max_date or ddate > max_date else max_date
-
-            # تاریخ‌های برگشت از فروش
             for b in back_details:
                 bdate = b.backfactor.date if b.backfactor else None
                 if bdate:
                     min_date = bdate if not min_date or bdate < min_date else min_date
                     max_date = bdate if not max_date or bdate > max_date else max_date
 
-            if factor_ids:
-                link_filter |= Q(factor_id__in=list(factor_ids))
-
-        # اگر هیچ لینک مطمئنی نداریم، خروجی خالی بدهیم تا اضافه‌شماری نشود
-        if not link_filter:
-            cogs_entries = SanadDetail.objects.none()
-        else:
-            cogs_entries = cogs_qs.filter(link_filter)
+            # فقط اسنادی که مستقیم به فاکتور/برگشتی همین شخص لینک شده‌اند
+            cogs_entries = cogs_qs.filter(Q(factor__person=person) | Q(backfactor__person=person))
             # در صورت وجود بازه تاریخ، به همان بازه محدود می‌کنیم تا نویز کمتر شود
             if min_date and max_date:
                 cogs_entries = cogs_entries.filter(date__range=(min_date, max_date))
             cogs_entries = cogs_entries.order_by('date')
+        else:
+            cogs_entries = SanadDetail.objects.none()
     except Exception:
         # در صورت بروز هر خطا، از بازگرداندن نتایج خالی اطمینان حاصل می‌کنیم تا صفحه لود شود
         cogs_entries = SanadDetail.objects.none()

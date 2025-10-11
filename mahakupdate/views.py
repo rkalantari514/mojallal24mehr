@@ -3284,18 +3284,7 @@ def UpdateSanadDetail(request):
             person_id = None
             if kol == 103 and tafzili:
                 person_id = person_by_taf.get(tafzili)
-            # اگر کل 500 یا 401 بود، سعی می‌کنیم از متن شرح/سیستم، کد فاکتور/برگشتی را استخراج و شخص مرتبط را ست کنیم
-            if person_id is None and (kol == 500 or kol == 401):
-                try:
-                    ref_text = sharh or syscomment or ''
-                    m_bf = re_factor.search(str(ref_text))
-                    if m_bf:
-                        bfcode = int(m_bf.group(1))
-                        bf_person_id = backfactor_person_by_code.get(bfcode)
-                        if bf_person_id:
-                            person_id = bf_person_id
-                except Exception:
-                    pass
+            # توجه: برای کل‌های 500 و 401 شخص را از کد برگشتی استخراج نمی‌کنیم تا به مشتری نادرست لینک نشود
         except (ValueError, InvalidOperation) as e:
             print(f"خطا در پردازش رکورد {row}: {e}. گذر از این رکورد.")
             continue  # این رکورد را بگذرانید
@@ -3342,15 +3331,13 @@ def UpdateSanadDetail(request):
             target_kala_id = None
             try:
                 if kol == 500 or kol == 401:
-                    # فاکتور/برگشتی از شرح یا عنوان سیستم: «... (12345)»
+                    # فاکتور از شرح یا عنوان سیستم: «... (12345)»
                     ref_text = (sharh or '') or (syscomment or '')
                     if ref_text:
                         m = re_factor.search(str(ref_text))
                         if m:
                             fcode = int(m.group(1))
                             target_factor_id = factor_by_code.get(fcode)
-                            if target_factor_id is None:
-                                target_backfactor_id = backfactor_id_by_code.get(fcode)
                     # کالا از tafzili -> Kala.kala_taf
                     if tafzili:
                         target_kala_id = kala_by_taf.get(tafzili)
